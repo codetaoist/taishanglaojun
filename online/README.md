@@ -1,69 +1,104 @@
-# 码道 (Code Taoist) 中心化平台服务
+# 码道云端平台服务
 
-码道是一个融合道家哲学的智能编程助手平台，提供AI驱动的编程辅助、项目知识库管理和团队协作功能。
+> 🌐 **智能编程助手的云端大脑**
 
-## 🏗️ 架构概览
+码道云端平台是一个基于微服务架构的AI编程助手后端系统，为CLI工具提供强大的AI能力、知识库管理和团队协作功能。采用云原生设计，支持从单机部署到大规模集群的弹性扩展。
 
-本项目采用微服务架构，包含以下核心组件：
+## 🏗️ 系统架构
 
-### 核心服务
-- **AI智能体服务** (Python/FastAPI) - 处理自然语言编程指令
-- **用户管理服务** (Go) - 用户和团队管理
-- **记忆知识库服务** (Go) - 项目知识库和向量搜索
-- **认证授权服务** (Keycloak) - 统一身份认证
-- **API网关** (Nginx) - 请求路由和负载均衡
+### 🎯 设计原则
 
-### 基础设施
-- **PostgreSQL** - 主数据库
-- **Redis** - 缓存和会话存储
-- **Chroma** - 向量数据库
-- **MinIO** - 对象存储
-- **Prometheus + Grafana** - 监控和可视化
+- **微服务架构** - 服务解耦，独立部署和扩展
+- **云原生设计** - 容器化部署，支持Kubernetes
+- **API优先** - RESTful API设计，易于集成
+- **安全可靠** - 多层安全防护，数据隔离
+- **高可用性** - 服务冗余，故障自愈
+
+### 🧩 核心组件
+
+| 服务类型 | 组件 | 技术栈 | 功能描述 |
+|----------|------|--------|----------|
+| **业务服务** | AI智能体服务 | Python/FastAPI | 自然语言处理、代码生成 |
+| | 用户管理服务 | Go/Gin | 用户、团队、权限管理 |
+| | 记忆知识库服务 | Go/Echo | 项目知识库、向量搜索 |
+| **基础服务** | API网关 | Nginx/Traefik | 请求路由、负载均衡 |
+| | 认证服务 | Keycloak | 统一身份认证、SSO |
+| **数据层** | 主数据库 | PostgreSQL | 结构化数据存储 |
+| | 向量数据库 | Chroma | 代码、文档向量化存储 |
+| | 缓存层 | Redis | 会话、热点数据缓存 |
+| | 对象存储 | MinIO | 文件、快照存储 |
+| **监控层** | 指标监控 | Prometheus | 系统指标收集 |
+| | 可视化 | Grafana | 监控面板、告警 |
+| | 日志聚合 | Loki | 日志收集、查询 |
 
 ## 🚀 快速开始
 
-### 前置要求
+### 📋 环境要求
 
-- Docker 20.10+
-- Docker Compose 2.0+
-- Git
-- 至少 8GB 可用内存
-- 至少 20GB 可用磁盘空间
+| 组件 | 最低版本 | 推荐配置 | 说明 |
+|------|----------|----------|------|
+| **Docker** | 20.10+ | 24.0+ | 容器运行时 |
+| **Docker Compose** | 2.0+ | 2.20+ | 容器编排 |
+| **系统内存** | 8GB | 16GB+ | 多服务运行需求 |
+| **磁盘空间** | 20GB | 50GB+ | 数据库、日志存储 |
+| **CPU** | 2核 | 4核+ | 并发处理能力 |
 
-### 一键部署
+### 🚀 一键部署
 
-1. **克隆项目**
-   ```bash
-   git clone https://github.com/codetaoist/taishanglaojun.git
-   cd taishanglaojun/online
-   ```
+#### 步骤1：获取代码
+```bash
+# 克隆仓库
+git clone https://github.com/codetaoist/taishanglaojun.git
+cd taishanglaojun/online
 
-2. **配置环境变量**
-   ```bash
-   cp .env.example .env
-   # 编辑 .env 文件，设置必要的配置
-   ```
+# 检查Docker环境
+docker --version
+docker-compose --version
+```
 
-3. **启动所有服务**
-   ```bash
-   docker-compose up -d
-   ```
+#### 步骤2：环境配置
+```bash
+# 复制环境配置模板
+cp .env.example .env
 
-4. **等待服务启动**
-   ```bash
-   # 检查服务状态
-   docker-compose ps
-   
-   # 查看日志
-   docker-compose logs -f ai-service
-   ```
+# 编辑配置文件（必须修改的配置）
+# - POSTGRES_PASSWORD: 数据库密码
+# - SECRET_KEY: 应用密钥
+# - OPENAI_API_KEY: OpenAI API密钥（可选）
+vim .env  # 或使用其他编辑器
+```
 
-5. **访问服务**
-   - API网关: http://localhost
-   - AI服务文档: http://localhost:8001/docs
-   - Keycloak管理: http://localhost:8080
-   - Grafana监控: http://localhost:3000
-   - MinIO控制台: http://localhost:9001
+#### 步骤3：启动服务
+```bash
+# 拉取镜像并启动所有服务
+docker-compose up -d
+
+# 查看启动状态
+docker-compose ps
+
+# 查看服务日志
+docker-compose logs -f
+```
+
+#### 步骤4：验证部署
+```bash
+# 健康检查
+curl http://localhost:8001/health
+
+# 查看API文档
+open http://localhost:8001/docs  # macOS
+# 或在浏览器访问 http://localhost:8001/docs
+```
+
+### 🌐 服务访问地址
+
+| 服务 | 地址 | 用途 | 默认凭据 |
+|------|------|------|----------|
+| **API文档** | http://localhost:8001/docs | Swagger API文档 | - |
+| **Keycloak管理** | http://localhost:8080 | 身份认证管理 | admin/admin123 |
+| **Grafana监控** | http://localhost:3000 | 系统监控面板 | admin/admin123 |
+| **MinIO控制台** | http://localhost:9001 | 对象存储管理 | minioadmin/minioadmin |
+| **Prometheus** | http://localhost:9090 | 指标监控 | - |
 
 ## 📋 服务端口映射
 

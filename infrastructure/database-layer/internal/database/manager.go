@@ -16,7 +16,7 @@ type Manager struct {
 	config   *DatabaseManagerConfig
 	logger   *zap.Logger
 	
-	// 健康检查相关
+	// 健康检查相�?
 	healthCheckTicker *time.Ticker
 	healthCheckStop   chan bool
 	healthMutex       sync.RWMutex
@@ -26,7 +26,7 @@ type Manager struct {
 	metrics *DatabaseMetrics
 }
 
-// DatabaseMetrics 数据库监控指标
+// DatabaseMetrics 数据库监控指�?
 type DatabaseMetrics struct {
 	PostgresConnections int32
 	RedisConnections    int32
@@ -47,13 +47,13 @@ type DatabaseManagerConfig struct {
 
 // NewManager 创建新的数据库管理器
 func NewManager(config *Config, logger *zap.Logger) (*Manager, error) {
-	// 创建管理器配置
+	// 创建管理器配�?
 	managerConfig := &DatabaseManagerConfig{
 		HealthCheckInterval: config.Manager.HealthCheckInterval,
 		MetricsInterval:     config.Manager.MetricsInterval,
 	}
 	
-	// 设置默认值
+	// 设置默认�?
 	if managerConfig.HealthCheckInterval == 0 {
 		managerConfig.HealthCheckInterval = 30 * time.Second
 	}
@@ -91,7 +91,7 @@ func NewManager(config *Config, logger *zap.Logger) (*Manager, error) {
 		manager.healthStatus["redis"] = true
 	}
 
-	// 启动统一健康检查
+	// 启动统一健康检�?
 	manager.startUnifiedHealthCheck()
 
 	logger.Info("Database manager initialized successfully",
@@ -103,7 +103,7 @@ func NewManager(config *Config, logger *zap.Logger) (*Manager, error) {
 	return manager, nil
 }
 
-// startUnifiedHealthCheck 启动统一健康检查
+// startUnifiedHealthCheck 启动统一健康检�?
 func (m *Manager) startUnifiedHealthCheck() {
 	m.healthCheckTicker = time.NewTicker(m.config.HealthCheckInterval)
 	
@@ -120,7 +120,7 @@ func (m *Manager) startUnifiedHealthCheck() {
 	}()
 }
 
-// performUnifiedHealthCheck 执行统一健康检查
+// performUnifiedHealthCheck 执行统一健康检�?
 func (m *Manager) performUnifiedHealthCheck() {
 	m.healthMutex.Lock()
 	defer m.healthMutex.Unlock()
@@ -128,7 +128,7 @@ func (m *Manager) performUnifiedHealthCheck() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// 检查PostgreSQL健康状态
+	// 检查PostgreSQL健康状�?
 	if m.postgres != nil {
 		if err := m.postgres.Health(); err != nil {
 			m.logger.Error("PostgreSQL health check failed", zap.Error(err))
@@ -143,7 +143,7 @@ func (m *Manager) performUnifiedHealthCheck() {
 		}
 	}
 
-	// 检查Redis健康状态
+	// 检查Redis健康状�?
 	if m.redis != nil {
 		if err := m.redis.Health(); err != nil {
 			m.logger.Error("Redis health check failed", zap.Error(err))
@@ -163,7 +163,7 @@ func (m *Manager) performUnifiedHealthCheck() {
 	
 	m.metrics.LastHealthCheck = time.Now()
 	
-	// 记录整体健康状态
+	// 记录整体健康状�?
 	m.logger.Debug("Database health check completed",
 		zap.Bool("postgres_healthy", m.healthStatus["postgres"]),
 		zap.Bool("redis_healthy", m.healthStatus["redis"]),
@@ -176,7 +176,7 @@ func (m *Manager) updateMetrics(ctx context.Context) {
 	m.metrics.mutex.Lock()
 	defer m.metrics.mutex.Unlock()
 
-	// 更新PostgreSQL连接数
+	// 更新PostgreSQL连接�?
 	if m.postgres != nil {
 		stats := m.postgres.GetStats()
 		if openConns, ok := stats["open_connections"].(int); ok {
@@ -184,7 +184,7 @@ func (m *Manager) updateMetrics(ctx context.Context) {
 		}
 	}
 
-	// 更新Redis连接数
+	// 更新Redis连接�?
 	if m.redis != nil {
 		stats := m.redis.GetStats()
 		if totalConns, ok := stats["total_conns"].(uint32); ok {
@@ -193,12 +193,12 @@ func (m *Manager) updateMetrics(ctx context.Context) {
 	}
 }
 
-// GetPostgresDB 获取PostgreSQL数据库实例
+// GetPostgresDB 获取PostgreSQL数据库实�?
 func (m *Manager) GetPostgresDB() *PostgresDB {
 	return m.postgres
 }
 
-// GetRedisDB 获取Redis数据库实例
+// GetRedisDB 获取Redis数据库实�?
 func (m *Manager) GetRedisDB() *RedisDB {
 	return m.redis
 }
@@ -207,7 +207,7 @@ func (m *Manager) GetRedisDB() *RedisDB {
 func (m *Manager) Close() error {
 	m.logger.Info("Shutting down database manager")
 
-	// 停止健康检查
+	// 停止健康检�?
 	if m.healthCheckTicker != nil {
 		close(m.healthCheckStop)
 	}
@@ -236,7 +236,7 @@ func (m *Manager) Close() error {
 	return nil
 }
 
-// Health 检查所有数据库的健康状态
+// Health 检查所有数据库的健康状�?
 func (m *Manager) Health() error {
 	m.healthMutex.RLock()
 	defer m.healthMutex.RUnlock()
@@ -260,7 +260,7 @@ func (m *Manager) Health() error {
 	return nil
 }
 
-// GetHealthStatus 获取详细健康状态
+// GetHealthStatus 获取详细健康状�?
 func (m *Manager) GetHealthStatus() map[string]interface{} {
 	m.healthMutex.RLock()
 	defer m.healthMutex.RUnlock()
@@ -271,7 +271,7 @@ func (m *Manager) GetHealthStatus() map[string]interface{} {
 		"databases":       make(map[string]interface{}),
 	}
 
-	// PostgreSQL状态
+	// PostgreSQL状�?
 	if m.postgres != nil {
 		postgresStats := m.postgres.GetStats()
 		status["databases"].(map[string]interface{})["postgres"] = map[string]interface{}{
@@ -280,7 +280,7 @@ func (m *Manager) GetHealthStatus() map[string]interface{} {
 		}
 	}
 
-	// Redis状态
+	// Redis状�?
 	if m.redis != nil {
 		redisStats := m.redis.GetStats()
 		status["databases"].(map[string]interface{})["redis"] = map[string]interface{}{
@@ -289,7 +289,7 @@ func (m *Manager) GetHealthStatus() map[string]interface{} {
 		}
 	}
 
-	// 检查整体健康状态
+	// 检查整体健康状�?
 	overallHealthy := true
 	for _, healthy := range m.healthStatus {
 		if !healthy {
@@ -307,7 +307,7 @@ func (m *Manager) GetMetrics() *DatabaseMetrics {
 	m.metrics.mutex.RLock()
 	defer m.metrics.mutex.RUnlock()
 
-	// 返回指标的副本
+	// 返回指标的副�?
 	return &DatabaseMetrics{
 		PostgresConnections: m.metrics.PostgresConnections,
 		RedisConnections:    m.metrics.RedisConnections,

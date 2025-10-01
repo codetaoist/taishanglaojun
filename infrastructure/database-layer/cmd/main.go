@@ -9,20 +9,20 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/taishanglaojun/database-layer/internal/database"
-	"github.com/taishanglaojun/database-layer/internal/models"
-	"github.com/taishanglaojun/database-layer/internal/repository"
+	"github.com/codetaoist/taishanglaojun/infrastructure/database-layer/internal/database"
+	"github.com/codetaoist/taishanglaojun/infrastructure/database-layer/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/database-layer/internal/repository"
 )
 
 func main() {
-	// 初始化日志
+	// 初始化日�?
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatal("Failed to initialize logger:", err)
 	}
 	defer logger.Sync()
 
-	// 创建数据库配置
+	// 创建数据库配�?
 	config := &database.Config{
 		Postgres: database.PostgresConfig{
 			Host:         getEnv("DB_HOST", "localhost"),
@@ -49,14 +49,14 @@ func main() {
 		},
 	}
 
-	// 初始化数据库管理器
+	// 初始化数据库管理�?
 	manager, err := database.NewManager(config, logger)
 	if err != nil {
 		logger.Fatal("Failed to initialize database manager", zap.Error(err))
 	}
 	defer manager.Close()
 
-	// 测试数据库连接
+	// 测试数据库连�?
 	if err := testDatabaseConnections(manager, logger); err != nil {
 		logger.Fatal("Database connection test failed", zap.Error(err))
 	}
@@ -74,11 +74,11 @@ func main() {
 	logger.Info("Database layer demonstration completed successfully")
 }
 
-// testDatabaseConnections 测试数据库连接
+// testDatabaseConnections 测试数据库连�?
 func testDatabaseConnections(manager *database.Manager, logger *zap.Logger) error {
 	logger.Info("Testing database connections...")
 
-	// 检查健康状态
+	// 检查健康状�?
 	health := manager.GetHealthStatus()
 	
 	for dbType, status := range health {
@@ -129,7 +129,7 @@ func demonstrateRepository(manager *database.Manager, logger *zap.Logger) error 
 		return fmt.Errorf("PostgreSQL not available")
 	}
 
-	// 自动迁移测试表
+	// 自动迁移测试�?
 	if err := postgres.AutoMigrate(&TestUser{}); err != nil {
 		return fmt.Errorf("failed to migrate test table: %w", err)
 	}
@@ -198,7 +198,7 @@ func demonstrateRepository(manager *database.Manager, logger *zap.Logger) error 
 	// 搜索用户
 	searchOpts := &models.QueryOptions{
 		Search: &models.SearchQuery{
-			Keyword: "张",
+			Keyword: "�?,
 			Fields:  []string{"name"},
 		},
 	}
@@ -232,7 +232,7 @@ func demonstrateCache(manager *database.Manager, logger *zap.Logger) error {
 	}
 	logger.Info("Cache retrieved", zap.String("value", value))
 
-	// 检查缓存是否存在
+	// 检查缓存是否存�?
 	exists, err := cache.Exists(ctx, "test:key1")
 	if err != nil {
 		return fmt.Errorf("failed to check cache existence: %w", err)
@@ -245,7 +245,7 @@ func demonstrateCache(manager *database.Manager, logger *zap.Logger) error {
 	}
 	logger.Info("Cache deleted successfully")
 
-	// Redis特定操作（如果Redis可用）
+	// Redis特定操作（如果Redis可用�?
 	if redis := manager.GetRedisDB(); redis != nil {
 		// Hash操作
 		if err := redis.HSet(ctx, "test:hash", "field1", "value1"); err != nil {
@@ -275,7 +275,7 @@ func demonstrateCache(manager *database.Manager, logger *zap.Logger) error {
 		}
 		logger.Info("Set operation successful", zap.Strings("members", members))
 
-		// 计数器操作
+		// 计数器操�?
 		count, err := redis.Incr(ctx, "test:counter")
 		if err != nil {
 			return fmt.Errorf("failed to increment counter: %w", err)
@@ -286,7 +286,7 @@ func demonstrateCache(manager *database.Manager, logger *zap.Logger) error {
 	return nil
 }
 
-// getEnv 获取环境变量，如果不存在则返回默认值
+// getEnv 获取环境变量，如果不存在则返回默认�?
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value

@@ -9,21 +9,21 @@ import (
 	"go.uber.org/zap"
 )
 
-// ConnectionMonitor 连接监控器
+// ConnectionMonitor 连接监控�?
 type ConnectionMonitor struct {
 	logger               *zap.Logger
 	config               *ConnectionMonitorConfig
 	
-	// 监控状态
+	// 监控状�?
 	isRunning            bool
 	stopChan             chan struct{}
 	wg                   sync.WaitGroup
 	mutex                sync.RWMutex
 	
-	// 连接池监控
+	// 连接池监�?
 	connectionPools      map[string]ConnectionPool
 	
-	// 泄漏检测
+	// 泄漏检�?
 	leakDetectionTicker  *time.Ticker
 	
 	// 优雅关闭
@@ -34,14 +34,14 @@ type ConnectionMonitor struct {
 // ConnectionMonitorConfig 连接监控配置
 type ConnectionMonitorConfig struct {
 	LeakDetectionInterval    time.Duration
-	LeakWarningThreshold     float64  // 连接使用率警告阈值
-	LeakCriticalThreshold    float64  // 连接使用率严重阈值
+	LeakWarningThreshold     float64  // 连接使用率警告阈�?
+	LeakCriticalThreshold    float64  // 连接使用率严重阈�?
 	ShutdownTimeout          time.Duration
 	MetricsCollectionInterval time.Duration
 	EnableDetailedLogging    bool
 }
 
-// ConnectionPool 连接池接口
+// ConnectionPool 连接池接�?
 type ConnectionPool interface {
 	GetStats() ConnectionStats
 	GetName() string
@@ -65,7 +65,7 @@ type ConnectionStats struct {
 // ShutdownCallback 关闭回调函数
 type ShutdownCallback func(ctx context.Context) error
 
-// NewConnectionMonitor 创建新的连接监控器
+// NewConnectionMonitor 创建新的连接监控�?
 func NewConnectionMonitor(config *ConnectionMonitorConfig, logger *zap.Logger) *ConnectionMonitor {
 	if config == nil {
 		config = &ConnectionMonitorConfig{
@@ -88,7 +88,7 @@ func NewConnectionMonitor(config *ConnectionMonitorConfig, logger *zap.Logger) *
 	}
 }
 
-// RegisterConnectionPool 注册连接池
+// RegisterConnectionPool 注册连接�?
 func (cm *ConnectionMonitor) RegisterConnectionPool(name string, pool ConnectionPool) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
@@ -100,7 +100,7 @@ func (cm *ConnectionMonitor) RegisterConnectionPool(name string, pool Connection
 	)
 }
 
-// UnregisterConnectionPool 注销连接池
+// UnregisterConnectionPool 注销连接�?
 func (cm *ConnectionMonitor) UnregisterConnectionPool(name string) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
@@ -128,7 +128,7 @@ func (cm *ConnectionMonitor) Start() error {
 	
 	cm.isRunning = true
 	
-	// 启动泄漏检测
+	// 启动泄漏检�?
 	cm.startLeakDetection()
 	
 	// 启动指标收集
@@ -154,13 +154,13 @@ func (cm *ConnectionMonitor) Stop() error {
 	
 	cm.logger.Info("Stopping connection monitor")
 	
-	// 发送停止信号
+	// 发送停止信�?
 	close(cm.stopChan)
 	
 	// 等待所有goroutine结束
 	cm.wg.Wait()
 	
-	// 停止泄漏检测
+	// 停止泄漏检�?
 	if cm.leakDetectionTicker != nil {
 		cm.leakDetectionTicker.Stop()
 	}
@@ -171,7 +171,7 @@ func (cm *ConnectionMonitor) Stop() error {
 	return nil
 }
 
-// startLeakDetection 启动泄漏检测
+// startLeakDetection 启动泄漏检�?
 func (cm *ConnectionMonitor) startLeakDetection() {
 	cm.leakDetectionTicker = time.NewTicker(cm.config.LeakDetectionInterval)
 	
@@ -210,7 +210,7 @@ func (cm *ConnectionMonitor) startMetricsCollection() {
 	}()
 }
 
-// performLeakDetection 执行泄漏检测
+// performLeakDetection 执行泄漏检�?
 func (cm *ConnectionMonitor) performLeakDetection() {
 	cm.mutex.RLock()
 	pools := make(map[string]ConnectionPool)
@@ -228,7 +228,7 @@ func (cm *ConnectionMonitor) performLeakDetection() {
 		
 		usageRatio := float64(stats.ActiveConnections) / float64(stats.MaxConnections)
 		
-		// 检查警告阈值
+		// 检查警告阈�?
 		if usageRatio >= cm.config.LeakWarningThreshold {
 			level := "warning"
 			if usageRatio >= cm.config.LeakCriticalThreshold {
@@ -307,7 +307,7 @@ func (cm *ConnectionMonitor) logDetailedConnectionInfo(poolName string, stats Co
 func (cm *ConnectionMonitor) GracefulShutdown(ctx context.Context) error {
 	cm.logger.Info("Starting graceful shutdown of database connections")
 	
-	// 创建带超时的上下文
+	// 创建带超时的上下�?
 	shutdownCtx, cancel := context.WithTimeout(ctx, cm.shutdownTimeout)
 	defer cancel()
 	
@@ -347,7 +347,7 @@ func (cm *ConnectionMonitor) GracefulShutdown(ctx context.Context) error {
 		}
 	}
 	
-	// 停止监控器
+	// 停止监控�?
 	if err := cm.Stop(); err != nil {
 		errors = append(errors, fmt.Errorf("failed to stop connection monitor: %w", err))
 	}
@@ -374,7 +374,7 @@ func (cm *ConnectionMonitor) GetConnectionStats() map[string]ConnectionStats {
 	return stats
 }
 
-// GetHealthStatus 获取所有连接池健康状态
+// GetHealthStatus 获取所有连接池健康状�?
 func (cm *ConnectionMonitor) GetHealthStatus() map[string]bool {
 	cm.mutex.RLock()
 	defer cm.mutex.RUnlock()
@@ -387,7 +387,7 @@ func (cm *ConnectionMonitor) GetHealthStatus() map[string]bool {
 	return status
 }
 
-// IsRunning 检查监控器是否运行中
+// IsRunning 检查监控器是否运行�?
 func (cm *ConnectionMonitor) IsRunning() bool {
 	cm.mutex.RLock()
 	defer cm.mutex.RUnlock()

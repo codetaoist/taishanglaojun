@@ -1,4 +1,4 @@
-module github.com/taishanglaojun/database-layer
+module github.com/codetaoist/taishanglaojun/infrastructure/database-layer
 
 go 1.21
 

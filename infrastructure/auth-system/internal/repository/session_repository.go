@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/taishanglaojun/auth_system/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/models"
 )
 
 var (
@@ -156,7 +156,7 @@ func (r *sessionRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// GetByUserID 获取用户的所有会话
+// GetByUserID 获取用户的所有会�?
 func (r *sessionRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Session, error) {
 	var sessions []*models.Session
 	if err := r.db.WithContext(ctx).
@@ -173,7 +173,7 @@ func (r *sessionRepository) GetByUserID(ctx context.Context, userID uuid.UUID) (
 	return sessions, nil
 }
 
-// GetActiveSessions 获取用户的活跃会话
+// GetActiveSessions 获取用户的活跃会�?
 func (r *sessionRepository) GetActiveSessions(ctx context.Context, userID uuid.UUID) ([]*models.Session, error) {
 	var sessions []*models.Session
 	if err := r.db.WithContext(ctx).
@@ -263,7 +263,7 @@ func (r *sessionRepository) RevokeSession(ctx context.Context, sessionID uuid.UU
 	return nil
 }
 
-// RevokeAllUserSessions 撤销用户的所有会话
+// RevokeAllUserSessions 撤销用户的所有会�?
 func (r *sessionRepository) RevokeAllUserSessions(ctx context.Context, userID uuid.UUID) error {
 	result := r.db.WithContext(ctx).Model(&models.Session{}).
 		Where("user_id = ? AND status = ?", userID, models.SessionStatusActive).
@@ -341,7 +341,7 @@ func (r *sessionRepository) ValidateSession(ctx context.Context, token string) (
 		return nil, err
 	}
 	
-	// 检查会话状态
+	// 检查会话状�?
 	if session.Status != models.SessionStatusActive {
 		if session.Status == models.SessionStatusExpired {
 			return nil, ErrSessionExpired
@@ -349,9 +349,9 @@ func (r *sessionRepository) ValidateSession(ctx context.Context, token string) (
 		return nil, ErrSessionRevoked
 	}
 	
-	// 检查是否过期
+	// 检查是否过�?
 	if session.IsExpired() {
-		// 自动标记为过期
+		// 自动标记为过�?
 		session.Status = models.SessionStatusExpired
 		r.Update(ctx, session)
 		return nil, ErrSessionExpired
@@ -360,7 +360,7 @@ func (r *sessionRepository) ValidateSession(ctx context.Context, token string) (
 	return session, nil
 }
 
-// IsSessionActive 检查会话是否活跃
+// IsSessionActive 检查会话是否活�?
 func (r *sessionRepository) IsSessionActive(ctx context.Context, sessionID uuid.UUID) (bool, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).
@@ -394,7 +394,7 @@ func (r *sessionRepository) CleanupExpiredSessions(ctx context.Context) (int64, 
 	return result.RowsAffected, nil
 }
 
-// CleanupRevokedSessions 清理撤销的会话
+// CleanupRevokedSessions 清理撤销的会�?
 func (r *sessionRepository) CleanupRevokedSessions(ctx context.Context, olderThan time.Duration) (int64, error) {
 	cutoffTime := time.Now().Add(-olderThan)
 	
@@ -426,7 +426,7 @@ func (r *sessionRepository) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
-// CountByUser 获取用户会话数
+// CountByUser 获取用户会话�?
 func (r *sessionRepository) CountByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).
@@ -442,7 +442,7 @@ func (r *sessionRepository) CountByUser(ctx context.Context, userID uuid.UUID) (
 	return count, nil
 }
 
-// CountActiveByUser 获取用户活跃会话数
+// CountActiveByUser 获取用户活跃会话�?
 func (r *sessionRepository) CountActiveByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).

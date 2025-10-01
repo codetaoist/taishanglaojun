@@ -18,7 +18,7 @@ const (
 	TokenTypeInvitation  TokenType = "invitation"
 )
 
-// TokenStatus 令牌状态枚举
+// TokenStatus 令牌状态枚�?
 type TokenStatus string
 
 const (
@@ -35,7 +35,7 @@ type Token struct {
 	Type      TokenType   `json:"type" gorm:"type:varchar(20);not null;index"`
 	Token     string      `json:"token" gorm:"uniqueIndex;not null;size:255"`
 	Status    TokenStatus `json:"status" gorm:"type:varchar(20);default:'active'"`
-	Purpose   string      `json:"purpose" gorm:"size:100"` // 令牌用途描述
+	Purpose   string      `json:"purpose" gorm:"size:100"` // 令牌用途描�?
 	Metadata  string      `json:"metadata" gorm:"type:text"` // JSON格式的元数据
 	ExpiresAt time.Time   `json:"expires_at" gorm:"not null"`
 	UsedAt    *time.Time  `json:"used_at"`
@@ -59,12 +59,12 @@ func (t *Token) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// IsExpired 检查令牌是否过期
+// IsExpired 检查令牌是否过�?
 func (t *Token) IsExpired() bool {
 	return time.Now().After(t.ExpiresAt)
 }
 
-// IsActive 检查令牌是否激活
+// IsActive 检查令牌是否激�?
 func (t *Token) IsActive() bool {
 	return t.Status == TokenStatusActive && !t.IsExpired()
 }
@@ -86,12 +86,12 @@ func (t *Token) Revoke() {
 	t.Status = TokenStatusRevoked
 }
 
-// Expire 使令牌过期
+// Expire 使令牌过�?
 func (t *Token) Expire() {
 	t.Status = TokenStatusExpired
 }
 
-// CanBeUsed 检查令牌是否可以使用
+// CanBeUsed 检查令牌是否可以使�?
 func (t *Token) CanBeUsed() bool {
 	return t.IsActive() && !t.IsUsed()
 }
@@ -102,7 +102,7 @@ type CreateTokenRequest struct {
 	Type      TokenType `json:"type" validate:"required,oneof=access refresh reset verification invitation"`
 	Purpose   string    `json:"purpose" validate:"max=100"`
 	Metadata  string    `json:"metadata"`
-	ExpiresIn int64     `json:"expires_in" validate:"min=1"` // 过期时间（秒）
+	ExpiresIn int64     `json:"expires_in" validate:"min=1"` // 过期时间（秒�?
 }
 
 // TokenQuery 令牌查询参数

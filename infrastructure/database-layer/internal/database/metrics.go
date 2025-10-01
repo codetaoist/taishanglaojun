@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// MetricsCollector 指标收集器
+// MetricsCollector 指标收集�?
 type MetricsCollector struct {
 	logger    *zap.Logger
 	mutex     sync.RWMutex
@@ -94,7 +94,7 @@ type QueryMetrics struct {
 	Context       map[string]interface{}
 }
 
-// NewMetricsCollector 创建新的指标收集器
+// NewMetricsCollector 创建新的指标收集�?
 func NewMetricsCollector(logger *zap.Logger) *MetricsCollector {
 	return &MetricsCollector{
 		logger:            logger,
@@ -104,10 +104,10 @@ func NewMetricsCollector(logger *zap.Logger) *MetricsCollector {
 			WindowSize: 5 * time.Minute,
 			CurrentWindow: &TimeWindow{
 				StartTime:  time.Now(),
-				MinLatency: time.Duration(^uint64(0) >> 1), // 最大值
+				MinLatency: time.Duration(^uint64(0) >> 1), // 最大�?
 			},
 		},
-		minResponseTime: int64(^uint64(0) >> 1), // 最大值
+		minResponseTime: int64(^uint64(0) >> 1), // 最大�?
 	}
 }
 
@@ -134,7 +134,7 @@ func (mc *MetricsCollector) RecordQuery(metrics QueryMetrics) {
 	durationNanos := metrics.Duration.Nanoseconds()
 	atomic.AddInt64(&mc.totalResponseTime, durationNanos)
 	
-	// 更新最小响应时间
+	// 更新最小响应时�?
 	for {
 		current := atomic.LoadInt64(&mc.minResponseTime)
 		if durationNanos >= current {
@@ -145,7 +145,7 @@ func (mc *MetricsCollector) RecordQuery(metrics QueryMetrics) {
 		}
 	}
 	
-	// 更新最大响应时间
+	// 更新最大响应时�?
 	for {
 		current := atomic.LoadInt64(&mc.maxResponseTime)
 		if durationNanos <= current {
@@ -232,7 +232,7 @@ func (mc *MetricsCollector) recordError(errorType, message string, context map[s
 	errorMetric.Count++
 	errorMetric.LastOccurred = time.Now()
 	
-	// 添加错误详情（保留最近100条）
+	// 添加错误详情（保留最�?00条）
 	detail := ErrorDetail{
 		Timestamp: time.Now(),
 		Message:   message,
@@ -253,15 +253,15 @@ func (mc *MetricsCollector) updateWindowMetrics(metrics QueryMetrics) {
 	now := time.Now()
 	currentWindow := mc.windowMetrics.CurrentWindow
 	
-	// 检查是否需要切换窗口
+	// 检查是否需要切换窗�?
 	if now.Sub(currentWindow.StartTime) >= mc.windowMetrics.WindowSize {
-		// 保存当前窗口为上一个窗口
+		// 保存当前窗口为上一个窗�?
 		mc.windowMetrics.PreviousWindow = currentWindow
 		
 		// 创建新的当前窗口
 		mc.windowMetrics.CurrentWindow = &TimeWindow{
 			StartTime:  now,
-			MinLatency: time.Duration(^uint64(0) >> 1), // 最大值
+			MinLatency: time.Duration(^uint64(0) >> 1), // 最大�?
 		}
 		currentWindow = mc.windowMetrics.CurrentWindow
 	}
@@ -285,7 +285,7 @@ func (mc *MetricsCollector) updateWindowMetrics(metrics QueryMetrics) {
 	}
 }
 
-// GetSummaryMetrics 获取汇总指标
+// GetSummaryMetrics 获取汇总指�?
 func (mc *MetricsCollector) GetSummaryMetrics() map[string]interface{} {
 	totalQueries := atomic.LoadInt64(&mc.totalQueries)
 	successfulQueries := atomic.LoadInt64(&mc.successfulQueries)
@@ -410,7 +410,7 @@ func (mc *MetricsCollector) LogPerformanceReport() {
 		zap.Int("error_types", len(errorMetrics)),
 	)
 	
-	// 记录连接池详情
+	// 记录连接池详�?
 	for poolName, metrics := range connectionMetrics {
 		mc.logger.Info("Connection pool performance",
 			zap.String("pool_name", poolName),
@@ -456,7 +456,7 @@ func (mc *MetricsCollector) LogPerformanceReport() {
 	}
 }
 
-// Reset 重置所有指标
+// Reset 重置所有指�?
 func (mc *MetricsCollector) Reset() {
 	atomic.StoreInt64(&mc.totalQueries, 0)
 	atomic.StoreInt64(&mc.successfulQueries, 0)

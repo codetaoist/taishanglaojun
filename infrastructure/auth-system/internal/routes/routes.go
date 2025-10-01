@@ -4,11 +4,11 @@ import (
 	"errors"
 	
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/auth_system/internal/handler"
-	"github.com/taishanglaojun/auth_system/internal/handlers"
-	"github.com/taishanglaojun/auth_system/internal/middleware"
-	"github.com/taishanglaojun/auth_system/internal/models"
-	"github.com/taishanglaojun/auth_system/internal/repository"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/handler"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/handlers"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/middleware"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/repository"
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +24,7 @@ func SetupRoutes(
 	db *gorm.DB,
 	logger *zap.Logger,
 ) {
-	// 全局中间件
+	// 全局中间�?
 	router.Use(gin.Recovery())
 	router.Use(authMiddleware.RequestLogger())
 	router.Use(authMiddleware.CORS())
@@ -33,7 +33,7 @@ func SetupRoutes(
 	// API版本分组
 	v1 := router.Group("/api/v1")
 	{
-		// 健康检查
+		// 健康检�?
 		v1.GET("/health", func(c *gin.Context) {
 			c.JSON(200, gin.H{
 				"status":  "ok",
@@ -78,7 +78,7 @@ func SetupRoutes(
 			}
 		}
 
-		// 管理员路由
+		// 管理员路�?
 		admin := v1.Group("/admin")
 		admin.Use(authMiddleware.RequireAuth())
 		admin.Use(authMiddleware.RequireRole(models.RoleAdmin))
@@ -103,7 +103,7 @@ func SetupRoutes(
 					c.JSON(200, gin.H{"message": "Delete user endpoint"})
 				})
 				users.PUT("/:userId/status", func(c *gin.Context) {
-					// 实现更新用户状态
+					// 实现更新用户状�?
 					userID := c.Param("userId")
 					
 					var req struct {
@@ -122,7 +122,7 @@ func SetupRoutes(
 						return
 					}
 					
-					// 获取当前管理员信息
+					// 获取当前管理员信�?
 					adminUser, exists := c.Get("user")
 					if !exists {
 						c.JSON(401, gin.H{"error": "Unauthorized"})
@@ -131,11 +131,11 @@ func SetupRoutes(
 					
 					admin := adminUser.(*models.User)
 					
-					// 调用服务层更新用户状态
+					// 调用服务层更新用户状�?
 					ctx := c.Request.Context()
 					userRepo := repository.NewUserRepository(db, logger)
 					
-					// 检查目标用户是否存在
+					// 检查目标用户是否存�?
 					targetUser, err := userRepo.GetByID(ctx, uuid.MustParse(userID))
 					if err != nil {
 						if errors.Is(err, repository.ErrUserNotFound) {
@@ -147,13 +147,13 @@ func SetupRoutes(
 						return
 					}
 					
-					// 防止管理员修改自己的状态
+					// 防止管理员修改自己的状�?
 					if targetUser.ID == admin.ID {
 						c.JSON(400, gin.H{"error": "Cannot modify your own status"})
 						return
 					}
 					
-					// 更新用户状态
+					// 更新用户状�?
 					if err := userRepo.UpdateStatus(ctx, targetUser.ID, models.UserStatus(req.Status)); err != nil {
 						logger.Error("Failed to update user status", 
 							zap.String("user_id", userID),
@@ -211,7 +211,7 @@ func SetupRoutes(
 			}
 		}
 
-		// 超级管理员路由
+		// 超级管理员路�?
 		superAdmin := v1.Group("/super-admin")
 		superAdmin.Use(authMiddleware.RequireAuth())
 		superAdmin.Use(authMiddleware.SuperAdminOnly())
@@ -298,7 +298,7 @@ func SetupRoutes(
 		}
 	}
 
-	// 开发环境路由
+	// 开发环境路�?
 	if gin.Mode() == gin.DebugMode {
 		debug := router.Group("/debug")
 		{

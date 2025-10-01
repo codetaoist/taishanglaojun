@@ -10,9 +10,9 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/taishanglaojun/auth_system/internal/jwt"
-	"github.com/taishanglaojun/auth_system/internal/models"
-	"github.com/taishanglaojun/auth_system/internal/repository"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/jwt"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/repository"
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 
 // AuthService 认证服务接口
 type AuthService interface {
-	// 用户注册和登录
+	// 用户注册和登�?
 	Register(ctx context.Context, req *models.RegisterRequest) (*models.RegisterResponse, error)
 	Login(ctx context.Context, req *models.LoginRequest) (*models.LoginResponse, error)
 	Logout(ctx context.Context, req *models.LogoutRequest) (*models.LogoutResponse, error)
@@ -87,7 +87,7 @@ func NewAuthService(
 
 // Register 用户注册
 func (s *authService) Register(ctx context.Context, req *models.RegisterRequest) (*models.RegisterResponse, error) {
-	// 检查用户名是否已存在
+	// 检查用户名是否已存�?
 	if exists, err := s.userRepo.Exists(ctx, "username", req.Username); err != nil {
 		s.logger.Error("Failed to check username existence", 
 			zap.String("username", req.Username),
@@ -113,10 +113,10 @@ func (s *authService) Register(ctx context.Context, req *models.RegisterRequest)
 	user := &models.User{
 		Username:  req.Username,
 		Email:     req.Email,
-		Password:  req.Password, // 将在BeforeCreate钩子中哈希
+		Password:  req.Password, // 将在BeforeCreate钩子中哈�?
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
-		Status:    models.UserStatusInactive, // 需要邮箱验证
+		Status:    models.UserStatusInactive, // 需要邮箱验�?
 		Role:      models.RoleUser,
 	}
 	
@@ -140,7 +140,7 @@ func (s *authService) Register(ctx context.Context, req *models.RegisterRequest)
 		Type:      models.TokenTypeVerification,
 		Status:    models.TokenStatusActive,
 		Purpose:   "email_verification",
-		ExpiresAt: time.Now().Add(24 * time.Hour), // 24小时有效期
+		ExpiresAt: time.Now().Add(24 * time.Hour), // 24小时有效�?
 	}
 	
 	if err := s.tokenRepo.Create(ctx, verificationToken); err != nil {
@@ -148,7 +148,7 @@ func (s *authService) Register(ctx context.Context, req *models.RegisterRequest)
 			zap.String("user_id", user.ID.String()),
 			zap.Error(err),
 		)
-		// 不返回错误，用户已创建成功
+		// 不返回错误，用户已创建成�?
 	}
 	
 	s.logger.Info("User registered successfully", 
@@ -179,7 +179,7 @@ func (s *authService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 		return nil, err
 	}
 	
-	// 检查用户状态
+	// 检查用户状�?
 	if user.Status == models.UserStatusInactive {
 		return nil, ErrUserInactive
 	}
@@ -204,7 +204,7 @@ func (s *authService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 		return nil, err
 	}
 	
-	// 生成JWT令牌对
+	// 生成JWT令牌�?
 	accessToken, _, err := s.jwtManager.GenerateAccessToken(
 		user.ID, 
 		user.Username, 
@@ -230,7 +230,7 @@ func (s *authService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 		return nil, err
 	}
 	
-	// 更新最后登录时间
+	// 更新最后登录时�?
 	if err := s.userRepo.UpdateLastLogin(ctx, user.ID); err != nil {
 		s.logger.Warn("Failed to update last login time", 
 			zap.String("user_id", user.ID.String()),
@@ -269,7 +269,7 @@ func (s *authService) Logout(ctx context.Context, req *models.LogoutRequest) (*m
 	
 	// 撤销相关令牌
 	if req.RefreshToken != "" {
-		// 这里可以实现令牌黑名单机制
+		// 这里可以实现令牌黑名单机�?
 		s.logger.Info("Refresh token should be blacklisted", 
 			zap.String("session_id", req.SessionID.String()),
 		)
@@ -284,7 +284,7 @@ func (s *authService) Logout(ctx context.Context, req *models.LogoutRequest) (*m
 	}, nil
 }
 
-// LogoutAll 登出所有会话
+// LogoutAll 登出所有会�?
 func (s *authService) LogoutAll(ctx context.Context, userID uuid.UUID) error {
 	if err := s.sessionRepo.RevokeAllUserSessions(ctx, userID); err != nil {
 		s.logger.Error("Failed to revoke all user sessions", 
@@ -309,7 +309,7 @@ func (s *authService) RefreshToken(ctx context.Context, req *models.RefreshToken
 		return nil, ErrInvalidToken
 	}
 	
-	// 检查令牌类型
+	// 检查令牌类�?
 	if claims.TokenType != "refresh" {
 		return nil, ErrInvalidToken
 	}
@@ -323,7 +323,7 @@ func (s *authService) RefreshToken(ctx context.Context, req *models.RefreshToken
 		return nil, err
 	}
 	
-	// 检查用户状态
+	// 检查用户状�?
 	if user.Status != models.UserStatusActive {
 		return nil, ErrUserInactive
 	}
@@ -358,7 +358,7 @@ func (s *authService) RefreshToken(ctx context.Context, req *models.RefreshToken
 		return nil, err
 	}
 	
-	// 如果刷新令牌即将过期，生成新的刷新令牌
+	// 如果刷新令牌即将过期，生成新的刷新令�?
 	var newRefreshToken string
 	refreshClaims, err := s.jwtManager.ValidateToken(req.RefreshToken)
 	if err == nil && s.jwtManager.IsTokenExpiringSoon(refreshClaims) {
@@ -417,7 +417,7 @@ func (s *authService) ValidateToken(ctx context.Context, req *models.ValidateTok
 		}, nil
 	}
 	
-	// 检查用户状态
+	// 检查用户状�?
 	if user.Status != models.UserStatusActive {
 		return &models.ValidateTokenResponse{
 			Valid:   false,
@@ -425,7 +425,7 @@ func (s *authService) ValidateToken(ctx context.Context, req *models.ValidateTok
 		}, nil
 	}
 	
-	// 验证会话（如果是访问令牌）
+	// 验证会话（如果是访问令牌�?
 	if claims.TokenType == "access" {
 		session, err := s.sessionRepo.GetByID(ctx, claims.SessionID)
 		if err != nil || !session.IsActive() {
@@ -482,7 +482,7 @@ func (s *authService) ChangePassword(ctx context.Context, userID uuid.UUID, req 
 		return err
 	}
 	
-	// 撤销所有会话（强制重新登录）
+	// 撤销所有会话（强制重新登录�?
 	if err := s.sessionRepo.RevokeAllUserSessions(ctx, userID); err != nil {
 		s.logger.Warn("Failed to revoke sessions after password change", 
 			zap.String("user_id", userID.String()),
@@ -511,7 +511,7 @@ func (s *authService) ForgotPassword(ctx context.Context, req *models.ForgotPass
 		return nil, err
 	}
 	
-	// 撤销之前的重置令牌
+	// 撤销之前的重置令�?
 	if err := s.tokenRepo.RevokeAllUserTokens(ctx, user.ID, models.TokenTypeReset); err != nil {
 		s.logger.Warn("Failed to revoke previous reset tokens", 
 			zap.String("user_id", user.ID.String()),
@@ -525,7 +525,7 @@ func (s *authService) ForgotPassword(ctx context.Context, req *models.ForgotPass
 		Type:      models.TokenTypeReset,
 		Status:    models.TokenStatusActive,
 		Purpose:   "password_reset",
-		ExpiresAt: time.Now().Add(1 * time.Hour), // 1小时有效期
+		ExpiresAt: time.Now().Add(1 * time.Hour), // 1小时有效�?
 	}
 	
 	if err := s.tokenRepo.Create(ctx, resetToken); err != nil {
@@ -576,7 +576,7 @@ func (s *authService) ResetPassword(ctx context.Context, req *models.ResetPasswo
 		return nil, err
 	}
 	
-	// 撤销所有会话
+	// 撤销所有会�?
 	if err := s.sessionRepo.RevokeAllUserSessions(ctx, token.UserID); err != nil {
 		s.logger.Warn("Failed to revoke sessions after password reset", 
 			zap.String("user_id", token.UserID.String()),
@@ -613,7 +613,7 @@ func (s *authService) VerifyEmail(ctx context.Context, req *models.VerifyEmailRe
 		return nil, err
 	}
 	
-	// 激活用户
+	// 激活用�?
 	if err := s.userRepo.UpdateStatus(ctx, token.UserID, models.UserStatusActive); err != nil {
 		s.logger.Error("Failed to activate user", 
 			zap.String("user_id", token.UserID.String()),
@@ -631,7 +631,7 @@ func (s *authService) VerifyEmail(ctx context.Context, req *models.VerifyEmailRe
 	}, nil
 }
 
-// ResendVerification 重新发送验证邮件
+// ResendVerification 重新发送验证邮�?
 func (s *authService) ResendVerification(ctx context.Context, req *models.ResendVerificationRequest) (*models.ResendVerificationResponse, error) {
 	// 查找用户
 	user, err := s.userRepo.GetByEmail(ctx, req.Email)
@@ -644,14 +644,14 @@ func (s *authService) ResendVerification(ctx context.Context, req *models.Resend
 		return nil, err
 	}
 	
-	// 检查用户是否已激活
+	// 检查用户是否已激�?
 	if user.Status == models.UserStatusActive {
 		return &models.ResendVerificationResponse{
 			Message: "Email is already verified.",
 		}, nil
 	}
 	
-	// 撤销之前的验证令牌
+	// 撤销之前的验证令�?
 	if err := s.tokenRepo.RevokeAllUserTokens(ctx, user.ID, models.TokenTypeVerification); err != nil {
 		s.logger.Warn("Failed to revoke previous verification tokens", 
 			zap.String("user_id", user.ID.String()),
@@ -665,7 +665,7 @@ func (s *authService) ResendVerification(ctx context.Context, req *models.Resend
 		Type:      models.TokenTypeVerification,
 		Status:    models.TokenStatusActive,
 		Purpose:   "email_verification",
-		ExpiresAt: time.Now().Add(24 * time.Hour), // 24小时有效期
+		ExpiresAt: time.Now().Add(24 * time.Hour), // 24小时有效�?
 	}
 	
 	if err := s.tokenRepo.Create(ctx, verificationToken); err != nil {
@@ -718,7 +718,7 @@ func (s *authService) RevokeSession(ctx context.Context, sessionID uuid.UUID) er
 	return nil
 }
 
-// RevokeAllSessions 撤销所有会话
+// RevokeAllSessions 撤销所有会�?
 func (s *authService) RevokeAllSessions(ctx context.Context, userID uuid.UUID) error {
 	if err := s.sessionRepo.RevokeAllUserSessions(ctx, userID); err != nil {
 		s.logger.Error("Failed to revoke all sessions", 

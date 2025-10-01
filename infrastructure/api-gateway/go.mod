@@ -1,4 +1,4 @@
-module api-gateway
+module github.com/codetaoist/taishanglaojun/infrastructure/api-gateway
 
 go 1.21
 

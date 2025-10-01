@@ -24,7 +24,7 @@ type AppConfig struct {
 	Environment string `mapstructure:"environment"`
 }
 
-// ServerConfig 服务器配置
+// ServerConfig 服务器配�?
 type ServerConfig struct {
 	Host         string `mapstructure:"host"`
 	Port         int    `mapstructure:"port"`
@@ -32,7 +32,7 @@ type ServerConfig struct {
 	WriteTimeout int    `mapstructure:"write_timeout"`
 }
 
-// DatabaseConfig 数据库配置
+// DatabaseConfig 数据库配�?
 type DatabaseConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
@@ -75,7 +75,7 @@ func Load() (*Config, error) {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
-	// 设置默认值
+	// 设置默认�?
 	setDefaults()
 
 	// 读取配置文件
@@ -94,7 +94,7 @@ func Load() (*Config, error) {
 	return &config, nil
 }
 
-// setDefaults 设置默认配置值
+// setDefaults 设置默认配置�?
 func setDefaults() {
 	// App defaults
 	viper.SetDefault("app.name", "taishang-service")

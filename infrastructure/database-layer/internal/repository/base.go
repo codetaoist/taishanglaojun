@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 	"go.uber.org/zap"
 
-	"github.com/taishanglaojun/database-layer/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/database-layer/internal/models"
 )
 
 // Repository 仓储接口
@@ -91,7 +91,7 @@ func (r *BaseRepository[T]) Update(ctx context.Context, entity *T) error {
 	return nil
 }
 
-// Delete 硬删除实体
+// Delete 硬删除实�?
 func (r *BaseRepository[T]) Delete(ctx context.Context, id uint) error {
 	var entity T
 	if err := r.db.WithContext(ctx).Unscoped().Delete(&entity, id).Error; err != nil {
@@ -108,7 +108,7 @@ func (r *BaseRepository[T]) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-// SoftDelete 软删除实体
+// SoftDelete 软删除实�?
 func (r *BaseRepository[T]) SoftDelete(ctx context.Context, id uint) error {
 	var entity T
 	if err := r.db.WithContext(ctx).Delete(&entity, id).Error; err != nil {
@@ -150,7 +150,7 @@ func (r *BaseRepository[T]) Count(ctx context.Context, opts *models.QueryOptions
 	query := r.db.WithContext(ctx).Model(&r.model)
 	
 	if opts != nil {
-		// 应用过滤条件，但不应用分页
+		// 应用过滤条件，但不应用分�?
 		if len(opts.Filters) > 0 {
 			for _, filter := range opts.Filters {
 				query = r.applyFilter(query, filter)
@@ -197,7 +197,7 @@ func (r *BaseRepository[T]) Paginate(ctx context.Context, opts *models.QueryOpti
 	return models.NewPaginationResult(entities, total, pagination), nil
 }
 
-// Exists 检查实体是否存在
+// Exists 检查实体是否存�?
 func (r *BaseRepository[T]) Exists(ctx context.Context, id uint) (bool, error) {
 	var count int64
 	err := r.db.WithContext(ctx).Model(&r.model).Where("id = ?", id).Count(&count).Error
@@ -275,7 +275,7 @@ func (r *BaseRepository[T]) Transaction(ctx context.Context, fn func(tx *gorm.DB
 	return r.db.WithContext(ctx).Transaction(fn)
 }
 
-// GetDB 获取数据库实例
+// GetDB 获取数据库实�?
 func (r *BaseRepository[T]) GetDB() *gorm.DB {
 	return r.db
 }

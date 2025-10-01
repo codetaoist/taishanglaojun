@@ -23,11 +23,11 @@ type PostgresConfig struct {
 	MaxOpenConns        int
 	MaxIdleConns        int
 	MaxLifetime         time.Duration
-	MaxIdleTime         time.Duration        // 连接最大空闲时间
+	MaxIdleTime         time.Duration        // 连接最大空闲时�?
 	ConnMaxIdleTime     time.Duration        // 连接空闲超时
-	HealthCheckInterval time.Duration        // 健康检查间隔
+	HealthCheckInterval time.Duration        // 健康检查间�?
 	ReconnectInterval   time.Duration        // 重连间隔
-	MaxReconnectAttempts int                 // 最大重连尝试次数
+	MaxReconnectAttempts int                 // 最大重连尝试次�?
 }
 
 // PostgresDB PostgreSQL数据库管理器
@@ -53,9 +53,9 @@ type ConnectionLeakDetector struct {
 	stop              chan bool
 }
 
-// NewPostgresDB 创建新的PostgreSQL数据库连接
+// NewPostgresDB 创建新的PostgreSQL数据库连�?
 func NewPostgresDB(config *PostgresConfig, log *zap.Logger) (*PostgresDB, error) {
-	// 设置默认值
+	// 设置默认�?
 	if config.MaxIdleTime == 0 {
 		config.MaxIdleTime = 30 * time.Minute
 	}
@@ -86,7 +86,7 @@ func NewPostgresDB(config *PostgresConfig, log *zap.Logger) (*PostgresDB, error)
 		},
 	)
 
-	// 连接数据库
+	// 连接数据�?
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: gormLogger,
 	})
@@ -100,7 +100,7 @@ func NewPostgresDB(config *PostgresConfig, log *zap.Logger) (*PostgresDB, error)
 		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-	// 设置连接池参数
+	// 设置连接池参�?
 	sqlDB.SetMaxOpenConns(config.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(config.MaxIdleConns)
 	sqlDB.SetConnMaxLifetime(config.MaxLifetime)
@@ -123,16 +123,16 @@ func NewPostgresDB(config *PostgresConfig, log *zap.Logger) (*PostgresDB, error)
 	// 初始化连接泄漏检测器
 	postgresDB.connectionLeakDetector = &ConnectionLeakDetector{
 		maxConnections:   config.MaxOpenConns,
-		warningThreshold: 0.8, // 80%阈值
+		warningThreshold: 0.8, // 80%阈�?
 		checkInterval:    1 * time.Minute,
 		logger:          log,
 		stop:            make(chan bool),
 	}
 
-	// 启动健康检查
+	// 启动健康检�?
 	postgresDB.startHealthCheck()
 	
-	// 启动连接泄漏检测
+	// 启动连接泄漏检�?
 	postgresDB.startConnectionLeakDetection()
 
 	log.Info("PostgreSQL connected successfully",
@@ -147,7 +147,7 @@ func NewPostgresDB(config *PostgresConfig, log *zap.Logger) (*PostgresDB, error)
 	return postgresDB, nil
 }
 
-// startHealthCheck 启动健康检查
+// startHealthCheck 启动健康检�?
 func (p *PostgresDB) startHealthCheck() {
 	p.healthCheckTicker = time.NewTicker(p.config.HealthCheckInterval)
 	
@@ -164,7 +164,7 @@ func (p *PostgresDB) startHealthCheck() {
 	}()
 }
 
-// performHealthCheck 执行健康检查
+// performHealthCheck 执行健康检�?
 func (p *PostgresDB) performHealthCheck() {
 	p.reconnectMutex.Lock()
 	defer p.reconnectMutex.Unlock()
@@ -194,7 +194,7 @@ func (p *PostgresDB) performHealthCheck() {
 	p.isHealthy = true
 	p.lastHealthCheck = time.Now()
 	
-	// 记录连接池统计信息
+	// 记录连接池统计信�?
 	stats := sqlDB.Stats()
 	p.logger.Debug("Database connection pool stats",
 		zap.Int("open_connections", stats.OpenConnections),
@@ -242,7 +242,7 @@ func (p *PostgresDB) attemptReconnect() {
 	)
 }
 
-// startConnectionLeakDetection 启动连接泄漏检测
+// startConnectionLeakDetection 启动连接泄漏检�?
 func (p *PostgresDB) startConnectionLeakDetection() {
 	detector := p.connectionLeakDetector
 	detector.ticker = time.NewTicker(detector.checkInterval)
@@ -260,7 +260,7 @@ func (p *PostgresDB) startConnectionLeakDetection() {
 	}()
 }
 
-// checkConnectionLeak 检查连接泄漏
+// checkConnectionLeak 检查连接泄�?
 func (p *PostgresDB) checkConnectionLeak() {
 	sqlDB, err := p.db.DB()
 	if err != nil {
@@ -284,19 +284,19 @@ func (p *PostgresDB) checkConnectionLeak() {
 	}
 }
 
-// GetDB 获取GORM数据库实例
+// GetDB 获取GORM数据库实�?
 func (p *PostgresDB) GetDB() *gorm.DB {
 	return p.db
 }
 
-// Close 关闭数据库连接
+// Close 关闭数据库连�?
 func (p *PostgresDB) Close() error {
-	// 停止健康检查
+	// 停止健康检�?
 	if p.healthCheckTicker != nil {
 		close(p.healthCheckStop)
 	}
 	
-	// 停止连接泄漏检测
+	// 停止连接泄漏检�?
 	if p.connectionLeakDetector != nil && p.connectionLeakDetector.ticker != nil {
 		close(p.connectionLeakDetector.stop)
 	}
@@ -310,7 +310,7 @@ func (p *PostgresDB) Close() error {
 	return sqlDB.Close()
 }
 
-// Health 检查数据库健康状态
+// Health 检查数据库健康状�?
 func (p *PostgresDB) Health() error {
 	p.reconnectMutex.RLock()
 	defer p.reconnectMutex.RUnlock()
@@ -330,14 +330,14 @@ func (p *PostgresDB) Health() error {
 	return sqlDB.PingContext(ctx)
 }
 
-// IsHealthy 返回数据库健康状态
+// IsHealthy 返回数据库健康状�?
 func (p *PostgresDB) IsHealthy() bool {
 	p.reconnectMutex.RLock()
 	defer p.reconnectMutex.RUnlock()
 	return p.isHealthy
 }
 
-// GetStats 获取连接池统计信息
+// GetStats 获取连接池统计信�?
 func (p *PostgresDB) GetStats() map[string]interface{} {
 	sqlDB, err := p.db.DB()
 	if err != nil {
@@ -383,7 +383,7 @@ func (p *PostgresDB) Transaction(fn func(*gorm.DB) error) error {
 	return p.db.Transaction(fn)
 }
 
-// gormLogWriter GORM日志写入器
+// gormLogWriter GORM日志写入�?
 type gormLogWriter struct {
 	logger *zap.Logger
 }

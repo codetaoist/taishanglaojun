@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/taishanglaojun/auth_system/internal/config"
-	"github.com/taishanglaojun/auth_system/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/models"
 
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
@@ -34,7 +34,7 @@ func New(cfg *config.Config, log *zap.Logger) (*Database, error) {
 		logger: log,
 	}
 
-	// 连接数据库
+	// 连接数据�?
 	if db.config.Database.Type != "disabled" {
 		if err := db.connectDatabase(); err != nil {
 			return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -48,7 +48,7 @@ func New(cfg *config.Config, log *zap.Logger) (*Database, error) {
 		db.logger.Warn("Failed to connect to Redis, continuing without Redis", zap.Error(err))
 	}
 
-	// 数据库迁移
+	// 数据库迁�?
 	if db.DB != nil {
 		if err := db.migrate(); err != nil {
 			return nil, fmt.Errorf("failed to migrate database: %w", err)
@@ -58,7 +58,7 @@ func New(cfg *config.Config, log *zap.Logger) (*Database, error) {
 	return db, nil
 }
 
-// connectDatabase 连接数据库
+// connectDatabase 连接数据�?
 func (d *Database) connectDatabase() error {
 	dsn := d.config.GetDSN()
 	
@@ -117,7 +117,7 @@ func (d *Database) connectDatabase() error {
 		return fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-	// 配置连接池
+	// 配置连接�?
 	sqlDB.SetMaxOpenConns(d.config.Database.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(d.config.Database.MaxIdleConns)
 	sqlDB.SetConnMaxLifetime(d.config.Database.MaxLifetime)
@@ -168,7 +168,7 @@ func (d *Database) connectRedis() error {
 func (d *Database) migrate() error {
 	d.logger.Info("Starting database migration")
 
-	// 迁移用户相关表
+	// 迁移用户相关�?
 	if err := d.DB.AutoMigrate(
 		&models.User{},
 		&models.Session{},
@@ -185,7 +185,7 @@ func (d *Database) migrate() error {
 		return fmt.Errorf("failed to create indexes: %w", err)
 	}
 
-	// 初始化默认数据
+	// 初始化默认数�?
 	if err := d.seedData(); err != nil {
 		return fmt.Errorf("failed to seed data: %w", err)
 	}
@@ -194,29 +194,29 @@ func (d *Database) migrate() error {
 	return nil
 }
 
-// createIndexes 创建数据库索引
+// createIndexes 创建数据库索�?
 func (d *Database) createIndexes() error {
-	// 检查数据库类型，MySQL不支持 IF NOT EXISTS 语法
+	// 检查数据库类型，MySQL不支�?IF NOT EXISTS 语法
 	dbType := d.config.Database.Type
 	
 	var indexQueries []string
 	
 	if dbType == "mysql" {
-		// MySQL 索引创建（不使用 IF NOT EXISTS）
+		// MySQL 索引创建（不使用 IF NOT EXISTS�?
 		indexQueries = []string{
-			// 用户表索引
+			// 用户表索�?
 			"CREATE INDEX idx_users_username ON users(username)",
 			"CREATE INDEX idx_users_email ON users(email)",
 			"CREATE INDEX idx_users_status ON users(status)",
 			"CREATE INDEX idx_users_role ON users(role)",
 			
-			// 会话表索引
+			// 会话表索�?
 			"CREATE INDEX idx_sessions_user_id ON sessions(user_id)",
 			"CREATE INDEX idx_sessions_token ON sessions(token)",
 			"CREATE INDEX idx_sessions_status ON sessions(status)",
 			"CREATE INDEX idx_sessions_expires_at ON sessions(expires_at)",
 			
-			// 令牌表索引
+			// 令牌表索�?
 			"CREATE INDEX idx_tokens_user_id ON tokens(user_id)",
 			"CREATE INDEX idx_tokens_token ON tokens(token)",
 			"CREATE INDEX idx_tokens_type ON tokens(type)",
@@ -224,21 +224,21 @@ func (d *Database) createIndexes() error {
 			"CREATE INDEX idx_tokens_expires_at ON tokens(expires_at)",
 		}
 	} else {
-		// PostgreSQL 和其他数据库索引创建（支持 IF NOT EXISTS）
+		// PostgreSQL 和其他数据库索引创建（支�?IF NOT EXISTS�?
 		indexQueries = []string{
-			// 用户表索引
+			// 用户表索�?
 			"CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
 			"CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
 			"CREATE INDEX IF NOT EXISTS idx_users_status ON users(status)",
 			"CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)",
 			
-			// 会话表索引
+			// 会话表索�?
 			"CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)",
 			"CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)",
 			"CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status)",
 			"CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)",
 			
-			// 令牌表索引
+			// 令牌表索�?
 			"CREATE INDEX IF NOT EXISTS idx_tokens_user_id ON tokens(user_id)",
 			"CREATE INDEX IF NOT EXISTS idx_tokens_token ON tokens(token)",
 			"CREATE INDEX IF NOT EXISTS idx_tokens_type ON tokens(type)",
@@ -262,16 +262,16 @@ func (d *Database) createIndexes() error {
 	return nil
 }
 
-// seedData 初始化默认数据
+// seedData 初始化默认数�?
 func (d *Database) seedData() error {
 	// 创建默认权限
 	permissions := []models.Permission{
 		{Name: "user.read", Description: "读取用户信息"},
 		{Name: "user.write", Description: "修改用户信息"},
 		{Name: "user.delete", Description: "删除用户"},
-		{Name: "admin.read", Description: "管理员读取权限"},
-		{Name: "admin.write", Description: "管理员写入权限"},
-		{Name: "super_admin.all", Description: "超级管理员所有权限"},
+		{Name: "admin.read", Description: "管理员读取权�?},
+		{Name: "admin.write", Description: "管理员写入权�?},
+		{Name: "super_admin.all", Description: "超级管理员所有权�?},
 	}
 
 	for _, permission := range permissions {
@@ -287,7 +287,7 @@ func (d *Database) seedData() error {
 		}
 	}
 
-	// 为角色分配权限
+	// 为角色分配权�?
 	rolePermissions := map[models.UserRole][]string{
 		models.RoleUser: {
 			"user.read",
@@ -333,7 +333,7 @@ func (d *Database) seedData() error {
 	return nil
 }
 
-// Close 关闭数据库连接
+// Close 关闭数据库连�?
 func (d *Database) Close() error {
 	var errs []error
 
@@ -361,7 +361,7 @@ func (d *Database) Close() error {
 	return nil
 }
 
-// Health 检查数据库健康状态
+// Health 检查数据库健康状�?
 func (d *Database) Health(ctx context.Context) error {
 	// 检查PostgreSQL
 	if d.DB != nil {
@@ -384,22 +384,22 @@ func (d *Database) Health(ctx context.Context) error {
 	return nil
 }
 
-// GetDB 获取GORM数据库实例
+// GetDB 获取GORM数据库实�?
 func (d *Database) GetDB() *gorm.DB {
 	return d.DB
 }
 
-// GetRedis 获取Redis客户端
+// GetRedis 获取Redis客户�?
 func (d *Database) GetRedis() *redis.Client {
 	return d.Redis
 }
 
-// Transaction 执行数据库事务
+// Transaction 执行数据库事�?
 func (d *Database) Transaction(fn func(*gorm.DB) error) error {
 	return d.DB.Transaction(fn)
 }
 
-// WithContext 使用上下文
+// WithContext 使用上下�?
 func (d *Database) WithContext(ctx context.Context) *gorm.DB {
 	return d.DB.WithContext(ctx)
 }

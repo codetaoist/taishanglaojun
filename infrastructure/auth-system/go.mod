@@ -1,4 +1,4 @@
-module github.com/taishanglaojun/auth_system
+module github.com/codetaoist/taishanglaojun/infrastructure/auth-system
 
 go 1.23
 
@@ -10,7 +10,6 @@ require (
 	github.com/joho/godotenv v1.4.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.17.0
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/driver/postgres v1.5.4
 	gorm.io/driver/sqlite v1.5.4

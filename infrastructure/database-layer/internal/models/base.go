@@ -21,7 +21,7 @@ type Model interface {
 	BeforeUpdate(tx *gorm.DB) error
 }
 
-// SoftDeleteModel 软删除模型接口
+// SoftDeleteModel 软删除模型接�?
 type SoftDeleteModel interface {
 	Model
 	IsDeleted() bool
@@ -29,7 +29,7 @@ type SoftDeleteModel interface {
 	Restore() error
 }
 
-// TimestampModel 时间戳模型接口
+// TimestampModel 时间戳模型接�?
 type TimestampModel interface {
 	GetCreatedAt() time.Time
 	GetUpdatedAt() time.Time
@@ -57,7 +57,7 @@ func (m *BaseModel) SetUpdatedAt(t time.Time) {
 	m.UpdatedAt = t
 }
 
-// IsDeleted 检查是否已软删除
+// IsDeleted 检查是否已软删�?
 func (m *BaseModel) IsDeleted() bool {
 	return m.DeletedAt.Valid
 }
@@ -84,7 +84,7 @@ type PaginationQuery struct {
 	Sort     string `json:"sort" form:"sort" binding:"oneof=asc desc"`
 }
 
-// GetOffset 获取偏移量
+// GetOffset 获取偏移�?
 func (p *PaginationQuery) GetOffset() int {
 	if p.Page <= 0 {
 		p.Page = 1
@@ -171,7 +171,7 @@ type QueryOptions struct {
 func (opts *QueryOptions) ApplyToQuery(db *gorm.DB) *gorm.DB {
 	query := db
 
-	// 应用预加载
+	// 应用预加�?
 	if len(opts.Preload) > 0 {
 		for _, preload := range opts.Preload {
 			query = query.Preload(preload)
@@ -200,7 +200,7 @@ func (opts *QueryOptions) ApplyToQuery(db *gorm.DB) *gorm.DB {
 		query = applySearch(query, opts.Search)
 	}
 
-	// 应用分页和排序
+	// 应用分页和排�?
 	if opts.Pagination != nil {
 		orderBy := opts.Pagination.GetOrderBy() + " " + opts.Pagination.GetSort()
 		query = query.Order(orderBy).

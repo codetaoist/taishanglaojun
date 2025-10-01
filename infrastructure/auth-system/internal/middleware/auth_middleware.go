@@ -8,19 +8,19 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
-	"github.com/taishanglaojun/auth_system/internal/jwt"
-	"github.com/taishanglaojun/auth_system/internal/models"
-	"github.com/taishanglaojun/auth_system/internal/service"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/jwt"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/service"
 )
 
-// AuthMiddleware 认证中间件
+// AuthMiddleware 认证中间�?
 type AuthMiddleware struct {
 	jwtManager  *jwt.Manager
 	authService service.AuthService
 	logger      *zap.Logger
 }
 
-// NewAuthMiddleware 创建认证中间件
+// NewAuthMiddleware 创建认证中间�?
 func NewAuthMiddleware(jwtManager *jwt.Manager, authService service.AuthService, logger *zap.Logger) *AuthMiddleware {
 	return &AuthMiddleware{
 		jwtManager:  jwtManager,
@@ -29,7 +29,7 @@ func NewAuthMiddleware(jwtManager *jwt.Manager, authService service.AuthService,
 	}
 }
 
-// RequireAuth 需要认证的中间件
+// RequireAuth 需要认证的中间�?
 func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := m.extractToken(c)
@@ -53,7 +53,7 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 			return
 		}
 
-		// 验证令牌是否为访问令牌
+		// 验证令牌是否为访问令�?
 		if claims.TokenType != "access" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error":   "unauthorized",
@@ -63,7 +63,7 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 			return
 		}
 
-		// 验证令牌状态
+		// 验证令牌状�?
 		validateReq := &models.ValidateTokenRequest{Token: token}
 		validateResp, err := m.authService.ValidateToken(c.Request.Context(), validateReq)
 		if err != nil || !validateResp.Valid {
@@ -87,7 +87,7 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		c.Set("permissions", claims.Permissions)
 		c.Set("session_id", claims.SessionID)
 		
-		// 设置完整的用户对象到上下文
+		// 设置完整的用户对象到上下�?
 		user := &models.User{
 			ID:       claims.UserID,
 			Username: claims.Username,
@@ -100,7 +100,7 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 	}
 }
 
-// RequireRole 需要特定角色的中间件
+// RequireRole 需要特定角色的中间�?
 func (m *AuthMiddleware) RequireRole(roles ...models.UserRole) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userRole, exists := c.Get("role")
@@ -149,7 +149,7 @@ func (m *AuthMiddleware) RequireRole(roles ...models.UserRole) gin.HandlerFunc {
 	}
 }
 
-// RequirePermission 需要特定权限的中间件
+// RequirePermission 需要特定权限的中间�?
 func (m *AuthMiddleware) RequirePermission(permissions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userPermissions, exists := c.Get("permissions")
@@ -172,7 +172,7 @@ func (m *AuthMiddleware) RequirePermission(permissions ...string) gin.HandlerFun
 			return
 		}
 
-		// 检查用户是否拥有所需的权限
+		// 检查用户是否拥有所需的权�?
 		for _, requiredPerm := range permissions {
 			hasPermission := false
 			for _, userPerm := range perms {
@@ -195,7 +195,7 @@ func (m *AuthMiddleware) RequirePermission(permissions ...string) gin.HandlerFun
 	}
 }
 
-// OptionalAuth 可选认证中间件（不强制要求认证）
+// OptionalAuth 可选认证中间件（不强制要求认证�?
 func (m *AuthMiddleware) OptionalAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := m.extractToken(c)
@@ -211,7 +211,7 @@ func (m *AuthMiddleware) OptionalAuth() gin.HandlerFunc {
 			return
 		}
 
-		// 验证令牌状态
+		// 验证令牌状�?
 		validateReq := &models.ValidateTokenRequest{Token: token}
 		validateResp, err := m.authService.ValidateToken(c.Request.Context(), validateReq)
 		if err != nil || !validateResp.Valid {
@@ -254,7 +254,7 @@ func (m *AuthMiddleware) SuperAdminOnly() gin.HandlerFunc {
 	})
 }
 
-// RateLimitByUser 按用户限流的中间件
+// RateLimitByUser 按用户限流的中间�?
 func (m *AuthMiddleware) RateLimitByUser() gin.HandlerFunc {
 	// 这里可以实现基于用户的限流逻辑
 	// 例如使用 Redis 存储用户请求计数
@@ -266,14 +266,14 @@ func (m *AuthMiddleware) RateLimitByUser() gin.HandlerFunc {
 		}
 
 		// 实现限流逻辑
-		// 这里只是示例，实际实现需要使用 Redis 或其他存储
+		// 这里只是示例，实际实现需要使�?Redis 或其他存�?
 		m.logger.Debug("Rate limiting for user", zap.Any("user_id", userID))
 		
 		c.Next()
 	}
 }
 
-// CORS 跨域中间件
+// CORS 跨域中间�?
 func (m *AuthMiddleware) CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
@@ -294,7 +294,7 @@ func (m *AuthMiddleware) CORS() gin.HandlerFunc {
 	}
 }
 
-// RequestLogger 请求日志中间件
+// RequestLogger 请求日志中间�?
 func (m *AuthMiddleware) RequestLogger() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		userID := "anonymous"
@@ -336,7 +336,7 @@ func (m *AuthMiddleware) SecurityHeaders() gin.HandlerFunc {
 
 // extractToken 从请求中提取令牌
 func (m *AuthMiddleware) extractToken(c *gin.Context) string {
-	// 从 Authorization 头中提取
+	// �?Authorization 头中提取
 	authHeader := c.GetHeader("Authorization")
 	if authHeader != "" {
 		parts := strings.SplitN(authHeader, " ", 2)
@@ -351,7 +351,7 @@ func (m *AuthMiddleware) extractToken(c *gin.Context) string {
 		return token
 	}
 
-	// 从 Cookie 中提取
+	// �?Cookie 中提�?
 	cookie, err := c.Cookie("access_token")
 	if err == nil && cookie != "" {
 		return cookie
@@ -360,7 +360,7 @@ func (m *AuthMiddleware) extractToken(c *gin.Context) string {
 	return ""
 }
 
-// GetCurrentUser 获取当前用户信息的辅助函数
+// GetCurrentUser 获取当前用户信息的辅助函�?
 func GetCurrentUser(c *gin.Context) (*CurrentUser, bool) {
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -406,12 +406,12 @@ type CurrentUser struct {
 	SessionID   uuid.UUID         `json:"session_id"`
 }
 
-// HasRole 检查用户是否拥有指定角色
+// HasRole 检查用户是否拥有指定角�?
 func (u *CurrentUser) HasRole(role models.UserRole) bool {
 	return u.Role == role
 }
 
-// HasPermission 检查用户是否拥有指定权限
+// HasPermission 检查用户是否拥有指定权�?
 func (u *CurrentUser) HasPermission(permission string) bool {
 	for _, perm := range u.Permissions {
 		if perm == permission {
@@ -421,12 +421,12 @@ func (u *CurrentUser) HasPermission(permission string) bool {
 	return false
 }
 
-// IsAdmin 检查用户是否为管理员
+// IsAdmin 检查用户是否为管理�?
 func (u *CurrentUser) IsAdmin() bool {
 	return u.Role == models.RoleAdmin
 }
 
-// IsSuperAdmin 检查用户是否为超级管理员
+// IsSuperAdmin 检查用户是否为超级管理�?
 func (u *CurrentUser) IsSuperAdmin() bool {
 	return u.Role == models.RoleSuperAdmin
 }

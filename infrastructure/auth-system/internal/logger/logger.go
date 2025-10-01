@@ -4,14 +4,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/taishanglaojun/auth_system/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-// New 创建日志记录器
+// New 创建日志记录�?
 func New(cfg *config.Config) (*zap.Logger, error) {
 	// 配置日志级别
 	level, err := zapcore.ParseLevel(cfg.Log.Level)
@@ -19,7 +19,7 @@ func New(cfg *config.Config) (*zap.Logger, error) {
 		level = zapcore.InfoLevel
 	}
 
-	// 配置编码器
+	// 配置编码�?
 	var encoderConfig zapcore.EncoderConfig
 	if cfg.Log.Format == "json" {
 		encoderConfig = zap.NewProductionEncoderConfig()
@@ -31,7 +31,7 @@ func New(cfg *config.Config) (*zap.Logger, error) {
 	encoderConfig.TimeKey = "timestamp"
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	// 创建编码器
+	// 创建编码�?
 	var encoder zapcore.Encoder
 	if cfg.Log.Format == "json" {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
@@ -69,10 +69,10 @@ func New(cfg *config.Config) (*zap.Logger, error) {
 	// 创建核心
 	core := zapcore.NewCore(encoder, writeSyncer, level)
 
-	// 创建日志记录器
+	// 创建日志记录�?
 	logger := zap.New(core)
 
-	// 在开发环境添加调用者信息
+	// 在开发环境添加调用者信�?
 	if cfg.IsDevelopment() {
 		logger = logger.WithOptions(zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 	}
@@ -97,12 +97,12 @@ func NewDevelopment() (*zap.Logger, error) {
 	return zap.NewDevelopment()
 }
 
-// NewProduction 创建生产环境日志记录器
+// NewProduction 创建生产环境日志记录�?
 func NewProduction() (*zap.Logger, error) {
 	return zap.NewProduction()
 }
 
-// Sync 同步日志缓冲区
+// Sync 同步日志缓冲�?
 func Sync(logger *zap.Logger) {
 	if logger != nil {
 		_ = logger.Sync()

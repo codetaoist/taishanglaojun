@@ -1,0 +1,215 @@
+# Prometheus告警规则 - API Gateway
+
+groups:
+  # API Gateway核心指标告警
+  - name: api-gateway-core
+    rules:
+      # 高错误率告警
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="api-gateway",status=~"5.."}[5m])) /
+            sum(rate(http_requests_total{job="api-gateway"}[5m]))
+          ) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: api-gateway
+        annotations:
+          summary: "API Gateway高错误率"
+          description: "API Gateway在过去5分钟内的错误率为 {{ $value }}%，超过了5%的阈值"
+
+      # 高延迟告警
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket{job="api-gateway"}[5m])) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "API Gateway高延迟"
+          description: "API Gateway的95%分位延迟为 {{ $value }}秒，超过了1秒的阈值"
+
+      # 请求量异常告警
+      - alert: RequestVolumeAnomaly
+        expr: |
+          (
+            sum(rate(http_requests_total{job="api-gateway"}[5m])) <
+            sum(rate(http_requests_total{job="api-gateway"}[5m] offset 1h)) * 0.5
+          ) and
+          sum(rate(http_requests_total{job="api-gateway"}[5m] offset 1h)) > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "API Gateway请求量异常下降"
+          description: "API Gateway的请求量比1小时前下降了50%以上"
+
+      # 服务不可用告警
+      - alert: ServiceDown
+        expr: up{job="api-gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api-gateway
+        annotations:
+          summary: "API Gateway服务不可用"
+          description: "API Gateway服务已经下线超过1分钟"
+
+  # 代理服务健康告警
+  - name: proxy-health
+    rules:
+      # 后端服务不健康告警
+      - alert: BackendServiceUnhealthy
+        expr: service_health_status == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "后端服务不健康"
+          description: "服务 {{ $labels.service_name }} 在实例 {{ $labels.instance }} 上不健康"
+
+      # 代理错误率高告警
+      - alert: HighProxyErrorRate
+        expr: |
+          (
+            sum(rate(proxy_requests_total{status="error"}[5m])) by (service) /
+            sum(rate(proxy_requests_total[5m])) by (service)
+          ) * 100 > 10
+        for: 3m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "代理服务错误率高"
+          description: "服务 {{ $labels.service }} 的代理错误率为 {{ $value }}%，超过了10%的阈值"
+
+  # 限流告警
+  - name: rate-limiting
+    rules:
+      # 限流触发频繁告警
+      - alert: FrequentRateLimiting
+        expr: |
+          sum(rate(rate_limit_hits_total[5m])) by (limiter_type) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "限流触发频繁"
+          description: "{{ $labels.limiter_type }} 限流器在过去5分钟内触发了 {{ $value }} 次"
+
+  # 熔断器告警
+  - name: circuit-breaker
+    rules:
+      # 熔断器开启告警
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 2
+        for: 1m
+        labels:
+          severity: critical
+          service: api-gateway
+        annotations:
+          summary: "熔断器开启"
+          description: "服务 {{ $labels.service }} 的熔断器已开启"
+
+      # 熔断器半开状态告警
+      - alert: CircuitBreakerHalfOpen
+        expr: circuit_breaker_state == 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "熔断器半开状态"
+          description: "服务 {{ $labels.service }} 的熔断器处于半开状态超过5分钟"
+
+  # 资源使用告警
+  - name: resource-usage
+    rules:
+      # 内存使用率高告警
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            process_resident_memory_bytes{job="api-gateway"} /
+            (1024 * 1024 * 1024)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "内存使用率高"
+          description: "API Gateway内存使用量为 {{ $value }}GB，超过了1GB的阈值"
+
+      # CPU使用率高告警
+      - alert: HighCPUUsage
+        expr: |
+          rate(process_cpu_seconds_total{job="api-gateway"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "CPU使用率高"
+          description: "API Gateway CPU使用率为 {{ $value }}%，超过了80%的阈值"
+
+      # 文件描述符使用率高告警
+      - alert: HighFileDescriptorUsage
+        expr: |
+          (
+            process_open_fds{job="api-gateway"} /
+            process_max_fds{job="api-gateway"}
+          ) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "文件描述符使用率高"
+          description: "API Gateway文件描述符使用率为 {{ $value }}%，超过了80%的阈值"
+
+  # Redis告警
+  - name: redis-alerts
+    rules:
+      # Redis连接数高告警
+      - alert: RedisHighConnections
+        expr: redis_connected_clients > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis连接数过高"
+          description: "Redis连接数为 {{ $value }}，超过了100的阈值"
+
+      # Redis内存使用率高告警
+      - alert: RedisHighMemoryUsage
+        expr: |
+          (
+            redis_memory_used_bytes /
+            redis_memory_max_bytes
+          ) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis内存使用率高"
+          description: "Redis内存使用率为 {{ $value }}%，超过了80%的阈值"
+
+      # Redis不可用告警
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis服务不可用"
+          description: "Redis服务已经下线超过1分钟"

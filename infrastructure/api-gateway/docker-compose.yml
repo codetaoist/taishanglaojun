@@ -1,0 +1,238 @@
+version: '3.8'
+
+services:
+  # API网关
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: api-gateway
+    ports:
+      - "8080:8080"  # API端口
+      - "9090:9090"  # 监控端口
+    environment:
+      - GIN_MODE=debug
+      - CONFIG_PATH=/app/configs/gateway.yaml
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./logs:/var/log/api-gateway
+    depends_on:
+      - redis
+      - prometheus
+    networks:
+      - gateway-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Redis - 用于限流和认证
+  redis:
+    image: redis:7-alpine
+    container_name: api-gateway-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./configs/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - gateway-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Prometheus - 监控
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: api-gateway-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - gateway-network
+    restart: unless-stopped
+
+  # Grafana - 可视化
+  grafana:
+    image: grafana/grafana:latest
+    container_name: api-gateway-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./configs/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - gateway-network
+    restart: unless-stopped
+
+  # Jaeger - 链路追踪
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: api-gateway-jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # HTTP collector
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - gateway-network
+    restart: unless-stopped
+
+  # 模拟后端服务1 - 认证服务
+  mock-auth-service:
+    image: nginx:alpine
+    container_name: mock-auth-service
+    ports:
+      - "8081:80"
+    volumes:
+      - ./mock-services/auth:/usr/share/nginx/html:ro
+      - ./mock-services/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - gateway-network
+    restart: unless-stopped
+
+  # 模拟后端服务2 - 用户服务
+  mock-user-service:
+    image: nginx:alpine
+    container_name: mock-user-service
+    ports:
+      - "8082:80"
+    volumes:
+      - ./mock-services/user:/usr/share/nginx/html:ro
+      - ./mock-services/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - gateway-network
+    restart: unless-stopped
+
+  # 模拟后端服务3 - 管理服务
+  mock-admin-service:
+    image: nginx:alpine
+    container_name: mock-admin-service
+    ports:
+      - "8083:80"
+    volumes:
+      - ./mock-services/admin:/usr/share/nginx/html:ro
+      - ./mock-services/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - gateway-network
+    restart: unless-stopped
+
+networks:
+  gateway-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# 开发环境配置
+---
+version: '3.8'
+
+# 开发环境 - 使用热重载
+x-development: &development
+  services:
+    api-gateway-dev:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        target: dev
+      container_name: api-gateway-dev
+      ports:
+        - "8080:8080"
+        - "9090:9090"
+      environment:
+        - GIN_MODE=debug
+        - CONFIG_PATH=/app/configs/gateway.yaml
+      volumes:
+        - .:/app
+        - /app/tmp
+      depends_on:
+        - redis
+      networks:
+        - gateway-network
+      restart: unless-stopped
+      command: ["air", "-c", ".air.toml"]
+
+# 生产环境配置
+x-production: &production
+  services:
+    api-gateway:
+      image: taishanglaojun/api-gateway:latest
+      container_name: api-gateway-prod
+      ports:
+        - "8080:8080"
+        - "9090:9090"
+      environment:
+        - GIN_MODE=release
+        - CONFIG_PATH=/app/configs/gateway.yaml
+      volumes:
+        - ./configs:/app/configs:ro
+        - ./logs:/var/log/api-gateway
+      depends_on:
+        - redis
+        - prometheus
+      networks:
+        - gateway-network
+      restart: always
+      deploy:
+        resources:
+          limits:
+            cpus: '1.0'
+            memory: 512M
+          reservations:
+            cpus: '0.5'
+            memory: 256M
+        restart_policy:
+          condition: on-failure
+          delay: 5s
+          max_attempts: 3
+          window: 120s
+
+# 测试环境配置
+x-testing: &testing
+  services:
+    api-gateway-test:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: api-gateway-test
+      environment:
+        - GIN_MODE=test
+        - CONFIG_PATH=/app/configs/gateway-test.yaml
+      volumes:
+        - ./configs:/app/configs:ro
+      networks:
+        - gateway-network
+      command: ["go", "test", "-v", "./..."]

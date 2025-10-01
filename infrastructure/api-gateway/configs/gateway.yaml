@@ -1,0 +1,287 @@
+# API Gateway Configuration
+
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8080
+  debug: false
+  read_timeout: 30s
+  write_timeout: 30s
+  idle_timeout: 60s
+  max_header_bytes: 1048576
+
+# 日志配置
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  file:
+    enabled: false
+    path: "/var/log/api-gateway/gateway.log"
+    max_size: 100
+    max_backups: 3
+    max_age: 7
+    compress: true
+
+# 监控配置
+monitoring:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+  namespace: "api_gateway"
+
+# 服务注册与发现
+registry:
+  type: "static"  # static, consul, etcd
+  consul:
+    address: "localhost:8500"
+    scheme: "http"
+    datacenter: "dc1"
+    wait_time: 30s
+    token: ""
+  etcd:
+    endpoints:
+      - "localhost:2379"
+    dial_timeout: 5s
+    username: ""
+    password: ""
+
+# 代理配置
+proxy:
+  timeout: 30s
+  idle_conn_timeout: 90s
+  max_idle_conns: 100
+  max_idle_conns_per_host: 10
+  disable_keep_alives: false
+  health_check:
+    enabled: true
+    interval: 30s
+    timeout: 5s
+    path: "/health"
+
+# 安全配置
+security:
+  # 认证配置
+  auth:
+    jwt_secret: "your-super-secret-jwt-key-change-in-production"
+    token_expiry: 24h
+    refresh_expiry: 168h  # 7 days
+    redis_addr: "localhost:6379"
+    redis_password: ""
+    redis_db: 0
+    skip_paths:
+      - "/health"
+      - "/ready"
+      - "/metrics"
+      - "/auth/login"
+      - "/auth/register"
+      - "/auth/refresh"
+    optional_paths:
+      - "/public/*"
+      - "/docs/*"
+
+  # 限流配置
+  rate_limit:
+    global_rps: 1000
+    global_burst: 2000
+    ip_rps: 100
+    ip_burst: 200
+    user_rps: 50
+    user_burst: 100
+    redis_addr: "localhost:6379"
+    redis_password: ""
+    redis_db: 1
+    window_size: 1m
+    skip_paths:
+      - "/health"
+      - "/ready"
+    path_limits:
+      "/auth/*":
+        rps: 10
+        burst: 20
+      "/admin/*":
+        rps: 20
+        burst: 40
+
+  # CORS配置
+  cors:
+    allow_origins:
+      - "http://localhost:3000"
+      - "http://localhost:8080"
+      - "https://yourdomain.com"
+    allow_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+      - "PATCH"
+    allow_headers:
+      - "Origin"
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+      - "Accept"
+      - "Cache-Control"
+    expose_headers:
+      - "Content-Length"
+      - "X-RateLimit-Limit"
+      - "X-RateLimit-Remaining"
+      - "X-RateLimit-Reset"
+    allow_credentials: true
+    max_age: 86400
+    allow_all_origins: false
+    allow_private_network: false
+
+# 服务配置
+services:
+  # 认证服务
+  - name: "auth-service"
+    url: "http://localhost:8081"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/auth/*"
+        method: "ANY"
+        strip_prefix: true
+        middleware: ["rate_limit"]
+      - path: "/api/v1/auth/*"
+        method: "ANY"
+        rewrite: "/auth/*"
+        middleware: ["rate_limit"]
+
+  # 用户服务
+  - name: "user-service"
+    url: "http://localhost:8082"
+    load_balancer: "weighted_round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    routes:
+      - path: "/api/v1/users/*"
+        method: "ANY"
+        rewrite: "/users/*"
+        middleware: ["auth", "rate_limit"]
+      - path: "/api/v1/profile/*"
+        method: "ANY"
+        rewrite: "/profile/*"
+        middleware: ["auth", "rate_limit"]
+
+  # 管理服务
+  - name: "admin-service"
+    url: "http://localhost:8083"
+    load_balancer: "least_connections"
+    health_check: "/health"
+    timeout: 30
+    routes:
+      - path: "/api/v1/admin/*"
+        method: "ANY"
+        rewrite: "/admin/*"
+        middleware: ["auth", "admin", "rate_limit"]
+
+  # 文件服务
+  - name: "file-service"
+    url: "http://localhost:8084"
+    load_balancer: "ip_hash"
+    health_check: "/health"
+    timeout: 60  # 文件上传可能需要更长时间
+    routes:
+      - path: "/api/v1/files/*"
+        method: "ANY"
+        rewrite: "/files/*"
+        middleware: ["auth", "rate_limit"]
+      - path: "/uploads/*"
+        method: "GET"
+        strip_prefix: true
+        middleware: ["rate_limit"]
+
+  # 通知服务
+  - name: "notification-service"
+    url: "http://localhost:8085"
+    load_balancer: "random"
+    health_check: "/health"
+    timeout: 15
+    routes:
+      - path: "/api/v1/notifications/*"
+        method: "ANY"
+        rewrite: "/notifications/*"
+        middleware: ["auth", "rate_limit"]
+
+# 静态路由配置（用于服务发现不可用时的备用方案）
+static_services:
+  auth-service:
+    - id: "auth-1"
+      address: "localhost"
+      port: 8081
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+  
+  user-service:
+    - id: "user-1"
+      address: "localhost"
+      port: 8082
+      weight: 1
+      tags: ["primary"]
+    - id: "user-2"
+      address: "localhost"
+      port: 8092
+      weight: 1
+      tags: ["secondary"]
+
+# 健康检查配置
+health_check:
+  enabled: true
+  interval: 30s
+  timeout: 5s
+  unhealthy_threshold: 3
+  healthy_threshold: 2
+
+# 性能配置
+performance:
+  # 连接池配置
+  connection_pool:
+    max_idle_conns: 100
+    max_idle_conns_per_host: 10
+    idle_conn_timeout: 90s
+    disable_keep_alives: false
+  
+  # 缓存配置
+  cache:
+    enabled: true
+    ttl: 300s
+    max_size: 1000
+  
+  # 压缩配置
+  compression:
+    enabled: true
+    level: 6
+    min_length: 1024
+
+# 开发配置
+development:
+  hot_reload: true
+  debug_headers: true
+  mock_services: false
+  profiling: true

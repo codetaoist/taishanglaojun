@@ -1,0 +1,135 @@
+# 数据库层配置文件
+
+# PostgreSQL 数据库配置
+postgres:
+  host: localhost
+  port: 5432
+  username: postgres
+  password: password
+  database: taishang
+  ssl_mode: disable
+  
+  # 连接池配置
+  max_open_conns: 25
+  max_idle_conns: 5
+  max_lifetime: 300s
+  max_idle_time: 600s
+  conn_max_idle_time: 1800s
+  
+  # 健康检查配置
+  health_check_interval: 30s
+  reconnect_interval: 5s
+  max_reconnect_attempts: 3
+  
+  log_level: info
+
+# Redis 配置
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  database: 0
+  
+  # 连接池配置
+  pool_size: 10
+  min_idle_conns: 2
+  max_retries: 3
+  
+  # 超时配置
+  dial_timeout: 5s
+  read_timeout: 3s
+  write_timeout: 3s
+  pool_timeout: 4s
+  idle_timeout: 300s
+  idle_check_frequency: 60s
+  max_conn_age: 1800s
+  
+  # 健康检查配置
+  health_check_interval: 30s
+  reconnect_interval: 5s
+  max_reconnect_attempts: 3
+
+# 迁移配置
+migration:
+  dir: "./migrations"
+  auto_migrate: true
+
+# 数据库管理器配置
+manager:
+  health_check_interval: 30s
+  metrics_interval: 60s
+
+# 连接监控配置
+monitor:
+  leak_detection_interval: 60s
+  leak_warning_threshold: 0.8
+  leak_critical_threshold: 0.95
+  shutdown_timeout: 30s
+  metrics_collection_interval: 30s
+  enable_detailed_logging: false
+  
+# 日志配置
+logging:
+  level: info
+  format: json
+  output: stdout
+
+# 开发环境配置
+development:
+  postgres:
+    database: taishang_dev
+    log_level: debug
+    health_check_interval: 15s
+  redis:
+    database: 1
+    health_check_interval: 15s
+  manager:
+    health_check_interval: 15s
+    metrics_interval: 30s
+  monitor:
+    enable_detailed_logging: true
+  logging:
+    level: debug
+    format: console
+
+# 测试环境配置
+test:
+  postgres:
+    database: taishang_test
+    log_level: warn
+    health_check_interval: 60s
+  redis:
+    database: 2
+    health_check_interval: 60s
+  manager:
+    health_check_interval: 60s
+    metrics_interval: 120s
+  logging:
+    level: warn
+
+# 生产环境配置
+production:
+  postgres:
+    ssl_mode: require
+    max_open_conns: 50
+    max_idle_conns: 10
+    max_lifetime: 600s
+    max_idle_time: 1200s
+    conn_max_idle_time: 3600s
+    health_check_interval: 60s
+    log_level: error
+  redis:
+    pool_size: 20
+    min_idle_conns: 5
+    idle_timeout: 600s
+    max_conn_age: 3600s
+    health_check_interval: 60s
+  manager:
+    health_check_interval: 60s
+    metrics_interval: 300s
+  monitor:
+    leak_detection_interval: 300s
+    metrics_collection_interval: 60s
+  logging:
+    level: error
+    format: json

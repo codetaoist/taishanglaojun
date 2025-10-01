@@ -1,0 +1,1031 @@
+openapi: 3.0.3
+info:
+  title: 太上老君 - 核心服务API
+  description: |
+    太上老君项目核心服务API文档，包含AI集成服务和文化智慧服务的完整接口定义。
+    
+    ## 认证方式
+    - Bearer Token认证
+    - 用户等级权限控制（L1-L9）
+    
+    ## 服务模块
+    - **AI集成服务**: 提供智能对话、内容生成、语义分析等AI能力
+    - **文化智慧服务**: 管理文化智慧内容，支持CRUD、搜索、推荐等功能
+  version: 1.0.0
+  contact:
+    name: 太上老君开发团队
+    email: dev@taishanglaojun.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.taishanglaojun.com/v1
+    description: 生产环境
+  - url: https://api-staging.taishanglaojun.com/v1
+    description: 测试环境
+  - url: http://localhost:8080/v1
+    description: 本地开发环境
+
+security:
+  - BearerAuth: []
+
+paths:
+  # AI集成服务接口
+  /ai/chat:
+    post:
+      tags:
+        - AI对话
+      summary: 智能对话
+      description: 与AI进行智能对话，支持多轮对话和上下文理解
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            example:
+              message:
+                role: "user"
+                content: "请解释一下《道德经》中的'无为而治'思想"
+              session_id: "session_123456"
+              temperature: 0.7
+              max_tokens: 2000
+      responses:
+        '200':
+          description: 对话成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /ai/sessions:
+    get:
+      tags:
+        - AI对话
+      summary: 获取对话列表
+      description: 获取用户的对话会话列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationListResponse'
+
+  /ai/sessions/{session_id}:
+    get:
+      tags:
+        - AI对话
+      summary: 获取对话历史
+      description: 获取指定会话的对话历史记录
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags:
+        - AI对话
+      summary: 删除对话
+      description: 删除指定的对话会话
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /ai/generate/summary:
+    post:
+      tags:
+        - AI内容生成
+      summary: 生成内容摘要
+      description: 为指定内容生成简洁准确的摘要
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+      responses:
+        '200':
+          description: 生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+
+  /ai/generate/explanation:
+    post:
+      tags:
+        - AI内容生成
+      summary: 生成个性化解读
+      description: 根据用户等级生成个性化的文化智慧解读
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+      responses:
+        '200':
+          description: 生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+
+  /ai/analyze/sentiment:
+    post:
+      tags:
+        - AI分析
+      summary: 情感分析
+      description: 分析文本的情感倾向
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+      responses:
+        '200':
+          description: 分析成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+
+  # 文化智慧服务接口
+  /wisdom:
+    get:
+      tags:
+        - 文化智慧
+      summary: 获取智慧内容列表
+      description: 根据条件获取文化智慧内容列表，支持分页、筛选、排序
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: category
+          in: query
+          description: 分类ID
+          schema:
+            type: string
+        - name: school
+          in: query
+          description: 学派
+          schema:
+            type: string
+            enum: [儒, 道, 佛, 法]
+        - name: tags
+          in: query
+          description: 标签，多个用逗号分隔
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          description: 难度等级，多个用逗号分隔
+          schema:
+            type: string
+        - name: search
+          in: query
+          description: 搜索关键词
+          schema:
+            type: string
+        - name: sort_by
+          in: query
+          description: 排序字段
+          schema:
+            type: string
+            enum: [created_at, updated_at, view_count, like_count]
+            default: created_at
+        - name: sort_order
+          in: query
+          description: 排序方向
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WisdomListResponse'
+    
+    post:
+      tags:
+        - 文化智慧
+      summary: 创建智慧内容
+      description: 创建新的文化智慧内容（需要L3及以上等级）
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWisdomRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CulturalWisdom'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /wisdom/{id}:
+    get:
+      tags:
+        - 文化智慧
+      summary: 获取智慧内容详情
+      description: 根据ID获取文化智慧内容详情，自动增加浏览次数
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CulturalWisdom'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      tags:
+        - 文化智慧
+      summary: 更新智慧内容
+      description: 更新指定的文化智慧内容（仅作者或管理员）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWisdomRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CulturalWisdom'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags:
+        - 文化智慧
+      summary: 删除智慧内容
+      description: 删除指定的文化智慧内容（仅作者或管理员）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # 搜索接口
+  /search:
+    get:
+      tags:
+        - 搜索
+      summary: 全文搜索
+      description: 在文化智慧内容中进行全文搜索
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 搜索关键词
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: school
+          in: query
+          schema:
+            type: string
+            enum: [儒, 道, 佛, 法]
+        - name: tags
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 搜索成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /search/semantic:
+    post:
+      tags:
+        - 搜索
+      summary: 语义搜索
+      description: 基于语义理解的智能搜索
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SemanticSearchRequest'
+      responses:
+        '200':
+          description: 搜索成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /search/suggestions:
+    get:
+      tags:
+        - 搜索
+      summary: 获取搜索建议
+      description: 根据输入获取搜索建议
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+            maximum: 50
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionsResponse'
+
+  /search/popular:
+    get:
+      tags:
+        - 搜索
+      summary: 获取热门搜索
+      description: 获取热门搜索关键词
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopularSearchesResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # AI服务相关模型
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          $ref: '#/components/schemas/Message'
+        session_id:
+          type: string
+          description: 会话ID，为空时创建新会话
+        temperature:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 2
+          default: 0.7
+        max_tokens:
+          type: integer
+          minimum: 1
+          maximum: 4000
+          default: 2000
+
+    ChatResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+        message:
+          $ref: '#/components/schemas/Message'
+        usage:
+          $ref: '#/components/schemas/Usage'
+        timestamp:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum: [system, user, assistant]
+        content:
+          type: string
+
+    Usage:
+      type: object
+      properties:
+        prompt_tokens:
+          type: integer
+        completion_tokens:
+          type: integer
+        total_tokens:
+          type: integer
+
+    GenerateRequest:
+      type: object
+      required:
+        - type
+        - content
+      properties:
+        type:
+          type: string
+          enum: [summary, explanation, translation]
+        content:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+        temperature:
+          type: number
+          format: float
+          default: 0.7
+
+    GenerateResponse:
+      type: object
+      properties:
+        content:
+          type: string
+        type:
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+        timestamp:
+          type: string
+          format: date-time
+
+    AnalyzeRequest:
+      type: object
+      required:
+        - type
+        - content
+      properties:
+        type:
+          type: string
+          enum: [sentiment, keywords, similarity]
+        content:
+          type: string
+        target:
+          type: string
+          description: 用于相似度比较的目标文本
+
+    AnalyzeResponse:
+      type: object
+      properties:
+        type:
+          type: string
+        result:
+          type: object
+        usage:
+          $ref: '#/components/schemas/Usage'
+        timestamp:
+          type: string
+          format: date-time
+
+    # 文化智慧相关模型
+    CulturalWisdom:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        summary:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: array
+          items:
+            type: string
+        source:
+          $ref: '#/components/schemas/Source'
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 9
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        view_count:
+          type: integer
+          format: int64
+        like_count:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [draft, published, archived]
+        author_id:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        school:
+          type: string
+          enum: [儒, 道, 佛, 法]
+        parent_id:
+          type: string
+        level:
+          type: integer
+        description:
+          type: string
+
+    Source:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        dynasty:
+          type: string
+        publisher:
+          type: string
+        publish_date:
+          type: string
+        isbn:
+          type: string
+        url:
+          type: string
+        page:
+          type: string
+
+    CreateWisdomRequest:
+      type: object
+      required:
+        - title
+        - content
+        - category
+        - difficulty
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        summary:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: array
+          items:
+            type: string
+        source:
+          $ref: '#/components/schemas/Source'
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 9
+
+    UpdateWisdomRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        summary:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: array
+          items:
+            type: string
+        source:
+          $ref: '#/components/schemas/Source'
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 9
+        status:
+          type: string
+          enum: [draft, published, archived]
+
+    WisdomListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WisdomSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+          format: int64
+
+    WisdomSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: array
+          items:
+            type: string
+        difficulty:
+          type: integer
+        view_count:
+          type: integer
+          format: int64
+        like_count:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+
+    # 搜索相关模型
+    SemanticSearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+        category_id:
+          type: string
+        school:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        threshold:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          default: 0.7
+        page:
+          type: integer
+          default: 1
+        size:
+          type: integer
+          default: 20
+
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WisdomSummary'
+        query:
+          type: string
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+          format: int64
+        time_taken:
+          type: integer
+          format: int64
+          description: 搜索耗时（毫秒）
+
+    SuggestionsResponse:
+      type: object
+      properties:
+        suggestions:
+          type: array
+          items:
+            type: string
+        count:
+          type: integer
+
+    PopularSearchesResponse:
+      type: object
+      properties:
+        searches:
+          type: array
+          items:
+            $ref: '#/components/schemas/PopularSearch'
+        count:
+          type: integer
+
+    PopularSearch:
+      type: object
+      properties:
+        query:
+          type: string
+        count:
+          type: integer
+          format: int64
+        rank:
+          type: integer
+
+    # 通用响应模型
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        title:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ConversationListResponse:
+      type: object
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+
+    ConversationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        message_count:
+          type: integer
+        last_message:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: string
+
+    SuccessResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+
+  responses:
+    Success:
+      description: 操作成功
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SuccessResponse'
+
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "INVALID_REQUEST"
+            message: "请求参数无效"
+
+    Unauthorized:
+      description: 未授权访问
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "UNAUTHORIZED"
+            message: "用户未认证"
+
+    Forbidden:
+      description: 权限不足
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "INSUFFICIENT_PERMISSION"
+            message: "权限不足"
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "RESOURCE_NOT_FOUND"
+            message: "资源不存在"
+
+    InternalError:
+      description: 服务器内部错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "INTERNAL_ERROR"
+            message: "服务器内部错误"
+
+tags:
+  - name: AI对话
+    description: 智能对话相关接口
+  - name: AI内容生成
+    description: AI内容生成相关接口
+  - name: AI分析
+    description: AI分析相关接口
+  - name: 文化智慧
+    description: 文化智慧内容管理接口
+  - name: 搜索
+    description: 搜索相关接口

@@ -1,0 +1,14 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /admin
+Disallow: /api
+Disallow: /private
+
+# Allow access to main pages
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /about
+
+# Sitemap location
+Sitemap: https://taishang-sequence-zero.com/sitemap.xml

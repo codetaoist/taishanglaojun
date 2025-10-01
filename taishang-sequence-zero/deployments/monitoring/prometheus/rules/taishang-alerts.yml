@@ -1,0 +1,209 @@
+groups:
+  - name: taishang.sequence.zero.alerts
+    rules:
+      # 服务可用性告警
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "服务 {{ $labels.job }} 已下线"
+          description: "服务 {{ $labels.job }} 在实例 {{ $labels.instance }} 上已经下线超过1分钟。"
+
+      # HTTP错误率告警
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{code=~"5.."}[5m])) by (service)
+            /
+            sum(rate(http_requests_total[5m])) by (service)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "服务 {{ $labels.service }} 错误率过高"
+          description: "服务 {{ $labels.service }} 的5xx错误率在过去5分钟内超过5%，当前值: {{ $value | humanizePercentage }}。"
+
+      # 响应时间告警
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "服务 {{ $labels.service }} 响应时间过长"
+          description: "服务 {{ $labels.service }} 的95%响应时间超过1秒，当前值: {{ $value }}s。"
+
+      # CPU使用率告警
+      - alert: HighCPUUsage
+        expr: |
+          (
+            rate(process_cpu_seconds_total[5m]) * 100
+          ) > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "服务 {{ $labels.job }} CPU使用率过高"
+          description: "服务 {{ $labels.job }} 在实例 {{ $labels.instance }} 上的CPU使用率超过80%，当前值: {{ $value }}%。"
+
+      # 内存使用率告警
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            process_resident_memory_bytes / (1024 * 1024 * 1024)
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "服务 {{ $labels.job }} 内存使用过高"
+          description: "服务 {{ $labels.job }} 在实例 {{ $labels.instance }} 上的内存使用超过1GB，当前值: {{ $value }}GB。"
+
+      # 认证失败率告警
+      - alert: HighAuthFailureRate
+        expr: |
+          (
+            sum(rate(taishang_auth_attempts_total{status="failed"}[5m])) by (service)
+            /
+            sum(rate(taishang_auth_attempts_total[5m])) by (service)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "认证服务失败率过高"
+          description: "认证服务 {{ $labels.service }} 的失败率在过去5分钟内超过10%，当前值: {{ $value | humanizePercentage }}。可能存在安全威胁。"
+
+      # 权限检查异常告警
+      - alert: PermissionCheckAnomalies
+        expr: |
+          sum(rate(taishang_permission_checks_total{result="denied"}[5m])) by (service) > 50
+        for: 2m
+        labels:
+          severity: info
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "权限检查拒绝次数异常"
+          description: "权限服务 {{ $labels.service }} 在过去5分钟内拒绝权限检查超过50次/秒，当前值: {{ $value }}。"
+
+      # 数据库连接告警
+      - alert: DatabaseConnectionIssues
+        expr: |
+          sum(rate(database_connections_failed_total[5m])) by (service) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "数据库连接失败"
+          description: "服务 {{ $labels.service }} 出现数据库连接失败，失败率: {{ $value }}/秒。"
+
+      # Goroutine泄漏告警
+      - alert: GoroutineLeak
+        expr: |
+          go_goroutines > 1000
+        for: 15m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "可能存在Goroutine泄漏"
+          description: "服务 {{ $labels.job }} 在实例 {{ $labels.instance }} 上的Goroutine数量超过1000，当前值: {{ $value }}。"
+
+      # 磁盘空间告警
+      - alert: DiskSpaceLow
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}
+          ) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          instance: "{{ $labels.instance }}"
+        annotations:
+          summary: "磁盘空间不足"
+          description: "实例 {{ $labels.instance }} 的根分区可用空间少于10%，当前可用: {{ $value | humanizePercentage }}。"
+
+      # 意识融合核心异常告警
+      - alert: ConsciousnessFusionAnomalies
+        expr: |
+          sum(rate(taishang_consciousness_fusion_errors_total[5m])) by (service) > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "意识融合核心出现异常"
+          description: "意识融合服务 {{ $labels.service }} 出现错误，错误率: {{ $value }}/秒。这可能影响核心功能。"
+
+      # 文化智慧服务异常告警
+      - alert: CulturalWisdomServiceDown
+        expr: |
+          sum(rate(taishang_cultural_wisdom_requests_total[5m])) by (service) == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "文化智慧服务无响应"
+          description: "文化智慧服务 {{ $labels.service }} 在过去5分钟内没有处理任何请求，可能已停止工作。"
+
+      # 安全事件告警
+      - alert: SecurityIncident
+        expr: |
+          sum(rate(taishang_security_incidents_total[5m])) by (type, service) > 0
+        for: 0s
+        labels:
+          severity: critical
+          incident_type: "{{ $labels.type }}"
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "检测到安全事件"
+          description: "在服务 {{ $labels.service }} 中检测到 {{ $labels.type }} 类型的安全事件，发生率: {{ $value }}/秒。需要立即处理。"
+
+  - name: taishang.infrastructure.alerts
+    rules:
+      # Redis连接告警
+      - alert: RedisConnectionFailed
+        expr: |
+          redis_connected_clients == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis连接失败"
+          description: "Redis服务器没有活跃连接，可能已下线。"
+
+      # PostgreSQL连接告警
+      - alert: PostgreSQLConnectionIssues
+        expr: |
+          pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL连接失败"
+          description: "PostgreSQL数据库连接失败，服务可能不可用。"
+
+      # Neo4j连接告警
+      - alert: Neo4jConnectionFailed
+        expr: |
+          neo4j_database_system_check_point_events_total == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Neo4j连接异常"
+          description: "Neo4j图数据库可能存在连接问题或性能异常。"

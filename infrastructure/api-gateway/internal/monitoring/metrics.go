@@ -1,4 +1,4 @@
-package monitoring
+﻿package monitoring
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
 )
 
 // Metrics 监控指标接口

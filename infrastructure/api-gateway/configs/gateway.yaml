@@ -3,7 +3,7 @@
 # 服务器配置
 server:
   host: "0.0.0.0"
-  port: 8080
+  port: 8081
   debug: false
   read_timeout: 30s
   write_timeout: 30s
@@ -63,7 +63,7 @@ proxy:
 security:
   # 认证配置
   auth:
-    jwt_secret: "your-super-secret-jwt-key-change-in-production"
+    jwt_secret: "your-super-secret-jwt-key-change-in-production-laojun-2024"
     token_expiry: 24h
     refresh_expiry: 168h  # 7 days
     redis_addr: "localhost:6379"
@@ -76,6 +76,9 @@ security:
       - "/auth/login"
       - "/auth/register"
       - "/auth/refresh"
+      - "/ai/providers"
+      - "/ai/models"
+      - "/ai/health"
     optional_paths:
       - "/public/*"
       - "/docs/*"
@@ -107,6 +110,8 @@ security:
   cors:
     allow_origins:
       - "http://localhost:3000"
+      - "http://localhost:5173"
+      - "http://localhost:5174"
       - "http://localhost:8080"
       - "https://yourdomain.com"
     allow_methods:
@@ -137,7 +142,77 @@ security:
 services:
   # 认证服务
   - name: "auth-service"
-    url: "http://localhost:8081"
+    url: "http://localhost:8082"
+    load_balancer: "round_robin"
+    health_check: "/api/v1/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/auth/register"
+        method: "POST"
+        rewrite: "/api/v1/auth/register"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/auth/login"
+        method: "POST"
+        rewrite: "/api/v1/auth/login"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/auth/refresh"
+        method: "POST"
+        rewrite: "/api/v1/auth/refresh"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/auth/logout"
+        method: "POST"
+        rewrite: "/api/v1/user/logout"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/me"
+        method: "GET"
+        rewrite: "/api/v1/user/me"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/profile"
+        method: "GET"
+        rewrite: "/api/v1/user/profile"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/profile"
+        method: "PUT"
+        rewrite: "/api/v1/user/profile"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/change-password"
+        method: "POST"
+        rewrite: "/api/v1/user/change-password"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/validate-token"
+        method: "POST"
+        rewrite: "/api/v1/auth/validate-token"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/user/me"
+        method: "GET"
+        rewrite: "/api/v1/user/me"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+
+  # 文化智慧服务
+  - name: "cultural-wisdom-service"
+    url: "http://localhost:8080"
     load_balancer: "round_robin"
     health_check: "/health"
     timeout: 30
@@ -154,101 +229,108 @@ services:
       delay: 1s
       backoff_rate: 2.0
     routes:
-      - path: "/auth/*"
-        method: "ANY"
-        strip_prefix: true
-        middleware: ["rate_limit"]
-      - path: "/api/v1/auth/*"
-        method: "ANY"
-        rewrite: "/auth/*"
-        middleware: ["rate_limit"]
-
-  # 用户服务
-  - name: "user-service"
-    url: "http://localhost:8082"
-    load_balancer: "weighted_round_robin"
-    health_check: "/health"
-    timeout: 30
-    circuit_breaker:
-      enabled: true
-      request_threshold: 20
-      error_threshold: 0.5
-      timeout: 60s
-      max_concurrent: 100
-      sleep_window: 5s
-    routes:
-      - path: "/api/v1/users/*"
-        method: "ANY"
-        rewrite: "/users/*"
-        middleware: ["auth", "rate_limit"]
-      - path: "/api/v1/profile/*"
-        method: "ANY"
-        rewrite: "/profile/*"
-        middleware: ["auth", "rate_limit"]
-
-  # 管理服务
-  - name: "admin-service"
-    url: "http://localhost:8083"
-    load_balancer: "least_connections"
-    health_check: "/health"
-    timeout: 30
-    routes:
-      - path: "/api/v1/admin/*"
-        method: "ANY"
-        rewrite: "/admin/*"
-        middleware: ["auth", "admin", "rate_limit"]
-
-  # 文件服务
-  - name: "file-service"
-    url: "http://localhost:8084"
-    load_balancer: "ip_hash"
-    health_check: "/health"
-    timeout: 60  # 文件上传可能需要更长时间
-    routes:
-      - path: "/api/v1/files/*"
-        method: "ANY"
-        rewrite: "/files/*"
-        middleware: ["auth", "rate_limit"]
-      - path: "/uploads/*"
+      - path: "/cultural-wisdom/list"
         method: "GET"
-        strip_prefix: true
+        rewrite: "/api/v1/cultural-wisdom/list"
+        strip_prefix: false
         middleware: ["rate_limit"]
-
-  # 通知服务
-  - name: "notification-service"
-    url: "http://localhost:8085"
-    load_balancer: "random"
-    health_check: "/health"
-    timeout: 15
-    routes:
-      - path: "/api/v1/notifications/*"
-        method: "ANY"
-        rewrite: "/notifications/*"
+      - path: "/cultural-wisdom/categories"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/categories"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/categories/:category/wisdoms"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/categories/:category/wisdoms"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/search"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/search"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/search/semantic"
+        method: "POST"
+        rewrite: "/api/v1/cultural-wisdom/search/semantic"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/stats"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/stats"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/:id"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/:id"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom"
+        method: "POST"
+        rewrite: "/api/v1/cultural-wisdom/"
+        strip_prefix: false
         middleware: ["auth", "rate_limit"]
+      - path: "/cultural-wisdom/:id"
+        method: "PUT"
+        rewrite: "/api/v1/cultural-wisdom/:id"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/cultural-wisdom/:id"
+        method: "DELETE"
+        rewrite: "/api/v1/cultural-wisdom/:id"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/ai/providers"
+        method: "GET"
+        rewrite: "/api/v1/ai/providers"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/chat"
+        method: "POST"
+        rewrite: "/api/v1/ai/chat"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/sessions"
+        method: "GET"
+        rewrite: "/api/v1/ai/sessions"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/sessions/:id"
+        method: "GET"
+        rewrite: "/api/v1/ai/sessions/:id"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/models"
+        method: "GET"
+        rewrite: "/api/v1/ai/models"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/health"
+        method: "GET"
+        rewrite: "/api/v1/ai/health"
+        strip_prefix: false
+        middleware: ["rate_limit"]
 
 # 静态路由配置（用于服务发现不可用时的备用方案）
 static_services:
   auth-service:
-    - id: "auth-1"
+    - id: "auth-service-1"
       address: "localhost"
-      port: 8081
+      port: 8082
       weight: 1
       tags: ["primary"]
       meta:
         version: "1.0.0"
         region: "local"
-  
-  user-service:
-    - id: "user-1"
+        health_check_path: "/api/v1/health"
+  cultural-wisdom-service:
+    - id: "cultural-wisdom-1"
       address: "localhost"
-      port: 8082
+      port: 8080
       weight: 1
       tags: ["primary"]
-    - id: "user-2"
-      address: "localhost"
-      port: 8092
-      weight: 1
-      tags: ["secondary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
 
 # 健康检查配置
 health_check:

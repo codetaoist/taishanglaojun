@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"log"
@@ -16,14 +16,14 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// 初始化日�?
+	// 初始化日志�?
 	logger := logger.New(cfg.Log.Level, cfg.Log.Format)
 	defer logger.Sync()
 
-	// 创建服务�?
+	// 创建服务器�?
 	srv := server.New(cfg, logger)
 
-	// 启动服务�?
+	// 启动服务器�?
 	logger.Info("Starting server", 
 		"port", cfg.Server.Port,
 		"env", cfg.App.Environment,
@@ -34,3 +34,4 @@ func main() {
 		os.Exit(1)
 	}
 }
+

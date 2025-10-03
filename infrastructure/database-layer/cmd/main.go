@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"context"
@@ -15,14 +15,14 @@ import (
 )
 
 func main() {
-	// 初始化日�?
+	// 初始化日志记录器
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		log.Fatal("Failed to initialize logger:", err)
 	}
 	defer logger.Sync()
 
-	// 创建数据库配�?
+	// 创建数据库配置
 	config := &database.Config{
 		Postgres: database.PostgresConfig{
 			Host:         getEnv("DB_HOST", "localhost"),
@@ -49,14 +49,14 @@ func main() {
 		},
 	}
 
-	// 初始化数据库管理�?
+	// 初始化数据库管理器
 	manager, err := database.NewManager(config, logger)
 	if err != nil {
 		logger.Fatal("Failed to initialize database manager", zap.Error(err))
 	}
 	defer manager.Close()
 
-	// 测试数据库连�?
+	// 测试数据库连接
 	if err := testDatabaseConnections(manager, logger); err != nil {
 		logger.Fatal("Database connection test failed", zap.Error(err))
 	}
@@ -74,15 +74,15 @@ func main() {
 	logger.Info("Database layer demonstration completed successfully")
 }
 
-// testDatabaseConnections 测试数据库连�?
+// testDatabaseConnections 测试数据库连接
 func testDatabaseConnections(manager *database.Manager, logger *zap.Logger) error {
 	logger.Info("Testing database connections...")
 
-	// 检查健康状�?
+	// 检查健康状态
 	health := manager.GetHealthStatus()
-	
+
 	for dbType, status := range health {
-		logger.Info("Database health check", 
+		logger.Info("Database health check",
 			zap.String("type", dbType),
 			zap.Any("status", status))
 	}
@@ -129,7 +129,7 @@ func demonstrateRepository(manager *database.Manager, logger *zap.Logger) error 
 		return fmt.Errorf("PostgreSQL not available")
 	}
 
-	// 自动迁移测试�?
+	// 自动迁移测试表
 	if err := postgres.AutoMigrate(&TestUser{}); err != nil {
 		return fmt.Errorf("failed to migrate test table: %w", err)
 	}
@@ -151,7 +151,7 @@ func demonstrateRepository(manager *database.Manager, logger *zap.Logger) error 
 	}
 	logger.Info("User created", zap.Uint("id", user.ID))
 
-	// 根据ID获取用户
+	// 根据ID获取值用户
 	retrievedUser, err := repo.GetByID(ctx, user.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
@@ -191,14 +191,14 @@ func demonstrateRepository(manager *database.Manager, logger *zap.Logger) error 
 	if err != nil {
 		return fmt.Errorf("failed to paginate users: %w", err)
 	}
-	logger.Info("Users paginated", 
+	logger.Info("Users paginated",
 		zap.Int64("total", result.Total),
 		zap.Int("page_size", result.PageSize))
 
 	// 搜索用户
 	searchOpts := &models.QueryOptions{
 		Search: &models.SearchQuery{
-			Keyword: "�?,
+			Keyword: "test",
 			Fields:  []string{"name"},
 		},
 	}
@@ -225,27 +225,27 @@ func demonstrateCache(manager *database.Manager, logger *zap.Logger) error {
 	}
 	logger.Info("Cache set successfully")
 
-	// 获取缓存
+	// 获取值缓存
 	value, err := cache.Get(ctx, "test:key1")
 	if err != nil {
 		return fmt.Errorf("failed to get cache: %w", err)
 	}
 	logger.Info("Cache retrieved", zap.String("value", value))
 
-	// 检查缓存是否存�?
+	// 检查缓存是否存在
 	exists, err := cache.Exists(ctx, "test:key1")
 	if err != nil {
 		return fmt.Errorf("failed to check cache existence: %w", err)
 	}
 	logger.Info("Cache existence checked", zap.Int64("exists", exists))
 
-	// 删除缓存
+	// 删除键缓存
 	if err := cache.Del(ctx, "test:key1"); err != nil {
 		return fmt.Errorf("failed to delete cache: %w", err)
 	}
 	logger.Info("Cache deleted successfully")
 
-	// Redis特定操作（如果Redis可用�?
+	// Redis特定操作（如果Redis可用）
 	if redis := manager.GetRedisDB(); redis != nil {
 		// Hash操作
 		if err := redis.HSet(ctx, "test:hash", "field1", "value1"); err != nil {
@@ -275,7 +275,7 @@ func demonstrateCache(manager *database.Manager, logger *zap.Logger) error {
 		}
 		logger.Info("Set operation successful", zap.Strings("members", members))
 
-		// 计数器操�?
+		// 计数器操作（如果Redis可用）
 		count, err := redis.Incr(ctx, "test:counter")
 		if err != nil {
 			return fmt.Errorf("failed to increment counter: %w", err)
@@ -286,7 +286,7 @@ func demonstrateCache(manager *database.Manager, logger *zap.Logger) error {
 	return nil
 }
 
-// getEnv 获取环境变量，如果不存在则返回默认�?
+// getEnv 获取值环境变量，如果不存在则返回默认值
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value

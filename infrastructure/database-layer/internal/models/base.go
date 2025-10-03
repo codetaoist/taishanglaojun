@@ -1,4 +1,4 @@
-package models
+﻿package models
 
 import (
 	"time"
@@ -21,7 +21,7 @@ type Model interface {
 	BeforeUpdate(tx *gorm.DB) error
 }
 
-// SoftDeleteModel 软删除模型接�?
+// SoftDeleteModel 软删除键模型接口
 type SoftDeleteModel interface {
 	Model
 	IsDeleted() bool
@@ -29,7 +29,7 @@ type SoftDeleteModel interface {
 	Restore() error
 }
 
-// TimestampModel 时间戳模型接�?
+// TimestampModel 时间戳模型接口
 type TimestampModel interface {
 	GetCreatedAt() time.Time
 	GetUpdatedAt() time.Time
@@ -37,12 +37,12 @@ type TimestampModel interface {
 	SetUpdatedAt(time.Time)
 }
 
-// GetCreatedAt 获取创建时间
+// GetCreatedAt 获取值创建时间
 func (m *BaseModel) GetCreatedAt() time.Time {
 	return m.CreatedAt
 }
 
-// GetUpdatedAt 获取更新时间
+// GetUpdatedAt 获取值更新时间
 func (m *BaseModel) GetUpdatedAt() time.Time {
 	return m.UpdatedAt
 }
@@ -57,7 +57,7 @@ func (m *BaseModel) SetUpdatedAt(t time.Time) {
 	m.UpdatedAt = t
 }
 
-// IsDeleted 检查是否已软删�?
+// IsDeleted 检查是否已软删除键
 func (m *BaseModel) IsDeleted() bool {
 	return m.DeletedAt.Valid
 }
@@ -84,7 +84,7 @@ type PaginationQuery struct {
 	Sort     string `json:"sort" form:"sort" binding:"oneof=asc desc"`
 }
 
-// GetOffset 获取偏移�?
+// GetOffset 获取值偏移量
 func (p *PaginationQuery) GetOffset() int {
 	if p.Page <= 0 {
 		p.Page = 1
@@ -92,7 +92,7 @@ func (p *PaginationQuery) GetOffset() int {
 	return (p.Page - 1) * p.GetLimit()
 }
 
-// GetLimit 获取限制数量
+// GetLimit 获取值限制数量
 func (p *PaginationQuery) GetLimit() int {
 	if p.PageSize <= 0 {
 		p.PageSize = 10
@@ -103,7 +103,7 @@ func (p *PaginationQuery) GetLimit() int {
 	return p.PageSize
 }
 
-// GetOrderBy 获取排序字段
+// GetOrderBy 获取值排序字段
 func (p *PaginationQuery) GetOrderBy() string {
 	if p.OrderBy == "" {
 		return "id"
@@ -111,7 +111,7 @@ func (p *PaginationQuery) GetOrderBy() string {
 	return p.OrderBy
 }
 
-// GetSort 获取排序方向
+// GetSort 获取值排序方向
 func (p *PaginationQuery) GetSort() string {
 	if p.Sort == "" {
 		return "desc"
@@ -171,7 +171,7 @@ type QueryOptions struct {
 func (opts *QueryOptions) ApplyToQuery(db *gorm.DB) *gorm.DB {
 	query := db
 
-	// 应用预加�?
+	// 应用预加载
 	if len(opts.Preload) > 0 {
 		for _, preload := range opts.Preload {
 			query = query.Preload(preload)
@@ -200,7 +200,7 @@ func (opts *QueryOptions) ApplyToQuery(db *gorm.DB) *gorm.DB {
 		query = applySearch(query, opts.Search)
 	}
 
-	// 应用分页和排�?
+	// 应用分页和排序
 	if opts.Pagination != nil {
 		orderBy := opts.Pagination.GetOrderBy() + " " + opts.Pagination.GetSort()
 		query = query.Order(orderBy).
@@ -253,3 +253,4 @@ func applySearch(db *gorm.DB, search *SearchQuery) *gorm.DB {
 	}
 	return query
 }
+

@@ -10,12 +10,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	
-	"api-gateway/internal/config"
-	"api-gateway/internal/logger"
-	"api-gateway/internal/middleware"
-	"api-gateway/internal/monitoring"
-	"api-gateway/internal/proxy"
-	"api-gateway/internal/registry"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/middleware"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/monitoring"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/proxy"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/registry"
 )
 
 // Gateway API网关
@@ -92,9 +92,23 @@ func NewGateway(
 ) (*Gateway, error) {
 	
 	// 创建中间件
-	authMiddleware, err := middleware.NewAuthMiddleware(&middleware.AuthConfig{
-		JWTSecret: cfg.Security.JWTSecret,
-	}, log)
+	authConfig := &middleware.AuthConfig{
+		JWTSecret:     cfg.Security.Auth.JWTSecret,
+		TokenExpiry:   cfg.Security.Auth.TokenExpiry,
+		RefreshExpiry: cfg.Security.Auth.RefreshExpiry,
+		RedisAddr:     cfg.Security.Auth.RedisAddr,
+		RedisPassword: cfg.Security.Auth.RedisPassword,
+		RedisDB:       cfg.Security.Auth.RedisDB,
+		SkipPaths:     cfg.Security.Auth.SkipPaths,
+		OptionalPaths: cfg.Security.Auth.OptionalPaths,
+	}
+	
+	// 如果嵌套配置为空，使用向后兼容的配置
+	if authConfig.JWTSecret == "" {
+		authConfig.JWTSecret = cfg.Security.JWTSecret
+	}
+	
+	authMiddleware, err := middleware.NewAuthMiddleware(authConfig, log)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create auth middleware: %w", err)
 	}
@@ -208,12 +222,19 @@ func (g *Gateway) addRoute(route *RouteConfig) error {
 	g.routesMu.Lock()
 	defer g.routesMu.Unlock()
 	
+	// 生成路由键
 	routeKey := fmt.Sprintf("%s:%s", route.Method, route.Path)
-	g.routes[routeKey] = route
 	
-	// 注册到Gin路由器
+	// 检查路由是否已存在
+	if _, exists := g.routes[routeKey]; exists {
+		g.logger.Warnf("Route already exists, skipping: %s %s", route.Method, route.Path)
+		return nil
+	}
+	
+	// 创建处理器
 	handler := g.createRouteHandler(route)
 	
+	// 注册路由
 	switch strings.ToUpper(route.Method) {
 	case "GET":
 		g.router.GET(route.Path, handler...)
@@ -235,6 +256,9 @@ func (g *Gateway) addRoute(route *RouteConfig) error {
 		return fmt.Errorf("unsupported HTTP method: %s", route.Method)
 	}
 	
+	// 保存路由配置
+	g.routes[routeKey] = route
+	
 	g.logger.Infof("Added route: %s %s -> %s", route.Method, route.Path, route.Service)
 	return nil
 }
@@ -243,10 +267,14 @@ func (g *Gateway) addRoute(route *RouteConfig) error {
 func (g *Gateway) createRouteHandler(route *RouteConfig) []gin.HandlerFunc {
 	var handlers []gin.HandlerFunc
 	
+	// 调试日志：确认中间件配置
+	g.logger.Infof("Creating route handler for %s %s with middleware: %v", route.Method, route.Path, route.Middleware)
+	
 	// 添加中间件
 	for _, middlewareName := range route.Middleware {
 		switch middlewareName {
 		case "auth":
+			g.logger.Infof("Adding auth middleware for %s %s", route.Method, route.Path)
 			handlers = append(handlers, g.authMiddleware.Handler())
 		case "rate_limit":
 			handlers = append(handlers, g.rateLimitMiddleware.Handler())
@@ -282,7 +310,31 @@ func (g *Gateway) proxyHandler(route *RouteConfig) gin.HandlerFunc {
 		// 路径重写
 		originalPath := c.Request.URL.Path
 		if route.Rewrite != "" {
-			c.Request.URL.Path = route.Rewrite
+			// 处理路径参数重写
+			rewrittenPath := route.Rewrite
+			
+			// 如果路由路径包含参数（如 :id），需要将参数值传递到重写路径
+			if strings.Contains(route.Path, ":") && strings.Contains(route.Rewrite, ":") {
+				// 提取路径参数
+				pathParts := strings.Split(strings.Trim(route.Path, "/"), "/")
+				originalParts := strings.Split(strings.Trim(originalPath, "/"), "/")
+				rewriteParts := strings.Split(strings.Trim(route.Rewrite, "/"), "/")
+				
+				// 替换重写路径中的参数
+				for i, part := range pathParts {
+					if strings.HasPrefix(part, ":") && i < len(originalParts) && i < len(rewriteParts) {
+						paramName := part[1:] // 移除 : 前缀
+						for j, rewritePart := range rewriteParts {
+							if rewritePart == ":"+paramName {
+								rewriteParts[j] = originalParts[i]
+							}
+						}
+					}
+				}
+				rewrittenPath = "/" + strings.Join(rewriteParts, "/")
+			}
+			
+			c.Request.URL.Path = rewrittenPath
 		} else if route.StripPrefix {
 			// 移除路由前缀
 			if strings.HasPrefix(originalPath, route.Path) {

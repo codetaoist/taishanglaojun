@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>zh_CN</string>
+    
+    <key>CFBundleDisplayName</key>
+    <string>太上老君AI平台</string>
+    
+    <key>CFBundleExecutable</key>
+    <string>TaishangLaojun</string>
+    
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    
+    <key>CFBundleIdentifier</key>
+    <string>com.taishanglaojun.desktop</string>
+    
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    
+    <key>CFBundleName</key>
+    <string>TaishangLaojun</string>
+    
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    
+    <key>LSMinimumSystemVersion</key>
+    <string>11.0</string>
+    
+    <key>NSMainStoryboardFile</key>
+    <string>Main</string>
+    
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+    
+    <!-- 权限请求 -->
+    <key>NSCameraUsageDescription</key>
+    <string>应用需要访问摄像头以支持视频通话功能</string>
+    
+    <key>NSMicrophoneUsageDescription</key>
+    <string>应用需要访问麦克风以支持语音输入功能</string>
+    
+    <key>NSLocationUsageDescription</key>
+    <string>应用需要访问位置信息以提供基于位置的服务</string>
+    
+    <key>NSContactsUsageDescription</key>
+    <string>应用需要访问通讯录以支持好友添加功能</string>
+    
+    <key>NSCalendarsUsageDescription</key>
+    <string>应用需要访问日历以支持项目管理功能</string>
+    
+    <key>NSRemindersUsageDescription</key>
+    <string>应用需要访问提醒事项以支持任务管理功能</string>
+    
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>应用需要访问文档文件夹以支持文件管理功能</string>
+    
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>应用需要访问下载文件夹以支持文件传输功能</string>
+    
+    <key>NSNetworkVolumesUsageDescription</key>
+    <string>应用需要访问网络卷以支持文件同步功能</string>
+    
+    <key>NSRemovableVolumesUsageDescription</key>
+    <string>应用需要访问可移动卷以支持文件备份功能</string>
+    
+    <!-- 网络配置 -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>taishanglaojun.com</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <false/>
+                <key>NSExceptionMinimumTLSVersion</key>
+                <string>TLSv1.2</string>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+            </dict>
+            <key>api.taishanglaojun.com</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <false/>
+                <key>NSExceptionMinimumTLSVersion</key>
+                <string>TLSv1.2</string>
+            </dict>
+        </dict>
+    </dict>
+    
+    <!-- 支持的文档类型 -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>md</string>
+                <string>markdown</string>
+            </array>
+            <key>CFBundleTypeIconFile</key>
+            <string>MarkdownIcon</string>
+            <key>CFBundleTypeName</key>
+            <string>Markdown Document</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>net.daringfireball.markdown</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>tlj</string>
+            </array>
+            <key>CFBundleTypeIconFile</key>
+            <string>ProjectIcon</string>
+            <key>CFBundleTypeName</key>
+            <string>TaishangLaojun Project</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+        </dict>
+    </array>
+    
+    <!-- URL Schemes -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.taishanglaojun.desktop</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>taishanglaojun</string>
+            </array>
+        </dict>
+    </array>
+    
+    <!-- 应用分类 -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
+    
+    <!-- 后台模式 -->
+    <key>LSUIElement</key>
+    <false/>
+    
+    <key>LSBackgroundOnly</key>
+    <false/>
+    
+    <!-- 菜单栏应用支持 -->
+    <key>LSUIElement</key>
+    <false/>
+    
+    <!-- 支持暗黑模式 -->
+    <key>NSRequiresAquaSystemAppearance</key>
+    <false/>
+    
+    <!-- 硬件加速 -->
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+    
+    <!-- 多点触控支持 -->
+    <key>NSSupportsMultitouch</key>
+    <true/>
+    
+    <!-- 全屏支持 -->
+    <key>NSSupportsFullScreen</key>
+    <true/>
+    
+    <!-- 窗口恢复 -->
+    <key>NSSupportsWindowRestoration</key>
+    <true/>
+    
+    <!-- 自动保存 -->
+    <key>NSSupportsAutomaticDocumentSaving</key>
+    <true/>
+    
+    <!-- 版本浏览 -->
+    <key>NSSupportsDocumentVersioning</key>
+    <true/>
+    
+    <!-- 沙盒配置 -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    
+    <key>com.apple.security.network.client</key>
+    <true/>
+    
+    <key>com.apple.security.network.server</key>
+    <true/>
+    
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    
+    <key>com.apple.security.files.downloads.read-write</key>
+    <true/>
+    
+    <key>com.apple.security.files.bookmarks.app-scope</key>
+    <true/>
+    
+    <key>com.apple.security.device.camera</key>
+    <true/>
+    
+    <key>com.apple.security.device.microphone</key>
+    <true/>
+    
+    <key>com.apple.security.personal-information.location</key>
+    <true/>
+    
+    <key>com.apple.security.personal-information.addressbook</key>
+    <true/>
+    
+    <key>com.apple.security.personal-information.calendars</key>
+    <true/>
+    
+    <!-- 通知支持 -->
+    <key>NSUserNotificationAlertStyle</key>
+    <string>alert</string>
+    
+    <!-- 应用图标 -->
+    <key>CFBundleIcons</key>
+    <dict>
+        <key>CFBundlePrimaryIcon</key>
+        <dict>
+            <key>CFBundleIconFiles</key>
+            <array>
+                <string>AppIcon</string>
+            </array>
+        </dict>
+    </dict>
+    
+    <!-- 启动画面 -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    
+    <!-- 状态栏样式 -->
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleDefault</string>
+    
+    <!-- 支持的界面方向 -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+</dict>
+</plist>

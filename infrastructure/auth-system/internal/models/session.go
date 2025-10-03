@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// SessionStatus 会话状态枚�?
+// SessionStatus 会话状态枚举举
 type SessionStatus string
 
 const (
@@ -49,12 +49,12 @@ func (s *Session) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// IsExpired 检查会话是否过�?
+// IsExpired 检查会话是否过期
 func (s *Session) IsExpired() bool {
-	return time.Now().After(s.ExpiresAt)
+	return time.Now().UTC().After(s.ExpiresAt)
 }
 
-// IsActive 检查会话是否激�?
+// IsActive 检查会话是否激活
 func (s *Session) IsActive() bool {
 	return s.Status == SessionStatusActive && !s.IsExpired()
 }
@@ -64,14 +64,14 @@ func (s *Session) Revoke() {
 	s.Status = SessionStatusRevoked
 }
 
-// Expire 使会话过�?
+// Expire 使会话过期
 func (s *Session) Expire() {
 	s.Status = SessionStatusExpired
 }
 
 // Refresh 刷新会话过期时间
 func (s *Session) Refresh(duration time.Duration) {
-	s.ExpiresAt = time.Now().Add(duration)
+	s.ExpiresAt = time.Now().UTC().Add(duration)
 	s.Status = SessionStatusActive
 }
 
@@ -80,10 +80,10 @@ type CreateSessionRequest struct {
 	UserID    uuid.UUID `json:"user_id" validate:"required"`
 	UserAgent string    `json:"user_agent"`
 	IPAddress string    `json:"ip_address"`
-	ExpiresIn int64     `json:"expires_in" validate:"min=1"` // 过期时间（秒�?
+	ExpiresIn int64     `json:"expires_in" validate:"min=1"` // 过期时间（秒）
 }
 
-// SessionQuery 会话查询参数
+// SessionQuery 会话查询参数量
 type SessionQuery struct {
 	UserID    uuid.UUID     `form:"user_id"`
 	Status    SessionStatus `form:"status"`

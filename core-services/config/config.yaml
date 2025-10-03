@@ -70,10 +70,12 @@ redis:
     dial_timeout: "5s"
     read_timeout: "3s"
     write_timeout: "3s"
+    # 禁用Redis以便测试
+    enabled: false
   
   # 缓存Redis（可选）
   cache:
-    enabled: true
+    enabled: false
     host: "${REDIS_CACHE_HOST:localhost}"
     port: "${REDIS_CACHE_PORT:6379}"
     password: "${REDIS_CACHE_PASSWORD:}"

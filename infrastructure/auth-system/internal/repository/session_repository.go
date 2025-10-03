@@ -33,7 +33,7 @@ type SessionRepository interface {
 	GetActiveSessions(ctx context.Context, userID uuid.UUID) ([]*models.Session, error)
 	List(ctx context.Context, query *models.SessionQuery) ([]*models.Session, int64, error)
 	
-	// 会话管理
+	// 会话管理器
 	RevokeSession(ctx context.Context, sessionID uuid.UUID) error
 	RevokeAllUserSessions(ctx context.Context, userID uuid.UUID) error
 	RevokeExpiredSessions(ctx context.Context) (int64, error)
@@ -156,7 +156,7 @@ func (r *sessionRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// GetByUserID 获取用户的所有会�?
+// GetByUserID 获取用户的所有效会话�?
 func (r *sessionRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Session, error) {
 	var sessions []*models.Session
 	if err := r.db.WithContext(ctx).
@@ -173,11 +173,11 @@ func (r *sessionRepository) GetByUserID(ctx context.Context, userID uuid.UUID) (
 	return sessions, nil
 }
 
-// GetActiveSessions 获取用户的活跃会�?
+// GetActiveSessions 获取用户的活跃会话�?
 func (r *sessionRepository) GetActiveSessions(ctx context.Context, userID uuid.UUID) ([]*models.Session, error) {
 	var sessions []*models.Session
 	if err := r.db.WithContext(ctx).
-		Where("user_id = ? AND status = ? AND expires_at > ?", userID, models.SessionStatusActive, time.Now()).
+		Where("user_id = ? AND status = ? AND expires_at > ?", userID, models.SessionStatusActive, time.Now().UTC()).
 		Order("created_at DESC").
 		Find(&sessions).Error; err != nil {
 		r.logger.Error("Failed to get active sessions", 
@@ -194,7 +194,7 @@ func (r *sessionRepository) GetActiveSessions(ctx context.Context, userID uuid.U
 func (r *sessionRepository) List(ctx context.Context, query *models.SessionQuery) ([]*models.Session, int64, error) {
 	db := r.db.WithContext(ctx).Model(&models.Session{}).Preload("User")
 	
-	// 应用过滤条件
+	// 应用户过期滤条件
 	if query.UserID != uuid.Nil {
 		db = db.Where("user_id = ?", query.UserID)
 	}
@@ -205,14 +205,14 @@ func (r *sessionRepository) List(ctx context.Context, query *models.SessionQuery
 		db = db.Where("ip_address = ?", query.IPAddress)
 	}
 	
-	// 获取总数
+	// 获取总数量
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		r.logger.Error("Failed to count sessions", zap.Error(err))
 		return nil, 0, err
 	}
 	
-	// 应用排序
+	// 应用户排序
 	orderBy := "created_at"
 	if query.OrderBy != "" {
 		orderBy = query.OrderBy
@@ -223,7 +223,7 @@ func (r *sessionRepository) List(ctx context.Context, query *models.SessionQuery
 	}
 	db = db.Order(fmt.Sprintf("%s %s", orderBy, order))
 	
-	// 应用分页
+	// 应用户分页
 	if query.Page > 0 && query.PageSize > 0 {
 		offset := (query.Page - 1) * query.PageSize
 		db = db.Offset(offset).Limit(query.PageSize)
@@ -263,7 +263,7 @@ func (r *sessionRepository) RevokeSession(ctx context.Context, sessionID uuid.UU
 	return nil
 }
 
-// RevokeAllUserSessions 撤销用户的所有会�?
+// RevokeAllUserSessions 撤销用户的所有效会话�?
 func (r *sessionRepository) RevokeAllUserSessions(ctx context.Context, userID uuid.UUID) error {
 	result := r.db.WithContext(ctx).Model(&models.Session{}).
 		Where("user_id = ? AND status = ?", userID, models.SessionStatusActive).
@@ -288,7 +288,7 @@ func (r *sessionRepository) RevokeAllUserSessions(ctx context.Context, userID uu
 // RevokeExpiredSessions 撤销过期会话
 func (r *sessionRepository) RevokeExpiredSessions(ctx context.Context) (int64, error) {
 	result := r.db.WithContext(ctx).Model(&models.Session{}).
-		Where("status = ? AND expires_at <= ?", models.SessionStatusActive, time.Now()).
+		Where("status = ? AND expires_at <= ?", models.SessionStatusActive, time.Now().UTC()).
 		Update("status", models.SessionStatusExpired)
 	
 	if result.Error != nil {
@@ -305,7 +305,7 @@ func (r *sessionRepository) RevokeExpiredSessions(ctx context.Context) (int64, e
 
 // RefreshSession 刷新会话
 func (r *sessionRepository) RefreshSession(ctx context.Context, sessionID uuid.UUID, duration time.Duration) error {
-	newExpiresAt := time.Now().Add(duration)
+	newExpiresAt := time.Now().UTC().Add(duration)
 	
 	result := r.db.WithContext(ctx).Model(&models.Session{}).
 		Where("id = ? AND status = ?", sessionID, models.SessionStatusActive).
@@ -341,7 +341,7 @@ func (r *sessionRepository) ValidateSession(ctx context.Context, token string) (
 		return nil, err
 	}
 	
-	// 检查会话状�?
+	// 检查会话状态枚举�?
 	if session.Status != models.SessionStatusActive {
 		if session.Status == models.SessionStatusExpired {
 			return nil, ErrSessionExpired
@@ -349,9 +349,9 @@ func (r *sessionRepository) ValidateSession(ctx context.Context, token string) (
 		return nil, ErrSessionRevoked
 	}
 	
-	// 检查是否过�?
+	// 检查是否过期�?
 	if session.IsExpired() {
-		// 自动标记为过�?
+		// 自动标记录器为过期�?
 		session.Status = models.SessionStatusExpired
 		r.Update(ctx, session)
 		return nil, ErrSessionExpired
@@ -360,11 +360,11 @@ func (r *sessionRepository) ValidateSession(ctx context.Context, token string) (
 	return session, nil
 }
 
-// IsSessionActive 检查会话是否活�?
+// IsSessionActive 检查会话是否活�?
 func (r *sessionRepository) IsSessionActive(ctx context.Context, sessionID uuid.UUID) (bool, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).
-		Where("id = ? AND status = ? AND expires_at > ?", sessionID, models.SessionStatusActive, time.Now()).
+		Where("id = ? AND status = ? AND expires_at > ?", sessionID, models.SessionStatusActive, time.Now().UTC()).
 		Count(&count).Error; err != nil {
 		r.logger.Error("Failed to check session active status", 
 			zap.String("session_id", sessionID.String()),
@@ -379,7 +379,7 @@ func (r *sessionRepository) IsSessionActive(ctx context.Context, sessionID uuid.
 // CleanupExpiredSessions 清理过期会话
 func (r *sessionRepository) CleanupExpiredSessions(ctx context.Context) (int64, error) {
 	result := r.db.WithContext(ctx).
-		Where("expires_at <= ?", time.Now()).
+		Where("expires_at <= ?", time.Now().UTC()).
 		Delete(&models.Session{})
 	
 	if result.Error != nil {
@@ -394,9 +394,9 @@ func (r *sessionRepository) CleanupExpiredSessions(ctx context.Context) (int64, 
 	return result.RowsAffected, nil
 }
 
-// CleanupRevokedSessions 清理撤销的会�?
+// CleanupRevokedSessions 清理撤销的会话�?
 func (r *sessionRepository) CleanupRevokedSessions(ctx context.Context, olderThan time.Duration) (int64, error) {
-	cutoffTime := time.Now().Add(-olderThan)
+	cutoffTime := time.Now().UTC().Add(-olderThan)
 	
 	result := r.db.WithContext(ctx).
 		Where("status = ? AND updated_at <= ?", models.SessionStatusRevoked, cutoffTime).
@@ -415,7 +415,7 @@ func (r *sessionRepository) CleanupRevokedSessions(ctx context.Context, olderTha
 	return result.RowsAffected, nil
 }
 
-// Count 获取会话总数
+// Count 获取会话总数量
 func (r *sessionRepository) Count(ctx context.Context) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).Count(&count).Error; err != nil {
@@ -426,7 +426,7 @@ func (r *sessionRepository) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
-// CountByUser 获取用户会话�?
+// CountByUser 获取用户会话�?
 func (r *sessionRepository) CountByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).
@@ -442,11 +442,11 @@ func (r *sessionRepository) CountByUser(ctx context.Context, userID uuid.UUID) (
 	return count, nil
 }
 
-// CountActiveByUser 获取用户活跃会话�?
+// CountActiveByUser 获取用户活跃会话�?
 func (r *sessionRepository) CountActiveByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).
-		Where("user_id = ? AND status = ? AND expires_at > ?", userID, models.SessionStatusActive, time.Now()).
+		Where("user_id = ? AND status = ? AND expires_at > ?", userID, models.SessionStatusActive, time.Now().UTC()).
 		Count(&count).Error; err != nil {
 		r.logger.Error("Failed to count active sessions by user", 
 			zap.String("user_id", userID.String()),

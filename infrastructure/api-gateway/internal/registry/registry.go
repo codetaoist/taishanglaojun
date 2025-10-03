@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"api-gateway/internal/config"
-	"api-gateway/internal/logger"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
 )
 
 // ServiceInstance 服务实例
@@ -316,6 +316,42 @@ func (r *staticRegistry) LoadFromConfig(services []config.ServiceConfig) error {
 	}
 	
 	return nil
+}
+
+// LoadFromStaticConfig 从静态服务配置加载服务实例
+func (r *staticRegistry) LoadFromStaticConfig(staticServices map[string][]config.StaticServiceInstance) error {
+	ctx := context.Background()
+	
+	for serviceName, instances := range staticServices {
+		for _, staticInstance := range instances {
+			instance := &ServiceInstance{
+				ID:      staticInstance.ID,
+				Name:    serviceName,
+				Address: staticInstance.Address,
+				Port:    staticInstance.Port,
+				Weight:  staticInstance.Weight,
+				Tags:    staticInstance.Tags,
+				Meta:    staticInstance.Meta,
+			}
+			
+			if err := r.Register(ctx, instance); err != nil {
+				return fmt.Errorf("failed to register static service %s instance %s: %w", serviceName, staticInstance.ID, err)
+			}
+		}
+	}
+	
+	return nil
+}
+
+// LoadStaticServices 辅助函数，用于加载静态服务配置
+func LoadStaticServices(registry Registry, staticServices map[string][]config.StaticServiceInstance) error {
+	// 尝试类型断言为staticRegistry
+	if staticReg, ok := registry.(*staticRegistry); ok {
+		return staticReg.LoadFromStaticConfig(staticServices)
+	}
+	
+	// 如果不是staticRegistry类型，返回错误
+	return fmt.Errorf("registry does not support static service loading")
 }
 
 // extractAddress 从URL提取地址

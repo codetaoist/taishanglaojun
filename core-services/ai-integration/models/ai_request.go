@@ -16,7 +16,8 @@ type AIRequest struct {
 	Metadata    RequestMetadata   `json:"metadata" bson:"metadata"`
 }
 
-// RequestMetadata 请求元数�?type RequestMetadata struct {
+// RequestMetadata 请求元数据
+type RequestMetadata struct {
 	SessionID   string            `json:"session_id" bson:"session_id"`
 	Source      string            `json:"source" bson:"source"`
 	Priority    int               `json:"priority" bson:"priority"` // 1-10
@@ -36,8 +37,13 @@ type ChatRequestData struct {
 
 // ChatMessage 对话消息
 type ChatMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+	ID        uint      `json:"id" gorm:"primaryKey"`
+	SessionID string    `json:"session_id" gorm:"index"`
+	Role      string    `json:"role"`
+	Content   string    `json:"content"`
+	TokenUsed int       `json:"token_used"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // GenerateRequestData 内容生成请求数据
@@ -52,14 +58,15 @@ type GenerateRequestData struct {
 
 // AnalyzeRequestData 分析请求数据
 type AnalyzeRequestData struct {
-	Type       string   `json:"type"` // sentiment, keywords, similarity, classification
-	Content    string   `json:"content"`
-	Target     string   `json:"target"`     // 用于相似度比�?	Categories []string `json:"categories"` // 用于分类
-	Language   string   `json:"language"`
+	Type     string `json:"type"` // sentiment, keyword, classification
+	Content  string `json:"content"`
+	Language string `json:"language"`
+	Options  map[string]interface{} `json:"options"`
 }
 
-// EmbedRequestData 向量化请求数�?type EmbedRequestData struct {
-	Text     string `json:"text"`
-	Model    string `json:"model"`
-	Language string `json:"language"`
+// EmbedRequestData 向量化请求数据
+type EmbedRequestData struct {
+	Texts []string `json:"texts"`
+	Model string   `json:"model"`
 }
+

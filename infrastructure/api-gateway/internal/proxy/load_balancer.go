@@ -1,4 +1,4 @@
-package proxy
+﻿package proxy
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"api-gateway/internal/registry"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/registry"
 )
 
 // LoadBalancer 负载均衡器接口

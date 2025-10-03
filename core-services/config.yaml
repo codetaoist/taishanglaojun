@@ -13,17 +13,16 @@ server:
 
 # 主数据库配置 (支持 postgres, mysql, sqlserver)
 database:
-  driver: "postgres"  # postgres, mysql, sqlserver, mssql
-  host: "localhost"
-  port: 5432
-  database: "taishang_core"
-  username: "postgres"
-  password: "password"
+  type: "mysql"
+  host: "1.13.249.131"
+  port: 3306
+  database: "laojun"
+  username: "laojun"
+  password: "xKyyLNMM64zdfNwE"
   max_open_conns: 100
   max_idle_conns: 10
-  conn_max_lifetime: 3600s
+  max_lifetime: 3600
   ssl_mode: "disable"
-  connect_timeout: 10s
 
 # MySQL 数据库配置示例
 database_mysql:
@@ -69,20 +68,25 @@ redis:
 ai:
   providers:
     openai:
-      api_key: ""
-      base_url: "https://api.openai.com/v1"
-      model: "gpt-3.5-turbo"
-      timeout: 30s
+      enabled: false
+      config:
+        api_key: "sk-proj-test-key-for-development"
+        base_url: "https://api.openai.com/v1"
+        timeout: 30
     azure:
-      api_key: ""
-      endpoint: ""
-      deployment: ""
-      api_version: "2023-05-15"
-      timeout: 30s
+      enabled: false
+      config:
+        api_key: ""
+        endpoint: ""
+        deployment: ""
+        api_version: "2023-05-15"
+        timeout: 30
     baidu:
-      api_key: ""
-      secret_key: ""
-      timeout: 30s
+      enabled: false
+      config:
+        api_key: ""
+        secret_key: ""
+        timeout: 30
 
 # 日志配置
 logging:

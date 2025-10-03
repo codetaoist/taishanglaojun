@@ -1,0 +1,10 @@
+{
+  "name": "taishanglaojun-tracker-harmony",
+  "version": "1.0.0",
+  "description": "太上老君轨迹跟踪应用 - HarmonyOS版本",
+  "repository": {},
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@ohos/hvigor": "4.0.5"
+  }
+}

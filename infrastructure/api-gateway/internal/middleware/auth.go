@@ -10,8 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/go-redis/redis/v8"
+	"github.com/google/uuid"
 	
-	"api-gateway/internal/logger"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
 )
 
 // AuthConfig 认证配置
@@ -41,10 +42,13 @@ type AuthMiddleware struct {
 
 // UserClaims JWT用户声明
 type UserClaims struct {
-	UserID   string   `json:"user_id"`
-	Username string   `json:"username"`
-	Email    string   `json:"email"`
-	Roles    []string `json:"roles"`
+	UserID      uuid.UUID `json:"user_id"`
+	Username    string    `json:"username"`
+	Email       string    `json:"email"`
+	Role        string    `json:"role"`
+	SessionID   uuid.UUID `json:"session_id"`
+	TokenType   string    `json:"token_type"`
+	Permissions []string  `json:"permissions,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -76,10 +80,14 @@ func NewAuthMiddleware(config *AuthConfig, log logger.Logger) (*AuthMiddleware, 
 	}, nil
 }
 
-// Handler 返回Gin中间件处理函数
+// Handler 中间件处理器
 func (a *AuthMiddleware) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
+		method := c.Request.Method
+		
+		// 调试日志：确认中间件被调用
+		a.logger.Infof("AUTH MIDDLEWARE CALLED: %s %s", method, path)
 		
 		// 检查是否跳过认证
 		if a.shouldSkipAuth(path) {
@@ -189,6 +197,10 @@ func (a *AuthMiddleware) extractToken(c *gin.Context) (string, error) {
 
 // validateToken 验证JWT token
 func (a *AuthMiddleware) validateToken(tokenString string) (*UserClaims, error) {
+	// 添加调试日志
+	a.logger.Infof("Validating token with secret length: %d", len(a.config.JWTSecret))
+	a.logger.Infof("JWT Secret (first 10 chars): %s...", a.config.JWTSecret[:10])
+	
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// 验证签名方法
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -198,6 +210,7 @@ func (a *AuthMiddleware) validateToken(tokenString string) (*UserClaims, error) 
 	})
 	
 	if err != nil {
+		a.logger.Errorf("JWT validation failed: %v", err)
 		return nil, err
 	}
 	
@@ -206,6 +219,7 @@ func (a *AuthMiddleware) validateToken(tokenString string) (*UserClaims, error) 
 		if claims.ExpiresAt != nil && claims.ExpiresAt.Time.Before(time.Now()) {
 			return nil, fmt.Errorf("token has expired")
 		}
+		a.logger.Infof("JWT validation successful for user: %s", claims.Username)
 		return claims, nil
 	}
 	
@@ -232,8 +246,22 @@ func (a *AuthMiddleware) setUserContext(c *gin.Context, claims *UserClaims) {
 	c.Set("user_id", claims.UserID)
 	c.Set("username", claims.Username)
 	c.Set("email", claims.Email)
-	c.Set("roles", claims.Roles)
+	c.Set("role", claims.Role)
+	c.Set("session_id", claims.SessionID)
+	c.Set("permissions", claims.Permissions)
 	c.Set("user_claims", claims)
+	
+	// 将用户信息添加到请求头中，传递给后端服务
+	c.Request.Header.Set("X-User-ID", claims.UserID.String())
+	c.Request.Header.Set("X-Username", claims.Username)
+	c.Request.Header.Set("X-User-Email", claims.Email)
+	c.Request.Header.Set("X-User-Role", claims.Role)
+	c.Request.Header.Set("X-Session-ID", claims.SessionID.String())
+	c.Request.Header.Set("X-Auth-Validated", "true")
+	
+	// 添加调试日志
+	a.logger.Infof("Setting user headers for backend: user_id=%s, username=%s, role=%s", 
+		claims.UserID.String(), claims.Username, claims.Role)
 }
 
 // respondWithError 返回错误响应
@@ -274,38 +302,33 @@ func GetUserFromContext(c *gin.Context) (*UserClaims, bool) {
 }
 
 // GetUserID 从上下文获取用户ID
-func GetUserID(c *gin.Context) (string, bool) {
+func GetUserID(c *gin.Context) (uuid.UUID, bool) {
 	if userID, exists := c.Get("user_id"); exists {
-		if id, ok := userID.(string); ok {
+		if id, ok := userID.(uuid.UUID); ok {
 			return id, true
+		}
+	}
+	return uuid.Nil, false
+}
+
+// GetUserRoles 从上下文获取用户角色
+func GetUserRoles(c *gin.Context) (string, bool) {
+	if role, exists := c.Get("role"); exists {
+		if userRole, ok := role.(string); ok {
+			return userRole, true
 		}
 	}
 	return "", false
 }
 
-// GetUserRoles 从上下文获取用户角色
-func GetUserRoles(c *gin.Context) ([]string, bool) {
-	if roles, exists := c.Get("roles"); exists {
-		if userRoles, ok := roles.([]string); ok {
-			return userRoles, true
-		}
-	}
-	return nil, false
-}
-
 // HasRole 检查用户是否具有指定角色
 func HasRole(c *gin.Context, role string) bool {
-	roles, exists := GetUserRoles(c)
+	userRole, exists := GetUserRoles(c)
 	if !exists {
 		return false
 	}
 	
-	for _, r := range roles {
-		if r == role {
-			return true
-		}
-	}
-	return false
+	return userRole == role
 }
 
 // RequireRole 要求用户具有指定角色的中间件
@@ -327,23 +350,21 @@ func RequireRole(role string) gin.HandlerFunc {
 // RequireAnyRole 要求用户具有任意指定角色的中间件
 func RequireAnyRole(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userRoles, exists := GetUserRoles(c)
+		userRole, exists := GetUserRoles(c)
 		if !exists {
 			c.JSON(http.StatusForbidden, gin.H{
 				"error":   "Insufficient permissions",
-				"message": "No roles found",
+				"message": "No role found",
 				"code":    http.StatusForbidden,
 			})
 			c.Abort()
 			return
 		}
 		
-		for _, userRole := range userRoles {
-			for _, requiredRole := range roles {
-				if userRole == requiredRole {
-					c.Next()
-					return
-				}
+		for _, requiredRole := range roles {
+			if userRole == requiredRole {
+				c.Next()
+				return
 			}
 		}
 		

@@ -1,4 +1,4 @@
-package test
+﻿package test
 
 import (
 	"bytes"
@@ -12,12 +12,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"api-gateway/internal/config"
-	"api-gateway/internal/gateway"
-	"api-gateway/internal/logger"
-	"api-gateway/internal/monitoring"
-	"api-gateway/internal/proxy"
-	"api-gateway/internal/registry"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/gateway"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/monitoring"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/proxy"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/registry"
 )
 
 // 测试配置

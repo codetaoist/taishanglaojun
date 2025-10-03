@@ -1,4 +1,4 @@
-package middleware
+﻿package middleware
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"golang.org/x/time/rate"
 	
-	"api-gateway/internal/logger"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
 )
 
 // RateLimitConfig 限流配置

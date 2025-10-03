@@ -13,15 +13,16 @@ import (
 
 // Config 主配置结构
 type Config struct {
-	Server      ServerConfig      `yaml:"server" mapstructure:"server"`
-	Log         LogConfig         `yaml:"log" mapstructure:"log"`
-	Monitoring  MonitoringConfig  `yaml:"monitoring" mapstructure:"monitoring"`
-	Registry    RegistryConfig    `yaml:"registry" mapstructure:"registry"`
-	Proxy       ProxyConfig       `yaml:"proxy" mapstructure:"proxy"`
-	Security    SecurityConfig    `yaml:"security" mapstructure:"security"`
-	RateLimit   RateLimitConfig   `yaml:"rate_limit" mapstructure:"rate_limit"`
-	HealthCheck HealthCheckConfig `yaml:"health_check" mapstructure:"health_check"`
-	Services    []ServiceConfig   `yaml:"services" mapstructure:"services"`
+	Server        ServerConfig                       `yaml:"server" mapstructure:"server"`
+	Log           LogConfig                          `yaml:"log" mapstructure:"log"`
+	Monitoring    MonitoringConfig                   `yaml:"monitoring" mapstructure:"monitoring"`
+	Registry      RegistryConfig                     `yaml:"registry" mapstructure:"registry"`
+	Proxy         ProxyConfig                        `yaml:"proxy" mapstructure:"proxy"`
+	Security      SecurityConfig                     `yaml:"security" mapstructure:"security"`
+	RateLimit     RateLimitConfig                    `yaml:"rate_limit" mapstructure:"rate_limit"`
+	HealthCheck   HealthCheckConfig                  `yaml:"health_check" mapstructure:"health_check"`
+	Services      []ServiceConfig                    `yaml:"services" mapstructure:"services"`
+	StaticServices map[string][]StaticServiceInstance `yaml:"static_services" mapstructure:"static_services"`
 }
 
 // ServerConfig 服务器配置
@@ -69,12 +70,27 @@ type ProxyConfig struct {
 
 // SecurityConfig 安全配置
 type SecurityConfig struct {
-	JWTSecret     string   `yaml:"jwt_secret" mapstructure:"jwt_secret"`
-	AuthService   string   `yaml:"auth_service" mapstructure:"auth_service"`
-	CORSOrigins   []string `yaml:"cors_origins" mapstructure:"cors_origins"`
-	CORSMethods   []string `yaml:"cors_methods" mapstructure:"cors_methods"`
-	CORSHeaders   []string `yaml:"cors_headers" mapstructure:"cors_headers"`
-	TrustedProxies []string `yaml:"trusted_proxies" mapstructure:"trusted_proxies"`
+	Auth          AuthConfig `yaml:"auth" mapstructure:"auth"`
+	CORSOrigins   []string   `yaml:"cors_origins" mapstructure:"cors_origins"`
+	CORSMethods   []string   `yaml:"cors_methods" mapstructure:"cors_methods"`
+	CORSHeaders   []string   `yaml:"cors_headers" mapstructure:"cors_headers"`
+	TrustedProxies []string  `yaml:"trusted_proxies" mapstructure:"trusted_proxies"`
+	
+	// 保持向后兼容性
+	JWTSecret   string `yaml:"jwt_secret" mapstructure:"jwt_secret"`
+	AuthService string `yaml:"auth_service" mapstructure:"auth_service"`
+}
+
+// AuthConfig 认证配置
+type AuthConfig struct {
+	JWTSecret     string        `yaml:"jwt_secret" mapstructure:"jwt_secret"`
+	TokenExpiry   time.Duration `yaml:"token_expiry" mapstructure:"token_expiry"`
+	RefreshExpiry time.Duration `yaml:"refresh_expiry" mapstructure:"refresh_expiry"`
+	RedisAddr     string        `yaml:"redis_addr" mapstructure:"redis_addr"`
+	RedisPassword string        `yaml:"redis_password" mapstructure:"redis_password"`
+	RedisDB       int           `yaml:"redis_db" mapstructure:"redis_db"`
+	SkipPaths     []string      `yaml:"skip_paths" mapstructure:"skip_paths"`
+	OptionalPaths []string      `yaml:"optional_paths" mapstructure:"optional_paths"`
 }
 
 // RateLimitConfig 限流配置
@@ -139,6 +155,16 @@ type RetryConfig struct {
 	BackoffRate float64       `yaml:"backoff_rate" mapstructure:"backoff_rate"`
 }
 
+// StaticServiceInstance 静态服务实例配置
+type StaticServiceInstance struct {
+	ID      string            `yaml:"id" mapstructure:"id"`
+	Address string            `yaml:"address" mapstructure:"address"`
+	Port    int               `yaml:"port" mapstructure:"port"`
+	Weight  int               `yaml:"weight" mapstructure:"weight"`
+	Tags    []string          `yaml:"tags" mapstructure:"tags"`
+	Meta    map[string]string `yaml:"meta" mapstructure:"meta"`
+}
+
 // Load 加载配置
 func Load() (*Config, error) {
 	cfg := &Config{}
@@ -165,7 +191,7 @@ func Load() (*Config, error) {
 // setDefaults 设置默认值
 func setDefaults(cfg *Config) {
 	cfg.Server = ServerConfig{
-		Port:         8080,
+		Port:         8081,
 		Mode:         "development",
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
@@ -202,12 +228,23 @@ func setDefaults(cfg *Config) {
 	}
 
 	cfg.Security = SecurityConfig{
+		Auth: AuthConfig{
+			JWTSecret:     "your-secret-key",
+			TokenExpiry:   24 * time.Hour,
+			RefreshExpiry: 7 * 24 * time.Hour,
+			RedisAddr:     "localhost:6379",
+			RedisPassword: "",
+			RedisDB:       0,
+			SkipPaths:     []string{"/health", "/ready", "/metrics"},
+			OptionalPaths: []string{},
+		},
+		CORSOrigins:   []string{"*"},
+		CORSMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		CORSHeaders:   []string{"Origin", "Content-Type", "Authorization"},
+		TrustedProxies: []string{"127.0.0.1"},
+		// 保持向后兼容性
 		JWTSecret:   "your-secret-key",
 		AuthService: "http://auth-service:8081",
-		CORSOrigins: []string{"*"},
-		CORSMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		CORSHeaders: []string{"Origin", "Content-Type", "Authorization"},
-		TrustedProxies: []string{"127.0.0.1"},
 	}
 
 	cfg.RateLimit = RateLimitConfig{
@@ -240,7 +277,8 @@ func loadFromEnv(cfg *Config) {
 	}
 
 	if secret := getEnv("JWT_SECRET", ""); secret != "" {
-		cfg.Security.JWTSecret = secret
+		cfg.Security.Auth.JWTSecret = secret
+		cfg.Security.JWTSecret = secret // 保持向后兼容性
 	}
 
 	if authService := getEnv("AUTH_SERVICE_URL", ""); authService != "" {
@@ -258,6 +296,7 @@ func loadFromFile(cfg *Config) error {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("./config")
+	viper.AddConfigPath("./configs")
 	viper.AddConfigPath("/etc/gateway")
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -277,11 +316,18 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("invalid server port: %d", c.Server.Port)
 	}
 
-	if c.Security.JWTSecret == "" {
+	// 优先使用嵌套的Auth配置，如果为空则使用向后兼容的字段
+	jwtSecret := c.Security.Auth.JWTSecret
+	if jwtSecret == "" {
+		jwtSecret = c.Security.JWTSecret
+	}
+	
+	if jwtSecret == "" {
 		return fmt.Errorf("JWT secret is required")
 	}
 
-	if c.Security.AuthService == "" {
+	authService := c.Security.AuthService
+	if authService == "" {
 		return fmt.Errorf("auth service URL is required")
 	}
 

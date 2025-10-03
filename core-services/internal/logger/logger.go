@@ -37,7 +37,8 @@ func New(config LogConfig) (*zap.Logger, error) {
 		level = zapcore.FatalLevel
 	}
 
-	// 设置编码器配�?	encoderConfig := zapcore.EncoderConfig{
+	// 设置编码器配置
+	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "timestamp",
 		LevelKey:       "level",
 		NameKey:        "logger",
@@ -52,11 +53,11 @@ func New(config LogConfig) (*zap.Logger, error) {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	// 设置编码�?	var encoder zapcore.Encoder
+	// 选择编码器
+	var encoder zapcore.Encoder
 	if config.Format == "json" {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	} else {
-		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		encoder = zapcore.NewConsoleEncoder(encoderConfig)
 	}
 
@@ -73,19 +74,21 @@ func New(config LogConfig) (*zap.Logger, error) {
 		}
 		writeSyncer = zapcore.AddSync(lumberJackLogger)
 	} else {
-		// 标准输出
+		// 控制台输出
 		writeSyncer = zapcore.AddSync(os.Stdout)
 	}
 
 	// 创建核心
 	core := zapcore.NewCore(encoder, writeSyncer, level)
 
-	// 创建日志�?	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
+	// 创建logger
+	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 
 	return logger, nil
 }
 
-// NewDevelopment 创建开发环境日志实�?func NewDevelopment() (*zap.Logger, error) {
+// NewDevelopment 创建开发环境日志实例
+func NewDevelopment() (*zap.Logger, error) {
 	config := zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	return config.Build()
@@ -96,3 +99,23 @@ func NewProduction() (*zap.Logger, error) {
 	config := zap.NewProductionConfig()
 	return config.Build()
 }
+
+// GetDefaultConfig 获取默认日志配置
+func GetDefaultConfig() LogConfig {
+	return LogConfig{
+		Level:      "info",
+		Format:     "json",
+		Output:     "stdout",
+		Filename:   "",
+		MaxSize:    100,
+		MaxBackups: 10,
+		MaxAge:     30,
+		Compress:   true,
+	}
+}
+
+// SetGlobalLogger 设置全局日志实例
+func SetGlobalLogger(logger *zap.Logger) {
+	zap.ReplaceGlobals(logger)
+}
+

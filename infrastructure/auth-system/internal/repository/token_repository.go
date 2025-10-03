@@ -34,7 +34,7 @@ type TokenRepository interface {
 	GetByUserAndType(ctx context.Context, userID uuid.UUID, tokenType models.TokenType) ([]*models.Token, error)
 	List(ctx context.Context, query *models.TokenQuery) ([]*models.Token, int64, error)
 	
-	// 令牌管理
+	// 令牌管理器
 	UseToken(ctx context.Context, tokenID uuid.UUID) error
 	RevokeToken(ctx context.Context, tokenID uuid.UUID) error
 	RevokeAllUserTokens(ctx context.Context, userID uuid.UUID, tokenType models.TokenType) error
@@ -107,7 +107,7 @@ func (r *tokenRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.To
 	return &token, nil
 }
 
-// GetByToken 根据令牌字符串获取令�?
+// GetByToken 根据令牌字符串获取令牌�?
 func (r *tokenRepository) GetByToken(ctx context.Context, token string) (*models.Token, error) {
 	var tokenModel models.Token
 	if err := r.db.WithContext(ctx).Preload("User").First(&tokenModel, "token = ?", token).Error; err != nil {
@@ -160,7 +160,7 @@ func (r *tokenRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// GetByUserID 获取用户的所有令�?
+// GetByUserID 获取用户的所有效令牌�?
 func (r *tokenRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Token, error) {
 	var tokens []*models.Token
 	if err := r.db.WithContext(ctx).
@@ -177,7 +177,7 @@ func (r *tokenRepository) GetByUserID(ctx context.Context, userID uuid.UUID) ([]
 	return tokens, nil
 }
 
-// GetByUserAndType 获取用户指定类型的令�?
+// GetByUserAndType 获取用户指定类型的令牌�?
 func (r *tokenRepository) GetByUserAndType(ctx context.Context, userID uuid.UUID, tokenType models.TokenType) ([]*models.Token, error) {
 	var tokens []*models.Token
 	if err := r.db.WithContext(ctx).
@@ -199,7 +199,7 @@ func (r *tokenRepository) GetByUserAndType(ctx context.Context, userID uuid.UUID
 func (r *tokenRepository) List(ctx context.Context, query *models.TokenQuery) ([]*models.Token, int64, error) {
 	db := r.db.WithContext(ctx).Model(&models.Token{}).Preload("User")
 	
-	// 应用过滤条件
+	// 应用户过期滤条件
 	if query.UserID != uuid.Nil {
 		db = db.Where("user_id = ?", query.UserID)
 	}
@@ -213,14 +213,14 @@ func (r *tokenRepository) List(ctx context.Context, query *models.TokenQuery) ([
 		db = db.Where("purpose ILIKE ?", "%"+query.Purpose+"%")
 	}
 	
-	// 获取总数
+	// 获取总数量
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		r.logger.Error("Failed to count tokens", zap.Error(err))
 		return nil, 0, err
 	}
 	
-	// 应用排序
+	// 应用户排序
 	orderBy := "created_at"
 	if query.OrderBy != "" {
 		orderBy = query.OrderBy
@@ -231,7 +231,7 @@ func (r *tokenRepository) List(ctx context.Context, query *models.TokenQuery) ([
 	}
 	db = db.Order(fmt.Sprintf("%s %s", orderBy, order))
 	
-	// 应用分页
+	// 应用户分页
 	if query.Page > 0 && query.PageSize > 0 {
 		offset := (query.Page - 1) * query.PageSize
 		db = db.Offset(offset).Limit(query.PageSize)
@@ -246,9 +246,9 @@ func (r *tokenRepository) List(ctx context.Context, query *models.TokenQuery) ([
 	return tokens, total, nil
 }
 
-// UseToken 使用令牌
+// UseToken 使用户令牌
 func (r *tokenRepository) UseToken(ctx context.Context, tokenID uuid.UUID) error {
-	now := time.Now()
+	now := time.Now().UTC()
 	result := r.db.WithContext(ctx).Model(&models.Token{}).
 		Where("id = ? AND status = ?", tokenID, models.TokenStatusActive).
 		Updates(map[string]interface{}{
@@ -300,7 +300,7 @@ func (r *tokenRepository) RevokeToken(ctx context.Context, tokenID uuid.UUID) er
 	return nil
 }
 
-// RevokeAllUserTokens 撤销用户的所有指定类型令�?
+// RevokeAllUserTokens 撤销用户的所有效指定类型令牌�?
 func (r *tokenRepository) RevokeAllUserTokens(ctx context.Context, userID uuid.UUID, tokenType models.TokenType) error {
 	query := r.db.WithContext(ctx).Model(&models.Token{}).
 		Where("user_id = ? AND status = ?", userID, models.TokenStatusActive)
@@ -329,7 +329,7 @@ func (r *tokenRepository) RevokeAllUserTokens(ctx context.Context, userID uuid.U
 	return nil
 }
 
-// ExpireToken 使令牌过�?
+// ExpireToken 使令牌过期�?
 func (r *tokenRepository) ExpireToken(ctx context.Context, tokenID uuid.UUID) error {
 	result := r.db.WithContext(ctx).Model(&models.Token{}).
 		Where("id = ?", tokenID).
@@ -361,12 +361,12 @@ func (r *tokenRepository) ValidateToken(ctx context.Context, token string, token
 		return nil, err
 	}
 	
-	// 检查令牌类�?
+	// 检查令牌类型�?
 	if tokenType != "" && tokenModel.Type != tokenType {
 		return nil, ErrTokenNotFound
 	}
 	
-	// 检查令牌状�?
+	// 检查令牌状态枚举�?
 	if tokenModel.Status != models.TokenStatusActive {
 		switch tokenModel.Status {
 		case models.TokenStatusExpired:
@@ -380,9 +380,9 @@ func (r *tokenRepository) ValidateToken(ctx context.Context, token string, token
 		}
 	}
 	
-	// 检查是否过�?
+	// 检查是否过期�?
 	if tokenModel.IsExpired() {
-		// 自动标记为过�?
+		// 自动标记录器为过期�?
 		tokenModel.Status = models.TokenStatusExpired
 		r.Update(ctx, tokenModel)
 		return nil, ErrTokenExpired
@@ -391,11 +391,11 @@ func (r *tokenRepository) ValidateToken(ctx context.Context, token string, token
 	return tokenModel, nil
 }
 
-// IsTokenValid 检查令牌是否有�?
+// IsTokenValid 检查令牌是否有效�?
 func (r *tokenRepository) IsTokenValid(ctx context.Context, tokenID uuid.UUID) (bool, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Token{}).
-		Where("id = ? AND status = ? AND expires_at > ?", tokenID, models.TokenStatusActive, time.Now()).
+		Where("id = ? AND status = ? AND expires_at > ?", tokenID, models.TokenStatusActive, time.Now().UTC()).
 		Count(&count).Error; err != nil {
 		r.logger.Error("Failed to check token validity", 
 			zap.String("token_id", tokenID.String()),
@@ -410,7 +410,7 @@ func (r *tokenRepository) IsTokenValid(ctx context.Context, tokenID uuid.UUID) (
 // CleanupExpiredTokens 清理过期令牌
 func (r *tokenRepository) CleanupExpiredTokens(ctx context.Context) (int64, error) {
 	result := r.db.WithContext(ctx).
-		Where("expires_at <= ?", time.Now()).
+		Where("expires_at <= ?", time.Now().UTC()).
 		Delete(&models.Token{})
 	
 	if result.Error != nil {
@@ -425,9 +425,9 @@ func (r *tokenRepository) CleanupExpiredTokens(ctx context.Context) (int64, erro
 	return result.RowsAffected, nil
 }
 
-// CleanupUsedTokens 清理已使用的令牌
+// CleanupUsedTokens 清理已使用户的令牌
 func (r *tokenRepository) CleanupUsedTokens(ctx context.Context, olderThan time.Duration) (int64, error) {
-	cutoffTime := time.Now().Add(-olderThan)
+	cutoffTime := time.Now().UTC().Add(-olderThan)
 	
 	result := r.db.WithContext(ctx).
 		Where("status = ? AND used_at <= ?", models.TokenStatusUsed, cutoffTime).
@@ -446,9 +446,9 @@ func (r *tokenRepository) CleanupUsedTokens(ctx context.Context, olderThan time.
 	return result.RowsAffected, nil
 }
 
-// CleanupRevokedTokens 清理撤销的令�?
+// CleanupRevokedTokens 清理撤销的令牌�?
 func (r *tokenRepository) CleanupRevokedTokens(ctx context.Context, olderThan time.Duration) (int64, error) {
-	cutoffTime := time.Now().Add(-olderThan)
+	cutoffTime := time.Now().UTC().Add(-olderThan)
 	
 	result := r.db.WithContext(ctx).
 		Where("status = ? AND updated_at <= ?", models.TokenStatusRevoked, cutoffTime).
@@ -467,7 +467,7 @@ func (r *tokenRepository) CleanupRevokedTokens(ctx context.Context, olderThan ti
 	return result.RowsAffected, nil
 }
 
-// Count 获取令牌总数
+// Count 获取令牌总数量
 func (r *tokenRepository) Count(ctx context.Context) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Token{}).Count(&count).Error; err != nil {
@@ -478,7 +478,7 @@ func (r *tokenRepository) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
-// CountByUser 获取用户令牌�?
+// CountByUser 获取用户令牌�?
 func (r *tokenRepository) CountByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Token{}).
@@ -494,7 +494,7 @@ func (r *tokenRepository) CountByUser(ctx context.Context, userID uuid.UUID) (in
 	return count, nil
 }
 
-// CountByType 根据类型统计令牌�?
+// CountByType 根据类型统计令牌�?
 func (r *tokenRepository) CountByType(ctx context.Context, tokenType models.TokenType) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Token{}).
@@ -510,11 +510,11 @@ func (r *tokenRepository) CountByType(ctx context.Context, tokenType models.Toke
 	return count, nil
 }
 
-// CountActiveByUser 获取用户活跃令牌�?
+// CountActiveByUser 获取用户活跃令牌�?
 func (r *tokenRepository) CountActiveByUser(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Token{}).
-		Where("user_id = ? AND status = ? AND expires_at > ?", userID, models.TokenStatusActive, time.Now()).
+		Where("user_id = ? AND status = ? AND expires_at > ?", userID, models.TokenStatusActive, time.Now().UTC()).
 		Count(&count).Error; err != nil {
 		r.logger.Error("Failed to count active tokens by user", 
 			zap.String("user_id", userID.String()),

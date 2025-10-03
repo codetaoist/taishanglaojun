@@ -1,4 +1,4 @@
-package config
+﻿package config
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ type AppConfig struct {
 	Environment string `mapstructure:"environment"`
 }
 
-// ServerConfig 服务器配�?
+// ServerConfig 服务器配置�?
 type ServerConfig struct {
 	Host         string `mapstructure:"host"`
 	Port         int    `mapstructure:"port"`
@@ -32,7 +32,7 @@ type ServerConfig struct {
 	WriteTimeout int    `mapstructure:"write_timeout"`
 }
 
-// DatabaseConfig 数据库配�?
+// DatabaseConfig 数据库配置�?
 type DatabaseConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
@@ -75,7 +75,7 @@ func Load() (*Config, error) {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
-	// 设置默认�?
+	// 设置默认值�?
 	setDefaults()
 
 	// 读取配置文件
@@ -94,7 +94,7 @@ func Load() (*Config, error) {
 	return &config, nil
 }
 
-// setDefaults 设置默认配置�?
+// setDefaults 设置默认值配置�?
 func setDefaults() {
 	// App defaults
 	viper.SetDefault("app.name", "taishang-service")
@@ -130,7 +130,7 @@ func setDefaults() {
 	viper.SetDefault("jwt.expire_time", 3600)
 }
 
-// GetDSN 获取数据库连接字符串
+// GetDSN 获取数据库配置连接字符串
 func (c *DatabaseConfig) GetDSN() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		c.Host, c.Port, c.Username, c.Password, c.Database, c.SSLMode)
@@ -140,3 +140,4 @@ func (c *DatabaseConfig) GetDSN() string {
 func (c *RedisConfig) GetRedisAddr() string {
 	return fmt.Sprintf("%s:%d", c.Host, c.Port)
 }
+

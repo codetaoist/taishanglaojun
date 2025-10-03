@@ -32,7 +32,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 初始化日�?
+	// 初始化日志
 	log, err := logger.New(cfg)
 	if err != nil {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
@@ -49,7 +49,7 @@ func main() {
 		zap.String("address", cfg.GetServerAddr()),
 	)
 
-	// 初始化数据库
+	// 初始化数量据库
 	db, err := database.New(cfg, log)
 	if err != nil {
 		log.Fatal("Failed to initialize database", zap.Error(err))
@@ -60,21 +60,24 @@ func main() {
 		}
 	}()
 
-	// 初始化动态数据库管理�?
+	// 初始化动态数量据库管理器
 	dynamicDB := database.NewDynamicDatabase(log)
-	
-	// 添加默认数据库配�?
+
+	// 添加默认数量据库配置
 	if err := dynamicDB.AddDatabase("default", cfg); err != nil {
 		log.Fatal("Failed to add default database configuration", zap.Error(err))
 	}
 
-	// 初始化JWT管理�?
+	// 初始化JWT管理器
 	jwtConfig := &jwt.Config{
 		SecretKey:        cfg.JWT.SecretKey,
 		AccessTokenTTL:   cfg.JWT.AccessTokenTTL,
 		RefreshTokenTTL:  cfg.JWT.RefreshTokenTTL,
 		Issuer:           cfg.JWT.Issuer,
 		RefreshThreshold: cfg.JWT.RefreshThreshold,
+		RequireAudience:  cfg.JWT.RequireAudience,
+		AllowedAudiences: cfg.JWT.AllowedAudiences,
+		MaxTokenAge:      cfg.JWT.MaxTokenAge,
 	}
 	jwtManager := jwt.NewManager(jwtConfig, log)
 
@@ -83,34 +86,49 @@ func main() {
 	sessionRepo := repository.NewSessionRepository(db.GetDB(), log)
 	tokenRepo := repository.NewTokenRepository(db.GetDB(), log)
 
+	// 初始化邮件服务
+	emailService := service.NewEmailService(&cfg.Email, log)
+
 	// 初始化服务层
 	authService := service.NewAuthService(
 		userRepo,
 		sessionRepo,
 		tokenRepo,
+		emailService,
 		jwtManager,
 		log,
 	)
 
-	// 初始化中间件
+	// 初始化中间件件
 	authMiddleware := middleware.NewAuthMiddleware(jwtManager, authService, log)
 
-	// 初始化处理器
+	// 初始化限流中间件
+	rateLimiterConfig := &middleware.RateLimiterConfig{
+		RequestsPerWindow: cfg.Security.RateLimitRequests,
+		WindowDuration:    time.Minute,
+		BurstSize:         10,
+		CleanupInterval:   5 * time.Minute,
+		LoginLimit:        cfg.Security.MaxLoginAttempts,
+		RegisterLimit:     3, // 每分钟最多3次注册尝试
+	}
+	rateLimiter := middleware.NewRateLimiter(rateLimiterConfig, log)
+
+	// 初始化处理器器
 	authHandler := handler.NewAuthHandler(authService, log)
-	
-	// 初始化动态数据库处理�?
+
+	// 初始化动态数量据库处理器
 	databaseHandler := handlers.NewDatabaseHandler(dynamicDB, log)
 
 	// 设置Gin模式
 	gin.SetMode(cfg.Server.Mode)
 
-	// 创建路由�?
+	// 创建路由
 	router := gin.New()
 
 	// 设置路由
-	routes.SetupRoutes(router, authHandler, databaseHandler, authMiddleware, db.GetDB(), log)
+	routes.SetupRoutes(router, authHandler, databaseHandler, authMiddleware, rateLimiter, db.GetDB(), log, userRepo, sessionRepo, tokenRepo, jwtManager, authService)
 
-	// 创建HTTP服务�?
+	// 创建HTTP服务
 	server := &http.Server{
 		Addr:         cfg.GetServerAddr(),
 		Handler:      router,
@@ -119,7 +137,7 @@ func main() {
 		IdleTimeout:  cfg.Server.IdleTimeout,
 	}
 
-	// 启动服务�?
+	// 启动服务
 	go func() {
 		log.Info("Starting HTTP server", zap.String("address", server.Addr))
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -130,14 +148,14 @@ func main() {
 	// 启动后台任务
 	go startBackgroundTasks(cfg, db, tokenRepo, sessionRepo, log)
 
-	// 等待中断信号
+	// 等待中间件断信息号
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	log.Info("Shutting down server...")
 
-	// 优雅关闭服务�?
+	// 优雅关闭服务
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -186,14 +204,14 @@ func cleanupExpiredTokensAndSessions(
 		log.Info("Cleaned up expired tokens", zap.Int64("count", deletedTokens))
 	}
 
-	// 清理已使用的令牌
+	// 清理已使用户的令牌
 	if deletedTokens, err := tokenRepo.CleanupUsedTokens(ctx, 24*time.Hour); err != nil {
 		log.Error("Failed to cleanup used tokens", zap.Error(err))
 	} else if deletedTokens > 0 {
 		log.Info("Cleaned up used tokens", zap.Int64("count", deletedTokens))
 	}
 
-	// 清理已撤销的令�?
+	// 清理已撤销的令牌
 	if deletedTokens, err := tokenRepo.CleanupRevokedTokens(ctx, 24*time.Hour); err != nil {
 		log.Error("Failed to cleanup revoked tokens", zap.Error(err))
 	} else if deletedTokens > 0 {
@@ -207,7 +225,7 @@ func cleanupExpiredTokensAndSessions(
 		log.Info("Cleaned up expired sessions", zap.Int64("count", deletedSessions))
 	}
 
-	// 清理已撤销的会�?
+	// 清理已撤销的会话
 	if deletedSessions, err := sessionRepo.CleanupRevokedSessions(ctx, 7*24*time.Hour); err != nil {
 		log.Error("Failed to cleanup revoked sessions", zap.Error(err))
 	} else if deletedSessions > 0 {

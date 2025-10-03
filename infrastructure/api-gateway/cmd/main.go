@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"api-gateway/internal/config"
-	"api-gateway/internal/gateway"
-	"api-gateway/internal/logger"
-	"api-gateway/internal/monitoring"
-	"api-gateway/internal/proxy"
-	"api-gateway/internal/registry"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/gateway"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/monitoring"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/proxy"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/registry"
 	
 	"github.com/sirupsen/logrus"
 )
@@ -42,6 +42,17 @@ func main() {
 	gw, err := gateway.NewGateway(cfg, log, metrics, serviceRegistry, proxyManager)
 	if err != nil {
 		logrus.Fatalf("Failed to create gateway: %v", err)
+	}
+
+	// 加载静态服务配置到注册中心
+	if len(cfg.StaticServices) > 0 {
+		// 由于Registry是接口，我们需要通过类型断言来访问LoadFromStaticConfig方法
+		// 或者我们可以在registry包中添加一个辅助函数
+		if err := registry.LoadStaticServices(serviceRegistry, cfg.StaticServices); err != nil {
+			log.Errorf("Failed to load static services: %v", err)
+		} else {
+			log.Infof("Loaded %d static service groups", len(cfg.StaticServices))
+		}
 	}
 
 	// 创建路由器

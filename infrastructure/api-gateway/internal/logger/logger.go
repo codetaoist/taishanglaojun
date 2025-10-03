@@ -1,4 +1,4 @@
-package logger
+﻿package logger
 
 import (
 	"io"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
 )
 
 // Logger 日志接口

@@ -1,14 +1,14 @@
-package middleware
+﻿package middleware
 
 import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/codetaoist/taishanglaojun/infrastructure/project-scaffold/internal/logger"
+	"github.com/gin-gonic/gin"
 )
 
-// Logger 日志中间�?
+// Logger 日志中间件
 func Logger(log logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -41,7 +41,7 @@ func Logger(log logger.Logger) gin.HandlerFunc {
 	}
 }
 
-// Recovery 恢复中间�?
+// Recovery 恢复中间件
 func Recovery(log logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
@@ -64,7 +64,7 @@ func Recovery(log logger.Logger) gin.HandlerFunc {
 	}
 }
 
-// CORS 跨域中间�?
+// CORS 跨域中间件
 func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
@@ -93,10 +93,11 @@ func RateLimit() gin.HandlerFunc {
 	}
 }
 
-// Auth 认证中间�?
+// Auth 认证中间件
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO: 实现JWT认证逻辑
 		c.Next()
 	}
 }
+

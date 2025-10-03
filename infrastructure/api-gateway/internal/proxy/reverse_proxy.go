@@ -1,4 +1,4 @@
-package proxy
+﻿package proxy
 
 import (
 	"fmt"
@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"api-gateway/internal/config"
-	"api-gateway/internal/logger"
-	"api-gateway/internal/monitoring"
-	"api-gateway/internal/registry"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/monitoring"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/registry"
 )
 
 // ProxyManager 代理管理器接口

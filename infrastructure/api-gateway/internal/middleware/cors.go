@@ -102,14 +102,14 @@ func (cm *CORSMiddleware) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.GetHeader("Origin")
 		
-		// 设置CORS头部
-		cm.setCORSHeaders(c, origin)
-		
 		// 处理预检请求
 		if c.Request.Method == http.MethodOptions {
 			cm.handlePreflightRequest(c, origin)
 			return
 		}
+		
+		// 设置CORS头部（仅对非预检请求）
+		cm.setCORSHeaders(c, origin)
 		
 		c.Next()
 	}
@@ -148,6 +148,9 @@ func (cm *CORSMiddleware) handlePreflightRequest(c *gin.Context, origin string) 
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
+	
+	// 首先设置基本的CORS头部
+	cm.setCORSHeaders(c, origin)
 	
 	// Access-Control-Allow-Methods
 	if len(cm.config.AllowMethods) > 0 {

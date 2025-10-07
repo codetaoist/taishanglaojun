@@ -1,4 +1,4 @@
-﻿package models
+package models
 
 import (
 	"time"
@@ -39,8 +39,8 @@ type User struct {
 	LastName    string         `json:"last_name" gorm:"size:50" validate:"max=50"`
 	Avatar      string         `json:"avatar" gorm:"size:255"`
 	Phone       string         `json:"phone" gorm:"size:20" validate:"max=20"`
-	Status      UserStatus     `json:"status" gorm:"type:varchar(20);default:'active'" validate:"oneof=active inactive suspended deleted"`
-	Role        UserRole       `json:"role" gorm:"type:varchar(20);default:'user'" validate:"oneof=admin moderator user guest"`
+	Status      UserStatus     `json:"status" gorm:"type:varchar(20);default:'active';index" validate:"oneof=active inactive suspended deleted"`
+	Role        UserRole       `json:"role" gorm:"type:varchar(20);default:'user';index" validate:"oneof=admin moderator user guest"`
 	LastLoginAt *time.Time     `json:"last_login_at"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`

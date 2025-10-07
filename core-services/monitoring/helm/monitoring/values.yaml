@@ -1,0 +1,344 @@
+# 太上老君监控系统默认配置
+
+# 全局配置
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# 应用配置
+replicaCount: 1
+
+image:
+  repository: ghcr.io/taishanglaojun/monitoring
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# 服务账户
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod 安全上下文
+podSecurityContext:
+  fsGroup: 2000
+
+# 容器安全上下文
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# 服务配置
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  annotations: {}
+
+# Ingress 配置
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: monitoring.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    # - secretName: monitoring-tls
+    #   hosts:
+    #     - monitoring.local
+
+# 资源限制
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# 自动扩缩容
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# 节点选择器
+nodeSelector: {}
+
+# 容忍度
+tolerations: []
+
+# 亲和性
+affinity: {}
+
+# Pod 反亲和性
+podAntiAffinity:
+  enabled: false
+  type: soft  # soft or hard
+
+# 存活探针
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# 就绪探针
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+  successThreshold: 1
+
+# 启动探针
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+  successThreshold: 1
+
+# 持久化存储
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  annotations: {}
+
+# 配置映射
+configMap:
+  create: true
+  data: {}
+
+# 密钥
+secrets:
+  create: true
+  data: {}
+
+# 环境变量
+env:
+  - name: APP_ENV
+    value: "production"
+  - name: LOG_LEVEL
+    value: "info"
+  - name: PORT
+    value: "8080"
+
+# 从配置映射加载环境变量
+envFrom: []
+  # - configMapRef:
+  #     name: monitoring-config
+  # - secretRef:
+  #     name: monitoring-secrets
+
+# 额外的标签
+extraLabels: {}
+
+# 额外的注解
+extraAnnotations: {}
+
+# Pod 标签
+podLabels: {}
+
+# Pod 注解
+podAnnotations: {}
+
+# 额外的容器
+extraContainers: []
+
+# 初始化容器
+initContainers: []
+
+# 额外的卷
+extraVolumes: []
+
+# 额外的卷挂载
+extraVolumeMounts: []
+
+# 服务监控器 (Prometheus Operator)
+serviceMonitor:
+  enabled: false
+  namespace: ""
+  labels: {}
+  annotations: {}
+  interval: 30s
+  scrapeTimeout: 10s
+  path: /metrics
+  scheme: http
+  tlsConfig: {}
+
+# Pod 监控器 (Prometheus Operator)
+podMonitor:
+  enabled: false
+  namespace: ""
+  labels: {}
+  annotations: {}
+  interval: 30s
+  scrapeTimeout: 10s
+  path: /metrics
+  scheme: http
+
+# 网络策略
+networkPolicy:
+  enabled: false
+  ingress: []
+  egress: []
+
+# Pod 中断预算
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
+# 数据库配置
+database:
+  enabled: true
+  type: postgresql  # postgresql, mysql
+  host: ""
+  port: 5432
+  name: taishanglaojun_monitoring
+  user: monitoring_user
+  password: ""
+  sslMode: disable
+  maxOpenConns: 25
+  maxIdleConns: 5
+  connMaxLifetime: 300s
+
+# Redis 配置
+redis:
+  enabled: true
+  host: ""
+  port: 6379
+  db: 0
+  password: ""
+  maxRetries: 3
+  poolSize: 10
+  minIdleConns: 5
+
+# 监控配置
+monitoring:
+  enabled: true
+  logLevel: info
+  debug: false
+  metricsEnabled: true
+  metricsPath: /metrics
+  tracingEnabled: true
+  tracingEndpoint: ""
+  healthCheckPath: /health
+  readinessCheckPath: /ready
+
+# 安全配置
+security:
+  jwt:
+    secret: ""
+    expiration: 24h
+  encryption:
+    key: ""
+  cors:
+    enabled: true
+    allowedOrigins: ["*"]
+    allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowedHeaders: ["*"]
+
+# 告警配置
+alerting:
+  enabled: false
+  webhookUrl: ""
+  slackChannel: ""
+  emailRecipients: []
+
+# 备份配置
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  retention: 7
+  storage:
+    type: s3  # s3, gcs, azure
+    bucket: ""
+    region: ""
+    accessKey: ""
+    secretKey: ""
+
+# 依赖服务配置
+postgresql:
+  enabled: false
+  auth:
+    postgresPassword: ""
+    username: monitoring_user
+    password: ""
+    database: taishanglaojun_monitoring
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+
+redis:
+  enabled: false
+  auth:
+    enabled: true
+    password: ""
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+
+prometheus:
+  enabled: false
+  server:
+    persistentVolume:
+      enabled: true
+      size: 20Gi
+
+grafana:
+  enabled: false
+  persistence:
+    enabled: true
+    size: 5Gi
+  adminPassword: ""
+
+jaeger:
+  enabled: false
+  storage:
+    type: memory
+
+elasticsearch:
+  enabled: false
+  volumeClaimTemplate:
+    resources:
+      requests:
+        storage: 30Gi
+
+kibana:
+  enabled: false

@@ -8,10 +8,12 @@ import (
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 
-	"auth-system/internal/models"
-	"auth-system/internal/repository"
-	"auth-system/internal/utils"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/jwt"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/repository"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/utils"
 )
 
 var (
@@ -135,7 +137,7 @@ func (s *authService) Register(ctx context.Context, req *models.RegisterRequest)
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Phone:     req.Phone,
-		Status:    models.UserStatusPending, // 设为待验证状态
+		Status:    models.UserStatusInactive, // 设为待验证状态
 		Role:      models.RoleUser,
 	}
 
@@ -172,7 +174,7 @@ func (s *authService) Register(ctx context.Context, req *models.RegisterRequest)
 	}
 
 	// 发送验证邮件
-	if err := s.emailService.SendVerificationEmail(user.Email, user.FirstName+" "+user.LastName, verificationToken); err != nil {
+	if err := s.emailService.SendVerificationEmail(context.Background(), user, verificationToken); err != nil {
 		s.logger.Error("发送验证邮件失败", zap.Error(err))
 		// 注意：这里不返回错误，因为用户已经创建成功，只是邮件发送失败
 		// 可以通过重发验证邮件功能来解决
@@ -187,9 +189,9 @@ func (s *authService) Register(ctx context.Context, req *models.RegisterRequest)
 	)
 
 	return &models.RegisterResponse{
-		User:              user.ToPublic(),
-		Message:           "用户注册成功，请检查邮箱并验证邮箱地址",
-		VerificationToken: verificationToken,
+		User:    user.ToPublic(),
+		Message: "用户注册成功，请检查邮箱并验证邮箱地址",
+		Token:   verificationToken,
 	}, nil
 }
 
@@ -239,6 +241,15 @@ func (s *authService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 		return nil, err
 	}
 
+	// TODO: 计算用户角色，用于权限系统
+	// 这里需要根据用户的角色和权限来生成JWT中的claims
+	// 可以查询用户的角色权限和直接分配的权限
+	// userRoles := []string{string(user.Role)}
+	
+	// 查询用户的额外权限（如果有权限管理系统）
+	// TODO: 集成权限管理系统后，这里需要查询用户的实际权限
+	userPermissions := []string{}
+
 	// 生成JWT令牌
 	accessToken, _, err := s.jwtManager.GenerateAccessToken(
 		user.ID,
@@ -246,7 +257,7 @@ func (s *authService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 		user.Email,
 		string(user.Role),
 		session.ID,
-		[]string{}, // TODO: 实现权限系统计算用户角色
+		userPermissions, // 使用计算出的用户权限
 	)
 	if err != nil {
 		s.logger.Error("Failed to generate access token",

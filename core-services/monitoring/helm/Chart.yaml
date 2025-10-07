@@ -1,0 +1,90 @@
+# 太上老君监控系统 Helm Chart 配置
+
+apiVersion: v2
+name: taishanglaojun-monitoring
+description: 太上老君分布式监控系统 - 企业级监控解决方案
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+# Chart 元数据
+keywords:
+  - monitoring
+  - observability
+  - metrics
+  - tracing
+  - logging
+  - prometheus
+  - grafana
+  - influxdb
+  - jaeger
+  - alerting
+
+home: https://github.com/taishanglaojun/core-services/monitoring
+sources:
+  - https://github.com/taishanglaojun/core-services/monitoring
+
+maintainers:
+  - name: Taishanglaojun Team
+    email: team@taishanglaojun.com
+    url: https://taishanglaojun.com
+
+# 图标和截图
+icon: https://raw.githubusercontent.com/taishanglaojun/core-services/main/monitoring/assets/logo.svg
+
+# 注解
+annotations:
+  category: Monitoring
+  licenses: Apache-2.0
+  images: |
+    - name: taishanglaojun-monitoring
+      image: taishanglaojun/monitoring:1.0.0
+    - name: prometheus
+      image: prom/prometheus:v2.47.0
+    - name: grafana
+      image: grafana/grafana:10.1.0
+    - name: influxdb
+      image: influxdb:2.7
+    - name: jaeger
+      image: jaegertracing/all-in-one:1.49
+    - name: alertmanager
+      image: prom/alertmanager:v0.26.0
+    - name: node-exporter
+      image: prom/node-exporter:v1.6.1
+
+# 依赖项
+dependencies:
+  - name: prometheus
+    version: "25.8.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: prometheus.enabled
+    tags:
+      - monitoring
+      - metrics
+  - name: grafana
+    version: "7.0.8"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: grafana.enabled
+    tags:
+      - monitoring
+      - visualization
+  - name: influxdb2
+    version: "2.1.1"
+    repository: "https://helm.influxdata.com/"
+    condition: influxdb.enabled
+    tags:
+      - monitoring
+      - database
+  - name: jaeger
+    version: "0.71.14"
+    repository: "https://jaegertracing.github.io/helm-charts"
+    condition: jaeger.enabled
+    tags:
+      - monitoring
+      - tracing
+
+# 最低要求
+kubeVersion: ">=1.20.0-0"
+
+# 弃用信息
+deprecated: false

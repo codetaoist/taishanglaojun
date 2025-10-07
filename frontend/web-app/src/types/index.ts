@@ -6,6 +6,8 @@ export interface User {
   avatar?: string;
   name?: string;
   role: 'user' | 'admin' | 'moderator';
+  roles?: string[]; // 支持多角色
+  permissions?: string[]; // 用户权限列表
   isAdmin?: boolean;
   createdAt: string;
   updatedAt: string;

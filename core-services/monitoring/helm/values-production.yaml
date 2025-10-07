@@ -1,0 +1,413 @@
+# 太上老君监控系统 - 生产环境配置
+
+# 全局配置
+global:
+  imageRegistry: "ghcr.io"
+  imagePullSecrets:
+    - name: ghcr-secret
+
+# 应用配置
+replicaCount: 3
+
+image:
+  repository: taishanglaojun/monitoring
+  pullPolicy: IfNotPresent
+  tag: "v1.0.0"
+
+# 服务配置
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+# Ingress 配置
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+  hosts:
+    - host: monitoring.taishanglaojun.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: monitoring-prod-tls
+      hosts:
+        - monitoring.taishanglaojun.com
+
+# 资源限制
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+# 自动扩缩容
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 120
+    scaleUp:
+      stabilizationWindowSeconds: 120
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+
+# Pod 反亲和性
+podAntiAffinity:
+  enabled: true
+  type: hard
+
+# 节点选择器
+nodeSelector:
+  node-type: "compute"
+
+# 容忍度
+tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "monitoring"
+    effect: "NoSchedule"
+
+# 亲和性
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+          - amd64
+
+# 存活探针
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+# 就绪探针
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# 启动探针
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 60
+
+# 持久化存储
+persistence:
+  enabled: true
+  storageClass: "premium-ssd"
+  accessMode: ReadWriteOnce
+  size: 50Gi
+
+# 环境变量
+env:
+  - name: APP_ENV
+    value: "production"
+  - name: LOG_LEVEL
+    value: "warn"
+  - name: PORT
+    value: "8080"
+  - name: DEBUG
+    value: "false"
+
+# 数据库配置
+database:
+  enabled: true
+  type: postgresql
+  host: "postgres-prod.internal"
+  port: 5432
+  name: taishanglaojun_monitoring_prod
+  user: monitoring_user
+  password: ""  # 从 Secret 读取
+  sslMode: require
+  maxOpenConns: 50
+  maxIdleConns: 10
+  connMaxLifetime: 300s
+
+# Redis 配置
+redis:
+  enabled: true
+  host: "redis-prod.internal"
+  port: 6379
+  db: 0
+  password: ""  # 从 Secret 读取
+  maxRetries: 5
+  poolSize: 20
+  minIdleConns: 10
+
+# 监控配置
+monitoring:
+  enabled: true
+  logLevel: warn
+  debug: false
+  metricsEnabled: true
+  metricsPath: /metrics
+  tracingEnabled: true
+  tracingEndpoint: "http://jaeger-collector.monitoring:14268/api/traces"
+  healthCheckPath: /health
+  readinessCheckPath: /ready
+
+# 安全配置
+security:
+  jwt:
+    secret: ""  # 从 Secret 读取
+    expiration: 8h
+  encryption:
+    key: ""  # 从 Secret 读取
+  cors:
+    enabled: true
+    allowedOrigins: 
+      - "https://taishanglaojun.com"
+      - "https://www.taishanglaojun.com"
+      - "https://monitoring.taishanglaojun.com"
+    allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowedHeaders: ["Authorization", "Content-Type", "X-Requested-With"]
+
+# 告警配置
+alerting:
+  enabled: true
+  webhookUrl: "https://hooks.slack.com/services/prod/webhook"
+  slackChannel: "#monitoring-alerts"
+  emailRecipients:
+    - "ops-team@taishanglaojun.com"
+    - "dev-team@taishanglaojun.com"
+
+# 备份配置
+backup:
+  enabled: true
+  schedule: "0 2 * * *"
+  retention: 30
+  storage:
+    type: s3
+    bucket: "taishanglaojun-prod-backups"
+    region: "us-west-2"
+
+# 服务监控器
+serviceMonitor:
+  enabled: true
+  namespace: "monitoring"
+  labels:
+    release: prometheus
+  interval: 15s
+  scrapeTimeout: 10s
+  path: /metrics
+  scheme: http
+  tlsConfig: {}
+  relabelings: []
+  metricRelabelings: []
+
+# Pod 监控器
+podMonitor:
+  enabled: true
+  namespace: "monitoring"
+  labels:
+    release: prometheus
+  interval: 15s
+  scrapeTimeout: 10s
+  path: /metrics
+  scheme: http
+  relabelings: []
+  metricRelabelings: []
+
+# 网络策略
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: database
+      ports:
+        - protocol: TCP
+          port: 5432  # PostgreSQL
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: cache
+      ports:
+        - protocol: TCP
+          port: 6379  # Redis
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 53    # DNS
+        - protocol: UDP
+          port: 53    # DNS
+        - protocol: TCP
+          port: 443   # HTTPS
+        - protocol: TCP
+          port: 80    # HTTP
+
+# Pod 中断预算
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# 依赖服务配置
+postgresql:
+  enabled: false  # 使用外部高可用数据库
+
+redis:
+  enabled: false  # 使用外部高可用 Redis
+
+prometheus:
+  enabled: true
+  server:
+    persistentVolume:
+      enabled: true
+      size: 100Gi
+      storageClass: "premium-ssd"
+    retention: "30d"
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 8Gi
+      requests:
+        cpu: 2000m
+        memory: 4Gi
+    replicaCount: 2
+  alertmanager:
+    enabled: true
+    persistentVolume:
+      enabled: true
+      size: 10Gi
+      storageClass: "premium-ssd"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+grafana:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 20Gi
+    storageClass: "premium-ssd"
+  adminPassword: ""  # 从 Secret 读取
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  replicas: 2
+
+jaeger:
+  enabled: true
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      host: "elasticsearch.monitoring"
+      port: 9200
+  collector:
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+  query:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+elasticsearch:
+  enabled: true
+  replicas: 3
+  minimumMasterNodes: 2
+  volumeClaimTemplate:
+    resources:
+      requests:
+        storage: 100Gi
+    storageClassName: "premium-ssd"
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+
+kibana:
+  enabled: true
+  replicas: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"unicode"
 )
@@ -197,7 +196,9 @@ func calculateAdditionalScore(password string) int {
 func isCommonWeakPassword(password string) bool {
 	lowerPassword := strings.ToLower(password)
 	for _, weak := range commonWeakPasswords {
-		if strings.Contains(lowerPassword, weak) {
+		// 精确匹配或者密码主要由弱密码组成
+		if lowerPassword == weak || 
+		   (len(weak) >= 6 && strings.Contains(lowerPassword, weak) && len(lowerPassword) <= len(weak)+3) {
 			return true
 		}
 	}

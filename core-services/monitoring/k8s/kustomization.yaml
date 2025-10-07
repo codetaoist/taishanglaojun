@@ -1,0 +1,123 @@
+# 太上老君监控系统 Kustomization 配置
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: taishanglaojun-monitoring
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+# 命名空间
+namespace: taishanglaojun-monitoring
+
+# 通用标签
+commonLabels:
+  app.kubernetes.io/part-of: taishanglaojun
+  app.kubernetes.io/managed-by: kustomize
+  environment: production
+
+# 通用注解
+commonAnnotations:
+  version: "1.0.0"
+  maintainer: "taishanglaojun-team"
+  documentation: "https://github.com/taishanglaojun/core-services/monitoring"
+
+# 资源文件
+resources:
+  - namespace.yaml
+  - rbac.yaml
+  - configmap.yaml
+  - secret.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - hpa.yaml
+
+# 镜像配置
+images:
+  - name: taishanglaojun/monitoring
+    newTag: "1.0.0"
+  - name: prom/prometheus
+    newTag: "v2.47.0"
+  - name: grafana/grafana
+    newTag: "10.1.0"
+  - name: influxdb
+    newTag: "2.7"
+
+# 配置生成器
+configMapGenerator:
+  - name: grafana-datasources
+    files:
+      - datasources.yml=../docker/grafana/provisioning/datasources/datasources.yml
+  - name: grafana-dashboards-config
+    files:
+      - dashboards.yml=../docker/grafana/provisioning/dashboards/dashboards.yml
+
+# Secret生成器
+secretGenerator:
+  - name: grafana-basic-auth
+    type: Opaque
+    literals:
+      - auth=admin:$2y$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W  # admin:secret
+  - name: prometheus-basic-auth
+    type: Opaque
+    literals:
+      - auth=admin:$2y$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W  # admin:secret
+  - name: influxdb-basic-auth
+    type: Opaque
+    literals:
+      - auth=admin:$2y$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W  # admin:secret
+
+# 补丁
+patchesStrategicMerge:
+  - patches/deployment-patch.yaml
+  - patches/service-patch.yaml
+
+# JSON 6902 补丁
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: taishanglaojun-monitoring
+    path: patches/deployment-resources.yaml
+
+# 替换
+replacements:
+  - source:
+      kind: ConfigMap
+      name: taishanglaojun-monitoring-config
+      fieldPath: data.monitoring\.yaml
+    targets:
+      - select:
+          kind: Deployment
+          name: taishanglaojun-monitoring
+        fieldPaths:
+          - spec.template.spec.containers.[name=monitoring].env.[name=MONITORING_CONFIG_CHECKSUM].value
+
+# 变量
+vars:
+  - name: MONITORING_VERSION
+    objref:
+      kind: ConfigMap
+      name: taishanglaojun-monitoring-config
+      apiVersion: v1
+    fieldref:
+      fieldpath: metadata.labels.version
+  - name: NAMESPACE
+    objref:
+      kind: Namespace
+      name: taishanglaojun-monitoring
+      apiVersion: v1
+    fieldref:
+      fieldpath: metadata.name
+
+# 生成选项
+generatorOptions:
+  disableNameSuffixHash: false
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+  annotations:
+    config.kubernetes.io/local-config: "true"

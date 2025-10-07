@@ -1,0 +1,587 @@
+# 太上老君监控系统配置文件
+# 版本: 1.0.0
+
+# 服务配置
+service:
+  name: "taishanglaojun-monitoring"
+  version: "1.0.0"
+  environment: "development"  # development, staging, production
+  port: 8080
+  log_level: "info"  # trace, debug, info, warn, error, fatal
+
+# 分布式追踪配置
+tracing:
+  service_name: "taishanglaojun-monitoring"
+  service_version: "1.0.0"
+  environment: "development"
+  
+  # 采样配置
+  sampling:
+    type: "probabilistic"  # always, never, probabilistic, rate_limiting
+    rate: 0.1  # 采样率 (0.0-1.0)
+    max_traces_per_second: 100  # 限流采样最大traces/秒
+  
+  # 批处理配置
+  batching:
+    max_batch_size: 512
+    flush_timeout: "5s"
+    max_export_timeout: "30s"
+  
+  # 导出器配置
+  exporters:
+    - type: "console"
+      enabled: true
+      settings:
+        pretty_print: true
+    
+    - type: "jaeger"
+      enabled: false
+      settings:
+        endpoint: "http://localhost:14268/api/traces"
+        username: ""
+        password: ""
+        headers:
+          "Authorization": "Bearer token"
+    
+  # 数据收集配置
+  collection:
+    # 收集间隔
+    interval: 15s
+    # 批量大小
+    batch_size: 1000
+    # 收集超时
+    timeout: 10s
+    # 缓冲区大小
+    buffer_size: 10000
+    # 并发收集器数量
+    workers: 10
+    # 启用的收集器
+    enabled_collectors:
+      - system
+      - application
+      - business
+      - database
+      - redis
+      - http
+      - grpc
+    
+    # 系统指标收集
+    system:
+      enabled: true
+      interval: 30s
+      metrics:
+        - cpu_usage
+        - memory_usage
+        - disk_usage
+        - network_io
+        - load_average
+        - process_count
+        - file_descriptors
+    
+    # 应用指标收集
+    application:
+      enabled: true
+      interval: 15s
+      metrics:
+        - http_requests
+        - http_duration
+        - http_errors
+        - grpc_requests
+        - grpc_duration
+        - grpc_errors
+        - goroutines
+        - gc_duration
+    
+    # 业务指标收集
+    business:
+      enabled: true
+      interval: 60s
+      metrics:
+        - user_active
+        - feature_usage
+        - transaction_count
+        - revenue_metrics
+        - conversion_rate
+    
+    # 数据库指标收集
+    database:
+      enabled: true
+      interval: 30s
+      metrics:
+        - connection_pool
+        - query_duration
+        - slow_queries
+        - deadlocks
+        - table_size
+        - index_usage
+    
+    # Redis指标收集
+    redis:
+      enabled: true
+      interval: 30s
+      metrics:
+        - memory_usage
+        - hit_rate
+        - commands_processed
+        - connected_clients
+        - keyspace_hits
+        - keyspace_misses
+
+  # 数据存储配置
+  storage:
+    # 主存储引擎
+    primary:
+      type: "prometheus"  # prometheus, influxdb, clickhouse
+      url: "http://prometheus:9090"
+      retention: "30d"
+      compression: true
+      sharding:
+        enabled: false
+        shards: 3
+    
+    # 时序数据库配置
+    timeseries:
+      type: "influxdb"
+      url: "http://influxdb:8086"
+      database: "monitoring"
+      username: "admin"
+      password: "password"
+      retention_policy: "30d"
+      precision: "s"
+      batch_size: 5000
+      flush_interval: 10s
+    
+    # 元数据存储
+    metadata:
+      type: "postgresql"
+      host: "postgres"
+      port: 5432
+      database: "monitoring_metadata"
+      username: "postgres"
+      password: "password"
+      ssl_mode: "disable"
+      max_open_conns: 25
+      max_idle_conns: 5
+      conn_max_lifetime: 300s
+    
+    # 缓存配置
+    cache:
+      type: "redis"
+      host: "redis"
+      port: 6379
+      database: 2
+      password: ""
+      pool_size: 10
+      min_idle_conns: 2
+      idle_timeout: 300s
+      ttl: 3600s
+
+  # 数据处理配置
+  processing:
+    # 聚合配置
+    aggregation:
+      enabled: true
+      window_size: "5m"
+      step_size: "1m"
+      functions:
+        - avg
+        - sum
+        - min
+        - max
+        - count
+        - rate
+        - increase
+    
+    # 异常检测
+    anomaly_detection:
+      enabled: true
+      algorithm: "statistical"  # statistical, ml, hybrid
+      sensitivity: 0.8
+      window_size: "1h"
+      min_samples: 100
+      threshold_factor: 2.0
+    
+    # 趋势分析
+    trend_analysis:
+      enabled: true
+      algorithm: "linear_regression"
+      window_size: "24h"
+      prediction_horizon: "4h"
+      confidence_interval: 0.95
+    
+    # 数据清理
+    cleanup:
+      enabled: true
+      interval: "1h"
+      retention_rules:
+        raw_data: "7d"
+        aggregated_1m: "30d"
+        aggregated_5m: "90d"
+        aggregated_1h: "1y"
+
+  # 告警系统配置
+  alerting:
+    enabled: true
+    # 评估间隔
+    evaluation_interval: 30s
+    # 通知超时
+    notification_timeout: 5m
+    # 告警规则文件
+    rules_file: "config/alerts.yaml"
+    # 告警历史保留时间
+    history_retention: "30d"
+    
+    # 告警级别
+    severity_levels:
+      - info
+      - warning
+      - critical
+      - emergency
+    
+    # 告警抑制
+    suppression:
+      enabled: true
+      # 相同告警抑制时间
+      same_alert_interval: "5m"
+      # 依赖告警抑制
+      dependency_suppression: true
+    
+    # 告警升级
+    escalation:
+      enabled: true
+      # 升级规则
+      rules:
+        - level: "warning"
+          escalate_after: "15m"
+          escalate_to: "critical"
+        - level: "critical"
+          escalate_after: "30m"
+          escalate_to: "emergency"
+    
+    # 通知渠道
+    notifications:
+      # 邮件通知
+      email:
+        enabled: true
+        smtp_host: "smtp.gmail.com"
+        smtp_port: 587
+        username: "monitoring@taishang.com"
+        password: "password"
+        from: "monitoring@taishang.com"
+        to:
+          - "admin@taishang.com"
+          - "ops@taishang.com"
+        template: "email_alert_template.html"
+      
+      # 短信通知
+      sms:
+        enabled: false
+        provider: "aliyun"
+        access_key: "your_access_key"
+        secret_key: "your_secret_key"
+        sign_name: "太上老君"
+        template_code: "SMS_123456789"
+        phone_numbers:
+          - "+86138****8888"
+      
+      # 钉钉通知
+      dingtalk:
+        enabled: true
+        webhook_url: "https://oapi.dingtalk.com/robot/send?access_token=xxx"
+        secret: "your_secret"
+        at_mobiles:
+          - "138****8888"
+        at_all: false
+      
+      # 企业微信通知
+      wechat:
+        enabled: false
+        corp_id: "your_corp_id"
+        corp_secret: "your_corp_secret"
+        agent_id: 1000001
+        to_user: "@all"
+      
+      # Slack通知
+      slack:
+        enabled: false
+        webhook_url: "https://hooks.slack.com/services/xxx"
+        channel: "#monitoring"
+        username: "monitoring-bot"
+      
+      # Webhook通知
+      webhook:
+        enabled: true
+        url: "http://your-webhook-endpoint.com/alerts"
+        method: "POST"
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer your_token"
+        timeout: 10s
+        retry_count: 3
+
+  # 可视化配置
+  visualization:
+    # 仪表板配置
+    dashboards:
+      enabled: true
+      # 默认仪表板
+      default_dashboards:
+        - "system_overview"
+        - "application_metrics"
+        - "business_metrics"
+        - "alert_overview"
+      # 自定义仪表板目录
+      custom_dashboards_dir: "config/dashboards"
+      # 刷新间隔
+      refresh_interval: "30s"
+      # 时间范围选项
+      time_ranges:
+        - "5m"
+        - "15m"
+        - "1h"
+        - "6h"
+        - "24h"
+        - "7d"
+        - "30d"
+    
+    # 图表配置
+    charts:
+      # 默认图表类型
+      default_type: "line"
+      # 支持的图表类型
+      supported_types:
+        - line
+        - area
+        - bar
+        - pie
+        - gauge
+        - heatmap
+        - table
+      # 颜色主题
+      color_theme: "default"
+      # 图例位置
+      legend_position: "bottom"
+    
+    # 导出配置
+    export:
+      enabled: true
+      formats:
+        - png
+        - pdf
+        - csv
+        - json
+      max_export_size: "10MB"
+
+  # 分布式追踪配置
+  tracing:
+    enabled: true
+    # 追踪系统类型
+    system: "jaeger"  # jaeger, zipkin, skywalking
+    # Jaeger配置
+    jaeger:
+      endpoint: "http://jaeger:14268/api/traces"
+      agent_host: "jaeger"
+      agent_port: 6831
+      sampler_type: "probabilistic"
+      sampler_param: 0.1
+    
+    # 采样配置
+    sampling:
+      # 采样率
+      rate: 0.1
+      # 最大traces数量
+      max_traces: 10000
+      # 追踪保留时间
+      retention: "7d"
+    
+    # 服务映射
+    service_map:
+      enabled: true
+      update_interval: "1m"
+      dependency_threshold: 10
+
+  # 自动化运维配置
+  automation:
+    # 自动扩缩容
+    autoscaling:
+      enabled: false
+      # 扩容阈值
+      scale_up_threshold: 80
+      # 缩容阈值
+      scale_down_threshold: 20
+      # 最小实例数
+      min_instances: 2
+      # 最大实例数
+      max_instances: 10
+      # 冷却时间
+      cooldown_period: "5m"
+    
+    # 故障自愈
+    self_healing:
+      enabled: false
+      # 重启策略
+      restart_policy:
+        max_retries: 3
+        backoff_factor: 2
+        max_backoff: "5m"
+      # 健康检查
+      health_check:
+        interval: "30s"
+        timeout: "10s"
+        failure_threshold: 3
+    
+    # 容量规划
+    capacity_planning:
+      enabled: true
+      # 预测周期
+      prediction_period: "7d"
+      # 增长率阈值
+      growth_rate_threshold: 0.2
+      # 报告生成间隔
+      report_interval: "24h"
+
+  # 安全配置
+  security:
+    # 认证配置
+    authentication:
+      enabled: true
+      type: "jwt"  # jwt, basic, oauth2
+      jwt_secret: "your_jwt_secret"
+      token_expiry: "24h"
+    
+    # 授权配置
+    authorization:
+      enabled: true
+      # 角色权限映射
+      roles:
+        admin:
+          - read
+          - write
+          - delete
+          - manage
+        operator:
+          - read
+          - write
+        viewer:
+          - read
+    
+    # HTTPS配置
+    tls:
+      enabled: false
+      cert_file: "/etc/ssl/certs/monitoring.crt"
+      key_file: "/etc/ssl/private/monitoring.key"
+    
+    # 访问控制
+    access_control:
+      # IP白名单
+      ip_whitelist:
+        - "127.0.0.1"
+        - "10.0.0.0/8"
+        - "172.16.0.0/12"
+        - "192.168.0.0/16"
+      # 请求限流
+      rate_limiting:
+        enabled: true
+        requests_per_minute: 1000
+        burst_size: 100
+
+  # 日志配置
+  logging:
+    level: "info"  # debug, info, warn, error
+    format: "json"  # json, text
+    output: "stdout"  # stdout, file
+    file_path: "/var/log/monitoring/app.log"
+    max_size: "100MB"
+    max_backups: 10
+    max_age: 30
+    compress: true
+    
+    # 结构化日志字段
+    fields:
+      service: "monitoring"
+      version: "1.0.0"
+      environment: "development"
+
+  # 性能配置
+  performance:
+    # 并发配置
+    concurrency:
+      max_goroutines: 1000
+      worker_pool_size: 100
+      queue_size: 10000
+    
+    # 内存配置
+    memory:
+      max_memory_usage: "2GB"
+      gc_target_percentage: 100
+      gc_max_pause: "10ms"
+    
+    # 网络配置
+    network:
+      max_connections: 1000
+      connection_timeout: "30s"
+      keep_alive_timeout: "60s"
+      read_buffer_size: 4096
+      write_buffer_size: 4096
+
+  # 开发配置
+  development:
+    # 调试模式
+    debug: true
+    # 性能分析
+    pprof:
+      enabled: true
+      host: "localhost"
+      port: 6060
+    # 热重载
+    hot_reload: true
+    # 模拟数据
+    mock_data: false
+
+# 环境特定配置
+environments:
+  # 开发环境
+  development:
+    collection:
+      interval: 30s
+    storage:
+      retention: "7d"
+    alerting:
+      evaluation_interval: 60s
+    logging:
+      level: "debug"
+  
+  # 测试环境
+  staging:
+    collection:
+      interval: 15s
+    storage:
+      retention: "14d"
+    alerting:
+      evaluation_interval: 30s
+    logging:
+      level: "info"
+  
+  # 生产环境
+  production:
+    collection:
+      interval: 15s
+    storage:
+      retention: "90d"
+      compression: true
+    alerting:
+      evaluation_interval: 15s
+    automation:
+      autoscaling:
+        enabled: true
+      self_healing:
+        enabled: true
+    security:
+      authentication:
+        enabled: true
+      tls:
+        enabled: true
+    logging:
+      level: "warn"
+      format: "json"
+      output: "file"

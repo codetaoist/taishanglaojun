@@ -1,0 +1,250 @@
+# 太上老君监控系统 Kubernetes RBAC 配置
+
+# ServiceAccount for Taishanglaojun Monitoring
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: taishanglaojun-monitoring
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+automountServiceAccountToken: true
+
+---
+# ServiceAccount for Prometheus
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+automountServiceAccountToken: true
+
+---
+# ClusterRole for Prometheus
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+      - ingresses
+      - configmaps
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions", "networking.k8s.io"]
+    resources:
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - configmaps
+    verbs: ["get"]
+  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
+    verbs: ["get"]
+
+---
+# ClusterRoleBinding for Prometheus
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: taishanglaojun-monitoring
+
+---
+# Role for Taishanglaojun Monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: taishanglaojun-monitoring
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+rules:
+  - apiGroups: [""]
+    resources:
+      - configmaps
+      - secrets
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - events
+    verbs: ["create", "patch"]
+
+---
+# RoleBinding for Taishanglaojun Monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: taishanglaojun-monitoring
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: taishanglaojun-monitoring
+subjects:
+  - kind: ServiceAccount
+    name: taishanglaojun-monitoring
+    namespace: taishanglaojun-monitoring
+
+---
+# ClusterRole for Taishanglaojun Monitoring (cluster-wide monitoring)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: taishanglaojun-monitoring-cluster
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/metrics
+      - nodes/stats
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+      - namespaces
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+      - daemonsets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+      - cronjobs
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingresses
+      - networkpolicies
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources:
+      - storageclasses
+      - volumeattachments
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - persistentvolumes
+      - persistentvolumeclaims
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
+    verbs: ["get"]
+
+---
+# ClusterRoleBinding for Taishanglaojun Monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: taishanglaojun-monitoring-cluster
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: taishanglaojun-monitoring-cluster
+subjects:
+  - kind: ServiceAccount
+    name: taishanglaojun-monitoring
+    namespace: taishanglaojun-monitoring
+
+---
+# ServiceAccount for Node Exporter
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: node-exporter
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+automountServiceAccountToken: false
+
+---
+# ClusterRole for Node Exporter
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-exporter
+  labels:
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+rules:
+  - apiGroups: ["authentication.k8s.io"]
+    resources: ["tokenreviews"]
+    verbs: ["create"]
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["subjectaccessreviews"]
+    verbs: ["create"]
+
+---
+# ClusterRoleBinding for Node Exporter
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: node-exporter
+  labels:
+    app.kubernetes.io/name: node-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: node-exporter
+subjects:
+  - kind: ServiceAccount
+    name: node-exporter
+    namespace: taishanglaojun-monitoring

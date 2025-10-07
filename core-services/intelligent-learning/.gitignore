@@ -1,0 +1,175 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# Build artifacts
+build/
+dist/
+bin/
+*.tar.gz
+*.zip
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Log files
+*.log
+logs/
+log/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Coverage reports
+coverage/
+*.cover
+*.coverprofile
+
+# Documentation generated files
+docs/swagger/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+cache/
+
+# Node modules (if any frontend tools are used)
+node_modules/
+
+# Python cache (if any Python scripts are used)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Docker volumes
+docker-volumes/
+
+# Kubernetes secrets
+k8s-secrets/
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Backup files
+*.bak
+*.backup
+
+# Configuration files with sensitive data
+config.local.yaml
+config.production.yaml
+
+# Upload directories
+uploads/
+static/uploads/
+
+# Profiling data
+*.prof
+*.pprof
+
+# Memory dumps
+*.dump
+*.hprof
+
+# Application specific
+intelligent-learning
+intelligent-learning.exe
+
+# Test data
+testdata/fixtures/
+testdata/temp/
+
+# Vendor directory
+vendor/
+
+# Air live reload tool
+.air.toml
+tmp/
+
+# GoLand
+.idea/
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+
+# Delve debugger
+__debug_bin
+
+# Local development files
+docker-compose.override.yml
+.env.override
+
+# Helm charts
+charts/*/charts/
+charts/*/requirements.lock
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# Local scripts
+scripts/local/
+scripts/dev/
+
+# Performance test results
+performance-results/
+
+# Security scan results
+security-reports/
+
+# Dependency check results
+dependency-check-report.html
+
+# Local database dumps
+*.sql.gz
+*.dump.gz

@@ -209,6 +209,21 @@ services:
         rewrite: "/api/v1/user/me"
         strip_prefix: false
         middleware: ["auth", "rate_limit"]
+      - path: "/auth/sessions"
+        method: "GET"
+        rewrite: "/api/v1/sessions"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/sessions/:sessionId"
+        method: "DELETE"
+        rewrite: "/api/v1/sessions/:sessionId"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/sessions"
+        method: "DELETE"
+        rewrite: "/api/v1/sessions"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
 
   # 文化智慧服务
   - name: "cultural-wisdom-service"

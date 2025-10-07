@@ -16,6 +16,7 @@ import (
 	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/jwt"
 	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/logger"
 	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/middleware"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/monitoring"
 	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/repository"
 	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/routes"
 	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/service"
@@ -87,7 +88,10 @@ func main() {
 	tokenRepo := repository.NewTokenRepository(db.GetDB(), log)
 
 	// 初始化邮件服务
-	emailService := service.NewEmailService(&cfg.Email, log)
+	emailService, err := service.NewEmailService(cfg.Email, log)
+	if err != nil {
+		log.Fatal("Failed to initialize email service", zap.Error(err))
+	}
 
 	// 初始化服务层
 	authService := service.NewAuthService(
@@ -113,6 +117,9 @@ func main() {
 	}
 	rateLimiter := middleware.NewRateLimiter(rateLimiterConfig, log)
 
+	// 初始化Prometheus指标收集
+	metrics := monitoring.NewMetrics(log)
+
 	// 初始化处理器器
 	authHandler := handler.NewAuthHandler(authService, log)
 
@@ -125,8 +132,11 @@ func main() {
 	// 创建路由
 	router := gin.New()
 
+	// 添加Prometheus指标中间件
+	router.Use(metrics.GinMiddleware())
+
 	// 设置路由
-	routes.SetupRoutes(router, authHandler, databaseHandler, authMiddleware, rateLimiter, db.GetDB(), log, userRepo, sessionRepo, tokenRepo, jwtManager, authService)
+	routes.SetupRoutes(router, authHandler, databaseHandler, authMiddleware, rateLimiter, db.GetDB(), log, userRepo, sessionRepo, tokenRepo, jwtManager, authService, metrics)
 
 	// 创建HTTP服务
 	server := &http.Server{
@@ -146,7 +156,7 @@ func main() {
 	}()
 
 	// 启动后台任务
-	go startBackgroundTasks(cfg, db, tokenRepo, sessionRepo, log)
+	go startBackgroundTasks(cfg, db, tokenRepo, sessionRepo, metrics, log)
 
 	// 等待中间件断信息号
 	quit := make(chan os.Signal, 1)
@@ -172,6 +182,7 @@ func startBackgroundTasks(
 	db *database.Database,
 	tokenRepo repository.TokenRepository,
 	sessionRepo repository.SessionRepository,
+	metrics *monitoring.Metrics,
 	log *zap.Logger,
 ) {
 	ticker := time.NewTicker(cfg.Security.TokenCleanupInterval)
@@ -184,7 +195,7 @@ func startBackgroundTasks(
 	for {
 		select {
 		case <-ticker.C:
-			cleanupExpiredTokensAndSessions(tokenRepo, sessionRepo, log)
+			cleanupExpiredTokensAndSessions(tokenRepo, sessionRepo, metrics, log)
 		}
 	}
 }
@@ -193,6 +204,7 @@ func startBackgroundTasks(
 func cleanupExpiredTokensAndSessions(
 	tokenRepo repository.TokenRepository,
 	sessionRepo repository.SessionRepository,
+	metrics *monitoring.Metrics,
 	log *zap.Logger,
 ) {
 	ctx := context.Background()
@@ -200,35 +212,45 @@ func cleanupExpiredTokensAndSessions(
 	// 清理过期令牌
 	if deletedTokens, err := tokenRepo.CleanupExpiredTokens(ctx); err != nil {
 		log.Error("Failed to cleanup expired tokens", zap.Error(err))
+		metrics.RecordSystemCleanup("tokens", "expired", "error")
 	} else if deletedTokens > 0 {
 		log.Info("Cleaned up expired tokens", zap.Int64("count", deletedTokens))
+		metrics.RecordSystemCleanup("tokens", "expired", "success")
 	}
 
 	// 清理已使用户的令牌
 	if deletedTokens, err := tokenRepo.CleanupUsedTokens(ctx, 24*time.Hour); err != nil {
 		log.Error("Failed to cleanup used tokens", zap.Error(err))
+		metrics.RecordSystemCleanup("tokens", "used", "error")
 	} else if deletedTokens > 0 {
 		log.Info("Cleaned up used tokens", zap.Int64("count", deletedTokens))
+		metrics.RecordSystemCleanup("tokens", "used", "success")
 	}
 
 	// 清理已撤销的令牌
 	if deletedTokens, err := tokenRepo.CleanupRevokedTokens(ctx, 24*time.Hour); err != nil {
 		log.Error("Failed to cleanup revoked tokens", zap.Error(err))
+		metrics.RecordSystemCleanup("tokens", "revoked", "error")
 	} else if deletedTokens > 0 {
 		log.Info("Cleaned up revoked tokens", zap.Int64("count", deletedTokens))
+		metrics.RecordSystemCleanup("tokens", "revoked", "success")
 	}
 
 	// 清理过期会话
 	if deletedSessions, err := sessionRepo.CleanupExpiredSessions(ctx); err != nil {
 		log.Error("Failed to cleanup expired sessions", zap.Error(err))
+		metrics.RecordSystemCleanup("sessions", "expired", "error")
 	} else if deletedSessions > 0 {
 		log.Info("Cleaned up expired sessions", zap.Int64("count", deletedSessions))
+		metrics.RecordSystemCleanup("sessions", "expired", "success")
 	}
 
 	// 清理已撤销的会话
-	if deletedSessions, err := sessionRepo.CleanupRevokedSessions(ctx, 7*24*time.Hour); err != nil {
+	if deletedSessions, err := sessionRepo.CleanupRevokedSessions(ctx); err != nil {
 		log.Error("Failed to cleanup revoked sessions", zap.Error(err))
+		metrics.RecordSystemCleanup("sessions", "revoked", "error")
 	} else if deletedSessions > 0 {
 		log.Info("Cleaned up revoked sessions", zap.Int64("count", deletedSessions))
+		metrics.RecordSystemCleanup("sessions", "revoked", "success")
 	}
 }

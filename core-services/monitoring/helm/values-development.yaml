@@ -1,0 +1,238 @@
+# 太上老君监控系统 - 开发环境配置
+
+# 全局配置
+global:
+  imageRegistry: "ghcr.io"
+  imagePullSecrets: []
+
+# 应用配置
+replicaCount: 1
+
+image:
+  repository: taishanglaojun/monitoring
+  pullPolicy: Always
+  tag: "latest"
+
+# 服务配置
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+# Ingress 配置
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: monitoring-dev.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# 资源限制
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# 自动扩缩容
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+
+# 存活探针
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# 就绪探针
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# 启动探针
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+# 持久化存储
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+# 环境变量
+env:
+  - name: APP_ENV
+    value: "development"
+  - name: LOG_LEVEL
+    value: "debug"
+  - name: PORT
+    value: "8080"
+  - name: DEBUG
+    value: "true"
+
+# 数据库配置
+database:
+  enabled: true
+  type: postgresql
+  host: "postgres-development"
+  port: 5432
+  name: taishanglaojun_monitoring_dev
+  user: monitoring_user
+  password: "dev_password_123"
+  sslMode: disable
+  maxOpenConns: 10
+  maxIdleConns: 2
+  connMaxLifetime: 300s
+
+# Redis 配置
+redis:
+  enabled: true
+  host: "redis-development"
+  port: 6379
+  db: 0
+  password: "dev_redis_123"
+  maxRetries: 3
+  poolSize: 5
+  minIdleConns: 2
+
+# 监控配置
+monitoring:
+  enabled: true
+  logLevel: debug
+  debug: true
+  metricsEnabled: true
+  metricsPath: /metrics
+  tracingEnabled: true
+  tracingEndpoint: "http://jaeger-collector:14268/api/traces"
+  healthCheckPath: /health
+  readinessCheckPath: /ready
+
+# 安全配置
+security:
+  jwt:
+    secret: "dev_jwt_secret_key_for_development_only"
+    expiration: 24h
+  encryption:
+    key: "dev_encryption_key_32_chars_long"
+  cors:
+    enabled: true
+    allowedOrigins: ["*"]
+    allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowedHeaders: ["*"]
+
+# 告警配置
+alerting:
+  enabled: false
+  webhookUrl: ""
+  slackChannel: ""
+  emailRecipients: []
+
+# 备份配置
+backup:
+  enabled: false
+
+# 服务监控器
+serviceMonitor:
+  enabled: false
+  namespace: ""
+  labels: {}
+  interval: 30s
+  scrapeTimeout: 10s
+  path: /metrics
+  scheme: http
+
+# Pod 监控器
+podMonitor:
+  enabled: false
+
+# 网络策略
+networkPolicy:
+  enabled: false
+
+# Pod 中断预算
+podDisruptionBudget:
+  enabled: false
+
+# 依赖服务配置
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "dev_postgres_123"
+    username: monitoring_user
+    password: "dev_password_123"
+    database: taishanglaojun_monitoring_dev
+  primary:
+    persistence:
+      enabled: true
+      size: 5Gi
+      storageClass: ""
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "dev_redis_123"
+  master:
+    persistence:
+      enabled: true
+      size: 2Gi
+      storageClass: ""
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+
+jaeger:
+  enabled: false
+
+elasticsearch:
+  enabled: false
+
+kibana:
+  enabled: false

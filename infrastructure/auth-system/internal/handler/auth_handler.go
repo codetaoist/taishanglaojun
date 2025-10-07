@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -42,6 +43,9 @@ func NewAuthHandler(authService service.AuthService, logger *zap.Logger) *AuthHa
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req models.RegisterRequest
 	
+	// 记录原始请求体用于调试
+	h.logger.Debug("Register request received", zap.String("content_type", c.GetHeader("Content-Type")))
+	
 	// 直接绑定到结构体
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("Invalid JSON format", zap.Error(err))
@@ -53,6 +57,16 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 	
+	// 记录解析后的请求数据（不包含密码）
+	h.logger.Debug("Parsed register request", 
+		zap.String("username", req.Username),
+		zap.String("email", req.Email),
+		zap.String("first_name", req.FirstName),
+		zap.String("last_name", req.LastName),
+		zap.Bool("has_password", req.Password != ""),
+		zap.Bool("has_confirm_password", req.ConfirmPassword != ""),
+	)
+	
 	// 使用自定义验证方法
 	if err := req.Validate(); err != nil {
 		h.logger.Warn("Register request validation failed", zap.Error(err))
@@ -63,8 +77,19 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	h.logger.Info("Calling auth service register", 
+		zap.String("username", req.Username),
+		zap.String("email", req.Email),
+	)
+
 	resp, err := h.authService.Register(c.Request.Context(), &req)
 	if err != nil {
+		h.logger.Error("Auth service register failed", 
+			zap.String("username", req.Username),
+			zap.String("email", req.Email),
+			zap.Error(err),
+			zap.String("error_type", fmt.Sprintf("%T", err)),
+		)
 		h.handleServiceError(c, err, "Failed to register user")
 		return
 	}

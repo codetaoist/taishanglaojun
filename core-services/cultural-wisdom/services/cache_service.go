@@ -50,27 +50,26 @@ const (
 	SearchCacheTTL     = 5 * time.Minute
 )
 
-// GetWisdom 获取缓存的智慧内容
+// GetWisdom 从缓存获取智慧内容
 func (c *CacheService) GetWisdom(ctx context.Context, id string) (*models.CulturalWisdom, error) {
-	// 如果Redis客户端为空，直接返回nil
+	// 如果没有Redis客户端，直接返回nil
 	if c.redis == nil {
-		return nil, nil
+		return nil, fmt.Errorf("redis client not available")
 	}
-	
+
 	key := WisdomCachePrefix + id
-	
 	data, err := c.redis.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, nil // 缓存未命中
 		}
-		c.logger.Error("Failed to get wisdom from cache", zap.String("id", id), zap.Error(err))
+		c.logger.Error("Failed to get wisdom from cache", zap.Error(err), zap.String("key", key))
 		return nil, err
 	}
 
 	var wisdom models.CulturalWisdom
 	if err := json.Unmarshal([]byte(data), &wisdom); err != nil {
-		c.logger.Error("Failed to unmarshal wisdom from cache", zap.String("id", id), zap.Error(err))
+		c.logger.Error("Failed to unmarshal wisdom from cache", zap.Error(err))
 		return nil, err
 	}
 
@@ -100,48 +99,33 @@ func (c *CacheService) SetWisdom(ctx context.Context, wisdom *models.CulturalWis
 	return nil
 }
 
-// GetWisdomList 获取缓存的智慧列表
+// GetWisdomList 从缓存获取智慧列表
 func (c *CacheService) GetWisdomList(ctx context.Context, filter *models.WisdomFilter) ([]models.WisdomSummary, int64, error) {
-	// 如果Redis客户端为空，直接返回nil
+	// 如果没有Redis客户端，直接返回nil
 	if c.redis == nil {
-		return nil, 0, nil
+		return nil, 0, fmt.Errorf("redis client not available")
 	}
-	
+
 	key := c.generateWisdomListKey(filter)
-	
-	// 获取列表数据
-	listData, err := c.redis.Get(ctx, key+":list").Result()
+	data, err := c.redis.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
 			return nil, 0, nil // 缓存未命中
 		}
-		c.logger.Error("Failed to get wisdom list from cache", zap.Error(err))
+		c.logger.Error("Failed to get wisdom list from cache", zap.Error(err), zap.String("key", key))
 		return nil, 0, err
 	}
 
-	// 获取总数
-	totalData, err := c.redis.Get(ctx, key+":total").Result()
-	if err != nil {
-		if err == redis.Nil {
-			return nil, 0, nil // 缓存未命中
-		}
-		c.logger.Error("Failed to get wisdom list total from cache", zap.Error(err))
-		return nil, 0, err
+	var result struct {
+		Wisdoms []models.WisdomSummary `json:"wisdoms"`
+		Total   int64                  `json:"total"`
 	}
-
-	var wisdoms []models.WisdomSummary
-	if err := json.Unmarshal([]byte(listData), &wisdoms); err != nil {
+	if err := json.Unmarshal([]byte(data), &result); err != nil {
 		c.logger.Error("Failed to unmarshal wisdom list from cache", zap.Error(err))
 		return nil, 0, err
 	}
 
-	var total int64
-	if err := json.Unmarshal([]byte(totalData), &total); err != nil {
-		c.logger.Error("Failed to unmarshal wisdom list total from cache", zap.Error(err))
-		return nil, 0, err
-	}
-
-	return wisdoms, total, nil
+	return result.Wisdoms, result.Total, nil
 }
 
 // SetWisdomList 设置智慧列表到缓存

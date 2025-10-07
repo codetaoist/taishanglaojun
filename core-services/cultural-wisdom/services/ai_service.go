@@ -662,7 +662,7 @@ func (s *AIService) IntelligentQA(ctx context.Context, request QARequest) (*QARe
 		Messages: []providers.Message{
 			{
 				Role:    "system",
-				Content: "你是一位博学的中华传统文化专家和智慧导师，精通各种古典文献、哲学思想和文化典故。你能够准确回答关于中华传统文化的各种问题，并能引用相关的经典智慧进行说明。请用专业而易懂的语言回答问题，并尽可能引用相关的文化智慧作为支撑。",
+				Content: "你是一位博学的中华传统文化专家和智慧导师，精通各种古典文献、哲学思想和文化典故。你能够准确回答关于中华传统文化的各种问题，并能引用相关的经典智慧进行说明。请用专业易于懂的语言回答问题，并尽可能引用相关的文化智慧作为支撑。",
 			},
 			{
 				Role:    "user",
@@ -859,4 +859,14 @@ func (s *AIService) calculateQuestionRelevance(question string, wisdom models.Cu
 	}
 	
 	return relevance
+}
+
+// GetEmbedding 获取文本的向量表示
+func (s *AIService) GetEmbedding(ctx context.Context, text string) ([]float32, error) {
+	provider, err := s.providerManager.GetDefaultProvider()
+	if err != nil {
+		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+	}
+
+	return provider.Embed(ctx, text)
 }

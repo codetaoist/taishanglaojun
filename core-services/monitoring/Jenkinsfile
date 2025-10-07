@@ -1,0 +1,663 @@
+#!/usr/bin/env groovy
+
+/**
+ * 太上老君监控系统 Jenkins 流水线
+ * 
+ * 此流水线包含以下阶段：
+ * 1. 代码检出和环境准备
+ * 2. 代码质量检查和测试
+ * 3. 安全扫描
+ * 4. 构建 Docker 镜像
+ * 5. 打包 Helm Chart
+ * 6. 部署到不同环境
+ * 7. 集成测试和验证
+ */
+
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: golang
+    image: golang:1.21-alpine
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  - name: docker
+    image: docker:24-dind
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  - name: helm
+    image: alpine/helm:3.12.0
+    command:
+    - cat
+    tty: true
+  - name: kubectl
+    image: bitnami/kubectl:1.28
+    command:
+    - cat
+    tty: true
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+"""
+        }
+    }
+
+    environment {
+        // 基础配置
+        PROJECT_NAME = 'taishanglaojun-monitoring'
+        GO_VERSION = '1.21'
+        
+        // 镜像配置
+        REGISTRY = 'ghcr.io'
+        IMAGE_NAME = 'taishanglaojun/monitoring'
+        HELM_CHART_NAME = 'taishanglaojun-monitoring'
+        
+        // 版本信息
+        VERSION = sh(script: "echo ${env.BUILD_NUMBER}", returnStdout: true).trim()
+        GIT_COMMIT = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+        BUILD_DATE = sh(script: "date -u +'%Y-%m-%dT%H:%M:%SZ'", returnStdout: true).trim()
+        
+        // 凭据
+        GITHUB_TOKEN = credentials('github-token')
+        DOCKER_REGISTRY_CREDS = credentials('docker-registry-creds')
+        KUBE_CONFIG_DEV = credentials('kube-config-dev')
+        KUBE_CONFIG_STAGING = credentials('kube-config-staging')
+        KUBE_CONFIG_PROD = credentials('kube-config-prod')
+        SLACK_WEBHOOK = credentials('slack-webhook')
+        
+        // 质量门禁
+        SONAR_TOKEN = credentials('sonar-token')
+        SNYK_TOKEN = credentials('snyk-token')
+    }
+
+    options {
+        // 构建选项
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 60, unit: 'MINUTES')
+        timestamps()
+        ansiColor('xterm')
+        
+        // 并发控制
+        disableConcurrentBuilds()
+        
+        // 跳过默认检出
+        skipDefaultCheckout()
+    }
+
+    triggers {
+        // 定时触发
+        cron(env.BRANCH_NAME == 'main' ? 'H 2 * * *' : '')
+        
+        // Webhook 触发
+        githubPush()
+    }
+
+    parameters {
+        choice(
+            name: 'DEPLOY_ENVIRONMENT',
+            choices: ['none', 'dev', 'staging', 'prod'],
+            description: '选择部署环境'
+        )
+        booleanParam(
+            name: 'SKIP_TESTS',
+            defaultValue: false,
+            description: '跳过测试阶段'
+        )
+        booleanParam(
+            name: 'SKIP_SECURITY_SCAN',
+            defaultValue: false,
+            description: '跳过安全扫描'
+        )
+        booleanParam(
+            name: 'FORCE_DEPLOY',
+            defaultValue: false,
+            description: '强制部署（跳过质量门禁）'
+        )
+    }
+
+    stages {
+        stage('准备阶段') {
+            parallel {
+                stage('检出代码') {
+                    steps {
+                        script {
+                            // 检出代码
+                            checkout scm
+                            
+                            // 设置构建信息
+                            currentBuild.displayName = "#${env.BUILD_NUMBER} - ${env.GIT_COMMIT}"
+                            currentBuild.description = "分支: ${env.BRANCH_NAME}"
+                            
+                            // 打印环境信息
+                            sh '''
+                                echo "=== 构建环境信息 ==="
+                                echo "项目名称: ${PROJECT_NAME}"
+                                echo "构建编号: ${BUILD_NUMBER}"
+                                echo "Git 提交: ${GIT_COMMIT}"
+                                echo "分支名称: ${BRANCH_NAME}"
+                                echo "构建时间: ${BUILD_DATE}"
+                                echo "====================="
+                            '''
+                        }
+                    }
+                }
+                
+                stage('环境检查') {
+                    steps {
+                        container('golang') {
+                            sh '''
+                                echo "=== Go 环境检查 ==="
+                                go version
+                                echo "GOPATH: $GOPATH"
+                                echo "GOROOT: $GOROOT"
+                                echo "=================="
+                            '''
+                        }
+                        container('docker') {
+                            sh '''
+                                echo "=== Docker 环境检查 ==="
+                                docker version
+                                echo "====================="
+                            '''
+                        }
+                        container('helm') {
+                            sh '''
+                                echo "=== Helm 环境检查 ==="
+                                helm version
+                                echo "==================="
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('代码质量') {
+            when {
+                not { params.SKIP_TESTS }
+            }
+            parallel {
+                stage('代码格式检查') {
+                    steps {
+                        container('golang') {
+                            dir('core-services/monitoring') {
+                                sh '''
+                                    echo "=== 代码格式检查 ==="
+                                    go mod download
+                                    
+                                    # 格式检查
+                                    if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+                                        echo "代码格式不符合规范:"
+                                        gofmt -s -l .
+                                        exit 1
+                                    fi
+                                    
+                                    # 导入检查
+                                    go install golang.org/x/tools/cmd/goimports@latest
+                                    if [ "$(goimports -l . | wc -l)" -gt 0 ]; then
+                                        echo "导入格式不符合规范:"
+                                        goimports -l .
+                                        exit 1
+                                    fi
+                                    
+                                    echo "代码格式检查通过"
+                                '''
+                            }
+                        }
+                    }
+                }
+                
+                stage('静态代码分析') {
+                    steps {
+                        container('golang') {
+                            dir('core-services/monitoring') {
+                                sh '''
+                                    echo "=== 静态代码分析 ==="
+                                    
+                                    # 安装 golangci-lint
+                                    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+                                    
+                                    # 运行静态分析
+                                    golangci-lint run --timeout=5m --out-format=checkstyle > golangci-lint-report.xml || true
+                                    
+                                    echo "静态代码分析完成"
+                                '''
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            publishCheckStyleResults pattern: 'core-services/monitoring/golangci-lint-report.xml'
+                        }
+                    }
+                }
+                
+                stage('单元测试') {
+                    steps {
+                        container('golang') {
+                            dir('core-services/monitoring') {
+                                sh '''
+                                    echo "=== 单元测试 ==="
+                                    
+                                    # 运行测试
+                                    go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+                                    
+                                    # 生成覆盖率报告
+                                    go tool cover -html=coverage.out -o coverage.html
+                                    go tool cover -func=coverage.out > coverage.txt
+                                    
+                                    # 显示覆盖率
+                                    echo "测试覆盖率:"
+                                    tail -1 coverage.txt
+                                '''
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'core-services/monitoring',
+                                reportFiles: 'coverage.html',
+                                reportName: '测试覆盖率报告'
+                            ])
+                            
+                            publishTestResults testResultsPattern: 'core-services/monitoring/test-results.xml'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('安全扫描') {
+            when {
+                not { params.SKIP_SECURITY_SCAN }
+            }
+            parallel {
+                stage('代码安全扫描') {
+                    steps {
+                        container('golang') {
+                            dir('core-services/monitoring') {
+                                sh '''
+                                    echo "=== 代码安全扫描 ==="
+                                    
+                                    # 安装 gosec
+                                    go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+                                    
+                                    # 运行安全扫描
+                                    gosec -fmt=json -out=gosec-report.json ./... || true
+                                    gosec -fmt=junit-xml -out=gosec-report.xml ./... || true
+                                    
+                                    echo "代码安全扫描完成"
+                                '''
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            publishTestResults testResultsPattern: 'core-services/monitoring/gosec-report.xml'
+                            archiveArtifacts artifacts: 'core-services/monitoring/gosec-report.json'
+                        }
+                    }
+                }
+                
+                stage('依赖安全扫描') {
+                    steps {
+                        container('golang') {
+                            dir('core-services/monitoring') {
+                                sh '''
+                                    echo "=== 依赖安全扫描 ==="
+                                    
+                                    # 安装 nancy
+                                    go install github.com/sonatypecommunity/nancy@latest
+                                    
+                                    # 扫描依赖
+                                    go list -json -deps ./... | nancy sleuth > nancy-report.txt || true
+                                    
+                                    # 安装 govulncheck
+                                    go install golang.org/x/vuln/cmd/govulncheck@latest
+                                    
+                                    # 漏洞检查
+                                    govulncheck ./... > govulncheck-report.txt || true
+                                    
+                                    echo "依赖安全扫描完成"
+                                '''
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'core-services/monitoring/*-report.txt'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('构建镜像') {
+            steps {
+                container('docker') {
+                    script {
+                        dir('core-services/monitoring') {
+                            // 构建镜像
+                            def image = docker.build("${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}", 
+                                "--build-arg VERSION=${env.VERSION} " +
+                                "--build-arg COMMIT_SHA=${env.GIT_COMMIT} " +
+                                "--build-arg BUILD_DATE=${env.BUILD_DATE} .")
+                            
+                            // 推送镜像
+                            docker.withRegistry("https://${env.REGISTRY}", env.DOCKER_REGISTRY_CREDS) {
+                                image.push()
+                                image.push("latest")
+                                
+                                // 如果是主分支，推送版本标签
+                                if (env.BRANCH_NAME == 'main') {
+                                    image.push("v${env.VERSION}")
+                                }
+                            }
+                            
+                            // 清理本地镜像
+                            sh "docker rmi ${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} || true"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('打包 Helm Chart') {
+            steps {
+                container('helm') {
+                    dir('core-services/monitoring') {
+                        sh '''
+                            echo "=== 打包 Helm Chart ==="
+                            
+                            # 添加依赖仓库
+                            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                            helm repo add grafana https://grafana.github.io/helm-charts
+                            helm repo add influxdata https://helm.influxdata.com/
+                            helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
+                            helm repo update
+                            
+                            # 更新依赖
+                            cd helm
+                            helm dependency update
+                            
+                            # 验证 Chart
+                            helm lint .
+                            
+                            # 打包 Chart
+                            cd ..
+                            mkdir -p charts
+                            helm package helm/ --destination ./charts/ --version ${BUILD_NUMBER}
+                            
+                            # 生成索引
+                            helm repo index ./charts/ --url https://charts.taishanglaojun.com
+                            
+                            echo "Helm Chart 打包完成"
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'core-services/monitoring/charts/*'
+                }
+            }
+        }
+
+        stage('部署') {
+            when {
+                anyOf {
+                    expression { params.DEPLOY_ENVIRONMENT != 'none' }
+                    allOf {
+                        branch 'develop'
+                        expression { params.DEPLOY_ENVIRONMENT == 'none' }
+                        expression { return true } // 自动部署到开发环境
+                    }
+                    allOf {
+                        branch 'main'
+                        expression { params.DEPLOY_ENVIRONMENT == 'none' }
+                        expression { return true } // 自动部署到预发布环境
+                    }
+                }
+            }
+            stages {
+                stage('确定部署环境') {
+                    steps {
+                        script {
+                            if (params.DEPLOY_ENVIRONMENT != 'none') {
+                                env.TARGET_ENV = params.DEPLOY_ENVIRONMENT
+                            } else if (env.BRANCH_NAME == 'develop') {
+                                env.TARGET_ENV = 'dev'
+                            } else if (env.BRANCH_NAME == 'main') {
+                                env.TARGET_ENV = 'staging'
+                            }
+                            
+                            echo "目标部署环境: ${env.TARGET_ENV}"
+                        }
+                    }
+                }
+                
+                stage('部署到开发环境') {
+                    when {
+                        expression { env.TARGET_ENV == 'dev' }
+                    }
+                    steps {
+                        container('kubectl') {
+                            script {
+                                deployToEnvironment('dev', env.KUBE_CONFIG_DEV, 'monitoring-dev.taishanglaojun.com')
+                            }
+                        }
+                    }
+                }
+                
+                stage('部署到预发布环境') {
+                    when {
+                        expression { env.TARGET_ENV == 'staging' }
+                    }
+                    steps {
+                        container('kubectl') {
+                            script {
+                                deployToEnvironment('staging', env.KUBE_CONFIG_STAGING, 'monitoring-staging.taishanglaojun.com')
+                            }
+                        }
+                    }
+                }
+                
+                stage('部署到生产环境') {
+                    when {
+                        expression { env.TARGET_ENV == 'prod' }
+                    }
+                    steps {
+                        script {
+                            // 生产环境需要人工确认
+                            timeout(time: 10, unit: 'MINUTES') {
+                                input message: '确认部署到生产环境？', 
+                                      ok: '确认部署',
+                                      submitterParameter: 'APPROVER'
+                            }
+                        }
+                        container('kubectl') {
+                            script {
+                                deployToEnvironment('prod', env.KUBE_CONFIG_PROD, 'monitoring.taishanglaojun.com')
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('集成测试') {
+            when {
+                expression { env.TARGET_ENV != null }
+            }
+            parallel {
+                stage('健康检查') {
+                    steps {
+                        container('kubectl') {
+                            script {
+                                runHealthChecks(env.TARGET_ENV)
+                            }
+                        }
+                    }
+                }
+                
+                stage('功能测试') {
+                    steps {
+                        container('golang') {
+                            dir('core-services/monitoring') {
+                                sh '''
+                                    echo "=== 功能测试 ==="
+                                    
+                                    # 运行集成测试
+                                    go test -tags=integration ./tests/integration/... -v
+                                    
+                                    echo "功能测试完成"
+                                '''
+                            }
+                        }
+                    }
+                }
+                
+                stage('性能测试') {
+                    steps {
+                        container('golang') {
+                            dir('core-services/monitoring') {
+                                sh '''
+                                    echo "=== 性能测试 ==="
+                                    
+                                    # 运行性能测试
+                                    go test -bench=. -benchmem ./tests/performance/... > performance-report.txt
+                                    
+                                    echo "性能测试完成"
+                                '''
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'core-services/monitoring/performance-report.txt'
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // 清理工作空间
+            cleanWs()
+        }
+        
+        success {
+            script {
+                sendNotification('success', '✅ 构建成功')
+            }
+        }
+        
+        failure {
+            script {
+                sendNotification('failure', '❌ 构建失败')
+            }
+        }
+        
+        unstable {
+            script {
+                sendNotification('unstable', '⚠️ 构建不稳定')
+            }
+        }
+    }
+}
+
+// 部署到指定环境的函数
+def deployToEnvironment(environment, kubeConfig, hostname) {
+    sh """
+        echo "=== 部署到 ${environment} 环境 ==="
+        
+        # 配置 kubectl
+        mkdir -p ~/.kube
+        echo '${kubeConfig}' | base64 -d > ~/.kube/config
+        
+        # 设置命名空间
+        NAMESPACE="taishanglaojun-monitoring"
+        if [ "${environment}" != "prod" ]; then
+            NAMESPACE="taishanglaojun-monitoring-${environment}"
+        fi
+        
+        # 安装 Helm
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        
+        # 部署应用
+        helm upgrade --install taishanglaojun-monitoring-${environment} \\
+            ./charts/taishanglaojun-monitoring-${env.BUILD_NUMBER}.tgz \\
+            --namespace \${NAMESPACE} \\
+            --create-namespace \\
+            --set image.tag=${env.BUILD_NUMBER} \\
+            --set ingress.hosts[0].host=${hostname} \\
+            --set global.environment=${environment} \\
+            --wait --timeout=10m
+        
+        echo "部署到 ${environment} 环境完成"
+    """
+}
+
+// 运行健康检查的函数
+def runHealthChecks(environment) {
+    sh """
+        echo "=== 健康检查 ==="
+        
+        NAMESPACE="taishanglaojun-monitoring"
+        if [ "${environment}" != "prod" ]; then
+            NAMESPACE="taishanglaojun-monitoring-${environment}"
+        fi
+        
+        # 检查 Pod 状态
+        kubectl get pods -n \${NAMESPACE} -l app.kubernetes.io/name=taishanglaojun-monitoring
+        
+        # 等待 Pod 就绪
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=taishanglaojun-monitoring -n \${NAMESPACE} --timeout=300s
+        
+        # 运行 Helm 测试
+        helm test taishanglaojun-monitoring-${environment} -n \${NAMESPACE}
+        
+        echo "健康检查完成"
+    """
+}
+
+// 发送通知的函数
+def sendNotification(status, message) {
+    def color = status == 'success' ? 'good' : (status == 'failure' ? 'danger' : 'warning')
+    def emoji = status == 'success' ? '✅' : (status == 'failure' ? '❌' : '⚠️')
+    
+    slackSend(
+        channel: '#ci-cd',
+        color: color,
+        message: """
+${emoji} *太上老君监控系统* - ${message}
+
+*项目:* ${env.JOB_NAME}
+*构建:* #${env.BUILD_NUMBER}
+*分支:* ${env.BRANCH_NAME}
+*提交:* ${env.GIT_COMMIT}
+*环境:* ${env.TARGET_ENV ?: 'N/A'}
+*耗时:* ${currentBuild.durationString}
+
+*查看详情:* ${env.BUILD_URL}
+        """.trim()
+    )
+}

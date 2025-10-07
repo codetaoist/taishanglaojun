@@ -45,12 +45,13 @@ type SessionRepository interface {
 	
 	// 清理方法
 	CleanupExpiredSessions(ctx context.Context) (int64, error)
-	CleanupRevokedSessions(ctx context.Context, olderThan time.Duration) (int64, error)
+	CleanupRevokedSessions(ctx context.Context) (int64, error)
 	
 	// 统计方法
 	Count(ctx context.Context) (int64, error)
 	CountByUser(ctx context.Context, userID uuid.UUID) (int64, error)
 	CountActiveByUser(ctx context.Context, userID uuid.UUID) (int64, error)
+	CountByStatus(ctx context.Context, status models.SessionStatus) (int64, error)
 }
 
 // sessionRepository 会话仓储实现
@@ -394,9 +395,10 @@ func (r *sessionRepository) CleanupExpiredSessions(ctx context.Context) (int64, 
 	return result.RowsAffected, nil
 }
 
-// CleanupRevokedSessions 清理撤销的会话�?
-func (r *sessionRepository) CleanupRevokedSessions(ctx context.Context, olderThan time.Duration) (int64, error) {
-	cutoffTime := time.Now().UTC().Add(-olderThan)
+// CleanupRevokedSessions 清理撤销的会话
+func (r *sessionRepository) CleanupRevokedSessions(ctx context.Context) (int64, error) {
+	// 清理7天前的已撤销会话
+	cutoffTime := time.Now().UTC().Add(-7 * 24 * time.Hour)
 	
 	result := r.db.WithContext(ctx).
 		Where("status = ? AND updated_at <= ?", models.SessionStatusRevoked, cutoffTime).
@@ -409,7 +411,7 @@ func (r *sessionRepository) CleanupRevokedSessions(ctx context.Context, olderTha
 	
 	r.logger.Info("Revoked sessions cleaned up successfully", 
 		zap.Int64("deleted", result.RowsAffected),
-		zap.Duration("older_than", olderThan),
+		zap.Time("cutoff_time", cutoffTime),
 	)
 	
 	return result.RowsAffected, nil
@@ -420,6 +422,22 @@ func (r *sessionRepository) Count(ctx context.Context) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.Session{}).Count(&count).Error; err != nil {
 		r.logger.Error("Failed to count sessions", zap.Error(err))
+		return 0, err
+	}
+	
+	return count, nil
+}
+
+// CountByStatus 根据状态统计会话数量
+func (r *sessionRepository) CountByStatus(ctx context.Context, status models.SessionStatus) (int64, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&models.Session{}).
+		Where("status = ?", status).
+		Count(&count).Error; err != nil {
+		r.logger.Error("Failed to count sessions by status", 
+			zap.String("status", string(status)),
+			zap.Error(err),
+		)
 		return 0, err
 	}
 	

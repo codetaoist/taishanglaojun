@@ -7,6 +7,7 @@ import { store } from './store';
 import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import Chat from './pages/Chat';
 import ApiTest from './pages/ApiTest';
 import Wisdom from './pages/Wisdom';
@@ -16,6 +17,15 @@ import Profile from './pages/Profile';
 import Community from './pages/Community';
 import UserFavorites from './pages/UserFavorites';
 import UserNotes from './pages/UserNotes';
+import IntelligentLearning from './pages/IntelligentLearning';
+import ProjectManagement from './pages/ProjectManagement';
+import ProjectWorkspace from './pages/projects/ProjectWorkspace';
+import TaskManagement from './pages/projects/TaskManagement';
+import TeamCollaboration from './pages/projects/TeamCollaboration';
+import ProjectAnalytics from './pages/projects/ProjectAnalytics';
+import HealthManagement from './pages/HealthManagement';
+import SecurityCenter from './pages/SecurityCenter';
+import PermissionTest from './components/common/PermissionTest';
 import Login from './pages/Login';
 import TestLogin from './pages/TestLogin';
 import EmailVerification from './pages/EmailVerification';
@@ -30,7 +40,7 @@ import SystemSettings from './pages/admin/SystemSettings';
 import NotificationCenter from './pages/admin/NotificationCenter';
 import ContentReview from './pages/admin/ContentReview';
 import WisdomEditor from './pages/admin/WisdomEditor';
-import { useAuth } from './hooks/useAuth.tsx';
+import { useAuth } from './hooks/useAuth';
 import './index.css';
 
 // 受保护的路由组件
@@ -112,12 +122,22 @@ const App: React.FC = () => {
                 <MainLayout>
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/chat" element={<Chat />} />
                     <Route path="/api-test" element={<ApiTest />} />
                     <Route path="/wisdom" element={<Wisdom />} />
                     <Route path="/wisdom/:id" element={<WisdomDetail />} />
                     <Route path="/recommendations" element={<RecommendationCenter />} />
                     <Route path="/community" element={<Community />} />
+                    <Route path="/intelligent-learning" element={<IntelligentLearning />} />
+                    <Route path="/project-management" element={<ProjectManagement />} />
+                    <Route path="/projects/workspace" element={<ProjectWorkspace />} />
+                    <Route path="/projects/tasks" element={<TaskManagement />} />
+                    <Route path="/projects/collaboration" element={<TeamCollaboration />} />
+                    <Route path="/projects/analytics" element={<ProjectAnalytics />} />
+                    <Route path="/health-management" element={<HealthManagement />} />
+                    <Route path="/security" element={<SecurityCenter />} />
+                    <Route path="/permission-test" element={<PermissionTest />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/favorites" element={<UserFavorites />} />
                     <Route path="/notes" element={<UserNotes />} />

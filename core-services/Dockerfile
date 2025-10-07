@@ -22,8 +22,8 @@ COPY . .
 
 # 构建应用
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-    -ldflags="-w -s -X main.version=$(git describe --tags --always --dirty) -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    -o main ./cmd/server
+    -ldflags="-w -s -X main.version=$(git describe --tags --always --dirty 2>/dev/null || echo 'dev') -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    -o main main.go
 
 # 使用轻量级的alpine镜像作为运行环境
 FROM alpine:latest

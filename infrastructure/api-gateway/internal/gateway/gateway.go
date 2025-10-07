@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/api"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/health"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/middleware"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/monitoring"
@@ -25,6 +26,7 @@ type Gateway struct {
 	metrics      monitoring.Metrics
 	registry     registry.Registry
 	proxyManager proxy.ProxyManager
+	healthChecker health.HealthChecker
 	
 	// 中间件
 	authMiddleware      *middleware.AuthMiddleware
@@ -34,34 +36,17 @@ type Gateway struct {
 	// 路由器
 	router *gin.Engine
 	
-	// 路由配置
+	// 动态路由管理器
+	dynamicRouter *DynamicRouter
+	routeManager  *RouteManager
+	
+	// 路由配置 (保留用于兼容性)
 	routes     map[string]*RouteConfig
 	routesMu   sync.RWMutex
 	
 	// 停止信号
 	stopCh chan struct{}
 	wg     sync.WaitGroup
-}
-
-// RouteConfig 路由配置
-type RouteConfig struct {
-	Path        string            `yaml:"path"`
-	Method      string            `yaml:"method"`
-	Service     string            `yaml:"service"`
-	Rewrite     string            `yaml:"rewrite"`
-	StripPrefix bool              `yaml:"strip_prefix"`
-	Timeout     time.Duration     `yaml:"timeout"`
-	Middleware  []string          `yaml:"middleware"`
-	Headers     map[string]string `yaml:"headers"`
-	
-	// 负载均衡配置
-	LoadBalancer string `yaml:"load_balancer"`
-	
-	// 熔断配置
-	CircuitBreaker *CircuitBreakerConfig `yaml:"circuit_breaker"`
-	
-	// 重试配置
-	Retry *RetryConfig `yaml:"retry"`
 }
 
 // CircuitBreakerConfig 熔断器配置
@@ -89,6 +74,7 @@ func NewGateway(
 	metrics monitoring.Metrics,
 	reg registry.Registry,
 	pm proxy.ProxyManager,
+	healthChecker health.HealthChecker,
 ) (*Gateway, error) {
 	
 	// 创建中间件
@@ -135,21 +121,22 @@ func NewGateway(
 		metrics:             metrics,
 		registry:            reg,
 		proxyManager:        pm,
+		healthChecker:       healthChecker,
 		authMiddleware:      authMiddleware,
 		rateLimitMiddleware: rateLimitMiddleware,
 		corsMiddleware:      corsMiddleware,
 		routes:              make(map[string]*RouteConfig),
-		stopCh:              make(chan struct{}),
 	}
+	
+	// 创建路由管理器
+	gateway.routeManager = NewRouteManager(log)
+	
+	// 创建动态路由管理器
+	gateway.dynamicRouter = NewDynamicRouter(gateway, gateway.routeManager, log)
 	
 	// 初始化路由器
 	if err := gateway.initRouter(); err != nil {
 		return nil, fmt.Errorf("failed to initialize router: %w", err)
-	}
-	
-	// 加载路由配置
-	if err := gateway.loadRoutes(); err != nil {
-		return nil, fmt.Errorf("failed to load routes: %w", err)
 	}
 	
 	return gateway, nil
@@ -168,21 +155,28 @@ func (g *Gateway) initRouter() error {
 	
 	// 添加全局中间件
 	g.router.Use(gin.Recovery())
-	g.router.Use(g.loggingMiddleware())
-	g.router.Use(g.metricsMiddleware())
 	g.router.Use(g.corsMiddleware.Handler())
 	
 	// 健康检查端点
 	g.router.GET("/health", g.healthHandler)
 	g.router.GET("/ready", g.readyHandler)
 	
+	// 注册负载均衡管理API
+	if lbManager, ok := g.proxyManager.(interface{ GetLoadBalancerManager() proxy.LoadBalancerManager }); ok {
+		lbAPI := api.NewLoadBalancerAPI(lbManager.GetLoadBalancerManager(), g.healthChecker, g.logger.GetLogrusLogger())
+		lbAPI.RegisterRoutes(g.router)
+		g.logger.Info("Load balancer API routes registered")
+	} else {
+		g.logger.Warn("ProxyManager does not implement GetLoadBalancerManager interface")
+	}
+	
 	// 管理端点
 	admin := g.router.Group("/gateway/admin")
 	{
 		admin.GET("/routes", g.listRoutesHandler)
 		admin.POST("/routes", g.addRouteHandler)
-		admin.PUT("/routes/:id", g.updateRouteHandler)
-		admin.DELETE("/routes/:id", g.deleteRouteHandler)
+		admin.PUT("/routes/:method/:path", g.updateRouteHandler)
+		admin.DELETE("/routes/:method/:path", g.deleteRouteHandler)
 		admin.GET("/services", g.listServicesHandler)
 		admin.GET("/metrics", g.metricsHandler)
 	}
@@ -190,27 +184,65 @@ func (g *Gateway) initRouter() error {
 	return nil
 }
 
-// loadRoutes 加载路由配置
-func (g *Gateway) loadRoutes() error {
+// Start 启动网关
+func (g *Gateway) Start(ctx context.Context) error {
+	// 启动健康检查
+	if g.healthChecker != nil {
+		g.healthChecker.StartHealthChecks(ctx)
+	}
+	
+	// 加载路由配置
+	if err := g.LoadRoutes(); err != nil {
+		return fmt.Errorf("failed to load routes: %w", err)
+	}
+	
+	g.logger.Info("Gateway started successfully")
+	return nil
+}
+
+// LoadRoutes 加载路由配置
+func (g *Gateway) LoadRoutes() error {
+	routes := make([]*RouteConfig, 0)
+	
 	for _, serviceConfig := range g.config.Services {
 		for _, route := range serviceConfig.Routes {
 			routeConfig := &RouteConfig{
-				Path:           route.Path,
-				Method:         route.Method,
-				Service:        serviceConfig.Name,
-				Rewrite:        route.Rewrite,
-				StripPrefix:    route.StripPrefix,
-				Timeout:        time.Duration(route.Timeout) * time.Second,
-				Middleware:     route.Middleware,
-				Headers:        route.Headers,
-				LoadBalancer:   serviceConfig.LoadBalancer,
-				CircuitBreaker: nil,
-				Retry:          nil,
+				ID:          fmt.Sprintf("%s:%s", route.Method, route.Path),
+				Path:        route.Path,
+				Method:      route.Method,
+				Service:     serviceConfig.Name,
+				Rewrite:     route.Rewrite,
+				StripPrefix: route.StripPrefix,
+				Timeout:     time.Duration(route.Timeout) * time.Second,
+				Middleware:  route.Middleware,
+				Headers:     route.Headers,
+				Enabled:     true,
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
 			}
 			
-			if err := g.addRoute(routeConfig); err != nil {
-				return fmt.Errorf("failed to add route %s: %w", route.Path, err)
-			}
+			routes = append(routes, routeConfig)
+		}
+	}
+	
+	// 加载路由到RouteManager
+	if err := g.routeManager.LoadRoutes(routes); err != nil {
+		return fmt.Errorf("failed to load routes to manager: %w", err)
+	}
+	
+	// 同步到旧的routes map以保持兼容性
+	g.routesMu.Lock()
+	g.routes = make(map[string]*RouteConfig)
+	for _, route := range routes {
+		routeKey := fmt.Sprintf("%s:%s", route.Method, route.Path)
+		g.routes[routeKey] = route
+	}
+	g.routesMu.Unlock()
+	
+	// 注册路由到Gin引擎
+	for _, route := range routes {
+		if err := g.registerRoute(route); err != nil {
+			return fmt.Errorf("failed to register route %s %s: %w", route.Method, route.Path, err)
 		}
 	}
 	
@@ -232,26 +264,26 @@ func (g *Gateway) addRoute(route *RouteConfig) error {
 	}
 	
 	// 创建处理器
-	handler := g.createRouteHandler(route)
+	handlers := g.createRouteHandlers(route)
 	
 	// 注册路由
 	switch strings.ToUpper(route.Method) {
 	case "GET":
-		g.router.GET(route.Path, handler...)
+		g.router.GET(route.Path, handlers...)
 	case "POST":
-		g.router.POST(route.Path, handler...)
+		g.router.POST(route.Path, handlers...)
 	case "PUT":
-		g.router.PUT(route.Path, handler...)
+		g.router.PUT(route.Path, handlers...)
 	case "DELETE":
-		g.router.DELETE(route.Path, handler...)
+		g.router.DELETE(route.Path, handlers...)
 	case "PATCH":
-		g.router.PATCH(route.Path, handler...)
+		g.router.PATCH(route.Path, handlers...)
 	case "HEAD":
-		g.router.HEAD(route.Path, handler...)
+		g.router.HEAD(route.Path, handlers...)
 	case "OPTIONS":
-		g.router.OPTIONS(route.Path, handler...)
+		g.router.OPTIONS(route.Path, handlers...)
 	case "ANY":
-		g.router.Any(route.Path, handler...)
+		g.router.Any(route.Path, handlers...)
 	default:
 		return fmt.Errorf("unsupported HTTP method: %s", route.Method)
 	}
@@ -263,119 +295,70 @@ func (g *Gateway) addRoute(route *RouteConfig) error {
 	return nil
 }
 
-// createRouteHandler 创建路由处理器
-func (g *Gateway) createRouteHandler(route *RouteConfig) []gin.HandlerFunc {
+// createRouteHandlers 创建路由处理器链
+func (g *Gateway) createRouteHandlers(route *RouteConfig) []gin.HandlerFunc {
 	var handlers []gin.HandlerFunc
-	
-	// 调试日志：确认中间件配置
-	g.logger.Infof("Creating route handler for %s %s with middleware: %v", route.Method, route.Path, route.Middleware)
 	
 	// 添加中间件
 	for _, middlewareName := range route.Middleware {
 		switch middlewareName {
 		case "auth":
-			g.logger.Infof("Adding auth middleware for %s %s", route.Method, route.Path)
 			handlers = append(handlers, g.authMiddleware.Handler())
 		case "rate_limit":
 			handlers = append(handlers, g.rateLimitMiddleware.Handler())
-		case "admin":
-			handlers = append(handlers, middleware.RequireRole("admin"))
+		case "cors":
+			handlers = append(handlers, g.corsMiddleware.Handler())
+		default:
+			g.logger.WithFields(map[string]interface{}{
+				"middleware": middlewareName,
+			}).Warn("Unknown middleware")
 		}
 	}
 	
-	// 添加代理处理器
-	handlers = append(handlers, g.proxyHandler(route))
+	// 添加主处理器
+	handlers = append(handlers, g.createRouteHandler(route))
 	
 	return handlers
 }
 
-// proxyHandler 代理处理器
-func (g *Gateway) proxyHandler(route *RouteConfig) gin.HandlerFunc {
+// createRouteHandler 创建路由处理器
+func (g *Gateway) createRouteHandler(route *RouteConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		start := time.Now()
-		
 		// 设置超时
-		ctx := c.Request.Context()
 		if route.Timeout > 0 {
-			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, route.Timeout)
-			defer cancel()
+			c.Header("X-Timeout", route.Timeout.String())
 		}
 		
 		// 添加自定义头部
 		for key, value := range route.Headers {
-			c.Request.Header.Set(key, value)
+			c.Header(key, value)
 		}
 		
-		// 路径重写
-		originalPath := c.Request.URL.Path
+		// 计算目标路径
+		targetPath := route.Path
 		if route.Rewrite != "" {
-			// 处理路径参数重写
-			rewrittenPath := route.Rewrite
-			
-			// 如果路由路径包含参数（如 :id），需要将参数值传递到重写路径
-			if strings.Contains(route.Path, ":") && strings.Contains(route.Rewrite, ":") {
-				// 提取路径参数
-				pathParts := strings.Split(strings.Trim(route.Path, "/"), "/")
-				originalParts := strings.Split(strings.Trim(originalPath, "/"), "/")
-				rewriteParts := strings.Split(strings.Trim(route.Rewrite, "/"), "/")
-				
-				// 替换重写路径中的参数
-				for i, part := range pathParts {
-					if strings.HasPrefix(part, ":") && i < len(originalParts) && i < len(rewriteParts) {
-						paramName := part[1:] // 移除 : 前缀
-						for j, rewritePart := range rewriteParts {
-							if rewritePart == ":"+paramName {
-								rewriteParts[j] = originalParts[i]
-							}
-						}
-					}
-				}
-				rewrittenPath = "/" + strings.Join(rewriteParts, "/")
-			}
-			
-			c.Request.URL.Path = rewrittenPath
-		} else if route.StripPrefix {
-			// 移除路由前缀
+			targetPath = route.Rewrite
+		}
+		
+		if route.StripPrefix {
+			// 移除路径前缀
+			originalPath := c.Request.URL.Path
 			if strings.HasPrefix(originalPath, route.Path) {
-				c.Request.URL.Path = strings.TrimPrefix(originalPath, strings.TrimSuffix(route.Path, "*"))
+				targetPath = strings.TrimPrefix(originalPath, route.Path)
+				if !strings.HasPrefix(targetPath, "/") {
+					targetPath = "/" + targetPath
+				}
 			}
 		}
 		
-		// 获取服务实例
-		instances, err := g.registry.Discover(c.Request.Context(), route.Service)
+		// 使用ProxyManager处理请求（已集成负载均衡）
+		err := g.proxyManager.HandleRequest(c.Writer, c.Request, route.Service)
 		if err != nil {
 			g.logger.WithFields(map[string]interface{}{
-				"service": route.Service,
-				"error":   err.Error(),
-			}).Error("Failed to get service instances")
-			
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"error":   "Service unavailable",
-				"message": "Failed to get service instances",
-			})
-			return
-		}
-		
-		if len(instances) == 0 {
-			g.logger.WithFields(map[string]interface{}{
-				"service": route.Service,
-			}).Error("No available service instances")
-			
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"error":   "Service unavailable",
-				"message": "No available service instances",
-			})
-			return
-		}
-		
-		// 使用ProxyManager处理请求
-		err = g.proxyManager.HandleRequest(c, route.Service)
-		if err != nil {
-			g.logger.WithFields(map[string]interface{}{
-				"service": route.Service,
-				"error":   err.Error(),
-			}).Error("Failed to proxy request")
+				"service":    route.Service,
+				"targetPath": targetPath,
+				"error":      err.Error(),
+			}).Error("Proxy request failed")
 			
 			c.JSON(http.StatusBadGateway, gin.H{
 				"error":   "Bad gateway",
@@ -383,43 +366,7 @@ func (g *Gateway) proxyHandler(route *RouteConfig) gin.HandlerFunc {
 			})
 			return
 		}
-		
-		// 记录指标
-		duration := time.Since(start)
-		status := fmt.Sprintf("%d", c.Writer.Status())
-		g.metrics.RecordProxyRequest(route.Service, c.Request.Method, status, duration)
-		
-		g.logger.WithFields(map[string]interface{}{
-			"service":  route.Service,
-			"path":     route.Path,
-			"method":   c.Request.Method,
-			"status":   status,
-			"duration": duration.String(),
-		}).Info("Request proxied")
 	}
-}
-
-// loggingMiddleware 日志中间件
-func (g *Gateway) loggingMiddleware() gin.HandlerFunc {
-	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		g.logger.WithFields(map[string]interface{}{
-			"timestamp":   param.TimeStamp.Format(time.RFC3339),
-			"status":      param.StatusCode,
-			"latency":     param.Latency,
-			"client_ip":   param.ClientIP,
-			"method":      param.Method,
-			"path":        param.Path,
-			"user_agent":  param.Request.UserAgent(),
-			"error":       param.ErrorMessage,
-		}).Info("HTTP request")
-		
-		return ""
-	})
-}
-
-// metricsMiddleware 指标中间件
-func (g *Gateway) metricsMiddleware() gin.HandlerFunc {
-	return g.metrics.GinMiddleware()
 }
 
 // healthHandler 健康检查处理器
@@ -463,13 +410,7 @@ func (g *Gateway) readyHandler(c *gin.Context) {
 
 // listRoutesHandler 列出路由处理器
 func (g *Gateway) listRoutesHandler(c *gin.Context) {
-	g.routesMu.RLock()
-	defer g.routesMu.RUnlock()
-	
-	routes := make([]*RouteConfig, 0, len(g.routes))
-	for _, route := range g.routes {
-		routes = append(routes, route)
-	}
+	routes := g.routeManager.ListRoutes()
 	
 	c.JSON(http.StatusOK, gin.H{
 		"routes": routes,
@@ -488,9 +429,21 @@ func (g *Gateway) addRouteHandler(c *gin.Context) {
 		return
 	}
 	
-	if err := g.addRoute(&route); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+	if err := g.routeManager.AddRoute(&route); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Failed to add route",
+			"message": err.Error(),
+		})
+		return
+	}
+	
+	// 重新加载路由到Gin引擎
+	if err := g.reloadRoutes(); err != nil {
+		g.logger.WithFields(map[string]interface{}{
+			"error": err,
+		}).Error("Failed to reload routes after adding")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Route added but failed to reload",
 			"message": err.Error(),
 		})
 		return
@@ -504,17 +457,87 @@ func (g *Gateway) addRouteHandler(c *gin.Context) {
 
 // updateRouteHandler 更新路由处理器
 func (g *Gateway) updateRouteHandler(c *gin.Context) {
-	// 实现路由更新逻辑
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"error": "Route update not implemented yet",
+	method := c.Param("method")
+	path := c.Param("path")
+	
+	if method == "" || path == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Method and path are required",
+		})
+		return
+	}
+	
+	var updatedRoute RouteConfig
+	if err := c.ShouldBindJSON(&updatedRoute); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid request body",
+			"message": err.Error(),
+		})
+		return
+	}
+	
+	if err := g.routeManager.UpdateRoute(method, path, &updatedRoute); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Failed to update route",
+			"message": err.Error(),
+		})
+		return
+	}
+	
+	// 重新加载路由到Gin引擎
+	if err := g.reloadRoutes(); err != nil {
+		g.logger.WithFields(map[string]interface{}{
+			"error": err,
+		}).Error("Failed to reload routes after updating")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Route updated but failed to reload",
+			"message": err.Error(),
+		})
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Route updated successfully",
+		"route":   updatedRoute,
 	})
 }
 
 // deleteRouteHandler 删除路由处理器
 func (g *Gateway) deleteRouteHandler(c *gin.Context) {
-	// 实现路由删除逻辑
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"error": "Route deletion not implemented yet",
+	method := c.Param("method")
+	path := c.Param("path")
+	
+	if method == "" || path == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Method and path are required",
+		})
+		return
+	}
+	
+	deletedRoute, err := g.routeManager.DeleteRoute(method, path)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error":   "Route not found",
+			"message": err.Error(),
+		})
+		return
+	}
+	
+	// 重新加载路由到Gin引擎
+	if err := g.reloadRoutes(); err != nil {
+		g.logger.WithFields(map[string]interface{}{
+			"error": err,
+		}).Error("Failed to reload routes after deleting")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Route deleted but failed to reload",
+			"message": err.Error(),
+		})
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Route deleted successfully",
+		"route":   deletedRoute,
 	})
 }
 
@@ -548,14 +571,14 @@ func (g *Gateway) GetRouter() *gin.Engine {
 }
 
 // Start 启动网关
-func (g *Gateway) Start() error {
-	g.logger.Info("Starting API Gateway...")
-	return nil
-}
-
 // Stop 停止网关
 func (g *Gateway) Stop() error {
 	g.logger.Info("Stopping API Gateway...")
+	
+	// 停止动态路由管理器
+	if err := g.dynamicRouter.Stop(); err != nil {
+		g.logger.Errorf("Failed to stop dynamic router: %v", err)
+	}
 	
 	close(g.stopCh)
 	g.wg.Wait()
@@ -588,7 +611,7 @@ func (g *Gateway) ReloadRoutes() error {
 	}
 	
 	// 重新加载路由配置
-	if err := g.loadRoutes(); err != nil {
+	if err := g.LoadRoutes(); err != nil {
 		return fmt.Errorf("failed to reload routes: %w", err)
 	}
 	

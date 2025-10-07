@@ -13,15 +13,15 @@ import (
 
 // LocationHandler 位置处理器
 type LocationHandler struct {
-	service *services.LocationService
-	logger  *zap.Logger
+	locationService *services.LocationService
+	logger          *zap.Logger
 }
 
 // NewLocationHandler 创建位置处理器实例
 func NewLocationHandler(service *services.LocationService, logger *zap.Logger) *LocationHandler {
 	return &LocationHandler{
-		service: service,
-		logger:  logger,
+		locationService: service,
+		logger:          logger,
 	}
 }
 
@@ -50,7 +50,7 @@ func (h *LocationHandler) CreateTrajectory(c *gin.Context) {
 		return
 	}
 
-	trajectory, err := h.service.CreateTrajectory(userID, req)
+	trajectory, err := h.locationService.CreateTrajectory(userID, req)
 	if err != nil {
 		h.logger.Error("Failed to create trajectory", zap.Error(err), zap.String("user_id", userID))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create trajectory"})
@@ -123,7 +123,7 @@ func (h *LocationHandler) GetTrajectories(c *gin.Context) {
 		}
 	}
 
-	trajectories, total, err := h.service.GetTrajectories(userID, query)
+	trajectories, total, err := h.locationService.GetTrajectories(userID, query)
 	if err != nil {
 		h.logger.Error("Failed to get trajectories", zap.Error(err), zap.String("user_id", userID))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get trajectories"})
@@ -166,7 +166,7 @@ func (h *LocationHandler) GetTrajectory(c *gin.Context) {
 	trajectoryID := c.Param("id")
 	includePoints, _ := strconv.ParseBool(c.DefaultQuery("include_points", "false"))
 
-	trajectory, err := h.service.GetTrajectory(userID, trajectoryID, includePoints)
+	trajectory, err := h.locationService.GetTrajectory(userID, trajectoryID, includePoints)
 	if err != nil {
 		if err.Error() == "trajectory not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Trajectory not found"})
@@ -209,7 +209,7 @@ func (h *LocationHandler) UpdateTrajectory(c *gin.Context) {
 		return
 	}
 
-	trajectory, err := h.service.UpdateTrajectory(userID, trajectoryID, req)
+	trajectory, err := h.locationService.UpdateTrajectory(userID, trajectoryID, req)
 	if err != nil {
 		if err.Error() == "trajectory not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Trajectory not found"})
@@ -243,7 +243,7 @@ func (h *LocationHandler) DeleteTrajectory(c *gin.Context) {
 
 	trajectoryID := c.Param("id")
 
-	err := h.service.DeleteTrajectory(userID, trajectoryID)
+	err := h.locationService.DeleteTrajectory(userID, trajectoryID)
 	if err != nil {
 		if err.Error() == "trajectory not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Trajectory not found"})
@@ -283,7 +283,7 @@ func (h *LocationHandler) AddLocationPoint(c *gin.Context) {
 		return
 	}
 
-	point, err := h.service.AddLocationPoint(userID, req)
+	point, err := h.locationService.AddLocationPoint(userID, req)
 	if err != nil {
 		if err.Error() == "trajectory not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Trajectory not found"})
@@ -297,154 +297,127 @@ func (h *LocationHandler) AddLocationPoint(c *gin.Context) {
 	c.JSON(http.StatusCreated, point.ToResponse())
 }
 
-// AddLocationPointsBatch 批量添加位置点
-// @Summary 批量添加位置点
-// @Description 向轨迹批量添加位置点
-// @Tags location-points
-// @Accept json
-// @Produce json
-// @Param request body models.LocationPointBatchRequest true "批量位置点请求"
-// @Success 201 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
-// @Router /api/v1/location-points/batch [post]
-func (h *LocationHandler) AddLocationPointsBatch(c *gin.Context) {
+// BatchUploadPoints 批量上传位置点
+func (h *LocationHandler) BatchUploadPoints(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	var req models.LocationPointBatchRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Error("Invalid request body", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	points, err := h.service.AddLocationPointsBatch(userID, req)
+	points, err := h.locationService.AddLocationPointsBatch(userID, req)
 	if err != nil {
-		if err.Error() == "trajectory not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Trajectory not found"})
-			return
-		}
-		h.logger.Error("Failed to add location points batch", zap.Error(err), zap.String("user_id", userID))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add location points batch"})
+		h.logger.Error("Failed to batch upload points", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload points"})
 		return
 	}
 
-	responses := make([]models.LocationPointResponse, len(points))
-	for i, point := range points {
-		responses[i] = point.ToResponse()
-	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"data":  responses,
-		"count": len(responses),
-	})
+	c.JSON(http.StatusCreated, gin.H{"points": points})
 }
 
-// GetLocationPoints 获取位置点
-// @Summary 获取位置点
-// @Description 获取位置点列表，支持分页和过滤
-// @Tags location-points
-// @Accept json
-// @Produce json
-// @Param page query int false "页码" default(1)
-// @Param limit query int false "每页数量" default(100)
-// @Param trajectory_id query string false "轨迹ID"
-// @Param start_time query int64 false "开始时间（毫秒时间戳）"
-// @Param end_time query int64 false "结束时间（毫秒时间戳）"
-// @Param min_lat query float64 false "最小纬度"
-// @Param max_lat query float64 false "最大纬度"
-// @Param min_lng query float64 false "最小经度"
-// @Param max_lng query float64 false "最大经度"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
-// @Router /api/v1/location-points [get]
-func (h *LocationHandler) GetLocationPoints(c *gin.Context) {
+// FinishTrajectory 完成轨迹
+func (h *LocationHandler) FinishTrajectory(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
+	}
+
+	trajectoryID := c.Param("id")
+	if trajectoryID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Trajectory ID is required"})
+		return
+	}
+
+	// 更新轨迹状态为完成
+	isActive := false
+	updateReq := models.TrajectoryUpdateRequest{
+		IsActive: &isActive,
+	}
+
+	trajectory, err := h.locationService.UpdateTrajectory(userID, trajectoryID, updateReq)
+	if err != nil {
+		h.logger.Error("Failed to finish trajectory", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to finish trajectory"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"trajectory": trajectory})
+}
+
+// GetTrajectoryPoints 获取轨迹的位置点
+func (h *LocationHandler) GetTrajectoryPoints(c *gin.Context) {
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	trajectoryID := c.Param("id")
+	if trajectoryID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Trajectory ID is required"})
+		return
+	}
+
+	// 构建查询参数
+	query := models.LocationPointQuery{
+		TrajectoryID: trajectoryID,
+		Limit:        100, // 默认限制
+		Offset:       0,
 	}
 
 	// 解析查询参数
-	query := models.LocationPointQuery{
-		Limit:  100,
-		Offset: 0,
-	}
-
-	if page, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && page > 0 {
-		query.Offset = (page - 1) * query.Limit
-	}
-
-	if limit, err := strconv.Atoi(c.DefaultQuery("limit", "100")); err == nil && limit > 0 && limit <= 1000 {
-		query.Limit = limit
-	}
-
-	query.TrajectoryID = c.Query("trajectory_id")
-
-	if startTimeStr := c.Query("start_time"); startTimeStr != "" {
-		if startTime, err := strconv.ParseInt(startTimeStr, 10, 64); err == nil {
-			query.StartTime = &startTime
+	if limitStr := c.Query("limit"); limitStr != "" {
+		if limit, err := strconv.Atoi(limitStr); err == nil && limit > 0 {
+			query.Limit = limit
 		}
 	}
 
-	if endTimeStr := c.Query("end_time"); endTimeStr != "" {
-		if endTime, err := strconv.ParseInt(endTimeStr, 10, 64); err == nil {
-			query.EndTime = &endTime
+	if offsetStr := c.Query("offset"); offsetStr != "" {
+		if offset, err := strconv.Atoi(offsetStr); err == nil && offset >= 0 {
+			query.Offset = offset
 		}
 	}
 
-	if minLatStr := c.Query("min_lat"); minLatStr != "" {
-		if minLat, err := strconv.ParseFloat(minLatStr, 64); err == nil {
-			query.MinLat = &minLat
-		}
-	}
-
-	if maxLatStr := c.Query("max_lat"); maxLatStr != "" {
-		if maxLat, err := strconv.ParseFloat(maxLatStr, 64); err == nil {
-			query.MaxLat = &maxLat
-		}
-	}
-
-	if minLngStr := c.Query("min_lng"); minLngStr != "" {
-		if minLng, err := strconv.ParseFloat(minLngStr, 64); err == nil {
-			query.MinLng = &minLng
-		}
-	}
-
-	if maxLngStr := c.Query("max_lng"); maxLngStr != "" {
-		if maxLng, err := strconv.ParseFloat(maxLngStr, 64); err == nil {
-			query.MaxLng = &maxLng
-		}
-	}
-
-	points, total, err := h.service.GetLocationPoints(userID, query)
+	points, total, err := h.locationService.GetLocationPoints(userID, query)
 	if err != nil {
-		if err.Error() == "trajectory not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Trajectory not found"})
-			return
-		}
-		h.logger.Error("Failed to get location points", zap.Error(err), zap.String("user_id", userID))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get location points"})
+		h.logger.Error("Failed to get trajectory points", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get points"})
 		return
 	}
 
-	responses := make([]models.LocationPointResponse, len(points))
-	for i, point := range points {
-		responses[i] = point.ToResponse()
+	c.JSON(http.StatusOK, gin.H{
+		"points": points,
+		"total":  total,
+		"limit":  query.Limit,
+		"offset": query.Offset,
+	})
+}
+
+// GetSyncStatus 获取同步状态
+func (h *LocationHandler) GetSyncStatus(c *gin.Context) {
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data":  responses,
-		"total": total,
-		"page":  (query.Offset / query.Limit) + 1,
-		"limit": query.Limit,
-	})
+	// 这里可以实现获取用户的同步状态逻辑
+	// 暂时返回一个简单的状态
+	status := gin.H{
+		"user_id":     userID,
+		"last_sync":   time.Now().Unix(),
+		"sync_status": "up_to_date",
+		"pending_uploads": 0,
+	}
+
+	c.JSON(http.StatusOK, status)
 }
 
 // GetTrajectoryStats 获取轨迹统计信息
@@ -463,7 +436,7 @@ func (h *LocationHandler) GetTrajectoryStats(c *gin.Context) {
 		return
 	}
 
-	stats, err := h.service.GetTrajectoryStats(userID)
+	stats, err := h.locationService.GetTrajectoryStats(userID)
 	if err != nil {
 		h.logger.Error("Failed to get trajectory stats", zap.Error(err), zap.String("user_id", userID))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get trajectory stats"})
@@ -498,7 +471,7 @@ func (h *LocationHandler) SyncData(c *gin.Context) {
 		return
 	}
 
-	response, err := h.service.SyncData(userID, req)
+	response, err := h.locationService.SyncData(userID, req)
 	if err != nil {
 		h.logger.Error("Failed to sync data", zap.Error(err), zap.String("user_id", userID))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync data"})
@@ -522,4 +495,42 @@ func (h *LocationHandler) HealthCheck(c *gin.Context) {
 		"service":   "location-tracking",
 		"timestamp": time.Now().Unix(),
 	})
+}
+
+// AddLocationPointsBatch 批量添加位置点
+func (h *LocationHandler) AddLocationPointsBatch(c *gin.Context) {
+	h.BatchUploadPoints(c)
+}
+
+// GetLocationPoints 获取位置点
+func (h *LocationHandler) GetLocationPoints(c *gin.Context) {
+	h.GetTrajectoryPoints(c)
+}
+
+// UploadLocationPoints 上传位置点（批量）
+func (h *LocationHandler) UploadLocationPoints(c *gin.Context) {
+	h.BatchUploadPoints(c)
+}
+
+// DeleteLocationPoint 删除位置点
+func (h *LocationHandler) DeleteLocationPoint(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+	
+	pointID := c.Param("point_id")
+
+	err := h.locationService.DeleteLocationPoint(userID.(string), pointID)
+	if err != nil {
+		h.logger.Error("Failed to delete location point", 
+			zap.String("user_id", userID.(string)),
+			zap.String("point_id", pointID),
+			zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete location point"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Location point deleted successfully"})
 }

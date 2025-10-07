@@ -1,4 +1,4 @@
-﻿package logger
+package logger
 
 import (
 	"io"
@@ -24,6 +24,8 @@ type Logger interface {
 	Fatalf(format string, args ...interface{})
 	WithField(key string, value interface{}) Logger
 	WithFields(fields map[string]interface{}) Logger
+	// GetLogrusLogger 获取底层的logrus.Logger实例
+	GetLogrusLogger() *logrus.Logger
 }
 
 // logrusLogger logrus实现
@@ -158,6 +160,11 @@ func (l *logrusLogger) WithFields(fields map[string]interface{}) Logger {
 		logger: l.logger,
 		entry:  l.entry.WithFields(logrusFields),
 	}
+}
+
+// GetLogrusLogger 获取底层的logrus.Logger实例
+func (l *logrusLogger) GetLogrusLogger() *logrus.Logger {
+	return l.logger
 }
 
 // NewNop 创建空日志实例（用于测试）

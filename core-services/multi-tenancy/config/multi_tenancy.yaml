@@ -1,0 +1,221 @@
+# 多租户配置文件
+multi_tenancy:
+  # 数据隔离策略
+  # row_level: 行级隔离（推荐，性能最好）
+  # schema: 模式隔离（中等性能，更好的隔离）
+  # database: 数据库隔离（最强隔离，性能开销最大）
+  isolation_strategy: "row_level"
+
+  # 默认租户配额设置
+  default_quota:
+    max_users: 100                    # 最大用户数
+    max_storage: 10737418240          # 最大存储空间 (10GB)
+    max_api_requests: 10000           # 每日最大API请求数
+    max_bandwidth: 1073741824         # 每月最大带宽 (1GB)
+    max_databases: 5                  # 最大数据库数
+    max_connections: 50               # 最大并发连接数
+    max_file_size: 104857600          # 最大文件大小 (100MB)
+    max_files: 1000                   # 最大文件数量
+    max_sessions: 100                 # 最大会话数
+    max_projects: 10                  # 最大项目数
+
+  # 缓存配置
+  cache:
+    ttl: "30m"                        # 缓存过期时间
+    tenant_cache_prefix: "tenant:"    # 租户缓存前缀
+    session_cache_prefix: "tenant_session:" # 会话缓存前缀
+    enable_cache: true                # 是否启用缓存
+    cache_size: 1000                  # 缓存大小
+
+  # 安全配置
+  security:
+    enable_subdomain_validation: true # 启用子域名验证
+    allowed_domains:                  # 允许的域名列表
+      - "localhost"
+      - "taishanglaojun.com"
+      - "*.taishanglaojun.com"
+    require_https: false              # 是否要求HTTPS（生产环境建议true）
+    enable_cors: true                 # 启用CORS
+    cors_origins:                     # CORS允许的源
+      - "http://localhost:3000"
+      - "https://taishanglaojun.com"
+    enable_rate_limiting: true        # 启用限流
+    rate_limit_requests: 1000         # 每小时请求限制
+    enable_ip_whitelist: false        # 启用IP白名单
+    ip_whitelist: []                  # IP白名单
+
+  # 监控配置
+  monitoring:
+    enable_metrics: true              # 启用指标收集
+    metrics_interval: "5m"            # 指标收集间隔
+    enable_health_check: true         # 启用健康检查
+    health_check_interval: "1m"       # 健康检查间隔
+    enable_audit_log: true            # 启用审计日志
+    audit_log_retention: "90d"        # 审计日志保留时间
+    enable_performance_monitoring: true # 启用性能监控
+
+  # 数据库配置
+  database:
+    max_connections: 100              # 最大连接数
+    connection_timeout: "30s"         # 连接超时时间
+    enable_auto_migrate: true         # 启用自动迁移
+    migration_timeout: "5m"           # 迁移超时时间
+    enable_connection_pool: true      # 启用连接池
+    pool_size: 50                     # 连接池大小
+    max_idle_connections: 10          # 最大空闲连接数
+    connection_max_lifetime: "1h"     # 连接最大生命周期
+
+  # 通知配置
+  notifications:
+    enable_email: true                # 启用邮件通知
+    enable_webhook: true              # 启用Webhook通知
+    webhook_timeout: "10s"            # Webhook超时时间
+    retry_attempts: 3                 # 重试次数
+    retry_interval: "5s"              # 重试间隔
+
+  # 备份配置
+  backup:
+    enable_auto_backup: true          # 启用自动备份
+    backup_interval: "24h"            # 备份间隔
+    backup_retention: "30d"           # 备份保留时间
+    backup_location: "/backups/tenants" # 备份位置
+    enable_encryption: true           # 启用备份加密
+
+  # 日志配置
+  logging:
+    level: "info"                     # 日志级别
+    enable_structured_logging: true   # 启用结构化日志
+    log_tenant_operations: true       # 记录租户操作
+    log_user_operations: true         # 记录用户操作
+    log_quota_usage: true             # 记录配额使用
+    log_performance_metrics: true     # 记录性能指标
+
+  # 功能开关
+  features:
+    enable_subdomain_routing: true    # 启用子域名路由
+    enable_custom_domains: true       # 启用自定义域名
+    enable_tenant_branding: true      # 启用租户品牌定制
+    enable_multi_language: true       # 启用多语言支持
+    enable_tenant_analytics: true     # 启用租户分析
+    enable_resource_quotas: true      # 启用资源配额
+    enable_usage_billing: false       # 启用使用计费
+    enable_tenant_isolation: true     # 启用租户隔离
+
+  # 性能配置
+  performance:
+    enable_query_optimization: true   # 启用查询优化
+    enable_index_optimization: true   # 启用索引优化
+    enable_cache_warming: true        # 启用缓存预热
+    cache_warming_interval: "1h"      # 缓存预热间隔
+    enable_lazy_loading: true         # 启用懒加载
+    batch_size: 100                   # 批处理大小
+    query_timeout: "30s"              # 查询超时时间
+
+  # 集成配置
+  integrations:
+    # 认证系统集成
+    auth_system:
+      enable: true
+      endpoint: "http://auth-system:8080"
+      timeout: "10s"
+    
+    # 支付系统集成
+    payment_system:
+      enable: false
+      endpoint: "http://payment-system:8080"
+      timeout: "30s"
+    
+    # 邮件系统集成
+    email_system:
+      enable: true
+      endpoint: "http://email-system:8080"
+      timeout: "10s"
+    
+    # 文件存储集成
+    file_storage:
+      enable: true
+      provider: "local"  # local, s3, oss, cos
+      endpoint: ""
+      bucket: "tenant-files"
+
+  # 开发配置
+  development:
+    enable_debug_mode: true           # 启用调试模式
+    enable_test_data: true            # 启用测试数据
+    enable_mock_services: false       # 启用模拟服务
+    log_sql_queries: true             # 记录SQL查询
+    enable_profiling: true            # 启用性能分析
+
+  # 生产配置
+  production:
+    enable_ssl: true                  # 启用SSL
+    ssl_cert_path: "/certs/cert.pem"  # SSL证书路径
+    ssl_key_path: "/certs/key.pem"    # SSL密钥路径
+    enable_compression: true          # 启用压缩
+    compression_level: 6              # 压缩级别
+    enable_cdn: false                 # 启用CDN
+    cdn_endpoint: ""                  # CDN端点
+
+# 租户模板配置
+tenant_templates:
+  # 基础版租户模板
+  basic:
+    name: "基础版"
+    description: "适合小型团队的基础功能"
+    quota:
+      max_users: 10
+      max_storage: 1073741824         # 1GB
+      max_api_requests: 1000
+      max_bandwidth: 104857600        # 100MB
+      max_databases: 1
+      max_connections: 10
+      max_file_size: 10485760         # 10MB
+      max_files: 100
+      max_sessions: 10
+      max_projects: 3
+    features:
+      enable_custom_domains: false
+      enable_tenant_branding: false
+      enable_advanced_analytics: false
+
+  # 专业版租户模板
+  professional:
+    name: "专业版"
+    description: "适合中型企业的专业功能"
+    quota:
+      max_users: 50
+      max_storage: 5368709120         # 5GB
+      max_api_requests: 5000
+      max_bandwidth: 536870912        # 500MB
+      max_databases: 3
+      max_connections: 25
+      max_file_size: 52428800         # 50MB
+      max_files: 500
+      max_sessions: 50
+      max_projects: 10
+    features:
+      enable_custom_domains: true
+      enable_tenant_branding: true
+      enable_advanced_analytics: true
+
+  # 企业版租户模板
+  enterprise:
+    name: "企业版"
+    description: "适合大型企业的完整功能"
+    quota:
+      max_users: 200
+      max_storage: 21474836480        # 20GB
+      max_api_requests: 20000
+      max_bandwidth: 2147483648       # 2GB
+      max_databases: 10
+      max_connections: 100
+      max_file_size: 209715200        # 200MB
+      max_files: 2000
+      max_sessions: 200
+      max_projects: 50
+    features:
+      enable_custom_domains: true
+      enable_tenant_branding: true
+      enable_advanced_analytics: true
+      enable_priority_support: true
+      enable_sla_guarantee: true

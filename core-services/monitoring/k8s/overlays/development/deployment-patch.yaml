@@ -1,0 +1,54 @@
+# 太上老君监控系统 - 开发环境部署补丁
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: monitoring
+        image: ghcr.io/taishanglaojun/monitoring:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        env:
+        - name: APP_ENV
+          value: "development"
+        - name: LOG_LEVEL
+          value: "debug"
+        - name: DEBUG
+          value: "true"
+        - name: PORT
+          value: "8080"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30

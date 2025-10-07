@@ -1,4 +1,4 @@
-﻿package proxy
+package proxy
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/registry"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/types"
 )
 
 // LoadBalancer 负载均衡器接口
@@ -19,35 +20,29 @@ type LoadBalancer interface {
 	Algorithm() string
 }
 
-// LoadBalancerType 负载均衡算法类型
-type LoadBalancerType string
 
-const (
-	RoundRobin       LoadBalancerType = "round_robin"
-	WeightedRoundRobin LoadBalancerType = "weighted_round_robin"
-	Random           LoadBalancerType = "random"
-	WeightedRandom   LoadBalancerType = "weighted_random"
-	LeastConnections LoadBalancerType = "least_connections"
-	IPHash           LoadBalancerType = "ip_hash"
-)
 
 // NewLoadBalancer 创建负载均衡器
-func NewLoadBalancer(algorithm LoadBalancerType) LoadBalancer {
+func NewLoadBalancer(algorithm types.LoadBalancerType) LoadBalancer {
 	switch algorithm {
-	case RoundRobin:
+	case types.RoundRobin:
 		return &roundRobinBalancer{}
-	case WeightedRoundRobin:
+	case types.WeightedRoundRobin:
 		return &weightedRoundRobinBalancer{}
-	case Random:
+	case types.Random:
 		return &randomBalancer{}
-	case WeightedRandom:
+	case types.WeightedRandom:
 		return &weightedRandomBalancer{}
-	case LeastConnections:
+	case types.LeastConnections:
 		return &leastConnectionsBalancer{
 			connections: make(map[string]int64),
 		}
-	case IPHash:
+	case types.IPHash:
 		return &ipHashBalancer{}
+	case types.ConsistentHash:
+		return NewConsistentHashBalancer(150)
+	case types.ConsistentHashWeighted:
+		return NewConsistentHashBalancerWithWeight(150)
 	default:
 		return &roundRobinBalancer{}
 	}
@@ -68,7 +63,7 @@ func (r *roundRobinBalancer) Select(instances []*registry.ServiceInstance) (*reg
 }
 
 func (r *roundRobinBalancer) Algorithm() string {
-	return string(RoundRobin)
+	return string(types.RoundRobin)
 }
 
 // weightedRoundRobinBalancer 加权轮询负载均衡器
@@ -124,7 +119,7 @@ func (w *weightedRoundRobinBalancer) Select(instances []*registry.ServiceInstanc
 }
 
 func (w *weightedRoundRobinBalancer) Algorithm() string {
-	return string(WeightedRoundRobin)
+	return string(types.WeightedRoundRobin)
 }
 
 // randomBalancer 随机负载均衡器
@@ -150,7 +145,7 @@ func (r *randomBalancer) Select(instances []*registry.ServiceInstance) (*registr
 }
 
 func (r *randomBalancer) Algorithm() string {
-	return string(Random)
+	return string(types.Random)
 }
 
 // weightedRandomBalancer 加权随机负载均衡器
@@ -200,7 +195,7 @@ func (w *weightedRandomBalancer) Select(instances []*registry.ServiceInstance) (
 }
 
 func (w *weightedRandomBalancer) Algorithm() string {
-	return string(WeightedRandom)
+	return string(types.WeightedRandom)
 }
 
 // leastConnectionsBalancer 最少连接负载均衡器
@@ -232,7 +227,7 @@ func (l *leastConnectionsBalancer) Select(instances []*registry.ServiceInstance)
 }
 
 func (l *leastConnectionsBalancer) Algorithm() string {
-	return string(LeastConnections)
+	return string(types.LeastConnections)
 }
 
 // IncrementConnections 增加连接数
@@ -266,7 +261,7 @@ func (i *ipHashBalancer) Select(instances []*registry.ServiceInstance) (*registr
 }
 
 func (i *ipHashBalancer) Algorithm() string {
-	return string(IPHash)
+	return string(types.IPHash)
 }
 
 // SelectWithIP IP哈希选择（需要客户端IP）

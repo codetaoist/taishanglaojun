@@ -16,7 +16,9 @@ import {
   Divider,
   Badge,
   Tooltip,
-  message
+  message,
+  Modal,
+  Form
 } from 'antd';
 import { 
   UserOutlined, 
@@ -81,6 +83,7 @@ const Community: React.FC = () => {
   const [users, setUsers] = useState<CommunityUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [newPostForm] = Form.useForm();
 
   // 模拟数据
   useEffect(() => {
@@ -88,7 +91,7 @@ const Community: React.FC = () => {
       {
         id: '1',
         title: '《道德经》第一章的现代理解',
-        content: '道可道，非常道。名可名，非常名。这句话在现代社会中如何理解？我认为...',
+        content: '道可道，非常道。名可名，非常名。这句话在现代社会中如何理解？认为...',
         author: {
           id: '1',
           username: '修道者',
@@ -224,6 +227,58 @@ const Community: React.FC = () => {
     return date.toLocaleDateString();
   };
 
+  const handleSubmitPost = async (values: any) => {
+    try {
+      setLoading(true);
+      
+      // 创建新帖子对象
+      const newPost: CommunityPost = {
+        id: Date.now().toString(),
+        title: values.title,
+        content: values.content,
+        author: {
+          id: 'current-user',
+          username: '当前用户',
+          level: 1,
+          title: '新手修行者'
+        },
+        category: values.category,
+        tags: values.tags || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        likes: 0,
+        comments: 0,
+        views: 0,
+        isLiked: false,
+        isBookmarked: false
+      };
+
+      // 添加到帖子列表开头
+      setPosts(prev => [newPost, ...prev]);
+      
+      // 重置表单并关闭模态框
+      newPostForm.resetFields();
+      setShowNewPost(false);
+      message.success('帖子发布成功！');
+      
+    } catch (error) {
+      message.error('发布失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleComment = (postId: string) => {
+    // TODO: 实现评论功能
+    message.info('评论功能开发中...');
+  };
+
+  const handleShare = (postId: string) => {
+    // TODO: 实现分享功能
+    navigator.clipboard.writeText(`${window.location.origin}/community/post/${postId}`);
+    message.success('链接已复制到剪贴板');
+  };
+
   const tabItems = [
     {
       key: 'posts',
@@ -282,13 +337,26 @@ const Community: React.FC = () => {
                     </Button>
                   </Space>,
                   <Space key="comment">
-                    <Button type="text" icon={<CommentOutlined />}>
+                    <Button 
+                      type="text" 
+                      icon={<CommentOutlined />}
+                      onClick={() => handleComment(post.id)}
+                    >
                       {post.comments}
                     </Button>
                   </Space>,
                   <Space key="view">
                     <Button type="text" icon={<EyeOutlined />}>
                       {post.views}
+                    </Button>
+                  </Space>,
+                  <Space key="share">
+                    <Button 
+                      type="text" 
+                      icon={<ShareAltOutlined />}
+                      onClick={() => handleShare(post.id)}
+                    >
+                      分享
                     </Button>
                   </Space>,
                   <Button 
@@ -476,7 +544,7 @@ const Community: React.FC = () => {
             <Col xs={24} sm={6}>
               <Card>
                 <div style={{ textAlign: 'center' }}>
-                  <Title level={3} style={{ margin: 0, color: '#52c41a' }}>5,678</Title>
+                  <Title level={3} style={{ margin: 0, color: '#52c41a' }}>{posts.length}</Title>
                   <Text type="secondary">讨论帖子</Text>
                 </div>
               </Card>
@@ -509,6 +577,101 @@ const Community: React.FC = () => {
           </Card>
         </div>
       </Content>
+
+      {/* 发布新帖模态框 */}
+      <Modal
+        title="发布新帖"
+        open={showNewPost}
+        onCancel={() => {
+          setShowNewPost(false);
+          newPostForm.resetFields();
+        }}
+        footer={null}
+        width={600}
+      >
+        <Form
+          form={newPostForm}
+          layout="vertical"
+          onFinish={handleSubmitPost}
+        >
+          <Form.Item
+            name="title"
+            label="帖子标题"
+            rules={[
+              { required: true, message: '请输入帖子标题' },
+              { min: 5, message: '标题至少5个字符' },
+              { max: 100, message: '标题不能超过100个字符' }
+            ]}
+          >
+            <Input placeholder="请输入一个吸引人的标题..." />
+          </Form.Item>
+
+          <Form.Item
+            name="category"
+            label="分类"
+            rules={[{ required: true, message: '请选择分类' }]}
+          >
+            <Select placeholder="选择帖子分类">
+              <Option value="道学讨论">道学讨论</Option>
+              <Option value="修行心得">修行心得</Option>
+              <Option value="儒学应用">儒学应用</Option>
+              <Option value="佛学智慧">佛学智慧</Option>
+              <Option value="生活感悟">生活感悟</Option>
+              <Option value="问题求助">问题求助</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="tags"
+            label="标签"
+          >
+            <Select
+              mode="tags"
+              placeholder="添加相关标签（可选）"
+              maxTagCount={5}
+            >
+              <Option value="道德经">道德经</Option>
+              <Option value="论语">论语</Option>
+              <Option value="静坐">静坐</Option>
+              <Option value="冥想">冥想</Option>
+              <Option value="修行">修行</Option>
+              <Option value="哲学">哲学</Option>
+              <Option value="智慧">智慧</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="content"
+            label="内容"
+            rules={[
+              { required: true, message: '请输入帖子内容' },
+              { min: 20, message: '内容至少20个字符' },
+              { max: 5000, message: '内容不能超过5000个字符' }
+            ]}
+          >
+            <TextArea
+              rows={8}
+              placeholder="分享你的想法、心得或问题..."
+              showCount
+              maxLength={5000}
+            />
+          </Form.Item>
+
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={() => {
+                setShowNewPost(false);
+                newPostForm.resetFields();
+              }}>
+                取消
+              </Button>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                发布帖子
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </Layout>
   );
 };

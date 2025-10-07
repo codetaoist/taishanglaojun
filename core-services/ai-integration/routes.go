@@ -14,9 +14,13 @@ import (
 func SetupRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger, providerManager *providers.Manager) {
 	// 创建服务
 	chatService := services.NewChatService(db, logger, providerManager)
+	aiService := services.NewAIService(providerManager)
+	crossModalService := services.NewCrossModalService(providerManager, logger)
 	
 	// 创建处理器
 	chatHandler := handlers.NewChatHandler(chatService, logger)
+	aiHandler := handlers.NewAIHandler(aiService, logger)
+	crossModalHandler := handlers.NewCrossModalHandler(crossModalService)
 
 	// 创建JWT中间件（从配置中获取）
 	jwtConfig := middleware.JWTConfig{
@@ -35,10 +39,29 @@ func SetupRoutes(router *gin.RouterGroup, db *gorm.DB, logger *zap.Logger, provi
 		aiGroup.GET("/sessions/:session_id/messages", jwtMiddleware.AuthRequired(), chatHandler.GetMessages)
 		aiGroup.DELETE("/sessions/:session_id", jwtMiddleware.AuthRequired(), chatHandler.DeleteSession)
 		
+		// 需要认证的AI功能路由
+		aiGroup.POST("/intent", jwtMiddleware.AuthRequired(), aiHandler.IntentRecognition)
+		aiGroup.POST("/sentiment", jwtMiddleware.AuthRequired(), aiHandler.SentimentAnalysis)
+		
 		// 公开的提供商信息路由（不需要认证）
 		aiGroup.GET("/providers", getProviders(providerManager))
 		aiGroup.GET("/models", getModels(providerManager))
 		aiGroup.GET("/health", healthCheck(providerManager))
+	}
+
+	// 跨模态推理路由组
+	crossModalGroup := router.Group("/crossmodal")
+	{
+		// 需要认证的跨模态推理路由
+		crossModalGroup.POST("/inference", jwtMiddleware.AuthRequired(), crossModalHandler.ProcessCrossModalInference)
+		crossModalGroup.POST("/search", jwtMiddleware.AuthRequired(), crossModalHandler.SemanticSearch)
+		crossModalGroup.POST("/match", jwtMiddleware.AuthRequired(), crossModalHandler.ContentMatching)
+		crossModalGroup.POST("/qa", jwtMiddleware.AuthRequired(), crossModalHandler.MultiModalQA)
+		crossModalGroup.POST("/scene", jwtMiddleware.AuthRequired(), crossModalHandler.SceneUnderstanding)
+		crossModalGroup.POST("/emotion", jwtMiddleware.AuthRequired(), crossModalHandler.EmotionAnalysis)
+		crossModalGroup.GET("/stream", jwtMiddleware.AuthRequired(), crossModalHandler.StreamCrossModalInference)
+		crossModalGroup.GET("/history", jwtMiddleware.AuthRequired(), crossModalHandler.GetInferenceHistory)
+		crossModalGroup.GET("/stats", jwtMiddleware.AuthRequired(), crossModalHandler.GetInferenceStats)
 	}
 }
 

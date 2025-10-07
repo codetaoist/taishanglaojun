@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -82,9 +83,11 @@ type CORSConfig struct {
 
 // JWTConfig JWT配置
 type JWTConfig struct {
-	Secret     string        `mapstructure:"secret"`
-	Issuer     string        `mapstructure:"issuer"`
-	Expiration time.Duration `mapstructure:"expiration"`
+	Secret           string        `mapstructure:"secret"`
+	ExpiresIn        time.Duration `mapstructure:"expires_in"`
+	RefreshExpiresIn time.Duration `mapstructure:"refresh_expires_in"`
+	Issuer           string        `mapstructure:"issuer"`
+	Audience         string        `mapstructure:"audience"`
 }
 
 // AIConfig AI配置
@@ -128,6 +131,14 @@ func Load(configPath string) (*Config, error) {
 	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("解析配置失败: %w", err)
+	}
+
+	// 手动处理环境变量替换
+	if config.JWT.Secret == "" || strings.Contains(config.JWT.Secret, "${") {
+		config.JWT.Secret = os.ExpandEnv(config.JWT.Secret)
+		if config.JWT.Secret == "" {
+			config.JWT.Secret = "your-super-secret-jwt-key-change-in-production"
+		}
 	}
 
 	globalConfig = &config

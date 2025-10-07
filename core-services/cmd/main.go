@@ -11,6 +11,7 @@ import (
 
 	ai_integration "github.com/codetaoist/taishanglaojun/core-services/ai-integration"
 	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/providers"
+	"github.com/codetaoist/taishanglaojun/core-services/community"
 	cultural_wisdom "github.com/codetaoist/taishanglaojun/core-services/cultural-wisdom"
 	"github.com/codetaoist/taishanglaojun/core-services/internal/config"
 	"github.com/codetaoist/taishanglaojun/core-services/internal/database"
@@ -144,6 +145,67 @@ func main() {
 		}
 	}
 
+	// 注册Azure提供商
+	if azureConfig, exists := cfg.AI.Providers["azure"]; exists && azureConfig.Enabled {
+		if apiKey, ok := azureConfig.Config["api_key"].(string); ok && apiKey != "" {
+			if endpoint, ok := azureConfig.Config["endpoint"].(string); ok && endpoint != "" {
+				if deploymentName, ok := azureConfig.Config["deployment_name"].(string); ok && deploymentName != "" {
+					apiVersion := "2023-05-15"
+					if version, ok := azureConfig.Config["api_version"].(string); ok && version != "" {
+						apiVersion = version
+					}
+					timeout := 30
+					if t, ok := azureConfig.Config["timeout"].(int); ok {
+						timeout = t
+					}
+
+					azureProviderConfig := providers.AzureConfig{
+						APIKey:         apiKey,
+						Endpoint:       endpoint,
+						DeploymentName: deploymentName,
+						APIVersion:     apiVersion,
+						Timeout:        timeout,
+					}
+					azureProvider := providers.NewAzureProvider(azureProviderConfig, log)
+					if err := providerManager.RegisterProvider("azure", azureProvider); err != nil {
+						log.Error("Failed to register Azure provider", zap.Error(err))
+					} else {
+						log.Info("Azure provider registered successfully")
+					}
+				}
+			}
+		}
+	}
+
+	// 注册百度提供商
+	if baiduConfig, exists := cfg.AI.Providers["baidu"]; exists && baiduConfig.Enabled {
+		if apiKey, ok := baiduConfig.Config["api_key"].(string); ok && apiKey != "" {
+			if secretKey, ok := baiduConfig.Config["secret_key"].(string); ok && secretKey != "" {
+				baseURL := "https://aip.baidubce.com"
+				if url, ok := baiduConfig.Config["base_url"].(string); ok && url != "" {
+					baseURL = url
+				}
+				timeout := 30
+				if t, ok := baiduConfig.Config["timeout"].(int); ok {
+					timeout = t
+				}
+
+				baiduProviderConfig := providers.BaiduConfig{
+					APIKey:    apiKey,
+					SecretKey: secretKey,
+					BaseURL:   baseURL,
+					Timeout:   timeout,
+				}
+				baiduProvider := providers.NewBaiduProvider(baiduProviderConfig, log)
+				if err := providerManager.RegisterProvider("baidu", baiduProvider); err != nil {
+					log.Error("Failed to register Baidu provider", zap.Error(err))
+				} else {
+					log.Info("Baidu provider registered successfully")
+				}
+			}
+		}
+	}
+
 	// 数据库迁移
 	if err := autoMigrate(db.GetDB()); err != nil {
 		log.Fatal("Failed to migrate database", zap.Error(err))
@@ -153,7 +215,7 @@ func main() {
 	jwtConfig := middleware.JWTConfig{
 		Secret:     cfg.JWT.Secret,
 		Issuer:     cfg.JWT.Issuer,
-		Expiration: cfg.JWT.Expiration,
+		Expiration: cfg.JWT.ExpiresIn,
 	}
 	jwtMiddleware := middleware.NewJWTMiddleware(jwtConfig, log)
 
@@ -226,6 +288,11 @@ func main() {
 	// 设置位置跟踪路由
 	log.Info("=== Starting location tracking routes setup ===")
 	location_tracking.SetupRoutes(apiV1, db.GetDB(), log, jwtMiddleware)
+	
+	// 设置社区路由
+	log.Info("=== Starting community routes setup ===")
+	community.SetupRoutes(apiV1, db.GetDB(), log)
+	log.Info("=== Community routes setup completed ===")
 	
 	log.Info("=== Cultural wisdom routes setup completed ===")
 

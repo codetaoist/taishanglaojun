@@ -1,0 +1,261 @@
+# 太上老君监控系统 Kubernetes ConfigMap 配置
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taishanglaojun-monitoring-config
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: taishanglaojun
+data:
+  monitoring.yaml: |
+    # 太上老君监控系统配置文件
+    
+    service:
+      name: "taishanglaojun-monitoring"
+      version: "1.0.0"
+      environment: "production"
+      host: "0.0.0.0"
+      port: 8080
+      log_level: "info"
+      
+    tracing:
+      enabled: true
+      sampling_rate: 0.1
+      batch_timeout: "5s"
+      max_export_batch_size: 512
+      max_queue_size: 2048
+      exporters:
+        console:
+          enabled: false
+        jaeger:
+          enabled: true
+          endpoint: "http://jaeger-collector.taishanglaojun-monitoring.svc.cluster.local:14268/api/traces"
+
+    logging:
+      level: "info"
+      format: "json"
+      output: "stdout"
+      file_path: "/var/log/monitoring/app.log"
+      max_size: 100
+      max_backups: 10
+      max_age: 30
+      compress: true
+
+    storage:
+      prometheus:
+        url: "http://prometheus.taishanglaojun-monitoring.svc.cluster.local:9090"
+        timeout: "30s"
+      influxdb:
+        url: "http://influxdb.taishanglaojun-monitoring.svc.cluster.local:8086"
+        token: "monitoring-token-123456789"
+        org: "taishanglaojun"
+        bucket: "monitoring"
+
+    alerting:
+      enabled: true
+      evaluation_interval: "30s"
+      notification_channels:
+        email:
+          enabled: true
+          smtp_host: "smtp.example.com"
+          smtp_port: 587
+          from: "monitoring@taishanglaojun.com"
+          to: ["admin@taishanglaojun.com"]
+
+    dashboard:
+      enabled: true
+      refresh_interval: "30s"
+
+    performance:
+      enabled: true
+      collection_interval: "15s"
+      
+    automation:
+      enabled: true
+      max_concurrent_workflows: 10
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: taishanglaojun
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: 'kubernetes'
+        replica: 'prometheus-1'
+
+    rule_files:
+      - "alert_rules.yml"
+
+    alerting:
+      alertmanagers:
+        - kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_namespace]
+              action: keep
+              regex: taishanglaojun-monitoring
+            - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+              action: keep
+              regex: alertmanager
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'taishanglaojun-monitoring'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - taishanglaojun-monitoring
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            action: keep
+            regex: taishanglaojun-monitoring
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: kubernetes_pod_name
+
+  alert_rules.yml: |
+    groups:
+      - name: taishanglaojun-monitoring
+        rules:
+          - alert: ServiceDown
+            expr: up{job="taishanglaojun-monitoring"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "太上老君监控系统服务不可用"
+              description: "服务 {{ $labels.instance }} 已经停止运行超过1分钟"
+
+          - alert: HighCPUUsage
+            expr: rate(process_cpu_seconds_total{job="taishanglaojun-monitoring"}[5m]) * 100 > 80
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "CPU使用率过高"
+              description: "实例 {{ $labels.instance }} CPU使用率超过80%"
+
+          - alert: HighMemoryUsage
+            expr: process_resident_memory_bytes{job="taishanglaojun-monitoring"} / 1024 / 1024 > 500
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "内存使用率过高"
+              description: "实例 {{ $labels.instance }} 内存使用超过500MB"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: taishanglaojun
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'smtp.example.com:587'
+      smtp_from: 'monitoring@taishanglaojun.com'
+      resolve_timeout: 5m
+
+    route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 1h
+      receiver: 'default-receiver'
+      
+      routes:
+        - match:
+            severity: critical
+          receiver: 'critical-alerts'
+          group_wait: 0s
+          repeat_interval: 5m
+
+    receivers:
+      - name: 'default-receiver'
+        email_configs:
+          - to: 'admin@taishanglaojun.com'
+            subject: '[监控告警] {{ .GroupLabels.alertname }}'
+            body: |
+              {{ range .Alerts }}
+              告警名称: {{ .Annotations.summary }}
+              告警详情: {{ .Annotations.description }}
+              告警级别: {{ .Labels.severity }}
+              告警时间: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+              {{ end }}
+
+      - name: 'critical-alerts'
+        email_configs:
+          - to: 'admin@taishanglaojun.com,ops@taishanglaojun.com'
+            subject: '[严重告警] {{ .GroupLabels.alertname }}'
+            body: |
+              🚨 严重告警通知 🚨
+              
+              {{ range .Alerts }}
+              告警名称: {{ .Annotations.summary }}
+              告警详情: {{ .Annotations.description }}
+              告警级别: {{ .Labels.severity }}
+              告警时间: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+              {{ end }}
+
+    inhibit_rules:
+      - source_match:
+          severity: 'critical'
+        target_match:
+          severity: 'warning'
+        equal: ['alertname', 'service', 'instance']

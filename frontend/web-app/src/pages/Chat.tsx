@@ -1,17 +1,33 @@
-import React, { useState } from 'react';
-import { Card, Typography, Button, Space, Tabs } from 'antd';
-import { MessageOutlined, RobotOutlined, QuestionCircleOutlined, HistoryOutlined } from '@ant-design/icons';
-import IntelligentQA from '../components/ai/IntelligentQA';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Layout, 
+  Card, 
+  Typography, 
+  Button, 
+  Space, 
+  Input, 
+  List, 
+  Avatar, 
+  Tag, 
+  Spin, 
+  Row, 
+  Col 
+} from 'antd';
+import { 
+  MessageOutlined, 
+  RobotOutlined, 
+  UserOutlined, 
+  SendOutlined, 
+  BulbOutlined, 
+  BookOutlined 
+} from '@ant-design/icons';
+import { useChat } from '../hooks/useChat';
+import ConversationList from '../components/chat/ConversationList';
+import { apiClient } from '../services/api';
 
-const { Title, Paragraph } = Typography;
-
-interface ChatMessage {
-  id: string;
-  content: string;
-  sender: 'user' | 'ai';
-  timestamp: string;
-  type?: 'text' | 'wisdom';
-}
+const { Title, Text, Paragraph } = Typography;
+const { Content } = Layout;
+const { TextArea } = Input;
 
 interface WisdomRecommendation {
   id: string;
@@ -26,7 +42,7 @@ const Chat: React.FC = () => {
     currentConversation,
     messages,
     loading,
-    conversationList,
+    conversations,
     sessionId,
     sendMessage,
     createNewConversation,
@@ -36,7 +52,6 @@ const Chat: React.FC = () => {
     searchConversations,
     exportConversations,
     importConversations,
-    retryMessage,
   } = useChat();
 
   const [inputValue, setInputValue] = useState('');
@@ -44,25 +59,23 @@ const Chat: React.FC = () => {
   const [showRecommendations, setShowRecommendations] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // 自动滚动到底部
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || loading) return;
-
+    
     const messageContent = inputValue.trim();
     setInputValue('');
-
+    
     try {
       await sendMessage(messageContent);
+      // 获取智慧推荐
       await fetchWisdomRecommendations(messageContent);
     } catch (error) {
-      console.error('发送消息失败:', error);
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -104,21 +117,26 @@ const Chat: React.FC = () => {
   // 获取智慧推荐
   const fetchWisdomRecommendations = async (query: string) => {
     try {
-      // 使用搜索API来获取相关的文化智慧内容
-      const searchResponse = await apiClient.searchWisdom(query, { limit: 3 });
-      if (searchResponse.success && searchResponse.data.items.length > 0) {
-        const wisdomRecommendations: WisdomRecommendation[] = searchResponse.data.items.map(item => ({
-          wisdom_id: item.id,
-          title: item.title,
-          author: item.author,
-          category: item.category,
-          summary: item.summary,
-          relevance: 0.8,
-          reason: '与您的问题相关'
-        }));
-        setRecommendations(wisdomRecommendations);
-        setShowRecommendations(true);
-      }
+      // 模拟API调用获取智慧推荐
+      const mockRecommendations: WisdomRecommendation[] = [
+        {
+          id: '1',
+          title: '道德经第一章',
+          content: '道可道，非常道。名可名，非常名。',
+          category: '道家经典',
+          source: '老子'
+        },
+        {
+          id: '2',
+          title: '论语·学而',
+          content: '学而时习之，不亦说乎？',
+          category: '儒家经典',
+          source: '孔子'
+        }
+      ];
+      
+      setRecommendations(mockRecommendations);
+      setShowRecommendations(true);
     } catch (error) {
       console.error('Failed to fetch wisdom recommendations:', error);
     }
@@ -247,7 +265,7 @@ const Chat: React.FC = () => {
         {/* 左侧对话列表 */}
         <Col span={6} style={{ borderRight: '1px solid #f0f0f0', height: '100%', overflow: 'hidden' }}>
           <ConversationList
-            conversations={conversationList}
+            conversations={conversations}
             currentConversationId={currentConversation?.id}
             loading={loading}
             onSelectConversation={handleSelectConversation}
@@ -315,39 +333,39 @@ const Chat: React.FC = () => {
                       style={{
                         border: 'none',
                         padding: '8px 0',
-                        justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
+                        justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
                       }}
                     >
                       <div
                         style={{
                           maxWidth: '70%',
                           display: 'flex',
-                          flexDirection: message.sender === 'user' ? 'row-reverse' : 'row',
+                          flexDirection: message.role === 'user' ? 'row-reverse' : 'row',
                           alignItems: 'flex-start',
                           gap: '8px',
                         }}
                       >
                         <Avatar
-                          icon={message.sender === 'user' ? <UserOutlined /> : <RobotOutlined />}
+                          icon={message.role === 'user' ? <UserOutlined /> : <RobotOutlined />}
                           style={{
-                            backgroundColor: message.sender === 'user' ? '#1890ff' : '#52c41a',
+                            backgroundColor: message.role === 'user' ? '#1890ff' : '#52c41a',
                             flexShrink: 0,
                           }}
                         />
                         <Card
                           size="small"
                           style={{
-                            backgroundColor: message.sender === 'user' ? '#1890ff' : '#fff',
-                            color: message.sender === 'user' ? '#fff' : '#000',
+                            backgroundColor: message.role === 'user' ? '#1890ff' : '#fff',
+                            color: message.role === 'user' ? '#fff' : '#000',
                             borderRadius: '12px',
-                            border: message.sender === 'user' ? 'none' : '1px solid #f0f0f0',
+                            border: message.role === 'user' ? 'none' : '1px solid #f0f0f0',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           }}
                           bodyStyle={{ padding: '8px 12px' }}
                         >
                           <Text
                             style={{
-                              color: message.sender === 'user' ? '#fff' : '#000',
+                              color: message.role === 'user' ? '#fff' : '#000',
                               whiteSpace: 'pre-wrap',
                             }}
                           >
@@ -357,7 +375,7 @@ const Chat: React.FC = () => {
                             marginTop: '4px', 
                             fontSize: '11px', 
                             opacity: 0.7,
-                            textAlign: message.sender === 'user' ? 'right' : 'left'
+                            textAlign: message.role === 'user' ? 'right' : 'left'
                           }}>
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </div>
@@ -412,6 +430,10 @@ const Chat: React.FC = () => {
                       size="small"
                       hoverable
                       style={{ backgroundColor: '#f9f9f9' }}
+                      onClick={() => {
+                        setInputValue(rec.content);
+                        setShowRecommendations(false);
+                      }}
                     >
                       <Space direction="vertical" size="small" style={{ width: '100%' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -386,6 +386,49 @@ type SuccessResponse struct {
 	Message string `json:"message"`
 }
 
+// EnhancedSemanticSearchRequest 增强语义搜索请求
+type EnhancedSemanticSearchRequest struct {
+	Query      string   `json:"query" binding:"required"`
+	UserID     string   `json:"user_id"`
+	CategoryID string   `json:"category_id"`
+	School     string   `json:"school"`
+	Tags       []string `json:"tags"`
+	Threshold  float32  `json:"threshold"` // 相似度阈值 0-1
+	Page       int      `json:"page"`
+	Size       int      `json:"size"`
+}
+
+// VectorSearchRequest 向量搜索请求
+type VectorSearchRequest struct {
+	Query     string  `json:"query" binding:"required"`
+	Threshold float32 `json:"threshold"` // 相似度阈值 0-1
+	Page      int     `json:"page"`
+	Size      int     `json:"size"`
+}
+
+// EnhancedSearchResponse 增强搜索响应
+type EnhancedSearchResponse struct {
+	Code        int                    `json:"code"`
+	Message     string                 `json:"message"`
+	Results     []*models.Wisdom       `json:"results"`
+	Total       int                    `json:"total"`
+	SearchType  string                 `json:"search_type"` // semantic, keyword, hybrid
+	QueryTime   int64                  `json:"query_time"`  // 毫秒
+	Suggestions []string               `json:"suggestions"`
+	Facets      map[string]interface{} `json:"facets"`
+	Page        int                    `json:"page"`
+	Size        int                    `json:"size"`
+}
+
+// SearchAnalyticsResponse 搜索分析响应
+type SearchAnalyticsResponse struct {
+	Code            int             `json:"code"`
+	Message         string          `json:"message"`
+	Period          string          `json:"period"`
+	PopularSearches []PopularSearch `json:"popular_searches"`
+	TotalSearches   int64           `json:"total_searches"`
+}
+
 
 // AdvancedSearch 高级搜索
 func (h *SearchHandler) AdvancedSearch(c *gin.Context) {
@@ -467,5 +510,190 @@ func (h *SearchHandler) SearchWithFacets(c *gin.Context) {
 		"data": result,
 		"message": "搜索成功",
 	})
+}
+
+// EnhancedSemanticSearch 增强的语义搜索
+// @Summary 增强的语义搜索
+// @Description 基于AI的增强语义搜索，支持智能排序和搜索建议
+// @Tags 搜索
+// @Accept json
+// @Produce json
+// @Param request body EnhancedSemanticSearchRequest true "增强语义搜索请求"
+// @Success 200 {object} EnhancedSearchResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Router /api/v1/search/enhanced-semantic [post]
+func (h *SearchHandler) EnhancedSemanticSearch(c *gin.Context) {
+	var req EnhancedSemanticSearchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	// 设置默认值
+	if req.Page <= 0 {
+		req.Page = 1
+	}
+	if req.Size <= 0 {
+		req.Size = 20
+	}
+	if req.Size > 100 {
+		req.Size = 100
+	}
+
+	// 转换为服务层请求
+	serviceReq := &services.SemanticSearchRequest{
+		Query:      req.Query,
+		UserID:     req.UserID,
+		CategoryID: req.CategoryID,
+		School:     req.School,
+		Tags:       req.Tags,
+		Threshold:  req.Threshold,
+		Page:       req.Page,
+		Size:       req.Size,
+	}
+
+	result, err := h.searchService.EnhancedSemanticSearch(c.Request.Context(), serviceReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "SEARCH_ERROR",
+			Message: "增强语义搜索失败",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	response := EnhancedSearchResponse{
+		Code:        200,
+		Message:     "搜索成功",
+		Results:     result.Results,
+		Total:       result.Total,
+		SearchType:  result.SearchType,
+		QueryTime:   result.QueryTime.Milliseconds(),
+		Suggestions: result.Suggestions,
+		Facets:      result.Facets,
+		Page:        req.Page,
+		Size:        req.Size,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// VectorSimilaritySearch 向量相似度搜索
+// @Summary 向量相似度搜索
+// @Description 基于向量相似度的精确搜索
+// @Tags 搜索
+// @Accept json
+// @Produce json
+// @Param request body VectorSearchRequest true "向量搜索请求"
+// @Success 200 {object} SearchResponse
+// @Failure 400 {object} ErrorResponse
+// @Router /api/v1/search/vector [post]
+func (h *SearchHandler) VectorSimilaritySearch(c *gin.Context) {
+	var req VectorSearchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	// 设置默认值
+	if req.Page <= 0 {
+		req.Page = 1
+	}
+	if req.Size <= 0 {
+		req.Size = 20
+	}
+
+	// 转换为服务层请求
+	serviceReq := &services.SemanticSearchRequest{
+		Query:     req.Query,
+		Threshold: req.Threshold,
+		Page:      req.Page,
+		Size:      req.Size,
+	}
+
+	results, err := h.searchService.SemanticSearch(c.Request.Context(), serviceReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "SEARCH_ERROR",
+			Message: "向量搜索失败",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	response := SearchResponse{
+		Code:    200,
+		Message: "搜索成功",
+		Data: SearchData{
+			Wisdoms: results,
+			Total:   len(results),
+			Page:    req.Page,
+			Size:    req.Size,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// GetSearchAnalytics 获取搜索分析数据
+// @Summary 获取搜索分析数据
+// @Description 获取搜索热词、趋势等分析数据
+// @Tags 搜索
+// @Produce json
+// @Param period query string false "时间周期" Enums(day,week,month) default(week)
+// @Param limit query int false "返回数量限制" default(10)
+// @Success 200 {object} SearchAnalyticsResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/search/analytics [get]
+func (h *SearchHandler) GetSearchAnalytics(c *gin.Context) {
+	period := c.DefaultQuery("period", "week")
+	limitStr := c.DefaultQuery("limit", "10")
+	
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	// 获取热门搜索
+	popularSearches, err := h.searchService.GetPopularSearches(c.Request.Context(), limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "ANALYTICS_ERROR",
+			Message: "获取搜索分析数据失败",
+			Details: err.Error(),
+		})
+		return
+	}
+
+	response := SearchAnalyticsResponse{
+		Code:            200,
+		Message:         "获取成功",
+		Period:          period,
+		PopularSearches: convertPopularSearches(popularSearches),
+		TotalSearches:   calculateTotalSearches(popularSearches),
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// calculateTotalSearches 计算总搜索次数
+func calculateTotalSearches(searches []services.PopularSearch) int64 {
+	var total int64
+	for _, search := range searches {
+		total += search.Count
+	}
+	return total
 }
 

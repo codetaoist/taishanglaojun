@@ -134,6 +134,56 @@ func (m *MockProvider) GetModels() []string {
 	return []string{"mock-gpt-3.5", "mock-gpt-4", "mock-claude"}
 }
 
+// IntentRecognition 意图识别
+func (m *MockProvider) IntentRecognition(ctx context.Context, req IntentRequest) (*IntentResponse, error) {
+	m.logger.Info("Mock AI processing intent recognition request", zap.String("text", req.Text))
+	
+	// 模拟处理时间
+	time.Sleep(300 * time.Millisecond)
+	
+	// 基于文本内容模拟意图识别
+	intent := m.generateMockIntent(req.Text)
+	entities := m.generateMockEntities(req.Text)
+	
+	return &IntentResponse{
+		Intent:     intent,
+		Confidence: 0.85,
+		Entities:   entities,
+		Context:    req.Context,
+		Usage: Usage{
+			PromptTokens:     len(req.Text) / 4, // 粗略估算
+			CompletionTokens: 50,
+			TotalTokens:      len(req.Text)/4 + 50,
+			Duration:         300 * time.Millisecond,
+		},
+	}, nil
+}
+
+// SentimentAnalysis 情感分析
+func (m *MockProvider) SentimentAnalysis(ctx context.Context, req SentimentRequest) (*SentimentResponse, error) {
+	m.logger.Info("Mock AI processing sentiment analysis request", zap.String("text", req.Text))
+	
+	// 模拟处理时间
+	time.Sleep(300 * time.Millisecond)
+	
+	// 基于文本内容模拟情感分析
+	sentiment, score := m.generateMockSentiment(req.Text)
+	emotions := m.generateMockEmotions(req.Text)
+	
+	return &SentimentResponse{
+		Sentiment:  sentiment,
+		Score:      score,
+		Confidence: 0.80,
+		Emotions:   emotions,
+		Usage: Usage{
+			PromptTokens:     len(req.Text) / 4, // 粗略估算
+			CompletionTokens: 30,
+			TotalTokens:      len(req.Text)/4 + 30,
+			Duration:         300 * time.Millisecond,
+		},
+	}, nil
+}
+
 // generateChatResponse 生成对话响应
 func (m *MockProvider) generateChatResponse(userMessage string) string {
 	if strings.Contains(userMessage, "智慧") || strings.Contains(userMessage, "wisdom") {
@@ -231,4 +281,137 @@ func (m *MockProvider) generateAnalysis(prompt string) string {
 
 **现代意义：**
 在当今社会，这样的智慧更显珍贵，能够帮助人们在浮躁的环境中找到内心的平静和方向。`
+}
+
+// generateMockIntent 生成模拟意图
+func (m *MockProvider) generateMockIntent(text string) string {
+	text = strings.ToLower(text)
+	
+	if strings.Contains(text, "问") || strings.Contains(text, "什么") || strings.Contains(text, "如何") || strings.Contains(text, "怎么") {
+		return "询问"
+	} else if strings.Contains(text, "请") || strings.Contains(text, "帮") || strings.Contains(text, "需要") {
+		return "请求"
+	} else if strings.Contains(text, "推荐") || strings.Contains(text, "建议") {
+		return "推荐"
+	} else if strings.Contains(text, "预订") || strings.Contains(text, "订") {
+		return "预订"
+	} else if strings.Contains(text, "取消") {
+		return "取消"
+	} else if strings.Contains(text, "查询") || strings.Contains(text, "查看") {
+		return "查询"
+	} else if strings.Contains(text, "谢谢") || strings.Contains(text, "感谢") || strings.Contains(text, "好的") {
+		return "赞美"
+	} else if strings.Contains(text, "不好") || strings.Contains(text, "问题") || strings.Contains(text, "错误") {
+		return "抱怨"
+	}
+	
+	return "其他"
+}
+
+// generateMockEntities 生成模拟实体
+func (m *MockProvider) generateMockEntities(text string) []Entity {
+	entities := []Entity{}
+	
+	// 简单的实体识别模拟
+	if strings.Contains(text, "时间") || strings.Contains(text, "今天") || strings.Contains(text, "明天") {
+		entities = append(entities, Entity{
+			Name:       "时间",
+			Value:      "今天",
+			Type:       "TIME",
+			Confidence: 0.9,
+		})
+	}
+	
+	if strings.Contains(text, "地点") || strings.Contains(text, "北京") || strings.Contains(text, "上海") {
+		entities = append(entities, Entity{
+			Name:       "地点",
+			Value:      "北京",
+			Type:       "LOCATION",
+			Confidence: 0.85,
+		})
+	}
+	
+	return entities
+}
+
+// generateMockSentiment 生成模拟情感
+func (m *MockProvider) generateMockSentiment(text string) (string, float32) {
+	text = strings.ToLower(text)
+	
+	// 积极情感关键词
+	positiveWords := []string{"好", "棒", "喜欢", "满意", "开心", "高兴", "谢谢", "感谢", "优秀", "完美"}
+	// 消极情感关键词
+	negativeWords := []string{"不好", "差", "讨厌", "不满", "生气", "愤怒", "糟糕", "失望", "问题", "错误"}
+	
+	positiveCount := 0
+	negativeCount := 0
+	
+	for _, word := range positiveWords {
+		if strings.Contains(text, word) {
+			positiveCount++
+		}
+	}
+	
+	for _, word := range negativeWords {
+		if strings.Contains(text, word) {
+			negativeCount++
+		}
+	}
+	
+	if positiveCount > negativeCount {
+		return "positive", 0.7
+	} else if negativeCount > positiveCount {
+		return "negative", -0.6
+	}
+	
+	return "neutral", 0.0
+}
+
+// generateMockEmotions 生成模拟情感详情
+func (m *MockProvider) generateMockEmotions(text string) []Emotion {
+	text = strings.ToLower(text)
+	emotions := []Emotion{}
+	
+	if strings.Contains(text, "开心") || strings.Contains(text, "高兴") || strings.Contains(text, "喜欢") {
+		emotions = append(emotions, Emotion{
+			Name:       "joy",
+			Score:      0.8,
+			Confidence: 0.85,
+		})
+	}
+	
+	if strings.Contains(text, "生气") || strings.Contains(text, "愤怒") {
+		emotions = append(emotions, Emotion{
+			Name:       "anger",
+			Score:      0.7,
+			Confidence: 0.80,
+		})
+	}
+	
+	if strings.Contains(text, "难过") || strings.Contains(text, "悲伤") {
+		emotions = append(emotions, Emotion{
+			Name:       "sadness",
+			Score:      0.6,
+			Confidence: 0.75,
+		})
+	}
+	
+	if strings.Contains(text, "惊讶") || strings.Contains(text, "意外") {
+		emotions = append(emotions, Emotion{
+			Name:       "surprise",
+			Score:      0.5,
+			Confidence: 0.70,
+		})
+	}
+	
+	// 如果没有明显情感，返回中性情感
+	if len(emotions) == 0 {
+		emotions = append(emotions, Emotion{
+			Name:       "neutral",
+			Score:      0.5,
+			Confidence: 0.60,
+		})
+	}
+	
+	return emotions
 }

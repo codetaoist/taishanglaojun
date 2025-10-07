@@ -11,11 +11,12 @@ import (
 
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/config"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/gateway"
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/health"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/logger"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/monitoring"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/proxy"
 	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/registry"
-	
+	"github.com/codetaoist/taishanglaojun/infrastructure/api-gateway/internal/types"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,24 +36,31 @@ func main() {
 	// 初始化服务注册中心
 	serviceRegistry := registry.New(cfg.Registry, log)
 
+	// 初始化负载均衡管理器
+	loadBalancerMgr := proxy.NewLoadBalancerManager(
+		types.LoadBalancerType(cfg.Proxy.LoadBalancer),
+		log,
+	)
+
+	// 创建健康检查器
+	healthChecker := health.NewHealthChecker(cfg.HealthCheck, serviceRegistry, log.GetLogrusLogger())
+
+	// 将健康检查器注册到负载均衡管理器
+	loadBalancerMgr.RegisterHealthChecker(healthChecker)
+
 	// 初始化代理管理器
-	proxyManager := proxy.New(cfg.Proxy, serviceRegistry, metrics, log)
+	proxyManager := proxy.New(serviceRegistry, loadBalancerMgr, log, time.Duration(cfg.Proxy.Timeout)*time.Second)
 
 	// 初始化网关
-	gw, err := gateway.NewGateway(cfg, log, metrics, serviceRegistry, proxyManager)
+	gw, err := gateway.NewGateway(cfg, log, metrics, serviceRegistry, proxyManager, healthChecker)
 	if err != nil {
 		logrus.Fatalf("Failed to create gateway: %v", err)
 	}
 
-	// 加载静态服务配置到注册中心
-	if len(cfg.StaticServices) > 0 {
-		// 由于Registry是接口，我们需要通过类型断言来访问LoadFromStaticConfig方法
-		// 或者我们可以在registry包中添加一个辅助函数
-		if err := registry.LoadStaticServices(serviceRegistry, cfg.StaticServices); err != nil {
-			log.Errorf("Failed to load static services: %v", err)
-		} else {
-			log.Infof("Loaded %d static service groups", len(cfg.StaticServices))
-		}
+	// 启动网关
+	ctx := context.Background()
+	if err := gw.Start(ctx); err != nil {
+		log.Fatalf("Failed to start gateway: %v", err)
 	}
 
 	// 创建路由器
@@ -85,18 +93,7 @@ func main() {
 		}()
 	}
 
-	// 启动健康检查
-	go func() {
-		ticker := time.NewTicker(cfg.HealthCheck.Interval)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				proxyManager.HealthCheck()
-			}
-		}
-	}()
+	// 健康检查已在Gateway.Start中启动
 
 	// 等待中断信号
 	quit := make(chan os.Signal, 1)

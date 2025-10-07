@@ -1,0 +1,508 @@
+# 太上老君监控系统 Docker Compose 配置
+# 用于本地开发和测试环境
+
+version: '3.8'
+
+# 网络配置
+networks:
+  monitoring-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# 数据卷配置
+volumes:
+  monitoring_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  influxdb_data:
+    driver: local
+  jaeger_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+services:
+  # ==================== 核心监控应用 ====================
+  
+  # 太上老君监控系统主应用
+  monitoring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: "dev"
+        COMMIT_SHA: "local"
+        BUILD_DATE: "2024-01-01T00:00:00Z"
+    container_name: taishanglaojun-monitoring
+    hostname: taishanglaojun-monitoring
+    restart: unless-stopped
+    ports:
+      - "8080:8080"    # HTTP 端口
+      - "8443:8443"    # HTTPS 端口
+      - "9090:9090"    # 指标端口
+      - "6060:6060"    # pprof 端口
+    environment:
+      # 应用配置
+      - MONITORING_SERVICE_ENVIRONMENT=development
+      - MONITORING_SERVICE_LOG_LEVEL=debug
+      - MONITORING_SERVICE_HOST=0.0.0.0
+      - MONITORING_SERVICE_PORT=8080
+      - MONITORING_SERVICE_HTTPS_PORT=8443
+      - MONITORING_SERVICE_METRICS_PORT=9090
+      - MONITORING_SERVICE_PPROF_PORT=6060
+      
+      # 数据库配置
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=taishanglaojun_monitoring
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - DB_SSL_MODE=disable
+      
+      # Redis 配置
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis123
+      - REDIS_DB=0
+      
+      # Prometheus 配置
+      - PROMETHEUS_URL=http://prometheus:9090
+      - PROMETHEUS_RETENTION=15d
+      
+      # Grafana 配置
+      - GRAFANA_URL=http://grafana:3000
+      - GRAFANA_ADMIN_USER=admin
+      - GRAFANA_ADMIN_PASSWORD=admin123
+      
+      # InfluxDB 配置
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=influxdb-token-123
+      - INFLUXDB_ORG=taishanglaojun
+      - INFLUXDB_BUCKET=monitoring
+      
+      # Jaeger 配置
+      - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+      
+      # Elasticsearch 配置
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=elastic123
+      
+      # 告警配置
+      - ALERTMANAGER_URL=http://alertmanager:9093
+      - WEBHOOK_URL=http://webhook:8080/webhook
+      
+      # 安全配置
+      - JWT_SECRET=taishanglaojun-jwt-secret-key-2024
+      - ENCRYPTION_KEY=taishanglaojun-encryption-key-32
+      
+      # 监控配置
+      - ENABLE_METRICS=true
+      - ENABLE_TRACING=true
+      - ENABLE_PROFILING=true
+      - HEALTH_CHECK_INTERVAL=30s
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/var/log/monitoring
+      - monitoring_data:/var/lib/monitoring
+      - ./data:/app/data
+    networks:
+      - monitoring-network
+    depends_on:
+      - postgres
+      - redis
+      - prometheus
+      - grafana
+      - influxdb
+      - jaeger
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ==================== 数据存储服务 ====================
+  
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: taishanglaojun-postgres
+    hostname: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=taishanglaojun_monitoring
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: taishanglaojun-redis
+    hostname: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis123 --appendonly yes
+    volumes:
+      - redis_data:/data
+      - ./configs/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ==================== 监控服务 ====================
+  
+  # Prometheus 指标收集
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: taishanglaojun-prometheus
+    hostname: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+      - '--log.level=info'
+    volumes:
+      - prometheus_data:/prometheus
+      - ./configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./configs/prometheus/rules:/etc/prometheus/rules:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Grafana 可视化
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: taishanglaojun-grafana
+    hostname: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_SERVER_DOMAIN=localhost
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres:5432
+      - GF_DATABASE_NAME=grafana
+      - GF_DATABASE_USER=postgres
+      - GF_DATABASE_PASSWORD=postgres123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./configs/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - monitoring-network
+    depends_on:
+      - postgres
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # InfluxDB 时序数据库
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: taishanglaojun-influxdb
+    hostname: influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
+      - DOCKER_INFLUXDB_INIT_ORG=taishanglaojun
+      - DOCKER_INFLUXDB_INIT_BUCKET=monitoring
+      - DOCKER_INFLUXDB_INIT_RETENTION=30d
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=influxdb-token-123
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - ./configs/influxdb/config.yml:/etc/influxdb2/config.yml:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 链路追踪服务 ====================
+  
+  # Jaeger 链路追踪
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: taishanglaojun-jaeger
+    hostname: jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # HTTP collector
+      - "6831:6831/udp"  # UDP agent
+      - "6832:6832/udp"  # UDP agent
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=elasticsearch
+      - ES_SERVER_URLS=http://elasticsearch:9200
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=elastic123
+    networks:
+      - monitoring-network
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:16686/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 日志服务 ====================
+  
+  # Elasticsearch 日志存储
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: taishanglaojun-elasticsearch
+    hostname: elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=elastic123
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./configs/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:elastic123 http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Kibana 日志可视化
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.0
+    container_name: taishanglaojun-kibana
+    hostname: kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=elastic123
+      - SERVER_NAME=kibana
+      - SERVER_HOST=0.0.0.0
+    volumes:
+      - ./configs/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    networks:
+      - monitoring-network
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 告警服务 ====================
+  
+  # AlertManager 告警管理
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: taishanglaojun-alertmanager
+    hostname: alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--log.level=info'
+    volumes:
+      - ./configs/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./configs/alertmanager/templates:/etc/alertmanager/templates:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Webhook 服务
+  webhook:
+    image: adnanh/webhook:2.8.0
+    container_name: taishanglaojun-webhook
+    hostname: webhook
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    command: ["-verbose", "-hooks=/etc/webhook/hooks.json", "-hotreload"]
+    volumes:
+      - ./configs/webhook/hooks.json:/etc/webhook/hooks.json:ro
+      - ./scripts/webhook:/scripts:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/hooks/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 系统监控服务 ====================
+  
+  # Node Exporter 系统指标
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: taishanglaojun-node-exporter
+    hostname: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9100/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 负载均衡和代理 ====================
+  
+  # Nginx 反向代理
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: taishanglaojun-nginx
+    hostname: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./configs/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./configs/nginx/ssl:/etc/nginx/ssl:ro
+      - ./static:/usr/share/nginx/html/static:ro
+    networks:
+      - monitoring-network
+    depends_on:
+      - monitoring
+      - grafana
+      - prometheus
+      - kibana
+      - jaeger
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 开发工具 ====================
+  
+  # Mailhog 邮件测试
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: taishanglaojun-mailhog
+    hostname: mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8025/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MinIO 对象存储
+  minio:
+    image: minio/minio:RELEASE.2023-07-07T07-13-57Z
+    container_name: taishanglaojun-minio
+    hostname: minio
+    restart: unless-stopped
+    ports:
+      - "9001:9000"  # API
+      - "9002:9001"  # Console
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+      - MINIO_BROWSER_REDIRECT_URL=http://localhost:9002
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# 额外的数据卷
+volumes:
+  minio_data:
+    driver: local

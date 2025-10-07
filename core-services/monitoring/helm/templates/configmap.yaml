@@ -1,0 +1,21 @@
+{{/*
+太上老君监控系统 ConfigMap 模板
+*/}}
+{{- if include "taishanglaojun-monitoring.createConfigmap" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "taishanglaojun-monitoring.configmapName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "taishanglaojun-monitoring.labels" . | nindent 4 }}
+  {{- with .Values.global.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  {{- range $key, $value := .Values.app.config }}
+  {{ $key }}: |
+    {{- $value | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -1,53 +1,49 @@
-# 太上老君 - 核心服务 Makefile
-# 提供常用的开发、测试、构建和部署命令
+# 太上老君核心服务 Makefile
+# 提供便捷的构建、测试和部署命令
 
 # 变量定义
-APP_NAME := taishang-laojun-core
-VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "v0.1.0")
-BUILD_TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+APP_NAME := taishanglaojun-core
+VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GO_VERSION := $(shell go version | awk '{print $$3}')
-GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+LDFLAGS := -X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.goVersion=$(GO_VERSION)
 
-# 构建标志
-LDFLAGS := -ldflags "-w -s -X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME) -X main.gitCommit=$(GIT_COMMIT)"
-
-# Go相关变量
-GOCMD := go
-GOBUILD := $(GOCMD) build
-GOCLEAN := $(GOCMD) clean
-GOTEST := $(GOCMD) test
-GOGET := $(GOCMD) get
-GOMOD := $(GOCMD) mod
-GOFMT := gofmt
-GOLINT := golangci-lint
-
-# 目录定义
-BUILD_DIR := ./build
-DIST_DIR := ./dist
-CMD_DIR := ./cmd/server
-MAIN_FILE := $(CMD_DIR)/main.go
-
-# Docker相关
+# Docker相关变量
 DOCKER_IMAGE := $(APP_NAME):$(VERSION)
-DOCKER_LATEST := $(APP_NAME):latest
 DOCKER_REGISTRY := registry.example.com
+DOCKER_COMPOSE_FILE := docker-compose.yml
 
 # 默认目标
-.DEFAULT_GOAL := help
-
-# 帮助信息
 .PHONY: help
 help: ## 显示帮助信息
-	@echo "太上老君 - 核心服务构建工具"
+	@echo "太上老君核心服务 - 可用命令:"
 	@echo ""
-	@echo "可用命令:"
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # 开发相关命令
 .PHONY: dev
-dev: ## 启动开发服务器
-	@echo "启动开发服务器..."
-	@$(GOCMD) run $(CMD_DIR)/main.go
+dev: ## 启动开发环境
+	@echo "启动开发环境..."
+	go run main.go
+
+.PHONY: dev-watch
+dev-watch: ## 启动开发环境（热重载）
+	@echo "启动开发环境（热重载）..."
+	@if command -v air > /dev/null; then \
+		air; \
+	else \
+		echo "请先安装 air: go install github.com/cosmtrek/air@latest"; \
+		exit 1; \
+	fi
+
+.PHONY: install-tools
+install-tools: ## 安装开发工具
+	@echo "安装开发工具..."
+	go install github.com/cosmtrek/air@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/swaggo/swag/cmd/swag@latest
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 .PHONY: dev-docker
 dev-docker: ## 使用Docker Compose启动开发环境

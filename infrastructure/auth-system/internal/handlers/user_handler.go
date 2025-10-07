@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,14 +18,16 @@ import (
 // UserHandler 用户管理处理器
 type UserHandler struct {
 	userRepo    repository.UserRepository
+	sessionRepo repository.SessionRepository
 	userService service.AuthService
 	logger      *zap.Logger
 }
 
 // NewUserHandler 创建用户管理处理器
-func NewUserHandler(userRepo repository.UserRepository, userService service.AuthService, logger *zap.Logger) *UserHandler {
+func NewUserHandler(userRepo repository.UserRepository, sessionRepo repository.SessionRepository, userService service.AuthService, logger *zap.Logger) *UserHandler {
 	return &UserHandler{
 		userRepo:    userRepo,
+		sessionRepo: sessionRepo,
 		userService: userService,
 		logger:      logger,
 	}
@@ -535,20 +539,124 @@ func (h *UserHandler) GetUserStats(c *gin.Context) {
 		return
 	}
 
-	// TODO: 实现今日新用户和在线用户统计
-	newUsersToday := int64(0)
-	onlineUsers := int64(0)
+	// 获取今日新用户统计
+	today := time.Now().Truncate(24 * time.Hour)
+	tomorrow := today.Add(24 * time.Hour)
+	newUsersToday, err := h.userRepo.CountCreatedBetween(ctx, today, tomorrow)
+	if err != nil {
+		h.logger.Warn("Failed to count new users today", zap.Error(err))
+		newUsersToday = 0
+	}
+
+	// 获取在线用户统计（基于活跃会话）
+	onlineUsers, err := h.sessionRepo.CountByStatus(ctx, models.SessionStatusActive)
+	if err != nil {
+		h.logger.Warn("Failed to count online users", zap.Error(err))
+		onlineUsers = 0
+	}
+
+	// 获取用户角色分布
+	roleStats, err := h.getUserRoleStats(ctx)
+	if err != nil {
+		h.logger.Warn("Failed to get user role stats", zap.Error(err))
+		roleStats = make(map[string]int64)
+	}
+
+	// 获取用户状态分布
+	statusStats, err := h.getUserStatusStats(ctx)
+	if err != nil {
+		h.logger.Warn("Failed to get user status stats", zap.Error(err))
+		statusStats = make(map[string]int64)
+	}
+
+	// 获取最近7天的用户注册趋势
+	registrationTrend, err := h.getUserRegistrationTrend(ctx, 7)
+	if err != nil {
+		h.logger.Warn("Failed to get user registration trend", zap.Error(err))
+		registrationTrend = make([]map[string]interface{}, 0)
+	}
 
 	stats := gin.H{
-		"totalUsers":     totalUsers,
-		"activeUsers":    activeUsers,
-		"adminUsers":     adminUsers,
-		"newUsersToday":  newUsersToday,
-		"onlineUsers":    onlineUsers,
+		"totalUsers":         totalUsers,
+		"activeUsers":        activeUsers,
+		"adminUsers":         adminUsers,
+		"newUsersToday":      newUsersToday,
+		"onlineUsers":        onlineUsers,
+		"roleDistribution":   roleStats,
+		"statusDistribution": statusStats,
+		"registrationTrend":  registrationTrend,
+		"lastUpdated":        time.Now(),
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    stats,
 	})
+}
+
+// getUserRoleStats 获取用户角色分布统计
+func (h *UserHandler) getUserRoleStats(ctx context.Context) (map[string]int64, error) {
+	roleStats := make(map[string]int64)
+	
+	// 获取所有角色的统计
+	roles := []models.UserRole{
+		models.RoleAdmin,
+		models.RoleUser,
+		models.RoleModerator,
+	}
+	
+	for _, role := range roles {
+		count, err := h.userRepo.CountByRole(ctx, role)
+		if err != nil {
+			return nil, err
+		}
+		roleStats[string(role)] = count
+	}
+	
+	return roleStats, nil
+}
+
+// getUserStatusStats 获取用户状态分布统计
+func (h *UserHandler) getUserStatusStats(ctx context.Context) (map[string]int64, error) {
+	statusStats := make(map[string]int64)
+	
+	// 获取所有状态的统计
+	statuses := []models.UserStatus{
+		models.UserStatusActive,
+		models.UserStatusInactive,
+		models.UserStatusSuspended,
+		models.UserStatusDeleted,
+	}
+	
+	for _, status := range statuses {
+		count, err := h.userRepo.CountByStatus(ctx, status)
+		if err != nil {
+			return nil, err
+		}
+		statusStats[string(status)] = count
+	}
+	
+	return statusStats, nil
+}
+
+// getUserRegistrationTrend 获取用户注册趋势
+func (h *UserHandler) getUserRegistrationTrend(ctx context.Context, days int) ([]map[string]interface{}, error) {
+	trend := make([]map[string]interface{}, 0, days)
+	
+	for i := days - 1; i >= 0; i-- {
+		date := time.Now().AddDate(0, 0, -i).Truncate(24 * time.Hour)
+		nextDate := date.Add(24 * time.Hour)
+		
+		count, err := h.userRepo.CountCreatedBetween(ctx, date, nextDate)
+		if err != nil {
+			return nil, err
+		}
+		
+		trend = append(trend, map[string]interface{}{
+			"date":  date.Format("2006-01-02"),
+			"count": count,
+		})
+	}
+	
+	return trend, nil
 }

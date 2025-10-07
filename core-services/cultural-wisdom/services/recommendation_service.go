@@ -19,15 +19,17 @@ type RecommendationService struct {
 	db                  *gorm.DB
 	cache               *CacheService
 	userBehaviorService *UserBehaviorService
+	aiService           *AIService
 	logger              *zap.Logger
 }
 
 // NewRecommendationService 创建推荐服务实例
-func NewRecommendationService(db *gorm.DB, cache *CacheService, userBehaviorService *UserBehaviorService, logger *zap.Logger) *RecommendationService {
+func NewRecommendationService(db *gorm.DB, cache *CacheService, userBehaviorService *UserBehaviorService, aiService *AIService, logger *zap.Logger) *RecommendationService {
 	return &RecommendationService{
 		db:                  db,
 		cache:               cache,
 		userBehaviorService: userBehaviorService,
+		aiService:           aiService,
 		logger:              logger,
 	}
 }
@@ -156,6 +158,137 @@ func (s *RecommendationService) getContentBasedRecommendations(ctx context.Conte
 	return recommendations, nil
 }
 
+// calculateVectorSimilarity 计算向量相似度
+func (s *RecommendationService) calculateVectorSimilarity(target, candidate models.CulturalWisdom) float64 {
+	// 如果已有向量，直接计算余弦相似度
+	if len(target.Vector) > 0 && len(candidate.Vector) > 0 {
+		return s.cosineSimilarity(target.Vector, candidate.Vector)
+	}
+
+	// 如果没有向量，生成向量并计算相似度
+	ctx := context.Background()
+	
+	// 生成目标智慧的向量
+	if len(target.Vector) == 0 {
+		targetEmbedding, err := s.aiService.GetEmbedding(ctx, target.Content)
+		if err != nil {
+			s.logger.Warn("Failed to generate target embedding", 
+				zap.String("wisdom_id", target.ID), 
+				zap.Error(err))
+			return 0
+		}
+		target.Vector = targetEmbedding
+		
+		// 更新数据库中的向量
+		s.db.Model(&target).Update("vector", target.Vector)
+	}
+
+	// 生成候选智慧的向量
+	if len(candidate.Vector) == 0 {
+		candidateEmbedding, err := s.aiService.GetEmbedding(ctx, candidate.Content)
+		if err != nil {
+			s.logger.Warn("Failed to generate candidate embedding", 
+				zap.String("wisdom_id", candidate.ID), 
+				zap.Error(err))
+			return 0
+		}
+		candidate.Vector = candidateEmbedding
+		
+		// 更新数据库中的向量
+		s.db.Model(&candidate).Update("vector", candidate.Vector)
+	}
+
+	return s.cosineSimilarity(target.Vector, candidate.Vector)
+}
+
+// applyDiversityOptimization 应用多样性优化
+func (s *RecommendationService) applyDiversityOptimization(recommendations []RecommendationItem, limit int) []RecommendationItem {
+	if len(recommendations) <= limit {
+		return recommendations
+	}
+
+	// 多样性优化：确保推荐结果包含不同类别、学派和作者
+	diversified := make([]RecommendationItem, 0, limit)
+	categoryCount := make(map[string]int)
+	schoolCount := make(map[string]int)
+	authorCount := make(map[string]int)
+
+	// 设置多样性阈值
+	maxPerCategory := max(1, limit/3)
+	maxPerSchool := max(1, limit/4)
+	maxPerAuthor := max(1, limit/5)
+
+	for _, rec := range recommendations {
+		// 检查多样性约束
+		if categoryCount[rec.Category] >= maxPerCategory ||
+		   schoolCount[rec.School] >= maxPerSchool ||
+		   authorCount[rec.Author] >= maxPerAuthor {
+			continue
+		}
+
+		diversified = append(diversified, rec)
+		categoryCount[rec.Category]++
+		schoolCount[rec.School]++
+		authorCount[rec.Author]++
+
+		if len(diversified) >= limit {
+			break
+		}
+	}
+
+	// 如果多样性优化后数量不足，补充高分推荐
+	if len(diversified) < limit {
+		for _, rec := range recommendations {
+			if len(diversified) >= limit {
+				break
+			}
+			
+			// 检查是否已存在
+			exists := false
+			for _, existing := range diversified {
+				if existing.WisdomID == rec.WisdomID {
+					exists = true
+					break
+				}
+			}
+			
+			if !exists {
+				diversified = append(diversified, rec)
+			}
+		}
+	}
+
+	return diversified
+}
+
+// max 辅助函数
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// cosineSimilarity 计算余弦相似度
+func (s *RecommendationService) cosineSimilarity(a, b []float32) float64 {
+	if len(a) != len(b) || len(a) == 0 {
+		return 0
+	}
+
+	var dotProduct, normA, normB float64
+	for i := 0; i < len(a); i++ {
+		dotProduct += float64(a[i]) * float64(b[i])
+		normA += float64(a[i]) * float64(a[i])
+		normB += float64(b[i]) * float64(b[i])
+	}
+
+	if normA == 0 || normB == 0 {
+		return 0
+	}
+
+	return dotProduct / (math.Sqrt(normA) * math.Sqrt(normB))
+}
+
 // getCollaborativeRecommendations 基于协同过滤的推荐
 func (s *RecommendationService) getCollaborativeRecommendations(ctx context.Context, req RecommendationRequest) ([]RecommendationItem, error) {
 	// 获取用户行为数据（浏览、点赞等）
@@ -181,12 +314,20 @@ func (s *RecommendationService) getCollaborativeRecommendations(ctx context.Cont
 	return recommendations, nil
 }
 
-// getHybridRecommendations 混合推荐
+// getHybridRecommendations 混合推荐算法
 func (s *RecommendationService) getHybridRecommendations(ctx context.Context, req RecommendationRequest) ([]RecommendationItem, error) {
 	// 获取基于内容的推荐
 	contentRecs, err := s.getContentBasedRecommendations(ctx, req)
 	if err != nil {
-		return nil, err
+		s.logger.Warn("Failed to get content-based recommendations", zap.Error(err))
+		contentRecs = []RecommendationItem{}
+	}
+
+	// 获取协同过滤推荐
+	collaborativeRecs, err := s.getCollaborativeRecommendations(ctx, req)
+	if err != nil {
+		s.logger.Warn("Failed to get collaborative recommendations", zap.Error(err))
+		collaborativeRecs = []RecommendationItem{}
 	}
 
 	// 获取热门推荐
@@ -196,49 +337,81 @@ func (s *RecommendationService) getHybridRecommendations(ctx context.Context, re
 		popularRecs = []RecommendationItem{}
 	}
 
-	// 合并和重新评分
-	recommendations := s.mergeRecommendations(contentRecs, popularRecs, req.Limit)
+	// 获取用户画像进行个性化权重调整
+	userProfile, err := s.userBehaviorService.GetUserProfile(ctx, req.UserID)
+	if err != nil {
+		s.logger.Warn("Failed to get user profile", zap.Error(err))
+	}
 
-	return recommendations, nil
+	// 根据用户活跃度和偏好调整权重
+	contentWeight := 0.4
+	collaborativeWeight := 0.3
+	popularWeight := 0.3
+
+	if userProfile != nil {
+		// 新用户更依赖热门推荐
+		if userProfile.TotalActions < 10 {
+			contentWeight = 0.2
+			collaborativeWeight = 0.1
+			popularWeight = 0.7
+		} else if userProfile.TotalActions > 100 {
+			// 活跃用户更依赖个性化推荐
+			contentWeight = 0.5
+			collaborativeWeight = 0.4
+			popularWeight = 0.1
+		}
+	}
+
+	// 合并推荐结果
+	merged := s.mergeRecommendations(contentRecs, collaborativeRecs, popularRecs, 
+		contentWeight, collaborativeWeight, popularWeight)
+
+	// 应用多样性优化
+	diversified := s.applyDiversityOptimization(merged, req.Limit)
+
+	return diversified, nil
 }
 
 // calculateContentSimilarity 计算内容相似度
 func (s *RecommendationService) calculateContentSimilarity(target, candidate models.CulturalWisdom) float64 {
 	score := 0.0
 
-	// 学派相似度 (权重: 0.3)
+	// 使用AI向量相似度计算 (权重: 0.4)
+	if s.aiService != nil {
+		vectorSimilarity := s.calculateVectorSimilarity(target, candidate)
+		if vectorSimilarity > 0 {
+			score += vectorSimilarity * 0.4
+		}
+	}
+
+	// 学派相似度 (权重: 0.25)
 	if target.School == candidate.School && target.School != "" {
-		score += 0.3
+		score += 0.25
 	}
 
-	// 分类相似度 (权重: 0.2)
+	// 分类相似度 (权重: 0.15)
 	if target.Category == candidate.Category && target.Category != "" {
-		score += 0.2
+		score += 0.15
 	}
 
-	// 作者相似度 (权重: 0.2)
+	// 作者相似度 (权重: 0.1)
 	if target.Author == candidate.Author && target.Author != "" {
-		score += 0.2
+		score += 0.1
 	}
 
-	// 标签相似度 (权重: 0.15)
+	// 标签相似度 (权重: 0.08)
 	if len(target.Tags) > 0 && len(candidate.Tags) > 0 {
 		commonTags := s.countCommonTags(target.Tags, candidate.Tags)
 		tagSimilarity := float64(commonTags) / float64(len(target.Tags))
-		score += tagSimilarity * 0.15
+		score += tagSimilarity * 0.08
 	}
 
-	// 内容长度相似度 (权重: 0.05)
+	// 内容长度相似度 (权重: 0.02)
 	targetLen := len(target.Content)
 	candidateLen := len(candidate.Content)
 	if targetLen > 0 && candidateLen > 0 {
 		lengthRatio := math.Min(float64(targetLen), float64(candidateLen)) / math.Max(float64(targetLen), float64(candidateLen))
-		score += lengthRatio * 0.05
-	}
-
-	// 作者相似度 (权重: 0.05)
-	if target.Author == candidate.Author && target.Author != "" {
-		score += 0.05
+		score += lengthRatio * 0.02
 	}
 
 	return score
@@ -325,26 +498,43 @@ func (s *RecommendationService) calculatePopularityScore(wisdom models.CulturalW
 }
 
 // mergeRecommendations 合并推荐结果
-func (s *RecommendationService) mergeRecommendations(contentRecs, popularRecs []RecommendationItem, limit int) []RecommendationItem {
+// mergeRecommendations 合并多种推荐结果
+func (s *RecommendationService) mergeRecommendations(contentRecs, collaborativeRecs, popularRecs []RecommendationItem, 
+	contentWeight, collaborativeWeight, popularWeight float64) []RecommendationItem {
 	// 创建推荐项映射，避免重复
 	recMap := make(map[string]RecommendationItem)
 
-	// 添加基于内容的推荐（权重: 0.7）
+	// 添加基于内容的推荐
 	for _, rec := range contentRecs {
-		rec.Score = rec.Score * 0.7
+		rec.Score = rec.Score * contentWeight
 		rec.Reason = "内容相似：" + rec.Reason
 		recMap[rec.WisdomID] = rec
 	}
 
-	// 添加热门推荐（权重: 0.3）
+	// 添加协同过滤推荐
+	for _, rec := range collaborativeRecs {
+		if existing, exists := recMap[rec.WisdomID]; exists {
+			// 如果已存在，合并分数
+			existing.Score += rec.Score * collaborativeWeight
+			existing.Reason += "，用户偏好匹配"
+			recMap[rec.WisdomID] = existing
+		} else {
+			rec.Score = rec.Score * collaborativeWeight
+			rec.Reason = "基于相似用户偏好推荐"
+			recMap[rec.WisdomID] = rec
+		}
+	}
+
+	// 添加热门推荐
 	for _, rec := range popularRecs {
 		if existing, exists := recMap[rec.WisdomID]; exists {
 			// 如果已存在，合并分数
-			existing.Score += rec.Score * 0.3
+			existing.Score += rec.Score * popularWeight
 			existing.Reason += "，热门推荐"
 			recMap[rec.WisdomID] = existing
 		} else {
-			rec.Score = rec.Score * 0.3
+			rec.Score = rec.Score * popularWeight
+			rec.Reason = "热门智慧推荐"
 			recMap[rec.WisdomID] = rec
 		}
 	}
@@ -358,10 +548,6 @@ func (s *RecommendationService) mergeRecommendations(contentRecs, popularRecs []
 	sort.Slice(recommendations, func(i, j int) bool {
 		return recommendations[i].Score > recommendations[j].Score
 	})
-
-	if len(recommendations) > limit {
-		recommendations = recommendations[:limit]
-	}
 
 	return recommendations
 }

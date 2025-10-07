@@ -155,6 +155,30 @@ func (m *Manager) IsHealthy(name string) bool {
 	return true
 }
 
+// GetProviders 获取所有提供商名称
+func (m *Manager) GetProviders() []string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	providers := make([]string, 0, len(m.providers))
+	for name := range m.providers {
+		providers = append(providers, name)
+	}
+	return providers
+}
+
+// GetModels 获取所有提供商的模型列表
+func (m *Manager) GetModels() map[string][]string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	models := make(map[string][]string)
+	for name, provider := range m.providers {
+		models[name] = provider.GetModels()
+	}
+	return models
+}
+
 // GetProviderInfo 获取提供商信息
 func (m *Manager) GetProviderInfo() map[string]interface{} {
 	m.mu.RLock()

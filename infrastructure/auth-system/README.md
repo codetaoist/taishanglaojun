@@ -117,7 +117,7 @@ make run
 
 ### 7. 测试API
 
-访问 http://localhost:8080/api/v1/health 检查服务状态
+访问 http://localhost:8082/api/v1/health 检查服务状态
 
 ## API文档
 
@@ -232,7 +232,7 @@ make db-reset
 | 变量名 | 描述 | 默认值 |
 |--------|------|--------|
 | `SERVER_HOST` | 服务器主机 | `localhost` |
-| `SERVER_PORT` | 服务器端口 | `8080` |
+| `SERVER_PORT` | 服务器端口 | `8082` |
 | `DB_HOST` | 数据库主机 | `localhost` |
 | `DB_PORT` | 数据库端口 | `5432` |
 | `JWT_SECRET_KEY` | JWT密钥 | 必须设置 |

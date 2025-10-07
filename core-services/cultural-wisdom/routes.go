@@ -9,6 +9,7 @@ import (
 	"github.com/codetaoist/taishanglaojun/core-services/cultural-wisdom/handlers"
 	"github.com/codetaoist/taishanglaojun/core-services/cultural-wisdom/services"
 	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/providers"
+	aiServices "github.com/codetaoist/taishanglaojun/core-services/ai-integration/services"
 	"github.com/codetaoist/taishanglaojun/core-services/internal/middleware"
 )
 
@@ -30,14 +31,16 @@ func SetupRoutes(router *gin.RouterGroup, db *gorm.DB, redisClient *redis.Client
 	// 创建服务实例
 	logger.Info("Creating wisdom service")
 	wisdomService := services.NewWisdomService(db, cacheService)
-	logger.Info("Creating search service")
-	searchService := services.NewSearchService(db, cacheService)
 	logger.Info("Creating AI service")
 	aiService := services.NewAIService(db, logger, providerManager)
+	logger.Info("Creating AI integration service")
+	aiIntegrationService := aiServices.NewAIService(providerManager)
+	logger.Info("Creating search service")
+	searchService := services.NewSearchService(db, cacheService, aiIntegrationService, logger)
 	logger.Info("Creating user behavior service")
 	userBehaviorService := services.NewUserBehaviorService(db, cacheService, logger)
 	logger.Info("Creating recommendation service")
-	recommendationService := services.NewRecommendationService(db, cacheService, userBehaviorService, logger)
+	recommendationService := services.NewRecommendationService(db, cacheService, userBehaviorService, aiService, logger)
 	logger.Info("Creating category service")
 	categoryService := services.NewCategoryService(db, cacheService)
 	logger.Info("Creating tag service")
@@ -82,6 +85,9 @@ func SetupRoutes(router *gin.RouterGroup, db *gorm.DB, redisClient *redis.Client
 		// 搜索相关路由（公开）
 		wisdomGroup.GET("/search", searchHandler.FullTextSearch)
 		wisdomGroup.GET("/search/semantic", searchHandler.SemanticSearch)
+		wisdomGroup.GET("/search/enhanced-semantic", searchHandler.EnhancedSemanticSearch)
+		// wisdomGroup.GET("/search/vector", searchHandler.VectorSearch) // TODO: 实现VectorSearch方法
+		wisdomGroup.GET("/search/analytics", searchHandler.GetSearchAnalytics)
 		wisdomGroup.POST("/search/advanced", searchHandler.AdvancedSearch)
 		wisdomGroup.GET("/search/facets", searchHandler.SearchWithFacets)
 		wisdomGroup.GET("/search/filters", searchHandler.GetSearchFilters)

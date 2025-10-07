@@ -1,0 +1,199 @@
+# 太上老君监控系统 Kubernetes Ingress 配置
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: taishanglaojun-monitoring
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+    - hosts:
+        - monitoring.taishanglaojun.com
+      secretName: taishanglaojun-monitoring-tls
+  rules:
+    - host: monitoring.taishanglaojun.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: taishanglaojun-monitoring
+                port:
+                  number: 8080
+
+---
+# Grafana Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: visualization
+    app.kubernetes.io/part-of: taishanglaojun
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: grafana-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Grafana"
+spec:
+  tls:
+    - hosts:
+        - grafana.taishanglaojun.com
+      secretName: grafana-tls
+  rules:
+    - host: grafana.taishanglaojun.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000
+
+---
+# Prometheus Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: taishanglaojun
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - Prometheus"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+spec:
+  tls:
+    - hosts:
+        - prometheus.taishanglaojun.com
+      secretName: prometheus-tls
+  rules:
+    - host: prometheus.taishanglaojun.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus
+                port:
+                  number: 9090
+
+---
+# InfluxDB Ingress (Admin UI)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: influxdb
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: influxdb
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: taishanglaojun
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: influxdb-basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required - InfluxDB"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+spec:
+  tls:
+    - hosts:
+        - influxdb.taishanglaojun.com
+      secretName: influxdb-tls
+  rules:
+    - host: influxdb.taishanglaojun.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: influxdb
+                port:
+                  number: 8086
+
+---
+# API Gateway Ingress (for external API access)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: taishanglaojun-monitoring-api
+  namespace: taishanglaojun-monitoring
+  labels:
+    app.kubernetes.io/name: taishanglaojun-monitoring
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: taishanglaojun
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+spec:
+  tls:
+    - hosts:
+        - api.taishanglaojun.com
+      secretName: taishanglaojun-api-tls
+  rules:
+    - host: api.taishanglaojun.com
+      http:
+        paths:
+          - path: /monitoring(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: taishanglaojun-monitoring
+                port:
+                  number: 8080

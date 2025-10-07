@@ -1,0 +1,30 @@
+{{/*
+太上老君监控系统 测试连接模板
+*/}}
+{{- if .Values.tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "taishanglaojun-monitoring.fullname" . }}-test-connection"
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "taishanglaojun-monitoring.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: wget
+      image: {{ .Values.tests.image.registry }}/{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}
+      command: ['wget']
+      args: ['{{ include "taishanglaojun-monitoring.fullname" . }}:{{ .Values.service.port }}/health']
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 50m
+          memory: 64Mi
+{{- end }}

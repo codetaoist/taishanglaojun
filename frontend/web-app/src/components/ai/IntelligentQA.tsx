@@ -8,7 +8,7 @@ import {
   StarOutlined,
   QuestionCircleOutlined
 } from '@ant-design/icons';
-import { api } from '../../services/api';
+import { apiClient } from '../../services/api';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
@@ -45,7 +45,7 @@ const IntelligentQA: React.FC = () => {
     setError(null);
     
     try {
-      const result = await api.post('/api/v1/cultural-wisdom/ai/qa', {
+      const result = await apiClient.post('/api/v1/cultural-wisdom/ai/qa', {
         question: question.trim()
       });
       

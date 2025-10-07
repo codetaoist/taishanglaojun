@@ -534,3 +534,61 @@ func (s *LocationService) SyncData(userID string, req models.SyncRequest) (*mode
 
 	return response, nil
 }
+
+// DeleteLocationPoint 删除位置点
+func (s *LocationService) DeleteLocationPoint(userID, pointID string) error {
+	// 首先检查位置点是否存在且属于该用户
+	var point models.LocationPoint
+	err := s.db.Joins("JOIN trajectories ON location_points.trajectory_id = trajectories.id").
+		Where("location_points.id = ? AND trajectories.user_id = ?", pointID, userID).
+		First(&point).Error
+	
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("location point not found")
+		}
+		s.logger.Error("Failed to find location point", zap.Error(err), zap.String("point_id", pointID))
+		return err
+	}
+
+	// 删除位置点
+	if err := s.db.Delete(&point).Error; err != nil {
+		s.logger.Error("Failed to delete location point", zap.Error(err), zap.String("point_id", pointID))
+		return err
+	}
+
+	// 更新轨迹统计信息
+	go s.updateTrajectoryStats(point.TrajectoryID)
+
+	return nil
+}
+
+// CleanupExpiredData 清理过期数据
+func (s *LocationService) CleanupExpiredData(days int) error {
+	if days <= 0 {
+		days = 30 // 默认清理30天前的数据
+	}
+
+	cutoffTime := time.Now().AddDate(0, 0, -days)
+	
+	// 删除过期的位置点
+	if err := s.db.Where("created_at < ?", cutoffTime).Delete(&models.LocationPoint{}).Error; err != nil {
+		s.logger.Error("Failed to cleanup expired location points", zap.Error(err))
+		return err
+	}
+
+	// 删除没有位置点的轨迹
+	if err := s.db.Where("created_at < ? AND id NOT IN (SELECT DISTINCT trajectory_id FROM location_points WHERE trajectory_id IS NOT NULL)", cutoffTime).Delete(&models.Trajectory{}).Error; err != nil {
+		s.logger.Error("Failed to cleanup expired trajectories", zap.Error(err))
+		return err
+	}
+
+	s.logger.Info("Successfully cleaned up expired data", zap.Int("days", days))
+	return nil
+}
+
+// UpdateTrajectoryStats 更新轨迹统计信息（公开方法）
+func (s *LocationService) UpdateTrajectoryStats(trajectoryID string) error {
+	s.updateTrajectoryStats(trajectoryID)
+	return nil
+}

@@ -11,6 +11,20 @@ server:
     allow_headers: ["*"]
   request_logging: true
 
+# CORS配置
+cors:
+  allowed_origins: ["*"]
+  allowed_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  allowed_headers: ["*"]
+  allow_credentials: true
+  max_age: 86400
+
+# JWT配置
+jwt:
+  secret: "${JWT_SECRET:your-super-secret-jwt-key-change-in-production}"
+  issuer: "taishang-laojun"
+  expiration: "24h"
+
 # 主数据库配置 (支持 postgres, mysql, sqlserver)
 database:
   type: "mysql"
@@ -52,10 +66,11 @@ database_sqlserver:
 
 # Redis配置
 redis:
+  enabled: true
   host: "localhost"
   port: 6379
   password: ""
-  db: 0
+  database: 0
   pool_size: 10
   min_idle_conns: 5
   dial_timeout: 5s
@@ -89,13 +104,12 @@ ai:
         timeout: 30
 
 # 日志配置
-logging:
+logger:
   level: "info"  # debug, info, warn, error
   format: "json"  # json, console
   output: "stdout"  # stdout, file
-  file:
-    path: "./logs/core-services.log"
-    max_size: 100  # MB
-    max_backups: 10
-    max_age: 30  # days
-    compress: true
+  filename: "./logs/core-services.log"
+  max_size: 100  # MB
+  max_backups: 10
+  max_age: 30  # days
+  compress: true

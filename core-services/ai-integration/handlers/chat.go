@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+
 	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/models"
 	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/services"
-	"go.uber.org/zap"
 )
 
 // ChatHandler 对话处理器
@@ -328,6 +330,46 @@ func (h *ChatHandler) DeleteSession(c *gin.Context) {
 		Code:    "SUCCESS",
 		Message: "会话删除成功",
 	})
+}
+
+// ClearSession 清空会话消息
+// @Summary 清空会话消息
+// @Description 清空指定会话的所有消息，但保留会话
+// @Tags AI对话
+// @Accept json
+// @Produce json
+// @Param session_id path int true "会话ID"
+// @Success 200 {object} SuccessResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/ai/sessions/{session_id}/clear [post]
+func (h *ChatHandler) ClearSession(c *gin.Context) {
+	sessionIDStr := c.Param("sessionId")
+	if sessionIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "会话ID不能为空"})
+		return
+	}
+
+	userIDInterface, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	userID, ok := userIDInterface.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户ID类型错误"})
+		return
+	}
+
+	// 修复类型错误 - 将uint转换为string
+	if err := h.chatService.ClearSession(c.Request.Context(), sessionIDStr, fmt.Sprintf("%d", userID)); err != nil {
+		h.logger.Error("Failed to clear session", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "清空会话失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "会话已清空"})
 }
 
 // ErrorResponse 错误响应

@@ -47,8 +47,8 @@ type UploadResponse struct {
 	} `json:"data"`
 }
 
-// ErrorResponse 错误响应
-type ErrorResponse struct {
+// UploadErrorResponse 上传错误响应
+type UploadErrorResponse struct {
 	Success bool   `json:"success"`
 	Error   string `json:"error"`
 	Message string `json:"message"`
@@ -71,20 +71,20 @@ func (h *UploadHandler) UploadAvatar(c *gin.Context) {
 	// 获取当前用户ID
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{
+c.JSON(http.StatusUnauthorized, UploadErrorResponse{
 			Success: false,
 			Error:   "unauthorized",
-			Message: "User not authenticated",
+			Message: "用户未认证",
 		})
 		return
 	}
 
 	uid, ok := userID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
+		c.JSON(http.StatusInternalServerError, UploadErrorResponse{
 			Success: false,
 			Error:   "internal_error",
-			Message: "Invalid user ID format",
+			Message: "内部服务器错误",
 		})
 		return
 	}
@@ -93,10 +93,10 @@ func (h *UploadHandler) UploadAvatar(c *gin.Context) {
 	file, header, err := c.Request.FormFile("avatar")
 	if err != nil {
 		h.logger.Error("Failed to get uploaded file", zap.Error(err))
-		c.JSON(http.StatusBadRequest, ErrorResponse{
+		c.JSON(http.StatusBadRequest, UploadErrorResponse{
 			Success: false,
-			Error:   "bad_request",
-			Message: "No file uploaded or invalid file",
+			Error:   "invalid_file",
+			Message: "无效的文件",
 		})
 		return
 	}
@@ -104,20 +104,20 @@ func (h *UploadHandler) UploadAvatar(c *gin.Context) {
 
 	// 验证文件类型
 	if !h.isValidImageType(header) {
-		c.JSON(http.StatusBadRequest, ErrorResponse{
+		c.JSON(http.StatusBadRequest, UploadErrorResponse{
 			Success: false,
 			Error:   "invalid_file_type",
-			Message: "Only JPEG, PNG, GIF, and WebP images are allowed",
+			Message: "不支持的文件类型",
 		})
 		return
 	}
 
 	// 验证文件大小 (2MB限制)
 	if header.Size > 2*1024*1024 {
-		c.JSON(http.StatusBadRequest, ErrorResponse{
+		c.JSON(http.StatusBadRequest, UploadErrorResponse{
 			Success: false,
 			Error:   "file_too_large",
-			Message: "File size must be less than 2MB",
+			Message: "文件大小超过限制",
 		})
 		return
 	}
@@ -130,10 +130,10 @@ func (h *UploadHandler) UploadAvatar(c *gin.Context) {
 	userDir := filepath.Join(h.uploadDir, "avatars", uid.String())
 	if err := os.MkdirAll(userDir, 0755); err != nil {
 		h.logger.Error("Failed to create user directory", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
+		c.JSON(http.StatusInternalServerError, UploadErrorResponse{
 			Success: false,
 			Error:   "internal_error",
-			Message: "Failed to create upload directory",
+			Message: "内部服务器错误",
 		})
 		return
 	}
@@ -142,10 +142,10 @@ func (h *UploadHandler) UploadAvatar(c *gin.Context) {
 	filePath := filepath.Join(userDir, filename)
 	if err := h.saveFile(file, filePath); err != nil {
 		h.logger.Error("Failed to save file", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
+		c.JSON(http.StatusInternalServerError, UploadErrorResponse{
 			Success: false,
-			Error:   "internal_error",
-			Message: "Failed to save file",
+			Error:   "save_failed",
+			Message: "保存文件失败",
 		})
 		return
 	}
@@ -189,20 +189,20 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 	// 获取当前用户ID
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, ErrorResponse{
+		c.JSON(http.StatusUnauthorized, UploadErrorResponse{
 			Success: false,
 			Error:   "unauthorized",
-			Message: "User not authenticated",
+			Message: "用户未认证",
 		})
 		return
 	}
 
 	uid, ok := userID.(uuid.UUID)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
+		c.JSON(http.StatusInternalServerError, UploadErrorResponse{
 			Success: false,
 			Error:   "internal_error",
-			Message: "Invalid user ID format",
+			Message: "内部服务器错误",
 		})
 		return
 	}
@@ -214,10 +214,10 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
 		h.logger.Error("Failed to get uploaded file", zap.Error(err))
-		c.JSON(http.StatusBadRequest, ErrorResponse{
+		c.JSON(http.StatusBadRequest, UploadErrorResponse{
 			Success: false,
-			Error:   "bad_request",
-			Message: "No file uploaded or invalid file",
+			Error:   "invalid_file",
+			Message: "无效的文件",
 		})
 		return
 	}
@@ -225,20 +225,20 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 
 	// 根据类型验证文件
 	if !h.isValidFileType(header, fileType) {
-		c.JSON(http.StatusBadRequest, ErrorResponse{
+		c.JSON(http.StatusBadRequest, UploadErrorResponse{
 			Success: false,
 			Error:   "invalid_file_type",
-			Message: "Invalid file type for the specified category",
+			Message: "不支持的文件类型",
 		})
 		return
 	}
 
 	// 验证文件大小 (10MB限制)
 	if header.Size > 10*1024*1024 {
-		c.JSON(http.StatusBadRequest, ErrorResponse{
+		c.JSON(http.StatusBadRequest, UploadErrorResponse{
 			Success: false,
 			Error:   "file_too_large",
-			Message: "File size must be less than 10MB",
+			Message: "文件大小超过限制",
 		})
 		return
 	}
@@ -251,10 +251,10 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 	typeDir := filepath.Join(h.uploadDir, fileType, uid.String())
 	if err := os.MkdirAll(typeDir, 0755); err != nil {
 		h.logger.Error("Failed to create type directory", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
+		c.JSON(http.StatusInternalServerError, UploadErrorResponse{
 			Success: false,
 			Error:   "internal_error",
-			Message: "Failed to create upload directory",
+			Message: "内部服务器错误",
 		})
 		return
 	}
@@ -263,10 +263,10 @@ func (h *UploadHandler) UploadFile(c *gin.Context) {
 	filePath := filepath.Join(typeDir, filename)
 	if err := h.saveFile(file, filePath); err != nil {
 		h.logger.Error("Failed to save file", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
+		c.JSON(http.StatusInternalServerError, UploadErrorResponse{
 			Success: false,
-			Error:   "internal_error",
-			Message: "Failed to save file",
+			Error:   "save_failed",
+			Message: "保存文件失败",
 		})
 		return
 	}

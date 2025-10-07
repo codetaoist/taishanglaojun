@@ -1,0 +1,110 @@
+# 智能学习系统配置文件
+
+# 应用配置
+app:
+  name: "intelligent-learning"
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+
+# 服务器配置
+server:
+  port: 8080
+  host: "0.0.0.0"
+  read_timeout: 30
+  write_timeout: 30
+  idle_timeout: 60
+
+# 存储配置
+storage:
+  # PostgreSQL数据库配置
+  database:
+    host: "localhost"
+    port: 5432
+    username: "postgres"
+    password: "password"
+    database: "intelligent_learning"
+    ssl_mode: "disable"
+    max_open_conns: 25
+    max_idle_conns: 5
+    conn_max_lifetime: 300
+
+  # Redis配置
+  redis:
+    host: "localhost"
+    port: 6379
+    password: ""
+    database: 0
+    pool_size: 10
+    min_idle_conns: 5
+
+  # Elasticsearch配置
+  elasticsearch:
+    hosts:
+      - "http://localhost:9200"
+    username: ""
+    password: ""
+    index_prefix: "intelligent_learning"
+
+  # Neo4j配置
+  neo4j:
+    uri: "bolt://localhost:7687"
+    username: "neo4j"
+    password: "password"
+    max_connection_pool_size: 50
+
+# 日志配置
+log:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  file_path: "logs/app.log"
+  max_size: 100
+  max_backups: 3
+  max_age: 28
+
+# 认证配置
+auth:
+  jwt_secret: "your-super-secret-jwt-key"
+  jwt_expiry: 86400  # 24小时
+  refresh_expiry: 604800  # 7天
+
+# AI配置
+ai:
+  # OpenAI配置
+  openai:
+    api_key: "your-openai-api-key"
+    model: "gpt-3.5-turbo"
+    max_tokens: 2048
+    temperature: 0.7
+
+  # 推荐系统配置
+  recommendation:
+    similarity_threshold: 0.7
+    max_recommendations: 10
+    update_interval: 3600  # 1小时
+
+  # 学习路径配置
+  learning_path:
+    max_path_length: 20
+    difficulty_weight: 0.3
+    prerequisite_weight: 0.4
+    interest_weight: 0.3
+
+# 缓存配置
+cache:
+  default_ttl: 3600  # 1小时
+  max_size: 1000
+  cleanup_interval: 600  # 10分钟
+
+# 监控配置
+monitoring:
+  metrics_enabled: true
+  tracing_enabled: true
+  health_check_interval: 30
+
+# 限流配置
+rate_limit:
+  requests_per_second: 100
+  burst: 200
+  cleanup_interval: 60

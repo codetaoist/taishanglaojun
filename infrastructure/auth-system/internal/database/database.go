@@ -34,7 +34,7 @@ func New(cfg *config.Config, log *zap.Logger) (*Database, error) {
 		logger: log,
 	}
 
-	// 连接数量据�?
+	// 连接数量据库
 	if db.config.Database.Type != "disabled" {
 		if err := db.connectDatabase(); err != nil {
 			return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -48,7 +48,7 @@ func New(cfg *config.Config, log *zap.Logger) (*Database, error) {
 		db.logger.Warn("Failed to connect to Redis, continuing without Redis", zap.Error(err))
 	}
 
-	// 数量据库迁�?
+	// 数量据库迁移
 	if db.DB != nil {
 		if err := db.migrate(); err != nil {
 			return nil, fmt.Errorf("failed to migrate database: %w", err)
@@ -58,10 +58,10 @@ func New(cfg *config.Config, log *zap.Logger) (*Database, error) {
 	return db, nil
 }
 
-// connectDatabase 连接数量据�?
+// connectDatabase 连接数量据库
 func (d *Database) connectDatabase() error {
 	dsn := d.config.GetDSN()
-	
+
 	// 配置GORM日志
 	var gormLogger logger.Interface
 	if d.config.IsDevelopment() {
@@ -117,7 +117,7 @@ func (d *Database) connectDatabase() error {
 		return fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-	// 配置连接�?
+	// 配置连接池
 	sqlDB.SetMaxOpenConns(d.config.Database.MaxOpenConns)
 	sqlDB.SetMaxIdleConns(d.config.Database.MaxIdleConns)
 	sqlDB.SetConnMaxLifetime(d.config.Database.MaxLifetime)
@@ -125,13 +125,13 @@ func (d *Database) connectDatabase() error {
 	// 测试连接
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	
+
 	if err := sqlDB.PingContext(ctx); err != nil {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	d.DB = db
-	d.logger.Info("Connected to database", 
+	d.logger.Info("Connected to database",
 		zap.String("type", d.config.Database.Type),
 		zap.String("dsn", dsn))
 	return nil
@@ -198,24 +198,20 @@ func (d *Database) migrate() error {
 func (d *Database) createIndexes() error {
 	// 检查数量据库类型，MySQL不支�?IF NOT EXISTS 语法
 	dbType := d.config.Database.Type
-	
+
 	var indexQueries []string
-	
+
 	if dbType == "mysql" {
 		// MySQL 索引创建（不使用户 IF NOT EXISTS�?
 		indexQueries = []string{
-			// 用户表索�?
-			"CREATE INDEX idx_users_username ON users(username)",
-			"CREATE INDEX idx_users_email ON users(email)",
-			"CREATE INDEX idx_users_status ON users(status)",
-			"CREATE INDEX idx_users_role ON users(role)",
-			
+			// 用户表索引（username、email、status、role已通过GORM自动创建）
+
 			// 会话表索�?
 			"CREATE INDEX idx_sessions_user_id ON sessions(user_id)",
 			"CREATE INDEX idx_sessions_token ON sessions(token)",
 			"CREATE INDEX idx_sessions_status ON sessions(status)",
 			"CREATE INDEX idx_sessions_expires_at ON sessions(expires_at)",
-			
+
 			// 令牌表索�?
 			"CREATE INDEX idx_tokens_user_id ON tokens(user_id)",
 			"CREATE INDEX idx_tokens_token ON tokens(token)",
@@ -226,18 +222,14 @@ func (d *Database) createIndexes() error {
 	} else {
 		// PostgreSQL 和其他数量据库索引创建（支�?IF NOT EXISTS�?
 		indexQueries = []string{
-			// 用户表索�?
-			"CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)",
-			"CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)",
-			"CREATE INDEX IF NOT EXISTS idx_users_status ON users(status)",
-			"CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)",
-			
+			// 用户表索引（username、email、status、role已通过GORM自动创建）
+
 			// 会话表索�?
 			"CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)",
 			"CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)",
 			"CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status)",
 			"CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)",
-			
+
 			// 令牌表索�?
 			"CREATE INDEX IF NOT EXISTS idx_tokens_user_id ON tokens(user_id)",
 			"CREATE INDEX IF NOT EXISTS idx_tokens_token ON tokens(token)",
@@ -246,7 +238,7 @@ func (d *Database) createIndexes() error {
 			"CREATE INDEX IF NOT EXISTS idx_tokens_expires_at ON tokens(expires_at)",
 		}
 	}
-	
+
 	// 执行索引创建
 	for _, query := range indexQueries {
 		if err := d.DB.Exec(query).Error; err != nil {
@@ -258,7 +250,7 @@ func (d *Database) createIndexes() error {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 

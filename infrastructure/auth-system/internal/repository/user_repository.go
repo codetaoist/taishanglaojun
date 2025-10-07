@@ -1,9 +1,10 @@
-﻿package repository
+package repository
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -51,6 +52,7 @@ type UserRepository interface {
 	Count(ctx context.Context) (int64, error)
 	CountByStatus(ctx context.Context, status models.UserStatus) (int64, error)
 	CountByRole(ctx context.Context, role models.UserRole) (int64, error)
+	CountCreatedBetween(ctx context.Context, start, end time.Time) (int64, error)
 }
 
 // userRepository 用户仓储实现
@@ -480,6 +482,23 @@ func (r *userRepository) Count(ctx context.Context) (int64, error) {
 	var count int64
 	if err := r.db.WithContext(ctx).Model(&models.User{}).Count(&count).Error; err != nil {
 		r.logger.Error("Failed to count users", zap.Error(err))
+		return 0, err
+	}
+	
+	return count, nil
+}
+
+// CountCreatedBetween 统计指定时间范围内创建的用户数量
+func (r *userRepository) CountCreatedBetween(ctx context.Context, start, end time.Time) (int64, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&models.User{}).
+		Where("created_at >= ? AND created_at < ?", start, end).
+		Count(&count).Error; err != nil {
+		r.logger.Error("Failed to count users created between dates", 
+			zap.Time("start", start),
+			zap.Time("end", end),
+			zap.Error(err),
+		)
 		return 0, err
 	}
 	

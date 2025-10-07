@@ -1,0 +1,93 @@
+{
+  "name": "taishanglaojun-ai-platform",
+  "version": "1.0.0",
+  "description": "太上老君AI平台 - 一个集成了先进人工智能技术的综合性平台",
+  "private": true,
+  "workspaces": [
+    "frontend/*",
+    "desktop-apps/*",
+    "mobile-apps/*",
+    "watch-apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:ai\"",
+    "dev:frontend": "cd frontend/web-app && npm run dev",
+    "dev:backend": "cd core-services && make dev",
+    "dev:ai": "cd core-services && python -m uvicorn ai_service.main:app --reload --port 8000",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend/web-app && npm run build",
+    "build:backend": "cd core-services && make build",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend/web-app && npm test",
+    "test:backend": "cd core-services && make test",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend/web-app && npm run lint",
+    "lint:backend": "cd core-services && golangci-lint run",
+    "format": "npm run format:frontend && npm run format:backend",
+    "format:frontend": "cd frontend/web-app && npm run format",
+    "format:backend": "cd core-services && gofmt -w .",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "k8s:deploy": "kubectl apply -f k8s/",
+    "k8s:delete": "kubectl delete -f k8s/",
+    "docs:serve": "cd docs && python -m http.server 8080",
+    "docs:build": "cd docs && mkdocs build",
+    "setup": "npm run setup:frontend && npm run setup:backend",
+    "setup:frontend": "cd frontend/web-app && npm install",
+    "setup:backend": "cd core-services && go mod download",
+    "clean": "npm run clean:frontend && npm run clean:backend",
+    "clean:frontend": "cd frontend/web-app && rm -rf node_modules dist",
+    "clean:backend": "cd core-services && go clean -cache",
+    "security:scan": "npm audit && cd core-services && gosec ./...",
+    "deps:update": "npm update && cd frontend/web-app && npm update && cd ../../core-services && go get -u ./..."
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/taishanglaojun.git"
+  },
+  "keywords": [
+    "ai",
+    "artificial-intelligence",
+    "chat",
+    "image-generation",
+    "document-analysis",
+    "data-analysis",
+    "microservices",
+    "golang",
+    "react",
+    "typescript"
+  ],
+  "author": "Taishanglaojun Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/your-org/taishanglaojun/issues"
+  },
+  "homepage": "https://taishanglaojun.com",
+  "commitlint": {
+    "extends": ["@commitlint/config-conventional"]
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yml,yaml}": ["prettier --write"],
+    "*.go": ["gofmt -w", "golangci-lint run --fix"]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  }
+}

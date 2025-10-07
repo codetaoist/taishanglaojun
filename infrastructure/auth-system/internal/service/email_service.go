@@ -7,12 +7,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/smtp"
-	"path/filepath"
 
 	"go.uber.org/zap"
 
-	"auth-system/internal/config"
-	"auth-system/internal/models"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/config"
+	"github.com/codetaoist/taishanglaojun/infrastructure/auth-system/internal/models"
 )
 
 // EmailService 邮件服务接口
@@ -152,6 +151,15 @@ func (s *emailService) getDefaultTemplate(name string) *template.Template {
 
 // SendVerificationEmail 发送验证邮件
 func (s *emailService) SendVerificationEmail(ctx context.Context, user *models.User, token string) error {
+	// 如果没有配置SMTP，则跳过发送（开发环境）
+	if s.config.SMTPUsername == "" || s.config.SMTPPassword == "" {
+		s.logger.Warn("SMTP credentials not configured, skipping verification email send",
+			zap.String("username", user.Username),
+			zap.String("email", user.Email),
+		)
+		return nil
+	}
+
 	subject := "验证您的邮箱地址"
 	verificationURL := fmt.Sprintf("http://localhost:3000/verify-email?token=%s", token)
 

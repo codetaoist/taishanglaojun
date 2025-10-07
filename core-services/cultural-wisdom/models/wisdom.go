@@ -58,6 +58,7 @@ type CulturalWisdom struct {
 	Category    string      `json:"category" gorm:"type:varchar(100)" bson:"category"`
 	School      string      `json:"school" gorm:"type:varchar(100)" bson:"school"`
 	Tags        StringSlice `json:"tags" gorm:"type:text" bson:"tags"` // JSON存储
+	Vector      []float32   `json:"vector" gorm:"type:text" bson:"vector"` // 向量表示
 	Difficulty  string      `json:"difficulty" gorm:"type:varchar(50);default:'medium'" bson:"difficulty"`
 	Status      string      `json:"status" gorm:"type:varchar(50);default:'published'" bson:"status"`
 	ViewCount   int64       `json:"view_count" gorm:"default:0" bson:"view_count"`

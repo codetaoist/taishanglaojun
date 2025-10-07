@@ -1,0 +1,109 @@
+# 太上老君监控系统 - 生产环境 Kustomize 配置
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 基础资源
+resources:
+  - ../../base
+
+# 命名空间
+namespace: taishanglaojun-monitoring
+
+# 名称前缀
+namePrefix: prod-
+
+# 通用标签
+commonLabels:
+  environment: production
+  app.kubernetes.io/instance: monitoring-prod
+  app.kubernetes.io/version: v1.0.0
+
+# 通用注解
+commonAnnotations:
+  deployment.kubernetes.io/revision: "1"
+  environment: production
+
+# 镜像替换
+images:
+  - name: ghcr.io/taishanglaojun/monitoring
+    newTag: v1.0.0
+
+# 副本数量
+replicas:
+  - name: monitoring
+    count: 3
+
+# 配置补丁
+patchesStrategicMerge:
+  - deployment-patch.yaml
+  - service-patch.yaml
+  - ingress-patch.yaml
+  - hpa-patch.yaml
+
+# JSON 补丁
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: monitoring
+    path: deployment-resources-patch.yaml
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      name: monitoring-network-policy
+    path: network-policy-patch.yaml
+
+# 配置生成器
+configMapGenerator:
+  - name: monitoring-config
+    literals:
+      - APP_ENV=production
+      - LOG_LEVEL=warn
+      - DEBUG=false
+      - DATABASE_HOST=postgres-prod.database.svc.cluster.local
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=taishanglaojun_monitoring_prod
+      - DATABASE_USER=monitoring_user
+      - DATABASE_SSL_MODE=require
+      - DATABASE_MAX_OPEN_CONNS=50
+      - DATABASE_MAX_IDLE_CONNS=10
+      - REDIS_HOST=redis-prod.cache.svc.cluster.local
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_MAX_RETRIES=5
+      - REDIS_POOL_SIZE=20
+      - REDIS_MIN_IDLE_CONNS=10
+      - METRICS_ENABLED=true
+      - METRICS_PATH=/metrics
+      - TRACING_ENABLED=true
+      - TRACING_ENDPOINT=http://jaeger-collector.monitoring:14268/api/traces
+      - CORS_ENABLED=true
+      - CORS_ALLOWED_ORIGINS=https://taishanglaojun.com,https://www.taishanglaojun.com,https://monitoring.taishanglaojun.com
+      - CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS
+      - CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
+      - ALERTING_ENABLED=true
+      - ALERTING_SLACK_CHANNEL=#monitoring-alerts
+      - BACKUP_ENABLED=true
+      - BACKUP_SCHEDULE=0 2 * * *
+      - BACKUP_RETENTION=30
+
+# 密钥生成器 (生产环境使用外部密钥管理)
+secretGenerator:
+  - name: monitoring-secrets
+    files:
+      - DATABASE_PASSWORD=secrets/database-password.txt
+      - REDIS_PASSWORD=secrets/redis-password.txt
+      - JWT_SECRET=secrets/jwt-secret.txt
+      - ENCRYPTION_KEY=secrets/encryption-key.txt
+    options:
+      disableNameSuffixHash: true
+
+# 生成器选项
+generatorOptions:
+  disableNameSuffixHash: false
+  labels:
+    environment: production
+    security.istio.io/tlsMode: istio

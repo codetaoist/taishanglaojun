@@ -134,7 +134,7 @@ func Load() (*Config, error) {
 	config := &Config{
 		Server: ServerConfig{
 			Host:         getEnv("SERVER_HOST", "localhost"),
-			Port:         getEnvAsInt("SERVER_PORT", 8080),
+			Port:         getEnvAsInt("SERVER_PORT", 8082),
 			Mode:         getEnv("SERVER_MODE", "debug"),
 			ReadTimeout:  getEnvAsDuration("SERVER_READ_TIMEOUT", 30*time.Second),
 			WriteTimeout: getEnvAsDuration("SERVER_WRITE_TIMEOUT", 30*time.Second),

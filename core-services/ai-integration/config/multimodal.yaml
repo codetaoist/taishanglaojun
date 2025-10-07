@@ -1,0 +1,113 @@
+# 多模态AI配置
+multimodal:
+  # 基础配置
+  enabled: true
+  max_file_size: 50MB  # 最大文件大小
+  max_session_duration: 24h  # 会话最大持续时间
+  max_messages_per_session: 1000  # 每个会话最大消息数
+  
+  # 支持的输入类型
+  supported_inputs:
+    - text
+    - audio
+    - image
+    - video
+  
+  # 支持的输出类型
+  supported_outputs:
+    - text
+    - audio
+    - image
+  
+  # 文件上传配置
+  upload:
+    allowed_extensions:
+      audio: [".mp3", ".wav", ".m4a", ".aac", ".flac"]
+      image: [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"]
+      video: [".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm"]
+    storage_path: "./uploads/multimodal"
+    temp_path: "./temp/multimodal"
+    cleanup_interval: 1h
+    
+  # 音频处理配置
+  audio:
+    max_duration: 300s  # 最大音频时长（秒）
+    sample_rate: 16000  # 采样率
+    channels: 1  # 声道数
+    format: "wav"  # 输出格式
+    
+  # 图像处理配置
+  image:
+    max_width: 4096  # 最大宽度
+    max_height: 4096  # 最大高度
+    quality: 85  # 压缩质量
+    format: "jpeg"  # 输出格式
+    
+  # 视频处理配置
+  video:
+    max_duration: 600s  # 最大视频时长（秒）
+    max_size: 100MB  # 最大视频文件大小
+    extract_frames: true  # 是否提取关键帧
+    frames_per_second: 1  # 每秒提取帧数
+    
+  # AI提供商配置
+  providers:
+    openai:
+      enabled: true
+      models:
+        text: "gpt-4-turbo-preview"
+        vision: "gpt-4-vision-preview"
+        audio: "whisper-1"
+        tts: "tts-1"
+      max_tokens: 4096
+      temperature: 0.7
+      
+    anthropic:
+      enabled: true
+      models:
+        text: "claude-3-opus-20240229"
+        vision: "claude-3-opus-20240229"
+      max_tokens: 4096
+      temperature: 0.7
+      
+    google:
+      enabled: false
+      models:
+        text: "gemini-pro"
+        vision: "gemini-pro-vision"
+      max_tokens: 4096
+      temperature: 0.7
+      
+  # 缓存配置
+  cache:
+    enabled: true
+    ttl: 1h  # 缓存生存时间
+    max_size: 1000  # 最大缓存条目数
+    
+  # 监控配置
+  monitoring:
+    enabled: true
+    metrics_interval: 30s
+    log_requests: true
+    log_responses: false  # 响应可能包含敏感数据
+    
+  # 安全配置
+  security:
+    content_filtering: true  # 内容过滤
+    virus_scanning: false  # 病毒扫描（需要额外配置）
+    watermarking: false  # 水印（用于生成的内容）
+    
+  # 限流配置
+  rate_limiting:
+    requests_per_minute: 60
+    requests_per_hour: 1000
+    requests_per_day: 10000
+    burst_size: 10
+    
+  # WebSocket配置
+  websocket:
+    enabled: true
+    max_connections: 1000
+    ping_interval: 30s
+    pong_timeout: 10s
+    message_buffer_size: 256

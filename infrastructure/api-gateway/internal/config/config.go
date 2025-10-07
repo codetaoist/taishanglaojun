@@ -23,6 +23,7 @@ type Config struct {
 	HealthCheck   HealthCheckConfig                  `yaml:"health_check" mapstructure:"health_check"`
 	Services      []ServiceConfig                    `yaml:"services" mapstructure:"services"`
 	StaticServices map[string][]StaticServiceInstance `yaml:"static_services" mapstructure:"static_services"`
+	LoadBalancer LoadBalancerConfig `yaml:"load_balancer" mapstructure:"load_balancer"`
 }
 
 // ServerConfig 服务器配置

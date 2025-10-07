@@ -2,92 +2,128 @@ version: '3.8'
 
 services:
   # 核心服务应用
-  app:
+  core-services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: taishang-laojun-core
-    ports:
-      - "8080:8080"
+    container_name: taishanglaojun-core
     environment:
-      - APP_MODE=development
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=taishanglaojun
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres123
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - ES_HOST=http://elasticsearch:9200
+      # 数据库配置
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER:-taishang}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-taishang123}
+      DB_NAME: ${MYSQL_DATABASE:-taishanglaojun}
+      
+      # Redis配置
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+      
+      # 服务配置
+      HTTP_PORT: ${HTTP_PORT:-8080}
+      GRPC_PORT: ${GRPC_PORT:-9090}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      
+      # JWT配置
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      
+      # 加密配置
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-your-32-char-encryption-key-here}
+      
+      # 位置追踪配置
+      LOCATION_DB_HOST: mysql
+      LOCATION_ENCRYPTION_KEY: ${LOCATION_ENCRYPTION_KEY:-location-encryption-key-32-chars}
+      
+      # AI集成配置
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      
+      # 文化智慧配置
+      WISDOM_CACHE_TTL: ${WISDOM_CACHE_TTL:-3600}
+      
+      # 意识模块配置
+      CONSCIOUSNESS_FUSION_ENABLED: ${CONSCIOUSNESS_FUSION_ENABLED:-true}
+      CONSCIOUSNESS_EVOLUTION_ENABLED: ${CONSCIOUSNESS_EVOLUTION_ENABLED:-true}
+      
+      # 社区配置
+      COMMUNITY_MAX_MEMBERS: ${COMMUNITY_MAX_MEMBERS:-1000}
+      COMMUNITY_CACHE_TTL: ${COMMUNITY_CACHE_TTL:-1800}
+      
+      # Elasticsearch配置
+      ES_HOST: http://elasticsearch:9200
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+      - "${GRPC_PORT:-9090}:9090"
     depends_on:
-      - postgres
-      - redis
-      - elasticsearch
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     volumes:
       - ./logs:/app/logs
-      - ./uploads:/app/uploads
+      - ./config:/app/config
     networks:
       - taishang-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
 
-  # PostgreSQL 数据库
-  postgres:
-    image: postgres:15-alpine
-    container_name: taishang-postgres
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: taishanglaojun-mysql
     environment:
-      POSTGRES_DB: taishanglaojun
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-taishanglaojun}
+      MYSQL_USER: ${MYSQL_USER:-taishang}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-taishang123}
     ports:
-      - "5432:5432"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - taishang-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   # Redis 缓存
   redis:
     image: redis:7-alpine
-    container_name: taishang-redis
+    container_name: taishanglaojun-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
-      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
     networks:
       - taishang-network
     restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
+      timeout: 10s
+      retries: 5
 
   # Elasticsearch 搜索引擎
   elasticsearch:
     image: elasticsearch:8.11.0
-    container_name: taishang-elasticsearch
+    container_name: taishanglaojun-elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "${ES_PORT:-9200}:9200"
+      - "${ES_TRANSPORT_PORT:-9300}:9300"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
@@ -229,7 +265,7 @@ services:
       - proxy
 
 volumes:
-  postgres_data:
+  mysql_data:
     driver: local
   redis_data:
     driver: local

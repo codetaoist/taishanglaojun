@@ -159,7 +159,7 @@ docker-build:
 .PHONY: docker-run
 docker-run:
 	@echo "Running Docker container..."
-	docker run --rm -p 8080:8080 --env-file .env $(APP_NAME):latest
+	docker run --rm -p 8082:8082 --env-file .env $(APP_NAME):latest
 
 # 部署相关命令
 .PHONY: deploy-staging

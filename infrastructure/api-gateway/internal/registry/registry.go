@@ -70,13 +70,19 @@ func New(cfg config.RegistryConfig, log logger.Logger) Registry {
 	case "static":
 		return newStaticRegistry(log)
 	case "consul":
-		// TODO: 实现Consul注册中心
-		log.Warn("Consul registry not implemented yet, using static registry")
-		return newStaticRegistry(log)
+		registry, err := newConsulRegistry(cfg.Endpoints, cfg.Options, log)
+		if err != nil {
+			log.Errorf("Failed to create Consul registry: %v, falling back to static registry", err)
+			return newStaticRegistry(log)
+		}
+		return registry
 	case "etcd":
-		// TODO: 实现etcd注册中心
-		log.Warn("etcd registry not implemented yet, using static registry")
-		return newStaticRegistry(log)
+		registry, err := newEtcdRegistry(cfg.Endpoints, cfg.Options, log)
+		if err != nil {
+			log.Errorf("Failed to create etcd registry: %v, falling back to static registry", err)
+			return newStaticRegistry(log)
+		}
+		return registry
 	default:
 		log.Warnf("Unknown registry type: %s, using static registry", cfg.Type)
 		return newStaticRegistry(log)

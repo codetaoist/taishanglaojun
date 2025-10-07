@@ -1,0 +1,129 @@
+{{/*
+太上老君监控系统 Deployment 模板
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "taishanglaojun-monitoring.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "taishanglaojun-monitoring.labels" . | nindent 4 }}
+  {{- with .Values.global.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.app.replicaCount }}
+  {{- end }}
+  strategy:
+    {{- toYaml .Values.app.updateStrategy | nindent 4 }}
+  selector:
+    matchLabels:
+      {{- include "taishanglaojun-monitoring.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.app.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "taishanglaojun-monitoring.selectorLabels" . | nindent 8 }}
+        {{- with .Values.app.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.app.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "taishanglaojun-monitoring.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.app.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.app.containerSecurityContext | nindent 12 }}
+          image: {{ include "taishanglaojun-monitoring.image" . }}
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            {{- range .Values.app.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+            {{- with .Values.extraEnvVars }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.extraEnvVarsCM }}
+            - name: EXTRA_ENV_VARS_CM
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.extraEnvVarsCM }}
+                  key: extra-env-vars
+            {{- end }}
+            {{- if .Values.extraEnvVarsSecret }}
+            - name: EXTRA_ENV_VARS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.extraEnvVarsSecret }}
+                  key: extra-env-vars
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/monitoring
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/monitoring
+            - name: logs
+              mountPath: /var/log/monitoring
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.app.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.app.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.app.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.app.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.app.startupProbe.enabled }}
+          startupProbe:
+            {{- omit .Values.app.startupProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "taishanglaojun-monitoring.fullname" . }}-config
+            defaultMode: 0644
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "taishanglaojun-monitoring.fullname" . }}-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: logs
+          emptyDir: {}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

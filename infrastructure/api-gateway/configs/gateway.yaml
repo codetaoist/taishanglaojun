@@ -1,6 +1,6 @@
-# API Gateway Configuration
+﻿# API Gateway Configuration
 
-# 服务器配置
+# 鏈嶅姟鍣ㄩ厤缃?
 server:
   host: "0.0.0.0"
   port: 8081
@@ -10,9 +10,9 @@ server:
   idle_timeout: 60s
   max_header_bytes: 1048576
 
-# 日志配置
+# 鏃ュ織閰嶇疆
 logging:
-  level: "info"
+  level: "debug"
   format: "json"
   output: "stdout"
   file:
@@ -23,14 +23,14 @@ logging:
     max_age: 7
     compress: true
 
-# 监控配置
+# 鐩戞帶閰嶇疆
 monitoring:
   enabled: true
   port: 9090
   path: "/metrics"
   namespace: "api_gateway"
 
-# 服务注册与发现
+# 鏈嶅姟娉ㄥ唽涓庡彂鐜?
 registry:
   type: "static"  # static, consul, etcd
   consul:
@@ -46,7 +46,7 @@ registry:
     username: ""
     password: ""
 
-# 代理配置
+# 浠ｇ悊閰嶇疆
 proxy:
   timeout: 30s
   idle_conn_timeout: 90s
@@ -59,9 +59,9 @@ proxy:
     timeout: 5s
     path: "/health"
 
-# 安全配置
+# 瀹夊叏閰嶇疆
 security:
-  # 认证配置
+  # 璁よ瘉閰嶇疆
   auth:
     jwt_secret: "your-super-secret-jwt-key-change-in-production-laojun-2024"
     token_expiry: 24h
@@ -80,10 +80,10 @@ security:
       - "/ai/models"
       - "/ai/health"
     optional_paths:
-      - "/public/*"
-      - "/docs/*"
+      - "/public/*filepath"
+      - "/docs/*filepath"
 
-  # 限流配置
+  # 闄愭祦閰嶇疆
   rate_limit:
     global_rps: 1000
     global_burst: 2000
@@ -99,14 +99,14 @@ security:
       - "/health"
       - "/ready"
     path_limits:
-      "/auth/*":
+      "/auth/*filepath":
         rps: 10
         burst: 20
-      "/admin/*":
+      "/admin/*filepath":
         rps: 20
         burst: 40
 
-  # CORS配置
+  # CORS閰嶇疆
   cors:
     allow_origins:
       - "http://localhost:3000"
@@ -138,9 +138,9 @@ security:
     allow_all_origins: false
     allow_private_network: false
 
-# 服务配置
+# 鏈嶅姟閰嶇疆
 services:
-  # 认证服务
+  # 璁よ瘉鏈嶅姟
   - name: "auth-service"
     url: "http://localhost:8082"
     load_balancer: "round_robin"
@@ -225,9 +225,139 @@ services:
         strip_prefix: false
         middleware: ["auth", "rate_limit"]
 
-  # 文化智慧服务
+  # 浠诲姟绠＄悊鏈嶅姟
+  - name: "task-management-service"
+    url: "http://localhost:8084"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/tasks/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/tasks/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/projects/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/projects/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/teams/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/teams/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+
+  # 绀惧尯鏈嶅姟
+  - name: "community-service"
+    url: "http://localhost:8085"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/posts/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/posts/*filepath"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/post/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/post/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/comments/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/comments/*filepath"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/comment/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/comment/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/users/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/users/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/chat/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/chat/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+
+  # AI闆嗘垚鏈嶅姟
+  - name: "ai-integration-service"
+    url: "http://localhost:8083"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes: []
+
+  # 鍋ュ悍绠＄悊鏈嶅姟
+  - name: "health-management-service"
+    url: "http://localhost:8086"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/health-management/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/*filepath"
+        strip_prefix: true
+        middleware: ["auth", "rate_limit"]
+
+  # 鏂囧寲鏅烘収鏈嶅姟
   - name: "cultural-wisdom-service"
-    url: "http://localhost:8080"
+    url: "http://localhost:8087"
     load_balancer: "round_robin"
     health_check: "/health"
     timeout: 30
@@ -325,7 +455,7 @@ services:
         strip_prefix: false
         middleware: ["rate_limit"]
 
-# 静态路由配置（用于服务发现不可用时的备用方案）
+# 闈欐€佽矾鐢遍厤缃紙鐢ㄤ簬鏈嶅姟鍙戠幇涓嶅彲鐢ㄦ椂鐨勫鐢ㄦ柟妗堬級
 static_services:
   auth-service:
     - id: "auth-service-1"
@@ -337,17 +467,58 @@ static_services:
         version: "1.0.0"
         region: "local"
         health_check_path: "/api/v1/health"
-  cultural-wisdom-service:
-    - id: "cultural-wisdom-1"
+  task-management-service:
+    - id: "task-management-1"
       address: "localhost"
-      port: 8080
+      port: 8084
       weight: 1
       tags: ["primary"]
       meta:
         version: "1.0.0"
         region: "local"
+        health_check_path: "/health"
+  community-service:
+    - id: "community-1"
+      address: "localhost"
+      port: 8085
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+  ai-integration-service:
+    - id: "ai-integration-1"
+      address: "localhost"
+      port: 8083
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+  health-management-service:
+    - id: "health-management-1"
+      address: "localhost"
+      port: 8086
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+  cultural-wisdom-service:
+    - id: "cultural-wisdom-1"
+      address: "localhost"
+      port: 8087
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
 
-# 健康检查配置
+# 鍋ュ悍妫€鏌ラ厤缃?
 health_check:
   enabled: true
   interval: 30s
@@ -355,28 +526,28 @@ health_check:
   unhealthy_threshold: 3
   healthy_threshold: 2
 
-# 性能配置
+# 鎬ц兘閰嶇疆
 performance:
-  # 连接池配置
+  # 杩炴帴姹犻厤缃?
   connection_pool:
     max_idle_conns: 100
     max_idle_conns_per_host: 10
     idle_conn_timeout: 90s
     disable_keep_alives: false
   
-  # 缓存配置
+  # 缂撳瓨閰嶇疆
   cache:
     enabled: true
     ttl: 300s
     max_size: 1000
   
-  # 压缩配置
+  # 鍘嬬缉閰嶇疆
   compression:
     enabled: true
     level: 6
     min_length: 1024
 
-# 开发配置
+# 寮€鍙戦厤缃?
 development:
   hot_reload: true
   debug_headers: true

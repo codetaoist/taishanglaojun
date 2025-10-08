@@ -8,16 +8,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
 )
 
 // ProgressHandler 进度追踪处理器
 type ProgressHandler struct {
-	progressService *services.ProgressTrackingService
+	progressService *analytics.ProgressTrackingService
 }
 
 // NewProgressHandler 创建新的进度处理器
-func NewProgressHandler(progressService *services.ProgressTrackingService) *ProgressHandler {
+func NewProgressHandler(progressService *analytics.ProgressTrackingService) *ProgressHandler {
 	return &ProgressHandler{
 		progressService: progressService,
 	}
@@ -29,14 +29,14 @@ func NewProgressHandler(progressService *services.ProgressTrackingService) *Prog
 // @Tags 进度追踪
 // @Accept json
 // @Produce json
-// @Param request body services.ProgressUpdateRequest true "进度更新请求"
-// @Success 200 {object} services.ProgressResponse "进度更新响应"
+// @Param request body analytics.ProgressUpdateRequest true "进度更新请求"
+// @Success 200 {object} analytics.ProgressResponse "进度更新响应"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 404 {object} ErrorResponse "学习者或内容不存在"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
 // @Router /api/v1/progress/update [post]
 func (h *ProgressHandler) UpdateProgress(c *gin.Context) {
-	var req services.ProgressUpdateRequest
+	var req analytics.ProgressUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
@@ -80,7 +80,7 @@ func (h *ProgressHandler) UpdateProgress(c *gin.Context) {
 // @Param period query string false "报告周期" Enums(daily,weekly,monthly,custom) default(weekly)
 // @Param start_date query string false "开始日期 (YYYY-MM-DD)"
 // @Param end_date query string false "结束日期 (YYYY-MM-DD)"
-// @Success 200 {object} services.LearningReport "学习报告"
+// @Success 200 {object} analytics.LearningReport "学习报告"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 404 {object} ErrorResponse "学习者不存在"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
@@ -168,7 +168,7 @@ func (h *ProgressHandler) GetProgressSummary(c *gin.Context) {
 
 // GetContentProgress 获取内容进度
 // @Summary 获取内容进度
-// @Description 获取学习者对特定内容的详细进度信息
+// @Description 获取学习者对特定内容的详细进度信息，包括学习状态、完成时间等
 // @Tags 进度追踪
 // @Accept json
 // @Produce json
@@ -220,7 +220,7 @@ func (h *ProgressHandler) GetContentProgress(c *gin.Context) {
 
 // BatchUpdateProgress 批量更新进度
 // @Summary 批量更新进度
-// @Description 批量更新多个内容的学习进度
+// @Description 批量更新多个内容的学习进度，包括学习状态、完成时间等
 // @Tags 进度追踪
 // @Accept json
 // @Produce json
@@ -257,7 +257,7 @@ func (h *ProgressHandler) BatchUpdateProgress(c *gin.Context) {
 // 辅助方法
 
 // validateProgressUpdateRequest 验证进度更新请求
-func (h *ProgressHandler) validateProgressUpdateRequest(req *services.ProgressUpdateRequest) error {
+func (h *ProgressHandler) validateProgressUpdateRequest(req *analytics.ProgressUpdateRequest) error {
 	if req.LearnerID == uuid.Nil {
 		return fmt.Errorf("学习者ID不能为空")
 	}
@@ -268,13 +268,13 @@ func (h *ProgressHandler) validateProgressUpdateRequest(req *services.ProgressUp
 		return fmt.Errorf("进度值必须在0-1之间")
 	}
 	if req.TimeSpent < 0 {
-		return fmt.Errorf("学习时间不能为负数")
+		return fmt.Errorf("学习时间不能为负")
 	}
 	return nil
 }
 
 // parseReportPeriod 解析报告周期
-func (h *ProgressHandler) parseReportPeriod(period, startDateStr, endDateStr string) (*services.ReportPeriod, error) {
+func (h *ProgressHandler) parseReportPeriod(period, startDateStr, endDateStr string) (*analytics.ReportPeriod, error) {
 	now := time.Now()
 	var startDate, endDate time.Time
 
@@ -283,12 +283,12 @@ func (h *ProgressHandler) parseReportPeriod(period, startDateStr, endDateStr str
 		startDate = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 		endDate = startDate.Add(24 * time.Hour)
 	case "weekly":
-		// 获取本周开始时间（周一）
+		// 获取本周开始时间（周一为第一天）
 		weekday := int(now.Weekday())
 		if weekday == 0 {
 			weekday = 7 // 将周日调整为7
 		}
-		startDate = now.AddDate(0, 0, -(weekday-1))
+		startDate = now.AddDate(0, 0, -(weekday - 1))
 		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, startDate.Location())
 		endDate = startDate.Add(7 * 24 * time.Hour)
 	case "monthly":
@@ -313,7 +313,7 @@ func (h *ProgressHandler) parseReportPeriod(period, startDateStr, endDateStr str
 		return nil, fmt.Errorf("不支持的报告周期: %s", period)
 	}
 
-	return &services.ReportPeriod{
+	return &analytics.ReportPeriod{
 		StartDate: startDate,
 		EndDate:   endDate,
 		Type:      period,
@@ -331,68 +331,68 @@ type ErrorResponse struct {
 
 // ProgressSummaryResponse 进度摘要响应
 type ProgressSummaryResponse struct {
-	LearnerID           uuid.UUID                        `json:"learner_id"`
-	OverallProgress     float64                          `json:"overall_progress"`
-	TotalTimeSpent      time.Duration                    `json:"total_time_spent"`
-	ContentCompleted    int                              `json:"content_completed"`
-	ContentInProgress   int                              `json:"content_in_progress"`
-	CurrentStreak       int                              `json:"current_streak"`
-	WeeklyGoalProgress  float64                          `json:"weekly_goal_progress"`
-	RecentAchievements  []services.Achievement           `json:"recent_achievements"`
-	ActiveContent       []ActiveContentInfo              `json:"active_content"`
-	NextRecommendations []services.NextStepRecommendation `json:"next_recommendations"`
-	UpdatedAt           time.Time                        `json:"updated_at"`
+	LearnerID           uuid.UUID                          `json:"learner_id"`
+	OverallProgress     float64                            `json:"overall_progress"`
+	TotalTimeSpent      time.Duration                      `json:"total_time_spent"`
+	ContentCompleted    int                                `json:"content_completed"`
+	ContentInProgress   int                                `json:"content_in_progress"`
+	CurrentStreak       int                                `json:"current_streak"`
+	WeeklyGoalProgress  float64                            `json:"weekly_goal_progress"`
+	RecentAchievements  []analytics.ProgressAchievement    `json:"recent_achievements"`
+	ActiveContent       []ActiveContentInfo                `json:"active_content"`
+	NextRecommendations []analytics.NextStepRecommendation `json:"next_recommendations"`
+	UpdatedAt           time.Time                          `json:"updated_at"`
 }
 
 // ActiveContentInfo 活跃内容信息
 type ActiveContentInfo struct {
-	ContentID    uuid.UUID `json:"content_id"`
-	Title        string    `json:"title"`
-	Type         string    `json:"type"`
-	Progress     float64   `json:"progress"`
-	LastAccessed time.Time `json:"last_accessed"`
+	ContentID    uuid.UUID     `json:"content_id"`
+	Title        string        `json:"title"`
+	Type         string        `json:"type"`
+	Progress     float64       `json:"progress"`
+	LastAccessed time.Time     `json:"last_accessed"`
 	TimeSpent    time.Duration `json:"time_spent"`
 }
 
 // ContentProgressResponse 内容进度响应
 type ContentProgressResponse struct {
-	LearnerID        uuid.UUID                     `json:"learner_id"`
-	ContentID        uuid.UUID                     `json:"content_id"`
-	ContentTitle     string                        `json:"content_title"`
-	Progress         float64                       `json:"progress"`
-	TimeSpent        time.Duration                 `json:"time_spent"`
-	LastPosition     int                           `json:"last_position"`
-	IsCompleted      bool                          `json:"is_completed"`
-	CompletedAt      *time.Time                    `json:"completed_at"`
-	QuizScores       map[uuid.UUID]float64         `json:"quiz_scores"`
-	Notes            []services.NoteData           `json:"notes"`
-	Bookmarks        []services.BookmarkData       `json:"bookmarks"`
-	InteractionCount int                           `json:"interaction_count"`
-	PerformanceScore float64                       `json:"performance_score"`
-	EngagementLevel  string                        `json:"engagement_level"`
-	UpdatedAt        time.Time                     `json:"updated_at"`
+	LearnerID        uuid.UUID                `json:"learner_id"`
+	ContentID        uuid.UUID                `json:"content_id"`
+	ContentTitle     string                   `json:"content_title"`
+	Progress         float64                  `json:"progress"`
+	TimeSpent        time.Duration            `json:"time_spent"`
+	LastPosition     int                      `json:"last_position"`
+	IsCompleted      bool                     `json:"is_completed"`
+	CompletedAt      *time.Time               `json:"completed_at"`
+	QuizScores       map[uuid.UUID]float64    `json:"quiz_scores"`
+	Notes            []analytics.NoteData     `json:"notes"`
+	Bookmarks        []analytics.BookmarkData `json:"bookmarks"`
+	InteractionCount int                      `json:"interaction_count"`
+	PerformanceScore float64                  `json:"performance_score"`
+	EngagementLevel  string                   `json:"engagement_level"`
+	UpdatedAt        time.Time                `json:"updated_at"`
 }
 
 // BatchProgressUpdateRequest 批量进度更新请求
 type BatchProgressUpdateRequest struct {
-	Updates []services.ProgressUpdateRequest `json:"updates" validate:"required,min=1,max=50"`
+	Updates []analytics.ProgressUpdateRequest `json:"updates" validate:"required,min=1,max=50"`
 }
 
 // BatchProgressUpdateResponse 批量进度更新响应
 type BatchProgressUpdateResponse struct {
-	SuccessCount int                           `json:"success_count"`
-	FailureCount int                           `json:"failure_count"`
-	Results      []BatchUpdateResult           `json:"results"`
-	ProcessedAt  time.Time                     `json:"processed_at"`
+	SuccessCount int                 `json:"success_count"`
+	FailureCount int                 `json:"failure_count"`
+	Results      []BatchUpdateResult `json:"results"`
+	ProcessedAt  time.Time           `json:"processed_at"`
 }
 
 // BatchUpdateResult 批量更新结果
 type BatchUpdateResult struct {
-	LearnerID uuid.UUID                `json:"learner_id"`
-	ContentID uuid.UUID                `json:"content_id"`
-	Success   bool                     `json:"success"`
-	Response  *services.ProgressResponse `json:"response,omitempty"`
-	Error     string                   `json:"error,omitempty"`
+	LearnerID uuid.UUID                   `json:"learner_id"`
+	ContentID uuid.UUID                   `json:"content_id"`
+	Success   bool                        `json:"success"`
+	Response  *analytics.ProgressResponse `json:"response,omitempty"`
+	Error     string                      `json:"error,omitempty"`
 }
 
 // 实现辅助方法的占位符

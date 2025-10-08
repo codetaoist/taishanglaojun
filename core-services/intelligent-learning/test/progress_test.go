@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/handlers"
 )
 
@@ -21,19 +21,18 @@ type MockProgressService struct {
 	mock.Mock
 }
 
-func (m *MockProgressService) UpdateProgress(req *services.ProgressUpdateRequest) (*services.ProgressResponse, error) {
+func (m *MockProgressService) UpdateProgress(req *analytics.ProgressUpdateRequest) (*analytics.ProgressResponse, error) {
 	args := m.Called(req)
-	return args.Get(0).(*services.ProgressResponse), args.Error(1)
+	return args.Get(0).(*analytics.ProgressResponse), args.Error(1)
 }
 
-func (m *MockProgressService) GetLearningReport(learnerID string, period services.ReportPeriod) (*services.LearningReport, error) {
+func (m *MockProgressService) GetLearningReport(learnerID string, period analytics.ReportPeriod) (*analytics.LearningReport, error) {
 	args := m.Called(learnerID, period)
-	return args.Get(0).(*services.LearningReport), args.Error(1)
+	return args.Get(0).(*analytics.LearningReport), args.Error(1)
 }
 
 func TestProgressHandler_UpdateProgress(t *testing.T) {
-	// 设置Gin为测试模式
-	gin.SetMode(gin.TestMode)
+	// 设置Gin为测试模�?	gin.SetMode(gin.TestMode)
 
 	// 创建模拟服务
 	mockService := new(MockProgressService)
@@ -44,11 +43,11 @@ func TestProgressHandler_UpdateProgress(t *testing.T) {
 	router.POST("/progress/update", handler.UpdateProgress)
 
 	// 准备测试数据
-	updateReq := services.ProgressUpdateRequest{
+	updateReq := analytics.ProgressUpdateRequest{
 		LearnerID: "learner-123",
 		ContentID: "content-456",
 		SessionID: "session-789",
-		Progress: services.ContentProgress{
+		Progress: analytics.ContentProgress{
 			CompletionPercentage: 75.5,
 			TimeSpent:           1800, // 30分钟
 			LastAccessedAt:      time.Now(),
@@ -58,7 +57,7 @@ func TestProgressHandler_UpdateProgress(t *testing.T) {
 		Timestamp:       time.Now(),
 	}
 
-	expectedResponse := &services.ProgressResponse{
+	expectedResponse := &analytics.ProgressResponse{
 		Success: true,
 		Message: "进度更新成功",
 		Data: map[string]interface{}{
@@ -66,20 +65,20 @@ func TestProgressHandler_UpdateProgress(t *testing.T) {
 			"time_spent":           1800,
 			"level_up":             false,
 		},
-		NextSteps: []services.NextStepRecommendation{
+		NextSteps: []analytics.NextStepRecommendation{
 			{
 				Type:        "continue_content",
 				ContentID:   "content-456",
 				Title:       "继续当前内容",
-				Description: "您已完成75.5%，继续学习剩余内容",
+				Description: "您已完成75.5%，继续学习剩余内�?,
 				Priority:    "high",
 			},
 		},
-		Achievements: []services.Achievement{},
+		Achievements: []analytics.Achievement{},
 	}
 
 	// 设置模拟期望
-	mockService.On("UpdateProgress", mock.AnythingOfType("*services.ProgressUpdateRequest")).Return(expectedResponse, nil)
+	mockService.On("UpdateProgress", mock.AnythingOfType("*analytics.ProgressUpdateRequest")).Return(expectedResponse, nil)
 
 	// 准备请求
 	reqBody, _ := json.Marshal(updateReq)
@@ -93,7 +92,7 @@ func TestProgressHandler_UpdateProgress(t *testing.T) {
 	// 验证结果
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response services.ProgressResponse
+	var response analytics.ProgressResponse
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Success)
@@ -105,8 +104,7 @@ func TestProgressHandler_UpdateProgress(t *testing.T) {
 }
 
 func TestProgressHandler_GetLearningReport(t *testing.T) {
-	// 设置Gin为测试模式
-	gin.SetMode(gin.TestMode)
+	// 设置Gin为测试模�?	gin.SetMode(gin.TestMode)
 
 	// 创建模拟服务
 	mockService := new(MockProgressService)
@@ -117,18 +115,18 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 	router.GET("/progress/report/:learnerId", handler.GetLearningReport)
 
 	// 准备期望响应
-	expectedReport := &services.LearningReport{
+	expectedReport := &analytics.LearningReport{
 		LearnerID:     "learner-123",
-		Period:        services.ReportPeriodWeek,
+		Period:        analytics.ReportPeriodWeek,
 		GeneratedAt:   time.Now(),
-		OverallProgress: services.OverallProgress{
+		OverallProgress: analytics.OverallProgress{
 			TotalTimeSpent:        7200, // 2小时
 			CompletedContents:     5,
 			InProgressContents:    3,
 			AverageCompletionRate: 68.5,
 			StreakDays:           7,
 		},
-		ContentProgress: []services.ContentProgressSummary{
+		ContentProgress: []analytics.ContentProgressSummary{
 			{
 				ContentID:            "content-456",
 				Title:               "Go语言基础",
@@ -138,7 +136,7 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 				Status:              "in_progress",
 			},
 		},
-		SkillProgress: []services.SkillProgress{
+		SkillProgress: []analytics.SkillProgress{
 			{
 				SkillName:     "Go编程",
 				CurrentLevel:  3,
@@ -147,8 +145,8 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 				Improvement:   25.5,
 			},
 		},
-		LearningPatterns: services.LearningPatternAnalysis{
-			PreferredTimeSlots: []services.TimeSlotAnalysis{
+		LearningPatterns: analytics.LearningPatternAnalysis{
+			PreferredTimeSlots: []analytics.TimeSlotAnalysis{
 				{
 					TimeSlot:    "morning",
 					Frequency:   5,
@@ -156,7 +154,7 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 					Efficiency:  85.2,
 				},
 			},
-			EngagementPatterns: []services.EngagementPattern{
+			EngagementPatterns: []analytics.EngagementPattern{
 				{
 					ContentType:   "video",
 					AvgEngagement: 78.5,
@@ -164,11 +162,11 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 				},
 			},
 		},
-		Recommendations: []services.RecommendationItem{
+		Recommendations: []analytics.RecommendationItem{
 			{
 				Type:        "content",
 				ContentID:   "content-789",
-				Title:       "Go高级特性",
+				Title:       "Go高级特�?,
 				Reason:      "基于您的Go语言基础进度推荐",
 				Priority:    "high",
 				EstimatedTime: 60,
@@ -177,7 +175,7 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 	}
 
 	// 设置模拟期望
-	mockService.On("GetLearningReport", "learner-123", services.ReportPeriodWeek).Return(expectedReport, nil)
+	mockService.On("GetLearningReport", "learner-123", analytics.ReportPeriodWeek).Return(expectedReport, nil)
 
 	// 执行请求
 	req, _ := http.NewRequest("GET", "/progress/report/learner-123?period=week", nil)
@@ -187,11 +185,11 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 	// 验证结果
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response services.LearningReport
+	var response analytics.LearningReport
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, "learner-123", response.LearnerID)
-	assert.Equal(t, services.ReportPeriodWeek, response.Period)
+	assert.Equal(t, analytics.ReportPeriodWeek, response.Period)
 	assert.Equal(t, 7200, response.OverallProgress.TotalTimeSpent)
 	assert.Equal(t, 5, response.OverallProgress.CompletedContents)
 	assert.Len(t, response.ContentProgress, 1)
@@ -203,8 +201,7 @@ func TestProgressHandler_GetLearningReport(t *testing.T) {
 }
 
 func TestProgressHandler_ValidationErrors(t *testing.T) {
-	// 设置Gin为测试模式
-	gin.SetMode(gin.TestMode)
+	// 设置Gin为测试模�?	gin.SetMode(gin.TestMode)
 
 	// 创建模拟服务
 	mockService := new(MockProgressService)

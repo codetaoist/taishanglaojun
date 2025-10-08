@@ -65,27 +65,57 @@ type staticRegistry struct {
 }
 
 // New 创建服务注册实例
-func New(cfg config.RegistryConfig, log logger.Logger) Registry {
+func New(cfg config.RegistryConfig, log logger.Logger, staticServices map[string][]config.StaticServiceInstance) Registry {
 	switch cfg.Type {
 	case "static":
-		return newStaticRegistry(log)
+		registry := newStaticRegistry(log)
+		// 加载静态服务配置
+		if staticServices != nil && len(staticServices) > 0 {
+			if err := LoadStaticServices(registry, staticServices); err != nil {
+				log.Errorf("Failed to load static services: %v", err)
+			} else {
+				log.Infof("Loaded %d static services", len(staticServices))
+			}
+		}
+		return registry
 	case "consul":
 		registry, err := newConsulRegistry(cfg.Endpoints, cfg.Options, log)
 		if err != nil {
 			log.Errorf("Failed to create Consul registry: %v, falling back to static registry", err)
-			return newStaticRegistry(log)
+			fallbackRegistry := newStaticRegistry(log)
+			// 为fallback注册中心也加载静态服务
+			if staticServices != nil && len(staticServices) > 0 {
+				if err := LoadStaticServices(fallbackRegistry, staticServices); err != nil {
+					log.Errorf("Failed to load static services for fallback registry: %v", err)
+				}
+			}
+			return fallbackRegistry
 		}
 		return registry
 	case "etcd":
 		registry, err := newEtcdRegistry(cfg.Endpoints, cfg.Options, log)
 		if err != nil {
 			log.Errorf("Failed to create etcd registry: %v, falling back to static registry", err)
-			return newStaticRegistry(log)
+			fallbackRegistry := newStaticRegistry(log)
+			// 为fallback注册中心也加载静态服务
+			if staticServices != nil && len(staticServices) > 0 {
+				if err := LoadStaticServices(fallbackRegistry, staticServices); err != nil {
+					log.Errorf("Failed to load static services for fallback registry: %v", err)
+				}
+			}
+			return fallbackRegistry
 		}
 		return registry
 	default:
 		log.Warnf("Unknown registry type: %s, using static registry", cfg.Type)
-		return newStaticRegistry(log)
+		registry := newStaticRegistry(log)
+		// 加载静态服务配置
+		if staticServices != nil && len(staticServices) > 0 {
+			if err := LoadStaticServices(registry, staticServices); err != nil {
+				log.Errorf("Failed to load static services: %v", err)
+			}
+		}
+		return registry
 	}
 }
 

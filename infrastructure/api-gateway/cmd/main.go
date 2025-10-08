@@ -34,7 +34,7 @@ func main() {
 	metrics := monitoring.New(cfg.Monitoring)
 
 	// 初始化服务注册中心
-	serviceRegistry := registry.New(cfg.Registry, log)
+	serviceRegistry := registry.New(cfg.Registry, log, cfg.StaticServices)
 
 	// 初始化负载均衡管理器
 	loadBalancerMgr := proxy.NewLoadBalancerManager(

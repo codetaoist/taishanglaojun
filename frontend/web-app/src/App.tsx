@@ -18,6 +18,12 @@ import Community from './pages/Community';
 import UserFavorites from './pages/UserFavorites';
 import UserNotes from './pages/UserNotes';
 import IntelligentLearning from './pages/IntelligentLearning';
+import LearningAnalyticsDashboard from './pages/LearningAnalyticsDashboard';
+import CourseCenter from './pages/CourseCenter';
+import AbilityAssessment from './pages/AbilityAssessment';
+import LearningPlan from './pages/LearningPlan';
+import DailyCheckin from './pages/DailyCheckin';
+import AchievementCenter from './pages/AchievementCenter';
 import ProjectManagement from './pages/ProjectManagement';
 import ProjectWorkspace from './pages/projects/ProjectWorkspace';
 import TaskManagement from './pages/projects/TaskManagement';
@@ -130,7 +136,13 @@ const App: React.FC = () => {
                     <Route path="/recommendations" element={<RecommendationCenter />} />
                     <Route path="/community" element={<Community />} />
                     <Route path="/intelligent-learning" element={<IntelligentLearning />} />
-                    <Route path="/project-management" element={<ProjectManagement />} />
+                    <Route path="/learning/analytics-dashboard" element={<LearningAnalyticsDashboard />} />
+                    <Route path="/course-center" element={<CourseCenter />} />
+                    <Route path="/ability-assessment" element={<AbilityAssessment />} />
+                <Route path="/learning-plan" element={<LearningPlan />} />
+                <Route path="/daily-checkin" element={<DailyCheckin />} />
+                <Route path="/achievement-center" element={<AchievementCenter />} />
+                <Route path="/project-management" element={<ProjectManagement />} />
                     <Route path="/projects/workspace" element={<ProjectWorkspace />} />
                     <Route path="/projects/tasks" element={<TaskManagement />} />
                     <Route path="/projects/collaboration" element={<TeamCollaboration />} />

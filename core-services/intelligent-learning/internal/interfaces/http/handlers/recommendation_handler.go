@@ -9,9 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 )
 
 // RecommendationHandler 推荐系统处理器
@@ -199,13 +197,22 @@ func (h *RecommendationHandler) GetPersonalizedRecommendations(c *gin.Context) {
 // @Router /api/v1/recommendations/strategy/{strategy} [get]
 func (h *RecommendationHandler) GetRecommendationsByStrategy(c *gin.Context) {
 	strategy := c.Param("strategy")
-	userID := c.Query("user_id")
+	userIDStr := c.Query("user_id")
 	limitStr := c.DefaultQuery("limit", "10")
 
-	if userID == "" {
+	if userIDStr == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "missing_parameter",
 			Message: "用户ID不能为空",
+		})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_parameter",
+			Message: "用户ID格式无效",
 		})
 		return
 	}
@@ -221,11 +228,11 @@ func (h *RecommendationHandler) GetRecommendationsByStrategy(c *gin.Context) {
 	startTime := time.Now()
 
 	// 构建请求
-	req := &services.PersonalizationRequest{
-		UserID:    userID,
-		Limit:     limit,
-		Strategy:  strategy,
-		Timestamp: time.Now(),
+	req := &domainServices.PersonalizationRequest{
+		LearnerID:           userID,
+		MaxRecommendations:  limit,
+		PersonalizationLevel: strategy,
+		IncludeExplanations: true,
 	}
 
 	// 生成推荐
@@ -502,7 +509,7 @@ func (h *RecommendationHandler) BatchRecommendations(c *gin.Context) {
 			MaxRecommendations:   req.Limit,
 			IncludeExplanations:  true,
 			Filters:              make(map[string]interface{}),
-			PersonalizationLevel: 0.8,
+			PersonalizationLevel: "advanced",
 		}
 
 		response, err := h.personalizationEngine.GeneratePersonalizedRecommendations(c.Request.Context(), personalizationReq)

@@ -9,14 +9,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure"
 )
 
 func main() {
-	// 创建服务管理器配置
-	config := &services.ServiceManagerConfig{
-		ConfigPath:          "./config/services.json",
-		LogLevel:            services.LogLevelInfo,
+	// 创建服务管理器配�?	config := &infrastructure.ServiceManagerConfig{
+		ConfigPath:          "./config/infrastructure.json",
+		LogLevel:            infrastructure.LogLevelInfo,
 		ShutdownTimeout:     30 * time.Second,
 		HealthCheckInterval: 30 * time.Second,
 		EnableHealthCheck:   true,
@@ -26,24 +25,20 @@ func main() {
 		ProfilingPort:       6060,
 	}
 
-	// 创建服务管理器
-	serviceManager := services.NewServiceManager(config)
+	// 创建服务管理�?	serviceManager := infrastructure.NewServiceManager(config)
 
 	// 启动HTTP服务器用于健康检查和指标
 	go startHTTPServer(serviceManager)
 
-	// 运行服务管理器（支持优雅关闭）
-	if err := serviceManager.RunWithGracefulShutdown(); err != nil {
+	// 运行服务管理器（支持优雅关闭�?	if err := serviceManager.RunWithGracefulShutdown(); err != nil {
 		log.Fatalf("Service manager failed: %v", err)
 	}
 }
 
-// startHTTPServer 启动HTTP服务器
-func startHTTPServer(sm *services.ServiceManager) {
+// startHTTPServer 启动HTTP服务�?func startHTTPServer(sm *infrastructure.ServiceManager) {
 	mux := http.NewServeMux()
 
-	// 健康检查端点
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	// 健康检查端�?	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		health := sm.GetHealthStatus()
 		w.Header().Set("Content-Type", "application/json")
 		
@@ -57,8 +52,7 @@ func startHTTPServer(sm *services.ServiceManager) {
 		json.NewEncoder(w).Encode(health)
 	})
 
-	// 状态端点
-	mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+	// 状态端�?	mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		status := sm.GetStatus()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -106,8 +100,7 @@ func startHTTPServer(sm *services.ServiceManager) {
 	// 获取错误历史端点
 	mux.HandleFunc("/api/v1/errors", func(w http.ResponseWriter, r *http.Request) {
 		errorHandler := sm.GetErrorHandler()
-		errors := errorHandler.GetErrorHistory(50) // 获取最近50个错误
-		
+		errors := errorHandler.GetErrorHistory(50) // 获取最�?0个错�?		
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -116,8 +109,7 @@ func startHTTPServer(sm *services.ServiceManager) {
 		})
 	})
 
-	// 根路径
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 根路�?	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `

@@ -11,12 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
 )
 
 // ProgressWebSocketHandler WebSocket进度处理器
 type ProgressWebSocketHandler struct {
-	progressService *services.ProgressTrackingService
+	progressService *analytics.ProgressTrackingService
 	upgrader        websocket.Upgrader
 	clients         map[uuid.UUID]*Client
 	clientsMutex    sync.RWMutex
@@ -25,14 +25,14 @@ type ProgressWebSocketHandler struct {
 	unregister      chan *Client
 }
 
-// Client WebSocket客户端
+// Client WebSocket客户
 type Client struct {
-	ID         uuid.UUID
-	LearnerID  uuid.UUID
-	Conn       *websocket.Conn
-	Send       chan []byte
-	Handler    *ProgressWebSocketHandler
-	LastSeen   time.Time
+	ID            uuid.UUID
+	LearnerID     uuid.UUID
+	Conn          *websocket.Conn
+	Send          chan []byte
+	Handler       *ProgressWebSocketHandler
+	LastSeen      time.Time
 	Subscriptions map[string]bool // 订阅的事件类型
 }
 
@@ -46,9 +46,9 @@ type ProgressBroadcast struct {
 
 // WebSocketMessage WebSocket消息
 type WebSocketMessage struct {
-	Type    string          `json:"type"`
-	Data    json.RawMessage `json:"data"`
-	ID      string          `json:"id,omitempty"`
+	Type string          `json:"type"`
+	Data json.RawMessage `json:"data"`
+	ID   string          `json:"id,omitempty"`
 }
 
 // ProgressUpdateMessage 进度更新消息
@@ -65,8 +65,9 @@ type SubscriptionMessage struct {
 	Events []string `json:"events"`
 }
 
-// NewProgressWebSocketHandler 创建新的WebSocket处理器
-func NewProgressWebSocketHandler(progressService *services.ProgressTrackingService) *ProgressWebSocketHandler {
+// NewProgressWebSocketHandler 创建新的WebSocket处理
+// 该处理用于实时跟踪学习者的学习进度和互动数据。
+func NewProgressWebSocketHandler(progressService *analytics.ProgressTrackingService) *ProgressWebSocketHandler {
 	handler := &ProgressWebSocketHandler{
 		progressService: progressService,
 		upgrader: websocket.Upgrader{
@@ -111,7 +112,7 @@ func (h *ProgressWebSocketHandler) HandleWebSocket(c *gin.Context) {
 		return
 	}
 
-	// 创建客户端
+	// 创建客户
 	client := &Client{
 		ID:            uuid.New(),
 		LearnerID:     learnerID,
@@ -122,7 +123,7 @@ func (h *ProgressWebSocketHandler) HandleWebSocket(c *gin.Context) {
 		Subscriptions: make(map[string]bool),
 	}
 
-	// 注册客户端
+	// 注册客户
 	h.register <- client
 
 	// 启动客户端处理协程
@@ -145,8 +146,8 @@ func (h *ProgressWebSocketHandler) run() {
 
 			// 发送欢迎消息
 			welcome := map[string]interface{}{
-				"type":    "welcome",
-				"message": "Connected to progress tracking",
+				"type":      "welcome",
+				"message":   "Connected to progress tracking",
 				"client_id": client.ID,
 			}
 			client.sendMessage(welcome)
@@ -182,6 +183,7 @@ func (h *ProgressWebSocketHandler) run() {
 }
 
 // readPump 读取客户端消息
+// 该方法负责从客户端接收消息，并根据消息类型进行处理。
 func (c *Client) readPump() {
 	defer func() {
 		c.Handler.unregister <- c
@@ -254,6 +256,7 @@ func (c *Client) writePump() {
 }
 
 // handleMessage 处理客户端消息
+// 该方法负责解析客户端发送的消息，并根据消息类型进行处理。
 func (c *Client) handleMessage(message []byte) {
 	var msg WebSocketMessage
 	if err := json.Unmarshal(message, &msg); err != nil {
@@ -268,7 +271,7 @@ func (c *Client) handleMessage(message []byte) {
 		c.handleSubscription(msg.Data)
 	case "ping":
 		c.sendMessage(map[string]interface{}{
-			"type": "pong",
+			"type":      "pong",
 			"timestamp": time.Now(),
 		})
 	default:
@@ -285,7 +288,7 @@ func (c *Client) handleProgressUpdate(data json.RawMessage) {
 	}
 
 	// 构建进度更新请求
-	req := &services.ProgressUpdateRequest{
+	req := &analytics.ProgressUpdateRequest{
 		LearnerID:       c.LearnerID,
 		ContentID:       updateMsg.ContentID,
 		Progress:        updateMsg.Progress,
@@ -333,12 +336,13 @@ func (c *Client) handleSubscription(data json.RawMessage) {
 	}
 
 	c.sendMessage(map[string]interface{}{
-		"type": "subscription_updated",
+		"type":   "subscription_updated",
 		"events": subMsg.Events,
 	})
 }
 
 // sendMessage 发送消息给客户端
+// 该方法负责将消息序列化为 JSON 格式并发送给客户端。
 func (c *Client) sendMessage(data interface{}) {
 	message, err := json.Marshal(data)
 	if err != nil {
@@ -353,17 +357,19 @@ func (c *Client) sendMessage(data interface{}) {
 	}
 }
 
-// sendError 发送错误消息
+// sendError 发送错误消息给客户端
+// 该方法负责将错误消息序列化为 JSON 格式并发送给客户端。
 func (c *Client) sendError(errorType, message string) {
 	c.sendMessage(map[string]interface{}{
-		"type": "error",
+		"type":       "error",
 		"error_type": errorType,
-		"message": message,
-		"timestamp": time.Now(),
+		"message":    message,
+		"timestamp":  time.Now(),
 	})
 }
 
 // marshalBroadcast 序列化广播消息
+// 该方法负责将广播消息序列化为 JSON 格式。
 func (h *ProgressWebSocketHandler) marshalBroadcast(broadcast *ProgressBroadcast) []byte {
 	data, err := json.Marshal(broadcast)
 	if err != nil {
@@ -438,10 +444,11 @@ func (h *ProgressWebSocketHandler) GetConnectedClients() int {
 }
 
 // GetClientsByLearner 获取特定学习者的客户端数量
+// 该方法负责统计当前连接的客户端中，指定学习者的数量。
 func (h *ProgressWebSocketHandler) GetClientsByLearner(learnerID uuid.UUID) int {
 	h.clientsMutex.RLock()
 	defer h.clientsMutex.RUnlock()
-	
+
 	count := 0
 	for _, client := range h.clients {
 		if client.LearnerID == learnerID {

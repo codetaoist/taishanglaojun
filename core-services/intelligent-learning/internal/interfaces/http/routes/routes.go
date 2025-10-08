@@ -10,7 +10,12 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	learnerservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
+	contentservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/content"
+	knowledgeservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	adaptiveservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
+	analyticsservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	recommendationservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/handlers"
 	httphandlers "github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/handlers"
 	httpinterfaces "github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http"
@@ -21,19 +26,19 @@ import (
 
 // RouterConfig 路由配置
 type RouterConfig struct {
-	LearnerService                    *services.LearnerService
-	ContentService                    *services.ContentService
-	KnowledgeGraphService             *services.KnowledgeGraphAppService
-	ProgressTrackingService           *services.ProgressTrackingService
-	AdaptiveLearningService           *services.AdaptiveLearningService
-	KnowledgeAnalysisService          *services.KnowledgeAnalysisService
+	LearnerService                    *learnerservices.LearnerService
+	ContentService                    *contentservices.ContentService
+	KnowledgeGraphService             *knowledgeservices.KnowledgeGraphAppService
+	ProgressTrackingService           *learnerservices.ProgressTrackingService
+	AdaptiveLearningService           *adaptiveservices.AdaptiveLearningService
+	KnowledgeAnalysisService          *knowledgeservices.KnowledgeAnalysisService
 	RealtimeAnalyticsService          *realtimeservices.RealtimeAnalyticsService
-	PersonalizationEngine             *services.PersonalizationEngine
-	UserBehaviorTracker               *services.UserBehaviorTracker
-	PreferenceAnalyzer                *services.PreferenceAnalyzer
-	ContextAnalyzer                   *services.ContextAnalyzer
-	RealtimeRecommendationService     *services.RealtimeRecommendationService
-	RecommendationIntegrationService  *services.RecommendationIntegrationService
+	PersonalizationEngine             *realtimeservices.PersonalizationEngine
+	UserBehaviorTracker               *realtimeservices.UserBehaviorTracker
+	PreferenceAnalyzer                *realtimeservices.PreferenceAnalyzer
+	ContextAnalyzer                   *realtimeservices.ContextAnalyzer
+	RealtimeRecommendationService     *recommendationservices.RealtimeRecommendationService
+	RecommendationIntegrationService  *recommendationservices.RecommendationIntegrationService
 }
 
 // SetupRoutes 设置路由
@@ -57,8 +62,11 @@ func SetupRoutes(config *RouterConfig) *gin.Engine {
 	progressWebSocketHandler := websockethandlers.NewProgressWebSocketHandler(config.ProgressTrackingService)
 	realtimeAnalyticsHandler := httphandlers.NewRealtimeAnalyticsHandler(config.RealtimeAnalyticsService)
 	
+	// 创建学习路径处理器（需要添加到RouterConfig中）
+	// learningPathHandler := httphandlers.NewLearningPathHandler(config.LearningPathService)
+	
 	// 创建推荐处理器
-	recommendationHandler := handlers.NewRecommendationHandler(
+	recommendationHandler := httphandlers.NewRecommendationHandler(
 		config.PersonalizationEngine,
 		config.UserBehaviorTracker,
 		config.PreferenceAnalyzer,
@@ -66,12 +74,12 @@ func SetupRoutes(config *RouterConfig) *gin.Engine {
 	)
 
 	// 创建实时推荐处理器
-	realtimeRecommendationHandler := handlers.NewRealtimeRecommendationHandler(
+	realtimeRecommendationHandler := httphandlers.NewRealtimeRecommendationHandler(
 		config.RealtimeRecommendationService,
 	)
 
 	// 创建推荐集成处理器
-	recommendationIntegrationHandler := handlers.NewRecommendationIntegrationHandler(
+	recommendationIntegrationHandler := httphandlers.NewRecommendationIntegrationHandler(
 		config.RecommendationIntegrationService,
 	)
 
@@ -130,8 +138,8 @@ func setupAPIRoutes(
 	progressWebSocketHandler *websockethandlers.ProgressWebSocketHandler,
 	realtimeAnalyticsHandler *httphandlers.RealtimeAnalyticsHandler,
 	recommendationHandler *httphandlers.RecommendationHandler,
-	realtimeRecommendationHandler *handlers.RealtimeRecommendationHandler,
-	recommendationIntegrationHandler *handlers.RecommendationIntegrationHandler,
+	realtimeRecommendationHandler *httphandlers.RealtimeRecommendationHandler,
+	recommendationIntegrationHandler *httphandlers.RecommendationIntegrationHandler,
 ) {
 
 	// API v1 路由组
@@ -288,9 +296,9 @@ func setupAPIRoutes(
 			
 			// 实时数据获取
 			realtime.GET("/:learnerId/data", realtimeAnalyticsHandler.GetRealtimeData)
-			realtime.GET("/:learnerId/metrics", realtimeAnalyticsHandler.GetMetrics)
-			realtime.GET("/:learnerId/insights", realtimeAnalyticsHandler.GetInsights)
-			realtime.GET("/:learnerId/session", realtimeAnalyticsHandler.GetSessionData)
+			realtime.GET("/:learnerId/metrics", realtimeAnalyticsHandler.GetAnalyticsMetrics)
+			realtime.GET("/:learnerId/insights", realtimeAnalyticsHandler.GetLearningInsights)
+			realtime.GET("/:learnerId/session", realtimeAnalyticsHandler.GetSessionAnalytics)
 			realtime.GET("/:learnerId/performance", realtimeAnalyticsHandler.GetPerformanceTrends)
 			realtime.GET("/:learnerId/alerts", realtimeAnalyticsHandler.GetAlerts)
 			realtime.GET("/:learnerId/recommendations", realtimeAnalyticsHandler.GetRecommendations)
@@ -299,7 +307,7 @@ func setupAPIRoutes(
 			realtime.POST("/analyzers", realtimeAnalyticsHandler.CreateAnalyzer)
 			
 			// WebSocket订阅
-			realtime.GET("/subscribe", realtimeAnalyticsHandler.Subscribe)
+			realtime.GET("/subscribe", realtimeAnalyticsHandler.SubscribeToUpdates)
 		}
 
 		// 推荐系统路由

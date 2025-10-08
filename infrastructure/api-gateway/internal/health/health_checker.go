@@ -294,7 +294,25 @@ func (hc *healthChecker) checkInstance(serviceName, instanceID string, health *I
 	start := time.Now()
 	
 	// 构建健康检查URL
-	healthURL := fmt.Sprintf("http://%s:%d/health", health.Instance.Address, health.Instance.Port)
+	healthCheckPath := health.Instance.Meta["health_check_path"]
+	if healthCheckPath == "" {
+		healthCheckPath = "/health"
+	}
+	
+	baseURL := health.Instance.Meta["url"]
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("http://%s:%d", health.Instance.Address, health.Instance.Port)
+	}
+	
+	healthURL := baseURL + healthCheckPath
+	
+	hc.logger.WithFields(logrus.Fields{
+		"service":     serviceName,
+		"instance":    instanceID,
+		"health_url":  healthURL,
+		"base_url":    baseURL,
+		"health_path": healthCheckPath,
+	}).Debug("Performing health check")
 	
 	// 执行健康检查
 	ctx, cancel := context.WithTimeout(hc.ctx, hc.config.Timeout)
@@ -302,12 +320,22 @@ func (hc *healthChecker) checkInstance(serviceName, instanceID string, health *I
 	
 	req, err := http.NewRequestWithContext(ctx, "GET", healthURL, nil)
 	if err != nil {
+		hc.logger.WithFields(logrus.Fields{
+			"service":  serviceName,
+			"instance": instanceID,
+			"error":    err.Error(),
+		}).Error("Failed to create health check request")
 		hc.updateHealthStatus(serviceName, instanceID, false, time.Since(start), err.Error())
 		return
 	}
 	
 	resp, err := hc.httpClient.Do(req)
 	if err != nil {
+		hc.logger.WithFields(logrus.Fields{
+			"service":  serviceName,
+			"instance": instanceID,
+			"error":    err.Error(),
+		}).Error("Health check request failed")
 		hc.updateHealthStatus(serviceName, instanceID, false, time.Since(start), err.Error())
 		return
 	}
@@ -319,6 +347,14 @@ func (hc *healthChecker) checkInstance(serviceName, instanceID string, health *I
 	if !isHealthy {
 		errorMsg = fmt.Sprintf("unexpected status code: %d", resp.StatusCode)
 	}
+	
+	hc.logger.WithFields(logrus.Fields{
+		"service":       serviceName,
+		"instance":      instanceID,
+		"status_code":   resp.StatusCode,
+		"is_healthy":    isHealthy,
+		"response_time": time.Since(start),
+	}).Info("Health check completed")
 	
 	hc.updateHealthStatus(serviceName, instanceID, isHealthy, time.Since(start), errorMsg)
 }

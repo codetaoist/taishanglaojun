@@ -8,17 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/content"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 )
 
 // ContentHandler 内容处理器
 type ContentHandler struct {
-	contentService *services.ContentService
+	contentService *content.ContentService
 }
 
 // NewContentHandler 创建新的内容处理器
-func NewContentHandler(contentService *services.ContentService) *ContentHandler {
+func NewContentHandler(contentService *content.ContentService) *ContentHandler {
 	return &ContentHandler{
 		contentService: contentService,
 	}
@@ -30,13 +30,13 @@ func NewContentHandler(contentService *services.ContentService) *ContentHandler 
 // @Tags content
 // @Accept json
 // @Produce json
-// @Param content body services.CreateContentRequest true "内容信息"
-// @Success 201 {object} services.ContentResponse
+// @Param content body content.CreateContentRequest true "内容信息"
+// @Success 201 {object} content.ContentResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/content [post]
 func (h *ContentHandler) CreateContent(c *gin.Context) {
-	var req services.CreateContentRequest
+	var req content.CreateContentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -63,7 +63,7 @@ func (h *ContentHandler) CreateContent(c *gin.Context) {
 // @Tags content
 // @Produce json
 // @Param id path string true "内容ID"
-// @Success 200 {object} services.ContentResponse
+// @Success 200 {object} content.ContentResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/v1/content/{id} [get]
@@ -97,8 +97,8 @@ func (h *ContentHandler) GetContent(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "内容ID"
-// @Param content body services.UpdateContentRequest true "更新信息"
-// @Success 200 {object} services.ContentResponse
+// @Param content body content.UpdateContentRequest true "更新信息"
+// @Success 200 {object} content.ContentResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/v1/content/{id} [put]
@@ -113,7 +113,7 @@ func (h *ContentHandler) UpdateContent(c *gin.Context) {
 		return
 	}
 
-	var req services.UpdateContentRequest
+	var req content.UpdateContentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -315,7 +315,7 @@ func (h *ContentHandler) SearchContent(c *gin.Context) {
 		}
 	}
 
-	req := &services.ContentSearchRequest{
+	req := &content.ContentSearchRequest{
 		Query:      query,
 		Limit:      limit,
 		Offset:     offset,
@@ -377,7 +377,7 @@ func (h *ContentHandler) GetPersonalizedContent(c *gin.Context) {
 		}
 	}
 
-	req := &services.PersonalizedContentRequest{
+	req := &content.PersonalizedContentRequest{
 		LearnerID:          learnerId,
 		MaxRecommendations: limit,
 	}
@@ -540,25 +540,25 @@ func (h *ContentHandler) GetContentAnalytics(c *gin.Context) {
 
 // ContentListResponse 内容列表响应
 type ContentListResponse struct {
-	Contents []*services.ContentResponse `json:"contents"`
-	Limit    int                         `json:"limit"`
-	Offset   int                         `json:"offset"`
+	Contents []*content.ContentResponse `json:"contents"`
+	Limit    int                        `json:"limit"`
+	Offset   int                        `json:"offset"`
 }
 
 // ContentSearchResponse 内容搜索响应
 type ContentSearchResponse struct {
-	Results []*services.ContentResponse `json:"results"`
-	Total   int                         `json:"total"`
-	Limit   int                         `json:"limit"`
-	Offset  int                         `json:"offset"`
-	Query   string                      `json:"query"`
+	Results []*content.ContentResponse `json:"results"`
+	Total   int                        `json:"total"`
+	Limit   int                        `json:"limit"`
+	Offset  int                        `json:"offset"`
+	Query   string                     `json:"query"`
 }
 
 // PersonalizedContentResponse 个性化内容响应
 type PersonalizedContentResponse struct {
-	Recommendations []*services.ContentRecommendation `json:"recommendations"`
-	LearnerID       uuid.UUID                         `json:"learner_id"`
-	Limit           int                               `json:"limit"`
+	Recommendations []*content.SimpleContentRecommendation `json:"recommendations"`
+	LearnerID       uuid.UUID                              `json:"learner_id"`
+	Limit           int                                    `json:"limit"`
 }
 
 // ContentInteractionRequest 内容交互请求

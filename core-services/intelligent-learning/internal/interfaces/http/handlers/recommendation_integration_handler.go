@@ -6,16 +6,36 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation"
 )
 
-// RecommendationIntegrationHandler 推荐集成处理器
+// RecommendationIntegrationHandler 推荐集成处理
+// @Summary 推荐集成处理
+// @Description 处理与推荐集成相关的HTTP请求
+// @Tags recommendations
+// @Accept json
+// @Produce json
+// @Param request body GetIntegratedRecommendationsRequest true "获取集成推荐请
+// @Success 200 {object} GetIntegratedRecommendationsResponse "集成推荐结果"
+// @Failure 400 {object} ErrorResponse "请求参数错误"
+// @Failure 500 {object} ErrorResponse "服务器内部错误"
+// @Router /api/v1/recommendations/integrated [post]
 type RecommendationIntegrationHandler struct {
-	integrationService *services.RecommendationIntegrationService
+	integrationService *recommendation.RecommendationIntegrationService
 }
 
-// NewRecommendationIntegrationHandler 创建推荐集成处理器
-func NewRecommendationIntegrationHandler(integrationService *services.RecommendationIntegrationService) *RecommendationIntegrationHandler {
+// NewRecommendationIntegrationHandler 创建推荐集成处理
+// @Summary 创建推荐集成处理
+// @Description 创建一个新的推荐集成处理
+// @Tags recommendations
+// @Accept json
+// @Produce json
+// @Param integrationService body recommendation.RecommendationIntegrationService true "推荐集成服务"
+// @Success 200 {object} RecommendationIntegrationHandler "推荐集成处理"
+// @Failure 400 {object} ErrorResponse "请求参数错误"
+// @Failure 500 {object} ErrorResponse "服务器内部错误"
+// @Router /api/v1/recommendations/integrated [post]
+func NewRecommendationIntegrationHandler(integrationService *recommendation.RecommendationIntegrationService) *RecommendationIntegrationHandler {
 	return &RecommendationIntegrationHandler{
 		integrationService: integrationService,
 	}
@@ -40,18 +60,18 @@ type GetIntegratedRecommendationsResponse struct {
 
 // RecommendationItem 推荐项目
 type RecommendationItem struct {
-	ContentID   string                 `json:"content_id"`
-	Title       string                 `json:"title"`
-	Type        string                 `json:"type"`
-	Score       float64                `json:"score"`
-	Confidence  float64                `json:"confidence"`
-	Reason      string                 `json:"reason"`
-	Source      string                 `json:"source"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	Tags        []string               `json:"tags,omitempty"`
-	Difficulty  string                 `json:"difficulty,omitempty"`
-	Duration    int                    `json:"duration,omitempty"`
-	Category    string                 `json:"category,omitempty"`
+	ContentID  string                 `json:"content_id"`
+	Title      string                 `json:"title"`
+	Type       string                 `json:"type"`
+	Score      float64                `json:"score"`
+	Confidence float64                `json:"confidence"`
+	Reason     string                 `json:"reason"`
+	Source     string                 `json:"source"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
+	Tags       []string               `json:"tags,omitempty"`
+	Difficulty string                 `json:"difficulty,omitempty"`
+	Duration   int                    `json:"duration,omitempty"`
+	Category   string                 `json:"category,omitempty"`
 }
 
 // IntegrationMetadata 集成元数据
@@ -127,7 +147,7 @@ func (h *RecommendationIntegrationHandler) GetIntegratedRecommendations(c *gin.C
 	}
 
 	// 构建请求
-	request := &services.IntegratedRecommendationRequest{
+	request := &recommendation.IntegratedRecommendationRequest{
 		UserID:      userID,
 		ContentType: contentType,
 		Limit:       limit,
@@ -152,14 +172,14 @@ func (h *RecommendationIntegrationHandler) GetIntegratedRecommendations(c *gin.C
 		if rec.ContentID != nil {
 			contentID = rec.ContentID.String()
 		}
-		
+
 		reason := ""
 		if len(rec.Reasoning) > 0 {
 			reason = strings.Join(rec.Reasoning, "; ")
 		}
-		
+
 		duration := int(rec.EstimatedTime.Minutes())
-		
+
 		recommendations[i] = &RecommendationItem{
 			ContentID:  contentID,
 			Title:      rec.Title,
@@ -227,9 +247,9 @@ func (h *RecommendationIntegrationHandler) BatchGetRecommendations(c *gin.Contex
 	}
 
 	// 构建批量请求
-	requests := make([]*services.IntegratedRecommendationRequest, len(req.UserIDs))
+	requests := make([]*recommendation.IntegratedRecommendationRequest, len(req.UserIDs))
 	for i, userID := range req.UserIDs {
-		requests[i] = &services.IntegratedRecommendationRequest{
+		requests[i] = &recommendation.IntegratedRecommendationRequest{
 			UserID:      userID,
 			ContentType: req.ContentType,
 			Limit:       req.Limit,
@@ -262,14 +282,14 @@ func (h *RecommendationIntegrationHandler) BatchGetRecommendations(c *gin.Contex
 				if rec.ContentID != nil {
 					contentID = rec.ContentID.String()
 				}
-				
+
 				reason := ""
 				if len(rec.Reasoning) > 0 {
 					reason = strings.Join(rec.Reasoning, "; ")
 				}
-				
+
 				duration := int(rec.EstimatedTime.Minutes())
-				
+
 				recommendations[i] = &RecommendationItem{
 					ContentID:  contentID,
 					Title:      rec.Title,
@@ -342,7 +362,7 @@ func (h *RecommendationIntegrationHandler) BatchGetRecommendations(c *gin.Contex
 // @Description 获取推荐系统的性能指标和统计信息
 // @Tags 推荐集成
 // @Produce json
-// @Success 200 {object} services.RecommendationMetrics
+// @Success 200 {object} recommendation.RecommendationMetrics
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/integrated-recommendations/metrics [get]
 func (h *RecommendationIntegrationHandler) GetRecommendationMetrics(c *gin.Context) {

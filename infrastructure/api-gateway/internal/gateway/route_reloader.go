@@ -66,7 +66,7 @@ func (g *Gateway) registerRoute(route *RouteConfig) error {
 		"method":  route.Method,
 		"path":    route.Path,
 		"service": route.Service,
-	}).Debug("Route registered")
+	}).Info("Route registered")
 	
 	return nil
 }

@@ -8,17 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 )
 
 // LearnerHandler 学习者处理器
 type LearnerHandler struct {
-	learnerService *services.LearnerService
+	learnerService *learner.LearnerService
 }
 
 // NewLearnerHandler 创建新的学习者处理器
-func NewLearnerHandler(learnerService *services.LearnerService) *LearnerHandler {
+func NewLearnerHandler(learnerService *learner.LearnerService) *LearnerHandler {
 	return &LearnerHandler{
 		learnerService: learnerService,
 	}

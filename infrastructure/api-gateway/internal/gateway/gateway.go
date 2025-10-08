@@ -78,25 +78,34 @@ func NewGateway(
 ) (*Gateway, error) {
 	
 	// 创建中间件
-	authConfig := &middleware.AuthConfig{
-		JWTSecret:     cfg.Security.Auth.JWTSecret,
-		TokenExpiry:   cfg.Security.Auth.TokenExpiry,
-		RefreshExpiry: cfg.Security.Auth.RefreshExpiry,
-		RedisAddr:     cfg.Security.Auth.RedisAddr,
-		RedisPassword: cfg.Security.Auth.RedisPassword,
-		RedisDB:       cfg.Security.Auth.RedisDB,
-		SkipPaths:     cfg.Security.Auth.SkipPaths,
-		OptionalPaths: cfg.Security.Auth.OptionalPaths,
-	}
+	var authMiddleware *middleware.AuthMiddleware
 	
-	// 如果嵌套配置为空，使用向后兼容的配置
-	if authConfig.JWTSecret == "" {
-		authConfig.JWTSecret = cfg.Security.JWTSecret
-	}
-	
-	authMiddleware, err := middleware.NewAuthMiddleware(authConfig, log)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create auth middleware: %w", err)
+	// 只有在认证启用时才创建认证中间件
+	if cfg.Security.Auth.Enabled {
+		authConfig := &middleware.AuthConfig{
+			JWTSecret:     cfg.Security.Auth.JWTSecret,
+			TokenExpiry:   cfg.Security.Auth.TokenExpiry,
+			RefreshExpiry: cfg.Security.Auth.RefreshExpiry,
+			RedisAddr:     cfg.Security.Auth.RedisAddr,
+			RedisPassword: cfg.Security.Auth.RedisPassword,
+			RedisDB:       cfg.Security.Auth.RedisDB,
+			SkipPaths:     cfg.Security.Auth.SkipPaths,
+			OptionalPaths: cfg.Security.Auth.OptionalPaths,
+		}
+		
+		// 如果嵌套配置为空，使用向后兼容的配置
+		if authConfig.JWTSecret == "" {
+			authConfig.JWTSecret = cfg.Security.JWTSecret
+		}
+		
+		var err error
+		authMiddleware, err = middleware.NewAuthMiddleware(authConfig, log)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create auth middleware: %w", err)
+		}
+		log.Info("Authentication middleware enabled")
+	} else {
+		log.Info("Authentication middleware disabled")
 	}
 	
 	rateLimitMiddleware, err := middleware.NewRateLimitMiddleware(&middleware.RateLimitConfig{
@@ -206,10 +215,16 @@ func (g *Gateway) LoadRoutes() error {
 	
 	for _, serviceConfig := range g.config.Services {
 		for _, route := range serviceConfig.Routes {
+			// 转换HTTP方法：将"*"转换为"ANY"
+			method := route.Method
+			if method == "*" {
+				method = "ANY"
+			}
+			
 			routeConfig := &RouteConfig{
-				ID:          fmt.Sprintf("%s:%s", route.Method, route.Path),
+				ID:          fmt.Sprintf("%s:%s", method, route.Path),
 				Path:        route.Path,
-				Method:      route.Method,
+				Method:      method,
 				Service:     serviceConfig.Name,
 				Rewrite:     route.Rewrite,
 				StripPrefix: route.StripPrefix,
@@ -243,6 +258,13 @@ func (g *Gateway) LoadRoutes() error {
 	for _, route := range routes {
 		if err := g.registerRoute(route); err != nil {
 			return fmt.Errorf("failed to register route %s %s: %w", route.Method, route.Path, err)
+		}
+	}
+	
+	// 将静态服务注册到健康检查器
+	if g.healthChecker != nil {
+		if err := g.registerStaticServicesToHealthChecker(); err != nil {
+			g.logger.Errorf("Failed to register static services to health checker: %v", err)
 		}
 	}
 	
@@ -303,7 +325,11 @@ func (g *Gateway) createRouteHandlers(route *RouteConfig) []gin.HandlerFunc {
 	for _, middlewareName := range route.Middleware {
 		switch middlewareName {
 		case "auth":
-			handlers = append(handlers, g.authMiddleware.Handler())
+			if g.authMiddleware != nil {
+				handlers = append(handlers, g.authMiddleware.Handler())
+			} else {
+				g.logger.Warn("Auth middleware requested but not enabled")
+			}
 		case "rate_limit":
 			handlers = append(handlers, g.rateLimitMiddleware.Handler())
 		case "cors":
@@ -335,29 +361,42 @@ func (g *Gateway) createRouteHandler(route *RouteConfig) gin.HandlerFunc {
 		}
 		
 		// 计算目标路径
-		targetPath := route.Path
+		targetPath := c.Request.URL.Path
 		if route.Rewrite != "" {
+			// 如果有重写规则，使用重写后的路径
 			targetPath = route.Rewrite
-		}
-		
-		if route.StripPrefix {
+			// 处理通配符路径参数
+			if strings.Contains(route.Path, "*filepath") && strings.Contains(route.Rewrite, "*filepath") {
+				// 提取通配符部分
+				routePrefix := strings.TrimSuffix(route.Path, "*filepath")
+				if strings.HasPrefix(c.Request.URL.Path, routePrefix) {
+					wildcardPart := strings.TrimPrefix(c.Request.URL.Path, routePrefix)
+					targetPath = strings.Replace(route.Rewrite, "*filepath", wildcardPart, 1)
+				}
+			}
+		} else if route.StripPrefix {
 			// 移除路径前缀
-			originalPath := c.Request.URL.Path
-			if strings.HasPrefix(originalPath, route.Path) {
-				targetPath = strings.TrimPrefix(originalPath, route.Path)
+			routePrefix := strings.TrimSuffix(route.Path, "*filepath")
+			if strings.HasPrefix(c.Request.URL.Path, routePrefix) {
+				targetPath = strings.TrimPrefix(c.Request.URL.Path, routePrefix)
 				if !strings.HasPrefix(targetPath, "/") {
 					targetPath = "/" + targetPath
 				}
 			}
 		}
 		
+		// 修改请求的URL路径
+		originalPath := c.Request.URL.Path
+		c.Request.URL.Path = targetPath
+		
 		// 使用ProxyManager处理请求（已集成负载均衡）
 		err := g.proxyManager.HandleRequest(c.Writer, c.Request, route.Service)
 		if err != nil {
 			g.logger.WithFields(map[string]interface{}{
-				"service":    route.Service,
-				"targetPath": targetPath,
-				"error":      err.Error(),
+				"service":      route.Service,
+				"originalPath": originalPath,
+				"targetPath":   targetPath,
+				"error":        err.Error(),
 			}).Error("Proxy request failed")
 			
 			c.JSON(http.StatusBadGateway, gin.H{
@@ -584,8 +623,10 @@ func (g *Gateway) Stop() error {
 	g.wg.Wait()
 	
 	// 关闭中间件资源
-	if err := g.authMiddleware.Close(); err != nil {
-		g.logger.Errorf("Failed to close auth middleware: %v", err)
+	if g.authMiddleware != nil {
+		if err := g.authMiddleware.Close(); err != nil {
+			g.logger.Errorf("Failed to close auth middleware: %v", err)
+		}
 	}
 	
 	if err := g.rateLimitMiddleware.Close(); err != nil {
@@ -624,6 +665,33 @@ func (g *Gateway) GetRouteCount() int {
 	g.routesMu.RLock()
 	defer g.routesMu.RUnlock()
 	return len(g.routes)
+}
+
+// registerStaticServicesToHealthChecker 将静态服务注册到健康检查器
+func (g *Gateway) registerStaticServicesToHealthChecker() error {
+	ctx := context.Background()
+	
+	// 获取所有已注册的服务
+	services, err := g.registry.ListServices(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to list services: %w", err)
+	}
+	
+	// 为每个服务注册健康检查
+	for serviceName, instances := range services {
+		if len(instances) > 0 {
+			// 转换为健康检查器需要的格式
+			var healthInstances []registry.ServiceInstance
+			for _, instance := range instances {
+				healthInstances = append(healthInstances, *instance)
+			}
+			
+			g.healthChecker.RegisterService(serviceName, healthInstances)
+			g.logger.Infof("Registered service %s with %d instances to health checker", serviceName, len(instances))
+		}
+	}
+	
+	return nil
 }
 
 // GetRoute 获取路由配置

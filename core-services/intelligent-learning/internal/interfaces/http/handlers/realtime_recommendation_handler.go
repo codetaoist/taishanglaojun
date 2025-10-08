@@ -9,18 +9,35 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
-	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation"
 )
 
-// RealtimeRecommendationHandler 实时推荐处理器
+// RealtimeRecommendationHandler 实时推荐处理
+// @Summary 实时推荐处理
+// @Description 处理与实时推荐相关的HTTP请求
+// @Tags realtime-recommendations
+// @Accept json
+// @Produce json
+// @Param request body recommendation.RealtimeEvent true "实时事件"
+// @Success 200 {object} map[string]interface{} "事件处理成功"
+// @Failure 400 {object} ErrorResponse "请求参数错误"
+// @Failure 500 {object} ErrorResponse "服务器内部错误"
+// @Router /api/v1/realtime-recommendations/events [post]
 type RealtimeRecommendationHandler struct {
-	realtimeService *services.RealtimeRecommendationService
+	realtimeService *recommendation.RealtimeRecommendationService
 	upgrader        websocket.Upgrader
 }
 
-// NewRealtimeRecommendationHandler 创建实时推荐处理器
-func NewRealtimeRecommendationHandler(realtimeService *services.RealtimeRecommendationService) *RealtimeRecommendationHandler {
+// NewRealtimeRecommendationHandler 创建实时推荐处理
+// @Summary 创建实时推荐处理
+// @Description 创建实时推荐处理
+// @Tags realtime-recommendations
+// @Param realtimeService body recommendation.RealtimeRecommendationService true "实时推荐服务"
+// @Success 200 {object} RealtimeRecommendationHandler "实时推荐处理成功"
+// @Failure 400 {object} ErrorResponse "请求参数错误"
+// @Failure 500 {object} ErrorResponse "服务器内部错误"
+// @Router /api/v1/realtime-recommendations/events [post]
+func NewRealtimeRecommendationHandler(realtimeService *recommendation.RealtimeRecommendationService) *RealtimeRecommendationHandler {
 	return &RealtimeRecommendationHandler{
 		realtimeService: realtimeService,
 		upgrader: websocket.Upgrader{
@@ -37,13 +54,13 @@ func NewRealtimeRecommendationHandler(realtimeService *services.RealtimeRecommen
 // @Tags realtime-recommendations
 // @Accept json
 // @Produce json
-// @Param request body services.RealtimeEvent true "实时事件"
+// @Param request body recommendation.RealtimeEvent true "实时事件"
 // @Success 200 {object} map[string]interface{} "事件处理成功"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
 // @Router /api/v1/realtime-recommendations/events [post]
 func (h *RealtimeRecommendationHandler) ProcessRealtimeEvent(c *gin.Context) {
-	var event services.RealtimeEvent
+	var event recommendation.RealtimeEvent
 	if err := c.ShouldBindJSON(&event); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "invalid_request",
@@ -63,9 +80,9 @@ func (h *RealtimeRecommendationHandler) ProcessRealtimeEvent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":    "事件处理成功",
-		"event_id":   event.EventID,
-		"timestamp":  event.Timestamp,
+		"message":   "事件处理成功",
+		"event_id":  event.EventID,
+		"timestamp": event.Timestamp,
 	})
 }
 
@@ -127,7 +144,7 @@ func (h *RealtimeRecommendationHandler) GetRealtimeRecommendations(c *gin.Contex
 // @Tags realtime-recommendations
 // @Produce json
 // @Param user_id path string true "用户ID"
-// @Success 200 {object} services.RealtimeUserSession "会话信息"
+// @Success 200 {object} recommendation.RealtimeUserSession "会话信息"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 404 {object} ErrorResponse "会话不存在"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
@@ -188,10 +205,10 @@ func (h *RealtimeRecommendationHandler) SubscribeToRecommendationUpdates(c *gin.
 	updateChannel := h.realtimeService.SubscribeToUpdates(userID)
 	defer h.realtimeService.UnsubscribeFromUpdates(userID)
 
-	// 发送初始推荐
+	// 发送初始推荐更新
 	recommendations, err := h.realtimeService.GetRealtimeRecommendations(c.Request.Context(), userID)
 	if err == nil {
-		initialUpdate := &services.RecommendationUpdate{
+		initialUpdate := &recommendation.RecommendationUpdate{
 			UserID:          userID,
 			UpdateType:      "initial",
 			Recommendations: recommendations,
@@ -210,6 +227,9 @@ func (h *RealtimeRecommendationHandler) SubscribeToRecommendationUpdates(c *gin.
 				break
 			}
 			// 处理客户端消息（如心跳包）
+			if message["type"] == "heartbeat" {
+				continue
+			}
 		}
 	}()
 
@@ -220,7 +240,7 @@ func (h *RealtimeRecommendationHandler) SubscribeToRecommendationUpdates(c *gin.
 			if !ok {
 				return
 			}
-			
+
 			err := conn.WriteJSON(update)
 			if err != nil {
 				return
@@ -263,7 +283,7 @@ func (h *RealtimeRecommendationHandler) BatchProcessEvents(c *gin.Context) {
 	if len(req.Events) > 100 {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "too_many_events",
-			Message: "批量事件数量不能超过100个",
+			Message: "批量事件数量不能超过100条",
 		})
 		return
 	}
@@ -317,7 +337,7 @@ func (h *RealtimeRecommendationHandler) BatchProcessEvents(c *gin.Context) {
 func (h *RealtimeRecommendationHandler) GetRecommendationMetrics(c *gin.Context) {
 	userID := c.Query("user_id")
 	hoursStr := c.DefaultQuery("hours", "24")
-	
+
 	hours, err := strconv.Atoi(hoursStr)
 	if err != nil || hours <= 0 {
 		hours = 24
@@ -326,39 +346,38 @@ func (h *RealtimeRecommendationHandler) GetRecommendationMetrics(c *gin.Context)
 	// 这里应该从监控系统或数据库获取实际指标
 	// 目前返回模拟数据
 	metrics := RecommendationMetrics{
-		UserID:              userID,
-		TimeRange:           hours,
+		UserID:               userID,
+		TimeRange:            hours,
 		TotalRecommendations: 1250,
-		ClickThroughRate:    0.15,
-		ConversionRate:      0.08,
-		AvgResponseTime:     45,
-		CacheHitRate:        0.85,
-		UpdateFrequency:     12,
-		Timestamp:           time.Now(),
+		ClickThroughRate:     0.15,
+		ConversionRate:       0.08,
+		AvgResponseTime:      45,
+		CacheHitRate:         0.85,
+		UpdateFrequency:      12,
+		Timestamp:            time.Now(),
 	}
 
 	c.JSON(http.StatusOK, metrics)
 }
 
 // 响应结构体定义
-
 // RealtimeRecommendationResponse 实时推荐响应
 type RealtimeRecommendationResponse struct {
-	UserID          string                      `json:"user_id"`
+	UserID          string                       `json:"user_id"`
 	Recommendations []PersonalizedRecommendation `json:"recommendations"`
-	Session         *SessionInfo                `json:"session,omitempty"`
-	Metadata        RealtimeMetadata            `json:"metadata"`
+	Session         *SessionInfo                 `json:"session,omitempty"`
+	Metadata        RealtimeMetadata             `json:"metadata"`
 }
 
 // SessionInfo 会话信息
 type SessionInfo struct {
-	SessionID     string                 `json:"session_id"`
-	StartTime     time.Time              `json:"start_time"`
-	LastActivity  time.Time              `json:"last_activity"`
-	Duration      int64                  `json:"duration_minutes"`
-	EventCount    int                    `json:"event_count"`
-	CurrentState  *LearningStateInfo     `json:"current_state,omitempty"`
-	Context       map[string]interface{} `json:"context"`
+	SessionID    string                 `json:"session_id"`
+	StartTime    time.Time              `json:"start_time"`
+	LastActivity time.Time              `json:"last_activity"`
+	Duration     int64                  `json:"duration_minutes"`
+	EventCount   int                    `json:"event_count"`
+	CurrentState *LearningStateInfo     `json:"current_state,omitempty"`
+	Context      map[string]interface{} `json:"context"`
 }
 
 // LearningStateInfo 学习状态信息
@@ -382,7 +401,7 @@ type RealtimeMetadata struct {
 
 // BatchEventRequest 批量事件请求
 type BatchEventRequest struct {
-	Events []services.RealtimeEvent `json:"events" binding:"required"`
+	Events []recommendation.RealtimeEvent `json:"events" binding:"required"`
 }
 
 // BatchEventResponse 批量事件响应
@@ -416,21 +435,21 @@ type RecommendationMetrics struct {
 
 // 辅助函数
 
-func convertToPersonalizedRecommendations(recommendations []*domainServices.PersonalizedRecommendation) []PersonalizedRecommendation {
+func convertToPersonalizedRecommendations(recommendations []*domainrecommendation.PersonalizedRecommendation) []PersonalizedRecommendation {
 	result := make([]PersonalizedRecommendation, len(recommendations))
 	for i, rec := range recommendations {
 		contentID := ""
 		if rec.ContentID != nil {
 			contentID = rec.ContentID.String()
 		}
-		
+
 		reasoning := ""
 		if len(rec.Reasoning) > 0 {
 			reasoning = strings.Join(rec.Reasoning, "; ")
 		}
-		
+
 		estimatedTime := int(rec.EstimatedTime.Minutes())
-		
+
 		result[i] = PersonalizedRecommendation{
 			ContentID:     contentID,
 			Title:         rec.Title,
@@ -448,7 +467,7 @@ func convertToPersonalizedRecommendations(recommendations []*domainServices.Pers
 	return result
 }
 
-func convertToSessionInfo(session *services.RealtimeUserSession) *SessionInfo {
+func convertToSessionInfo(session *recommendation.RealtimeUserSession) *SessionInfo {
 	if session == nil {
 		return nil
 	}

@@ -1,258 +1,301 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Typography, 
-  Space, 
-  Button, 
-  Row, 
-  Col, 
-  Statistic, 
-  Progress, 
-  List, 
-  Avatar, 
-  Tag, 
+import {
+  Card,
+  Row,
+  Col,
+  Button,
+  Typography,
+  Space,
+  Tag,
+  Progress,
   Timeline,
-  Alert,
-  Carousel,
-  Badge,
+  List,
+  Avatar,
   Tooltip,
+  Statistic,
+  Alert,
+  Spin,
+  message,
+  Badge,
   Divider,
-  Empty
+  Empty,
+  Skeleton
 } from 'antd';
-import { 
-  BookOutlined, 
-  BulbOutlined, 
-  TrophyOutlined, 
-  RocketOutlined,
+import {
+  BookOutlined,
+  TrophyOutlined,
   ClockCircleOutlined,
-  StarOutlined,
   FireOutlined,
-  ThunderboltOutlined,
-  UserOutlined,
-  PlayCircleOutlined,
-  CheckCircleOutlined,
   LineChartOutlined,
   BarChartOutlined,
-  CalendarOutlined,
+  BulbOutlined,
+  PlayCircleOutlined,
+  EyeOutlined,
+  ArrowRightOutlined,
+  AimOutlined,
   GiftOutlined,
   CrownOutlined,
+  StarOutlined,
+  ThunderboltOutlined,
+  RocketOutlined,
   HeartOutlined,
-  TeamOutlined,
-  AimOutlined,
-  EyeOutlined,
-  ArrowRightOutlined
+  CalendarOutlined,
+  UserOutlined,
+  SettingOutlined,
+  ReloadOutlined,
+  RiseOutlined,
+  FallOutlined,
+  MinusOutlined
 } from '@ant-design/icons';
-import { Line, Column, Pie } from '@ant-design/plots';
 import { useNavigate } from 'react-router-dom';
+import { Line, Pie, Column } from '@ant-design/plots';
 import moment from 'moment';
+import { learningApi } from '../services/learningApi';
+import type { 
+  LearnerProfile, 
+  LearningAnalytics, 
+  Recommendation, 
+  Achievement,
+  ActivityData,
+  SkillProgress
+} from '../services/learningApi';
 
-const { Title, Paragraph, Text } = Typography;
-
-interface LearningStats {
-  totalCourses: number;
-  completedCourses: number;
-  totalStudyTime: number; // 小时
-  currentStreak: number; // 连续学习天数
-  totalAssessments: number;
-  passedAssessments: number;
-  averageScore: number;
-  level: string;
-  experience: number;
-  nextLevelExp: number;
-}
-
-interface RecentActivity {
-  id: string;
-  type: 'course' | 'assessment' | 'achievement';
-  title: string;
-  description: string;
-  timestamp: Date;
-  icon: string;
-  color: string;
-}
-
-interface Recommendation {
-  id: string;
-  type: 'course' | 'assessment' | 'practice';
-  title: string;
-  description: string;
-  reason: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  estimatedTime: number; // 分钟
-  thumbnail: string;
-  tags: string[];
-}
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  earnedAt: Date;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-}
+const { Title, Text, Paragraph } = Typography;
 
 const IntelligentLearning: React.FC = () => {
   const navigate = useNavigate();
-  const [learningStats, setLearningStats] = useState<LearningStats | null>(null);
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  
+  // 状态管理
+  const [learnerProfile, setLearnerProfile] = useState<LearnerProfile | null>(null);
+  const [learningAnalytics, setLearningAnalytics] = useState<LearningAnalytics | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [skillProgress, setSkillProgress] = useState<SkillProgress[]>([]);
+  const [weeklyActivity, setWeeklyActivity] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadLearningData();
   }, []);
 
-  const loadLearningData = () => {
-    setLoading(true);
-    // 模拟数据加载
-    setTimeout(() => {
-      const mockStats: LearningStats = {
-        totalCourses: 25,
-        completedCourses: 18,
-        totalStudyTime: 156,
-        currentStreak: 12,
-        totalAssessments: 15,
-        passedAssessments: 13,
-        averageScore: 85,
-        level: '学者',
-        experience: 2850,
-        nextLevelExp: 3000
-      };
+  // 加载学习数据
+  const loadLearningData = async () => {
+    try {
+      setLoading(true);
+      
+      // 并行加载所有数据
+      const [
+        profileResponse,
+        analyticsResponse,
+        recommendationsResponse,
+        achievementsResponse,
+        skillsResponse,
+        weeklyActivityResponse
+      ] = await Promise.all([
+        learningApi.getLearnerProfile().catch(() => ({ success: false, data: null })),
+        learningApi.getLearningAnalytics('current', '7d').catch(() => ({ success: false, data: null })),
+        learningApi.getRecommendations('current').catch(() => ({ success: false, data: [] })),
+        learningApi.getAchievements('current').catch(() => ({ success: false, data: [] })),
+        learningApi.getSkillProgress('current').catch(() => ({ success: false, data: [] })),
+        learningApi.getWeeklyActivity().catch(() => ({ success: false, data: [] }))
+      ]);
 
-      const mockActivities: RecentActivity[] = [
-        {
-          id: '1',
-          type: 'course',
-          title: '完成课程：道德经精读',
-          description: '深入学习了道德经的核心思想',
-          timestamp: new Date('2024-02-01T14:30:00'),
-          icon: '📚',
-          color: '#1890ff'
-        },
-        {
-          id: '2',
-          type: 'assessment',
-          title: '通过评估：儒家思想基础',
-          description: '获得85分，表现优秀',
-          timestamp: new Date('2024-01-31T16:45:00'),
-          icon: '🏆',
-          color: '#52c41a'
-        },
-        {
-          id: '3',
-          type: 'achievement',
-          title: '获得成就：连续学习达人',
-          description: '连续学习12天',
-          timestamp: new Date('2024-01-30T09:15:00'),
-          icon: '🔥',
-          color: '#faad14'
-        },
-        {
-          id: '4',
-          type: 'course',
-          title: '开始学习：禅修入门',
-          description: '开始探索佛家修行之道',
-          timestamp: new Date('2024-01-29T20:00:00'),
-          icon: '🧘',
-          color: '#722ed1'
-        }
-      ];
+      // 设置学习者档案
+      if (profileResponse.success && profileResponse.data) {
+        setLearnerProfile(profileResponse.data);
+      } else {
+        // 使用模拟数据
+        setLearnerProfile({
+          id: 'mock-user',
+          userId: 'mock-user',
+          name: '智慧学者',
+          email: 'learner@example.com',
+          level: '学者',
+          experience: 2850,
+          nextLevelExp: 3000,
+          learningGoals: ['道家思想', '儒家思想', '佛家思想'],
+          preferences: {
+            learningStyle: 'visual',
+            difficulty: 'intermediate',
+            topics: ['哲学', '传统文化', '现代应用'],
+            studyTime: 60,
+            reminderEnabled: true,
+            reminderTime: '20:00'
+          },
+          skills: [],
+          achievements: [],
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-02-01T00:00:00Z'
+        });
+      }
 
-      const mockRecommendations: Recommendation[] = [
-        {
-          id: '1',
-          type: 'course',
-          title: '庄子逍遥游深度解析',
-          description: '基于您对道家思想的兴趣，推荐深入学习庄子哲学',
-          reason: '您在道德经课程中表现优秀',
-          difficulty: 'intermediate',
-          estimatedTime: 120,
-          thumbnail: '/api/placeholder/300/200',
-          tags: ['庄子', '道家', '哲学']
-        },
-        {
-          id: '2',
-          type: 'assessment',
-          title: '佛学基础能力评估',
-          description: '测试您对佛学基本概念的掌握程度',
-          reason: '您最近开始学习禅修课程',
-          difficulty: 'beginner',
-          estimatedTime: 30,
-          thumbnail: '/api/placeholder/300/200',
-          tags: ['佛学', '基础', '评估']
-        },
-        {
-          id: '3',
-          type: 'practice',
-          title: '传统文化现代应用练习',
-          description: '将传统智慧应用到现代生活场景中',
-          reason: '提升实践应用能力',
-          difficulty: 'advanced',
-          estimatedTime: 45,
-          thumbnail: '/api/placeholder/300/200',
-          tags: ['实践', '应用', '现代']
-        }
-      ];
+      // 设置学习分析数据
+      if (analyticsResponse.success && analyticsResponse.data) {
+        setLearningAnalytics(analyticsResponse.data);
+        setWeeklyActivity(analyticsResponse.data.weeklyActivity || []);
+      } else {
+        // 使用模拟数据
+        const mockAnalytics: LearningAnalytics = {
+          learnerId: 'mock-user',
+          totalStudyTime: 156,
+          coursesCompleted: 18,
+          currentStreak: 12,
+          averageScore: 85,
+          skillProgress: [],
+          weeklyActivity: generateMockWeeklyActivity(),
+          monthlyProgress: [],
+          recommendations: []
+        };
+        setLearningAnalytics(mockAnalytics);
+        setWeeklyActivity(mockAnalytics.weeklyActivity);
+      }
 
-      const mockAchievements: Achievement[] = [
-        {
-          id: '1',
-          title: '学习新手',
-          description: '完成第一门课程',
-          icon: '🌱',
-          earnedAt: new Date('2024-01-15'),
-          rarity: 'common'
-        },
-        {
-          id: '2',
-          title: '道家学者',
-          description: '在道家思想评估中获得优秀成绩',
-          icon: '🏆',
-          earnedAt: new Date('2024-01-25'),
-          rarity: 'rare'
-        },
-        {
-          id: '3',
-          title: '连续学习达人',
-          description: '连续学习12天',
-          icon: '🔥',
-          earnedAt: new Date('2024-01-30'),
-          rarity: 'epic'
-        }
-      ];
+      // 设置推荐数据
+      if (recommendationsResponse.success && recommendationsResponse.data) {
+        setRecommendations(recommendationsResponse.data);
+      } else {
+        // 使用模拟推荐数据
+        setRecommendations([
+          {
+            id: '1',
+            type: 'course',
+            title: '庄子逍遥游深度解析',
+            description: '基于您对道家思想的兴趣，推荐深入学习庄子哲学',
+            reason: '您在道德经课程中表现优秀',
+            confidence: 95,
+            priority: 'high',
+            difficulty: 'intermediate',
+            estimatedTime: 120,
+            tags: ['庄子', '道家', '哲学'],
+            thumbnail: '/api/placeholder/300/200'
+          },
+          {
+            id: '2',
+            type: 'assessment',
+            title: '佛学基础能力评估',
+            description: '测试您对佛学基本概念的掌握程度',
+            reason: '您最近开始学习禅修课程',
+            confidence: 88,
+            priority: 'medium',
+            difficulty: 'beginner',
+            estimatedTime: 30,
+            tags: ['佛学', '基础', '评估']
+          },
+          {
+            id: '3',
+            type: 'skill_practice',
+            title: '传统文化现代应用练习',
+            description: '将传统智慧应用到现代生活场景中',
+            reason: '提升实践应用能力',
+            confidence: 82,
+            priority: 'medium',
+            difficulty: 'advanced',
+            estimatedTime: 45,
+            tags: ['实践', '应用', '现代']
+          }
+        ]);
+      }
 
-      setLearningStats(mockStats);
-      setRecentActivities(mockActivities);
-      setRecommendations(mockRecommendations);
-      setAchievements(mockAchievements);
+      // 设置成就数据
+      if (achievementsResponse.success && achievementsResponse.data) {
+        setAchievements(achievementsResponse.data);
+      } else {
+        // 使用模拟成就数据
+        setAchievements([
+          {
+            id: '1',
+            title: '学习新手',
+            description: '完成第一门课程',
+            icon: '🌱',
+            earnedAt: '2024-01-15T00:00:00Z',
+            rarity: 'common'
+          },
+          {
+            id: '2',
+            title: '道家学者',
+            description: '在道家思想评估中获得优秀成绩',
+            icon: '🏆',
+            earnedAt: '2024-01-25T00:00:00Z',
+            rarity: 'rare'
+          },
+          {
+            id: '3',
+            title: '连续学习达人',
+            description: '连续学习12天',
+            icon: '🔥',
+            earnedAt: '2024-01-30T00:00:00Z',
+            rarity: 'epic'
+          }
+        ]);
+      }
+
+      // 设置技能进度数据
+      if (skillsResponse.success && skillsResponse.data) {
+        setSkillProgress(skillsResponse.data);
+      } else {
+        // 使用模拟技能数据
+        setSkillProgress([
+          { skillId: '1', skillName: '道家思想', currentLevel: 3, progress: 75, trend: 'up' },
+          { skillId: '2', skillName: '儒家思想', currentLevel: 2, progress: 60, trend: 'up' },
+          { skillId: '3', skillName: '佛家思想', currentLevel: 2, progress: 45, trend: 'stable' },
+          { skillId: '4', skillName: '现代应用', currentLevel: 1, progress: 30, trend: 'up' }
+        ]);
+      }
+
+      // 设置周活动数据
+      if (weeklyActivityResponse.success && weeklyActivityResponse.data) {
+        setWeeklyActivity(weeklyActivityResponse.data);
+      }
+
+    } catch (error) {
+      console.error('加载学习数据失败:', error);
+      message.error('加载学习数据失败，请稍后重试');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  // 获取学习进度数据
-  const getProgressData = () => {
-    if (!learningStats) return [];
-    
+  // 刷新数据
+  const refreshData = async () => {
+    setRefreshing(true);
+    await loadLearningData();
+    setRefreshing(false);
+    message.success('数据已刷新');
+  };
+
+  // 生成模拟周活动数据
+  const generateMockWeeklyActivity = (): ActivityData[] => {
     const days = [];
     for (let i = 6; i >= 0; i--) {
       const date = moment().subtract(i, 'days');
       days.push({
-        date: date.format('MM-DD'),
-        hours: Math.random() * 3 + 1 // 模拟数据
+        date: date.format('YYYY-MM-DD'),
+        studyTime: Math.floor(Math.random() * 180 + 30), // 30-210分钟
+        coursesCompleted: Math.floor(Math.random() * 3),
+        exercisesCompleted: Math.floor(Math.random() * 5 + 1)
       });
     }
     return days;
   };
 
-  // 获取分类学习数据
-  const getCategoryData = () => [
-    { category: '道家思想', value: 35, color: '#1890ff' },
-    { category: '儒家思想', value: 28, color: '#52c41a' },
-    { category: '佛家思想', value: 22, color: '#faad14' },
-    { category: '现代应用', value: 15, color: '#722ed1' }
-  ];
+  // 获取学习进度数据（用于图表）
+  const getProgressChartData = () => {
+    return weeklyActivity.map(activity => ({
+      date: moment(activity.date).format('MM-DD'),
+      studyTime: Math.round(activity.studyTime / 60 * 10) / 10, // 转换为小时，保留1位小数
+      coursesCompleted: activity.coursesCompleted
+    }));
+  };
+
+  // 获取技能分布数据
+  const getSkillDistributionData = () => {
+    return skillProgress.map(skill => ({
+      skill: skill.skillName,
+      progress: skill.progress,
+      level: skill.currentLevel
+    }));
+  };
 
   // 获取难度颜色
   const getDifficultyColor = (difficulty: string) => {
@@ -275,120 +318,228 @@ const IntelligentLearning: React.FC = () => {
     }
   };
 
+  // 获取优先级颜色
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return '#ff4d4f';
+      case 'medium': return '#faad14';
+      case 'low': return '#52c41a';
+      default: return '#d9d9d9';
+    }
+  };
+
+  // 获取趋势图标
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'up': return <RiseOutlined style={{ color: '#52c41a' }} />;
+      case 'down': return <FallOutlined style={{ color: '#ff4d4f' }} />;
+      case 'stable': return <MinusOutlined style={{ color: '#faad14' }} />;
+      default: return null;
+    }
+  };
+
+  // 格式化学习时间
+  const formatStudyTime = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes}分钟`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}小时${remainingMinutes}分钟` : `${hours}小时`;
+  };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '24px', background: '#f5f5f5', minHeight: '100vh' }}>
+        <Skeleton active />
+        <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+          {[1, 2, 3, 4].map(i => (
+            <Col xs={24} sm={12} lg={6} key={i}>
+              <Card>
+                <Skeleton.Input style={{ width: '100%' }} active />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '24px', background: '#f5f5f5', minHeight: '100vh' }}>
       {/* 页面标题 */}
-      <div style={{ marginBottom: '24px' }}>
-        <Title level={2}>
-          <BulbOutlined style={{ color: '#1890ff', marginRight: '8px' }} />
-          智能学习系统
-        </Title>
-        <Paragraph>
-          基于AI的个性化学习平台，为您提供智能化的学习体验和全方位的能力提升
-        </Paragraph>
+      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <Title level={2} style={{ margin: 0 }}>
+            <BulbOutlined style={{ color: '#1890ff', marginRight: '8px' }} />
+            智能学习系统
+          </Title>
+          <Paragraph style={{ margin: '8px 0 0 0', color: '#666' }}>
+            基于AI的个性化学习平台，为您提供智能化的学习体验和全方位的能力提升
+          </Paragraph>
+        </div>
+        <Space>
+          <Button 
+            icon={<SettingOutlined />} 
+            onClick={() => navigate('/profile')}
+          >
+            设置
+          </Button>
+          <Button 
+            icon={<ReloadOutlined />} 
+            loading={refreshing}
+            onClick={refreshData}
+          >
+            刷新
+          </Button>
+        </Space>
       </div>
 
       {/* 学习统计概览 */}
-      {learningStats && (
+      {learningAnalytics && (
         <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card hoverable>
               <Statistic
-                title="学习进度"
-                value={learningStats.completedCourses}
-                suffix={`/ ${learningStats.totalCourses}`}
+                title="完成课程"
+                value={learningAnalytics.coursesCompleted}
                 prefix={<BookOutlined />}
                 valueStyle={{ color: '#1890ff' }}
               />
-              <Progress 
-                percent={(learningStats.completedCourses / learningStats.totalCourses) * 100}
-                size="small"
-                style={{ marginTop: '8px' }}
-              />
+              <div style={{ marginTop: '8px' }}>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  本月新增 {Math.floor(learningAnalytics.coursesCompleted * 0.2)} 门
+                </Text>
+              </div>
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card hoverable>
               <Statistic
                 title="学习时长"
-                value={learningStats.totalStudyTime}
+                value={learningAnalytics.totalStudyTime}
                 suffix="小时"
                 prefix={<ClockCircleOutlined />}
                 valueStyle={{ color: '#52c41a' }}
               />
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                本月已学习 {Math.floor(learningStats.totalStudyTime * 0.3)} 小时
-              </Text>
+              <div style={{ marginTop: '8px' }}>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  本周已学习 {Math.floor(weeklyActivity.reduce((sum, day) => sum + day.studyTime, 0) / 60)} 小时
+                </Text>
+              </div>
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card hoverable>
               <Statistic
                 title="连续学习"
-                value={learningStats.currentStreak}
+                value={learningAnalytics.currentStreak}
                 suffix="天"
                 prefix={<FireOutlined />}
                 valueStyle={{ color: '#faad14' }}
               />
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                继续保持，冲击新纪录！
-              </Text>
+              <div style={{ marginTop: '8px' }}>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  继续保持，冲击新纪录！
+                </Text>
+              </div>
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card hoverable>
               <Statistic
                 title="平均分数"
-                value={learningStats.averageScore}
+                value={learningAnalytics.averageScore}
                 suffix="分"
                 prefix={<TrophyOutlined />}
                 valueStyle={{ color: '#722ed1' }}
               />
-              <Text type="secondary" style={{ fontSize: '12px' }}>
-                {learningStats.passedAssessments}/{learningStats.totalAssessments} 次通过
-              </Text>
+              <div style={{ marginTop: '8px' }}>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  超过 85% 的学习者
+                </Text>
+              </div>
             </Card>
           </Col>
         </Row>
       )}
 
-      {/* 等级和经验 */}
-      {learningStats && (
+      {/* 学习者档案和等级 */}
+      {learnerProfile && (
         <Card style={{ marginBottom: '24px' }}>
           <Row align="middle">
             <Col flex="auto">
-              <Space align="center">
-                <Avatar size={64} style={{ backgroundColor: '#1890ff' }}>
-                  <CrownOutlined style={{ fontSize: '32px' }} />
-                </Avatar>
+              <Space align="center" size="large">
+                <Badge count={achievements.length} showZero={false} offset={[-8, 8]}>
+                  <Avatar size={64} style={{ backgroundColor: '#1890ff' }} src={learnerProfile.avatar}>
+                    {learnerProfile.avatar ? null : <UserOutlined style={{ fontSize: '32px' }} />}
+                  </Avatar>
+                </Badge>
                 <div>
-                  <Title level={4} style={{ margin: 0 }}>
-                    {learningStats.level}
-                  </Title>
-                  <Text type="secondary">
-                    经验值: {learningStats.experience} / {learningStats.nextLevelExp}
-                  </Text>
-                  <Progress 
-                    percent={(learningStats.experience / learningStats.nextLevelExp) * 100}
-                    size="small"
-                    style={{ width: '200px', marginTop: '4px' }}
-                  />
+                  <Space align="center">
+                    <Title level={4} style={{ margin: 0 }}>
+                      {learnerProfile.name}
+                    </Title>
+                    <Tag color="gold" icon={<CrownOutlined />}>
+                      {learnerProfile.level}
+                    </Tag>
+                  </Space>
+                  <div style={{ marginTop: '8px' }}>
+                    <Text type="secondary">
+                      经验值: {learnerProfile.experience} / {learnerProfile.nextLevelExp}
+                    </Text>
+                    <Progress 
+                      percent={(learnerProfile.experience / learnerProfile.nextLevelExp) * 100}
+                      size="small"
+                      style={{ width: '300px', marginTop: '4px' }}
+                      strokeColor={{
+                        '0%': '#108ee9',
+                        '100%': '#87d068',
+                      }}
+                    />
+                  </div>
+                  <div style={{ marginTop: '8px' }}>
+                    <Space size="small">
+                      {learnerProfile.learningGoals.slice(0, 3).map((goal, index) => (
+                        <Tag key={index} size="small" color="blue">
+                          <AimOutlined style={{ marginRight: '4px' }} />
+                          {goal}
+                        </Tag>
+                      ))}
+                    </Space>
+                  </div>
                 </div>
               </Space>
             </Col>
             <Col>
-              <Space>
+              <Space direction="vertical" size="small">
                 <Button 
                   type="primary" 
                   icon={<AimOutlined />}
                   onClick={() => navigate('/learning/learning-progress')}
+                  block
                 >
                   查看详细进度
                 </Button>
                 <Button 
+                  icon={<LineChartOutlined />}
+                  onClick={() => navigate('/learning/analytics-dashboard')}
+                  block
+                >
+                  分析仪表板
+                </Button>
+                <Button 
                   icon={<GiftOutlined />}
+                  block
                 >
                   每日签到
+                </Button>
+                <Button 
+                  icon={<CalendarOutlined />}
+                  onClick={() => navigate('/course-center')}
+                  block
+                >
+                  学习计划
                 </Button>
               </Space>
             </Col>
@@ -398,7 +549,7 @@ const IntelligentLearning: React.FC = () => {
 
       {/* 快速入口 */}
       <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12} lg={8} xl={6}>
           <Card
             hoverable
             style={{ textAlign: 'center', height: '200px' }}
@@ -412,12 +563,12 @@ const IntelligentLearning: React.FC = () => {
             <Text type="secondary">查看详细的学习进度和统计</Text>
           </Card>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12} lg={8} xl={6}>
           <Card
             hoverable
             style={{ textAlign: 'center', height: '200px' }}
             bodyStyle={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-            onClick={() => navigate('/learning/course-center')}
+            onClick={() => navigate('/course-center')}
           >
             <div style={{ fontSize: '48px', color: '#52c41a', marginBottom: '16px' }}>
               <BookOutlined />
@@ -426,12 +577,26 @@ const IntelligentLearning: React.FC = () => {
             <Text type="secondary">浏览和学习各类精品课程</Text>
           </Card>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={12} lg={8} xl={6}>
           <Card
             hoverable
             style={{ textAlign: 'center', height: '200px' }}
             bodyStyle={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-            onClick={() => navigate('/learning/ability-assessment')}
+            onClick={() => navigate('/learning-plan')}
+          >
+            <div style={{ fontSize: '48px', color: '#722ed1', marginBottom: '16px' }}>
+              <CalendarOutlined />
+            </div>
+            <Title level={4} style={{ margin: 0 }}>学习计划</Title>
+            <Text type="secondary">制定个性化学习路径</Text>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={8} xl={6}>
+          <Card
+            hoverable
+            style={{ textAlign: 'center', height: '200px' }}
+            bodyStyle={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+            onClick={() => navigate('/ability-assessment')}
           >
             <div style={{ fontSize: '48px', color: '#faad14', marginBottom: '16px' }}>
               <TrophyOutlined />
@@ -441,206 +606,504 @@ const IntelligentLearning: React.FC = () => {
           </Card>
         </Col>
       </Row>
+      
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={24} sm={12} lg={8} xl={6}>
+          <Card
+            hoverable
+            style={{ textAlign: 'center', height: '200px' }}
+            bodyStyle={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+            onClick={() => navigate('/daily-checkin')}
+          >
+            <div style={{ fontSize: '48px', color: '#f5222d', marginBottom: '16px' }}>
+              <CheckCircleOutlined />
+            </div>
+            <Title level={4} style={{ margin: 0 }}>每日签到</Title>
+            <Text type="secondary">坚持签到获得奖励</Text>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} lg={8} xl={6}>
+          <Card
+            hoverable
+            style={{ textAlign: 'center', height: '200px' }}
+            bodyStyle={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+            onClick={() => navigate('/achievement-center')}
+          >
+            <div style={{ fontSize: '48px', color: '#722ed1', marginBottom: '16px' }}>
+              <TrophyOutlined />
+            </div>
+            <Title level={4} style={{ margin: 0 }}>成就中心</Title>
+            <Text type="secondary">查看学习成就和荣誉</Text>
+          </Card>
+        </Col>
+      </Row>
 
       <Row gutter={[16, 16]}>
         {/* 学习数据可视化 */}
         <Col xs={24} lg={12}>
-          <Card title="学习趋势" extra={<BarChartOutlined />} style={{ marginBottom: '16px' }}>
-            <Line
-              data={getProgressData()}
-              xField="date"
-              yField="hours"
-              height={200}
-              smooth
-              point={{
-                size: 3,
-                shape: 'circle'
-              }}
-              color="#1890ff"
-            />
+          <Card 
+            title="学习趋势" 
+            extra={
+              <Space>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  最近7天
+                </Text>
+                <LineChartOutlined />
+              </Space>
+            } 
+            style={{ marginBottom: '16px' }}
+          >
+            {weeklyActivity.length > 0 ? (
+              <Line
+                data={getProgressChartData()}
+                xField="date"
+                yField="studyTime"
+                height={200}
+                smooth
+                point={{
+                  size: 4,
+                  shape: 'circle'
+                }}
+                color="#1890ff"
+                tooltip={{
+                  formatter: (datum) => ({
+                    name: '学习时长',
+                    value: `${datum.studyTime}小时`
+                  })
+                }}
+                annotations={[
+                  {
+                    type: 'line',
+                    start: ['min', 'mean'],
+                    end: ['max', 'mean'],
+                    style: {
+                      stroke: '#faad14',
+                      lineDash: [4, 4],
+                    },
+                  },
+                ]}
+              />
+            ) : (
+              <Empty description="暂无学习数据" />
+            )}
           </Card>
         </Col>
 
         <Col xs={24} lg={12}>
-          <Card title="学习分布" extra={<BarChartOutlined />} style={{ marginBottom: '16px' }}>
-            <Pie
-              data={getCategoryData()}
-              angleField="value"
-              colorField="category"
-              height={200}
-              radius={0.8}
-              label={{
-                type: 'outer',
-                content: '{name} {percentage}'
-              }}
-            />
+          <Card 
+            title="技能进度" 
+            extra={
+              <Space>
+                <Text type="secondary" style={{ fontSize: '12px' }}>
+                  当前掌握情况
+                </Text>
+                <BarChartOutlined />
+              </Space>
+            } 
+            style={{ marginBottom: '16px' }}
+          >
+            {skillProgress.length > 0 ? (
+              <Column
+                data={getSkillDistributionData()}
+                xField="skill"
+                yField="progress"
+                height={200}
+                color="#52c41a"
+                columnWidthRatio={0.6}
+                tooltip={{
+                  formatter: (datum) => ({
+                    name: '掌握程度',
+                    value: `${datum.progress}% (等级${datum.level})`
+                  })
+                }}
+                label={{
+                  position: 'top',
+                  formatter: (datum) => `${datum.progress}%`
+                }}
+              />
+            ) : (
+              <Empty description="暂无技能数据" />
+            )}
           </Card>
         </Col>
 
         {/* 智能推荐 */}
         <Col xs={24} lg={12}>
           <Card 
-            title="智能推荐" 
+            title={
+              <Space>
+                <BulbOutlined />
+                智能推荐
+                <Badge count={recommendations.length} showZero color="#52c41a" />
+              </Space>
+            }
             extra={
-              <Button type="link" onClick={() => navigate('/learning/course-center')}>
-                查看更多 <ArrowRightOutlined />
+              <Button 
+                type="link" 
+                size="small" 
+                icon={<ReloadOutlined />}
+                onClick={refreshData}
+              >
+                刷新推荐
               </Button>
             }
             style={{ marginBottom: '16px' }}
           >
-            <List
-              dataSource={recommendations}
-              renderItem={item => (
-                <List.Item
-                  actions={[
-                    <Button 
-                      type="primary" 
-                      size="small"
-                      icon={item.type === 'course' ? <PlayCircleOutlined /> : <EyeOutlined />}
-                    >
-                      {item.type === 'course' ? '开始学习' : 
-                       item.type === 'assessment' ? '开始评估' : '开始练习'}
-                    </Button>
-                  ]}
-                >
-                  <List.Item.Meta
-                    avatar={
-                      <Avatar 
-                        shape="square" 
-                        size={48}
-                        src={item.thumbnail}
-                      />
-                    }
-                    title={
-                      <div>
-                        <Text strong>{item.title}</Text>
-                        <div style={{ marginTop: '4px' }}>
-                          <Space size="small">
-                            <Tag size="small" color={getDifficultyColor(item.difficulty)}>
-                              {item.difficulty === 'beginner' ? '初级' :
-                               item.difficulty === 'intermediate' ? '中级' : '高级'}
-                            </Tag>
-                            <Tag size="small">
-                              <ClockCircleOutlined /> {item.estimatedTime}分钟
-                            </Tag>
+            {recommendations.length > 0 ? (
+              <List
+                dataSource={recommendations}
+                renderItem={(item) => (
+                  <List.Item
+                    actions={[
+                      <Button 
+                        type="primary" 
+                        size="small" 
+                        icon={<PlayCircleOutlined />}
+                        style={{ borderRadius: '6px' }}
+                      >
+                        开始学习
+                      </Button>,
+                      <Button 
+                        type="text" 
+                        size="small" 
+                        icon={<StarOutlined />}
+                        style={{ color: '#faad14' }}
+                      >
+                        收藏
+                      </Button>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <Avatar 
+                          src={item.thumbnail} 
+                          size={56}
+                          icon={<BookOutlined />}
+                          style={{ 
+                            backgroundColor: '#f0f2f5',
+                            border: '2px solid #fff',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          }}
+                        />
+                      }
+                      title={
+                        <Space wrap>
+                          <Text strong style={{ fontSize: '14px' }}>
+                            {item.title}
+                          </Text>
+                          <Tag color={getPriorityColor(item.priority)}>
+                            {item.priority === 'high' ? '高优先级' : 
+                             item.priority === 'medium' ? '中优先级' : '低优先级'}
+                          </Tag>
+                          <Tag color="blue">
+                            匹配度 {Math.round(item.confidence)}%
+                          </Tag>
+                        </Space>
+                      }
+                      description={
+                        <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                          <Text type="secondary" style={{ fontSize: '13px' }}>
+                            {item.description}
+                          </Text>
+                          <Space wrap>
+                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                              <ClockCircleOutlined /> 预计 {item.estimatedTime} 分钟
+                            </Text>
+                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                              <StarOutlined /> 推荐指数 {item.confidence}
+                            </Text>
+                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                              <BookOutlined /> {item.type === 'course' ? '课程' : 
+                                                item.type === 'assessment' ? '评估' : '练习'}
+                            </Text>
                           </Space>
-                        </div>
-                      </div>
-                    }
-                    description={
-                      <div>
-                        <Text type="secondary" style={{ fontSize: '12px' }}>
-                          {item.description}
-                        </Text>
-                        <br />
-                        <Text type="secondary" style={{ fontSize: '11px', fontStyle: 'italic' }}>
-                          推荐理由: {item.reason}
-                        </Text>
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
+                        </Space>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Empty 
+                description="暂无推荐内容"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
           </Card>
         </Col>
 
         {/* 最近活动 */}
         <Col xs={24} lg={12}>
-          <Card title="最近活动" style={{ marginBottom: '16px' }}>
-            <Timeline>
-              {recentActivities.map(activity => (
-                <Timeline.Item
-                  key={activity.id}
-                  color={activity.color}
-                  dot={
-                    <div style={{ 
-                      fontSize: '16px', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      width: '24px',
-                      height: '24px'
-                    }}>
-                      {activity.icon}
+          <Card 
+            title={
+              <Space>
+                <ClockCircleOutlined />
+                最近活动
+                <Badge 
+                  count={weeklyActivity.reduce((sum, day) => sum + day.coursesCompleted + day.exercisesCompleted, 0)} 
+                  showZero 
+                  color="#1890ff" 
+                />
+              </Space>
+            }
+            extra={
+              <Button 
+                type="link" 
+                size="small"
+                onClick={() => navigate('/learning/learning-progress')}
+              >
+                查看全部 <ArrowRightOutlined />
+              </Button>
+            }
+            style={{ marginBottom: '16px' }}
+          >
+            {weeklyActivity.length > 0 ? (
+              <Timeline>
+                {weeklyActivity.slice(0, 5).map((day, index) => (
+                  <Timeline.Item
+                    key={index}
+                    dot={
+                      <Avatar 
+                        size="small" 
+                        icon={
+                          day.studyTime > 120 ? <FireOutlined /> :
+                          day.studyTime > 60 ? <BookOutlined /> :
+                          <ClockCircleOutlined />
+                        }
+                        style={{
+                          backgroundColor: 
+                            day.studyTime > 120 ? '#52c41a' :
+                            day.studyTime > 60 ? '#1890ff' :
+                            '#faad14'
+                        }}
+                      />
+                    }
+                    color={
+                      day.studyTime > 120 ? 'green' :
+                      day.studyTime > 60 ? 'blue' :
+                      'orange'
+                    }
+                  >
+                    <div>
+                      <Space>
+                        <Text strong>{moment(day.date).format('MM月DD日')}</Text>
+                        <Tag color={day.studyTime > 120 ? 'success' : day.studyTime > 60 ? 'processing' : 'warning'}>
+                          {formatStudyTime(day.studyTime)}
+                        </Tag>
+                      </Space>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: '12px' }}>
+                        完成 {day.coursesCompleted} 门课程，{day.exercisesCompleted} 个练习
+                      </Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: '11px' }}>
+                        {moment(day.date).fromNow()}
+                      </Text>
                     </div>
-                  }
-                >
-                  <div>
-                    <Text strong>{activity.title}</Text>
-                    <br />
-                    <Text type="secondary" style={{ fontSize: '12px' }}>
-                      {activity.description}
-                    </Text>
-                    <br />
-                    <Text type="secondary" style={{ fontSize: '11px' }}>
-                      {moment(activity.timestamp).fromNow()}
-                    </Text>
-                  </div>
-                </Timeline.Item>
-              ))}
-            </Timeline>
+                  </Timeline.Item>
+                ))}
+              </Timeline>
+            ) : (
+              <Empty 
+                description="暂无活动记录"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
           </Card>
         </Col>
 
         {/* 成就展示 */}
         <Col xs={24}>
-          <Card title="最新成就" extra={<TrophyOutlined />}>
-            <Row gutter={[16, 16]}>
-              {achievements.map(achievement => (
-                <Col xs={12} sm={8} md={6} lg={4} key={achievement.id}>
-                  <Tooltip title={achievement.description}>
-                    <Card 
-                      size="small" 
-                      style={{ 
-                        textAlign: 'center',
-                        borderColor: getRarityColor(achievement.rarity),
-                        borderWidth: '2px'
-                      }}
-                      bodyStyle={{ padding: '16px 8px' }}
+          <Card 
+            title={
+              <Space>
+                <TrophyOutlined />
+                最新成就
+                <Badge count={achievements.length} showZero color="#faad14" />
+              </Space>
+            }
+            extra={
+              <Button 
+                type="link" 
+                size="small"
+                onClick={() => navigate('/learning/achievements')}
+              >
+                查看全部 <ArrowRightOutlined />
+              </Button>
+            }
+            style={{ marginBottom: '16px' }}
+          >
+            {achievements.length > 0 ? (
+              <Row gutter={[16, 16]}>
+                {achievements.slice(0, 8).map((achievement) => (
+                  <Col xs={12} sm={8} md={6} lg={4} xl={3} key={achievement.id}>
+                    <Tooltip 
+                      title={
+                        <div>
+                          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                            {achievement.title}
+                          </div>
+                          <div style={{ marginBottom: '8px' }}>
+                            {achievement.description}
+                          </div>
+                          <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                            获得时间: {moment(achievement.earnedAt).format('YYYY-MM-DD HH:mm')}
+                          </div>
+                        </div>
+                      }
+                      placement="top"
                     >
-                      <div style={{ fontSize: '32px', marginBottom: '8px' }}>
-                        {achievement.icon}
-                      </div>
-                      <Text strong style={{ fontSize: '12px', display: 'block' }}>
-                        {achievement.title}
-                      </Text>
-                      <Tag 
-                        size="small" 
-                        color={getRarityColor(achievement.rarity)}
-                        style={{ marginTop: '4px', fontSize: '10px' }}
+                      <Card
+                        hoverable
+                        size="small"
+                        style={{
+                          textAlign: 'center',
+                          borderColor: achievement.rarity === 'legendary' ? '#faad14' :
+                                      achievement.rarity === 'epic' ? '#722ed1' :
+                                      achievement.rarity === 'rare' ? '#1890ff' : '#52c41a',
+                          borderWidth: '2px',
+                          background: achievement.rarity === 'legendary' ? 
+                            'linear-gradient(135deg, #fff7e6 0%, #fff1b8 100%)' :
+                            achievement.rarity === 'epic' ?
+                            'linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%)' :
+                            'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)',
+                          position: 'relative',
+                          overflow: 'hidden'
+                        }}
+                        bodyStyle={{ padding: '16px 8px' }}
                       >
-                        {achievement.rarity === 'common' ? '普通' :
-                         achievement.rarity === 'rare' ? '稀有' :
-                         achievement.rarity === 'epic' ? '史诗' : '传说'}
-                      </Tag>
-                      <div style={{ marginTop: '4px' }}>
-                        <Text type="secondary" style={{ fontSize: '10px' }}>
-                          {moment(achievement.earnedAt).format('MM-DD')}
+                        {achievement.rarity === 'legendary' && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '-10px',
+                            right: '-10px',
+                            width: '20px',
+                            height: '20px',
+                            background: 'linear-gradient(45deg, #faad14, #ffd666)',
+                            borderRadius: '50%',
+                            animation: 'pulse 2s infinite'
+                          }} />
+                        )}
+                        <div style={{ 
+                          fontSize: '32px', 
+                          marginBottom: '8px',
+                          filter: achievement.rarity === 'legendary' ? 'drop-shadow(0 0 8px #faad14)' : 'none'
+                        }}>
+                          {achievement.icon}
+                        </div>
+                        <Text strong style={{ 
+                          fontSize: '11px', 
+                          display: 'block',
+                          marginBottom: '4px'
+                        }}>
+                          {achievement.title}
                         </Text>
-                      </div>
-                    </Card>
-                  </Tooltip>
-                </Col>
-              ))}
-            </Row>
+                        <Tag 
+                          size="small" 
+                          color={
+                            achievement.rarity === 'legendary' ? 'gold' :
+                            achievement.rarity === 'epic' ? 'purple' :
+                            achievement.rarity === 'rare' ? 'blue' : 'green'
+                          }
+                        >
+                          {achievement.rarity === 'common' ? '普通' :
+                           achievement.rarity === 'rare' ? '稀有' :
+                           achievement.rarity === 'epic' ? '史诗' : '传说'}
+                        </Tag>
+                        <div style={{ 
+                          fontSize: '10px', 
+                          color: '#666', 
+                          marginTop: '4px' 
+                        }}>
+                          {moment(achievement.earnedAt).format('MM-DD')}
+                        </div>
+                      </Card>
+                    </Tooltip>
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <Empty 
+                description="暂无成就记录"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
           </Card>
         </Col>
       </Row>
 
       {/* 学习提醒 */}
-      <Alert
-        message="学习提醒"
-        description="您今天还没有完成学习目标，建议花费30分钟继续学习以保持连续学习记录。"
-        type="info"
-        showIcon
-        style={{ marginTop: '24px' }}
-        action={
-          <Button size="small" type="primary" onClick={() => navigate('/learning/course-center')}>
-            立即学习
-          </Button>
-        }
-      />
+      {learningAnalytics && (
+        <Alert
+          message={
+            <Space>
+              <BulbOutlined />
+              智能学习提醒
+            </Space>
+          }
+          description={
+            <div>
+              {learningAnalytics.dailyGoalProgress < 100 ? (
+                <div>
+                  <Text>
+                    您今天的学习进度为 <Text strong>{learningAnalytics.dailyGoalProgress}%</Text>，
+                    还需要学习 <Text strong>{Math.ceil((100 - learningAnalytics.dailyGoalProgress) * 0.6)} 分钟</Text> 
+                    即可完成今日目标。
+                  </Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                    建议优先学习推荐课程以获得更好的学习效果
+                  </Text>
+                </div>
+              ) : (
+                <div>
+                  <Text>
+                    🎉 恭喜！您已完成今日学习目标，当前连续学习 <Text strong>{learningAnalytics.currentStreak}</Text> 天。
+                  </Text>
+                  <br />
+                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                    继续保持，向更高的学习目标挑战！
+                  </Text>
+                </div>
+              )}
+            </div>
+          }
+          type={learningAnalytics.dailyGoalProgress < 100 ? "warning" : "success"}
+          showIcon
+          style={{ marginTop: '24px' }}
+          action={
+            <Space>
+              {learningAnalytics.dailyGoalProgress < 100 ? (
+                <Button 
+                  size="small" 
+                  type="primary"
+                  icon={<PlayCircleOutlined />}
+                  onClick={() => navigate('/learning/course-center')}
+                >
+                  开始学习
+                </Button>
+              ) : (
+                <Button 
+                  size="small" 
+                  type="primary"
+                  icon={<TrophyOutlined />}
+                  onClick={() => navigate('/learning/achievements')}
+                >
+                  查看成就
+                </Button>
+              )}
+              <Button 
+                size="small"
+                icon={<SettingOutlined />}
+                onClick={() => message.info('学习设置功能开发中...')}
+              >
+                设置目标
+              </Button>
+            </Space>
+          }
+          closable
+        />
+      )}
     </div>
   );
 };

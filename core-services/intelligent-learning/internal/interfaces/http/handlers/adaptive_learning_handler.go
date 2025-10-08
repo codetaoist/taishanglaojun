@@ -9,16 +9,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
 )
 
-// AdaptiveLearningHandler 自适应学习处理器
+// AdaptiveLearningHandler 自适应学习处理
+// @Summary 自适应学习处理
+// @Description 处理与自适应学习相关的HTTP请求
+// @Tags adaptive-learning
 type AdaptiveLearningHandler struct {
-	adaptiveService *services.AdaptiveLearningService
+	adaptiveService *adaptive.AdaptiveLearningService
 }
 
-// NewAdaptiveLearningHandler 创建自适应学习处理器
-func NewAdaptiveLearningHandler(adaptiveService *services.AdaptiveLearningService) *AdaptiveLearningHandler {
+// NewAdaptiveLearningHandler 创建自适应学习处理
+func NewAdaptiveLearningHandler(adaptiveService *adaptive.AdaptiveLearningService) *AdaptiveLearningHandler {
 	return &AdaptiveLearningHandler{
 		adaptiveService: adaptiveService,
 	}
@@ -30,13 +33,13 @@ func NewAdaptiveLearningHandler(adaptiveService *services.AdaptiveLearningServic
 // @Tags adaptive-learning
 // @Accept json
 // @Produce json
-// @Param request body services.PathAdaptationRequest true "路径适配请求"
-// @Success 200 {object} services.PathAdaptationResponse "适配成功"
+// @Param request body adaptive.PathAdaptationRequest true "路径适配请求"
+// @Success 200 {object} adaptive.PathAdaptationResponse "适配成功"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
 // @Router /api/v1/adaptive/adapt-path [post]
 func (h *AdaptiveLearningHandler) AdaptLearningPath(c *gin.Context) {
-	var req services.PathAdaptationRequest
+	var req adaptive.PathAdaptationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "invalid_request",
@@ -96,10 +99,10 @@ func (h *AdaptiveLearningHandler) GetAdaptationRecommendations(c *gin.Context) {
 
 	// 构建推荐请求
 	req := AdaptationRecommendationRequest{
-		LearnerID:     learnerID,
-		PathID:        pathID,
-		AnalysisDepth: analysisDepth,
-		IncludeReasoning: c.DefaultQuery("include_reasoning", "false") == "true",
+		LearnerID:          learnerID,
+		PathID:             pathID,
+		AnalysisDepth:      analysisDepth,
+		IncludeReasoning:   c.DefaultQuery("include_reasoning", "false") == "true",
 		MaxRecommendations: h.parseIntQuery(c, "max_recommendations", 5),
 	}
 
@@ -267,11 +270,11 @@ type AdaptationRecommendationRequest struct {
 
 // AdaptationRecommendationsResponse 适配推荐响应
 type AdaptationRecommendationsResponse struct {
-	LearnerID       string                    `json:"learner_id"`
-	PathID          string                    `json:"path_id"`
+	LearnerID       string                     `json:"learner_id"`
+	PathID          string                     `json:"path_id"`
 	Recommendations []AdaptationRecommendation `json:"recommendations"`
-	GeneratedAt     string                    `json:"generated_at"`
-	AnalysisDepth   string                    `json:"analysis_depth"`
+	GeneratedAt     string                     `json:"generated_at"`
+	AnalysisDepth   string                     `json:"analysis_depth"`
 }
 
 // AdaptationRecommendation 适配推荐
@@ -298,92 +301,92 @@ type AdaptationHistoryResponse struct {
 
 // AdaptationHistoryItem 适配历史项
 type AdaptationHistoryItem struct {
-	AdaptationID    string                 `json:"adaptation_id"`
-	PathID          string                 `json:"path_id"`
-	AdaptationType  string                 `json:"adaptation_type"`
-	Timestamp       string                 `json:"timestamp"`
-	Reason          string                 `json:"reason"`
-	Impact          float64                `json:"impact"`
-	Success         bool                   `json:"success"`
-	Metadata        map[string]interface{} `json:"metadata"`
+	AdaptationID   string                 `json:"adaptation_id"`
+	PathID         string                 `json:"path_id"`
+	AdaptationType string                 `json:"adaptation_type"`
+	Timestamp      string                 `json:"timestamp"`
+	Reason         string                 `json:"reason"`
+	Impact         float64                `json:"impact"`
+	Success        bool                   `json:"success"`
+	Metadata       map[string]interface{} `json:"metadata"`
 }
 
 // EffectivenessAnalysisRequest 效果分析请求
 type EffectivenessAnalysisRequest struct {
-	LearnerID       string   `json:"learner_id" binding:"required"`
-	PathID          string   `json:"path_id" binding:"required"`
-	AdaptationID    string   `json:"adaptation_id" binding:"required"`
-	AnalysisPeriod  string   `json:"analysis_period"`
+	LearnerID        string   `json:"learner_id" binding:"required"`
+	PathID           string   `json:"path_id" binding:"required"`
+	AdaptationID     string   `json:"adaptation_id" binding:"required"`
+	AnalysisPeriod   string   `json:"analysis_period"`
 	MetricsToAnalyze []string `json:"metrics_to_analyze"`
 }
 
 // EffectivenessAnalysisResponse 效果分析响应
 type EffectivenessAnalysisResponse struct {
-	LearnerID        string                    `json:"learner_id"`
-	PathID           string                    `json:"path_id"`
-	AdaptationID     string                    `json:"adaptation_id"`
-	AnalysisPeriod   string                    `json:"analysis_period"`
-	OverallScore     float64                   `json:"overall_score"`
-	MetricAnalysis   []MetricAnalysisResult    `json:"metric_analysis"`
-	Improvements     []ImprovementSuggestion   `json:"improvements"`
-	NextSteps        []string                  `json:"next_steps"`
-	AnalyzedAt       string                    `json:"analyzed_at"`
+	LearnerID      string                  `json:"learner_id"`
+	PathID         string                  `json:"path_id"`
+	AdaptationID   string                  `json:"adaptation_id"`
+	AnalysisPeriod string                  `json:"analysis_period"`
+	OverallScore   float64                 `json:"overall_score"`
+	MetricAnalysis []MetricAnalysisResult  `json:"metric_analysis"`
+	Improvements   []ImprovementSuggestion `json:"improvements"`
+	NextSteps      []string                `json:"next_steps"`
+	AnalyzedAt     string                  `json:"analyzed_at"`
 }
 
 // MetricAnalysisResult 指标分析结果
 type MetricAnalysisResult struct {
-	MetricName      string  `json:"metric_name"`
-	BeforeValue     float64 `json:"before_value"`
-	AfterValue      float64 `json:"after_value"`
-	ChangePercent   float64 `json:"change_percent"`
-	Significance    string  `json:"significance"`
-	Interpretation  string  `json:"interpretation"`
+	MetricName     string  `json:"metric_name"`
+	BeforeValue    float64 `json:"before_value"`
+	AfterValue     float64 `json:"after_value"`
+	ChangePercent  float64 `json:"change_percent"`
+	Significance   string  `json:"significance"`
+	Interpretation string  `json:"interpretation"`
 }
 
 // ImprovementSuggestion 改进建议
 type ImprovementSuggestion struct {
-	Area            string  `json:"area"`
-	Suggestion      string  `json:"suggestion"`
-	ExpectedImpact  float64 `json:"expected_impact"`
-	ImplementationEffort string `json:"implementation_effort"`
+	Area                 string  `json:"area"`
+	Suggestion           string  `json:"suggestion"`
+	ExpectedImpact       float64 `json:"expected_impact"`
+	ImplementationEffort string  `json:"implementation_effort"`
 }
 
 // OutcomePredictionRequest 结果预测请求
 type OutcomePredictionRequest struct {
-	LearnerID       string                 `json:"learner_id" binding:"required"`
-	PathID          string                 `json:"path_id" binding:"required"`
-	CurrentState    map[string]interface{} `json:"current_state"`
-	PredictionHorizon string               `json:"prediction_horizon"`
-	Scenarios       []PredictionScenario   `json:"scenarios"`
+	LearnerID         string                 `json:"learner_id" binding:"required"`
+	PathID            string                 `json:"path_id" binding:"required"`
+	CurrentState      map[string]interface{} `json:"current_state"`
+	PredictionHorizon string                 `json:"prediction_horizon"`
+	Scenarios         []PredictionScenario   `json:"scenarios"`
 }
 
 // PredictionScenario 预测场景
 type PredictionScenario struct {
-	ScenarioID   string                 `json:"scenario_id"`
-	Name         string                 `json:"name"`
-	Description  string                 `json:"description"`
-	Parameters   map[string]interface{} `json:"parameters"`
+	ScenarioID  string                 `json:"scenario_id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Parameters  map[string]interface{} `json:"parameters"`
 }
 
 // OutcomePredictionResponse 结果预测响应
 type OutcomePredictionResponse struct {
-	LearnerID         string                    `json:"learner_id"`
-	PathID            string                    `json:"path_id"`
-	PredictionHorizon string                    `json:"prediction_horizon"`
-	Predictions       []OutcomePrediction       `json:"predictions"`
-	Confidence        float64                   `json:"confidence"`
-	Assumptions       []string                  `json:"assumptions"`
+	LearnerID         string                     `json:"learner_id"`
+	PathID            string                     `json:"path_id"`
+	PredictionHorizon string                     `json:"prediction_horizon"`
+	Predictions       []OutcomePrediction        `json:"predictions"`
+	Confidence        float64                    `json:"confidence"`
+	Assumptions       []string                   `json:"assumptions"`
 	Recommendations   []PredictionRecommendation `json:"recommendations"`
-	PredictedAt       string                    `json:"predicted_at"`
+	PredictedAt       string                     `json:"predicted_at"`
 }
 
 // OutcomePrediction 结果预测
 type OutcomePrediction struct {
-	ScenarioID        string  `json:"scenario_id"`
-	ScenarioName      string  `json:"scenario_name"`
-	SuccessProbability float64 `json:"success_probability"`
-	ExpectedCompletion string  `json:"expected_completion"`
-	PredictedScore     float64 `json:"predicted_score"`
+	ScenarioID         string   `json:"scenario_id"`
+	ScenarioName       string   `json:"scenario_name"`
+	SuccessProbability float64  `json:"success_probability"`
+	ExpectedCompletion string   `json:"expected_completion"`
+	PredictedScore     float64  `json:"predicted_score"`
 	RiskFactors        []string `json:"risk_factors"`
 	SuccessFactors     []string `json:"success_factors"`
 }
@@ -398,7 +401,7 @@ type PredictionRecommendation struct {
 
 // 辅助方法
 
-func (h *AdaptiveLearningHandler) validateAdaptationRequest(req *services.PathAdaptationRequest) error {
+func (h *AdaptiveLearningHandler) validateAdaptationRequest(req *adaptive.PathAdaptationRequest) error {
 	if req.LearnerID == "" {
 		return fmt.Errorf("学习者ID不能为空")
 	}
@@ -441,7 +444,6 @@ func (h *AdaptiveLearningHandler) parseIntQuery(c *gin.Context, key string, defa
 }
 
 // 占位符方法实现
-
 func (h *AdaptiveLearningHandler) getAdaptationRecommendations(ctx context.Context, req *AdaptationRecommendationRequest) ([]AdaptationRecommendation, error) {
 	// 这里应该调用服务层方法获取推荐
 	return []AdaptationRecommendation{
@@ -449,7 +451,7 @@ func (h *AdaptiveLearningHandler) getAdaptationRecommendations(ctx context.Conte
 			RecommendationID:   "rec-001",
 			Type:               "difficulty_adjustment",
 			Title:              "降低内容难度",
-			Description:        "基于最近的表现数据，建议适当降低内容难度以提高学习效果",
+			Description:        "基于最近的表现数据，建议适当降低内容难度以提高学习效率",
 			Priority:           "high",
 			ExpectedImpact:     0.25,
 			ImplementationTime: "immediate",
@@ -529,7 +531,7 @@ func (h *AdaptiveLearningHandler) predictLearningOutcome(ctx context.Context, re
 				ExpectedCompletion: "2024-03-15",
 				PredictedScore:     0.82,
 				RiskFactors:        []string{"时间压力", "难度跳跃"},
-				SuccessFactors:     []string{"良好基础", "高动机"},
+				SuccessFactors:     []string{"良好基础", "高动力学习"},
 			},
 		},
 		Confidence: 0.85,

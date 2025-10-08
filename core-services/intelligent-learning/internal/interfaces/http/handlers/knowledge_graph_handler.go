@@ -6,17 +6,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
 )
 
 // KnowledgeGraphHandler 知识图谱处理器
 type KnowledgeGraphHandler struct {
-	kgService *services.KnowledgeGraphAppService
+	kgService *knowledge.KnowledgeGraphAppService
 }
 
 // NewKnowledgeGraphHandler 创建新的知识图谱处理器
-func NewKnowledgeGraphHandler(kgService *services.KnowledgeGraphAppService) *KnowledgeGraphHandler {
+func NewKnowledgeGraphHandler(kgService *knowledge.KnowledgeGraphAppService) *KnowledgeGraphHandler {
 	return &KnowledgeGraphHandler{
 		kgService: kgService,
 	}
@@ -28,13 +26,13 @@ func NewKnowledgeGraphHandler(kgService *services.KnowledgeGraphAppService) *Kno
 // @Tags knowledge-graph
 // @Accept json
 // @Produce json
-// @Param node body services.CreateNodeRequest true "节点信息"
-// @Success 201 {object} services.NodeResponse
+// @Param node body knowledge.CreateNodeRequest true "节点信息"
+// @Success 201 {object} knowledge.NodeResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/nodes [post]
 func (h *KnowledgeGraphHandler) CreateNode(c *gin.Context) {
-	var req services.CreateNodeRequest
+	var req knowledge.CreateNodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -61,7 +59,7 @@ func (h *KnowledgeGraphHandler) CreateNode(c *gin.Context) {
 // @Tags knowledge-graph
 // @Produce json
 // @Param id path string true "节点ID"
-// @Success 200 {object} services.NodeResponse
+// @Success 200 {object} knowledge.NodeResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/nodes/{id} [get]
@@ -95,8 +93,8 @@ func (h *KnowledgeGraphHandler) GetNode(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "节点ID"
-// @Param node body services.UpdateNodeRequest true "更新信息"
-// @Success 200 {object} services.NodeResponse
+// @Param node body knowledge.UpdateNodeRequest true "更新信息"
+// @Success 200 {object} knowledge.NodeResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/nodes/{id} [put]
@@ -111,7 +109,7 @@ func (h *KnowledgeGraphHandler) UpdateNode(c *gin.Context) {
 		return
 	}
 
-	var req services.UpdateNodeRequest
+	var req knowledge.UpdateNodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -191,13 +189,13 @@ func (h *KnowledgeGraphHandler) DeleteNode(c *gin.Context) {
 // @Tags knowledge-graph
 // @Accept json
 // @Produce json
-// @Param relation body services.CreateRelationRequest true "关系信息"
-// @Success 201 {object} services.RelationResponse
+// @Param relation body knowledge.CreateRelationRequest true "关系信息"
+// @Success 201 {object} knowledge.RelationResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/relations [post]
 func (h *KnowledgeGraphHandler) CreateRelation(c *gin.Context) {
-	var req services.CreateRelationRequest
+	var req knowledge.CreateRelationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -224,7 +222,7 @@ func (h *KnowledgeGraphHandler) CreateRelation(c *gin.Context) {
 // @Tags knowledge-graph
 // @Produce json
 // @Param id path string true "关系ID"
-// @Success 200 {object} services.RelationResponse
+// @Success 200 {object} knowledge.RelationResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/relations/{id} [get]
@@ -258,8 +256,8 @@ func (h *KnowledgeGraphHandler) GetRelation(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "关系ID"
-// @Param relation body services.UpdateRelationRequest true "更新信息"
-// @Success 200 {object} services.RelationResponse
+// @Param relation body knowledge.UpdateRelationRequest true "更新信息"
+// @Success 200 {object} knowledge.RelationResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/relations/{id} [put]
@@ -274,7 +272,7 @@ func (h *KnowledgeGraphHandler) UpdateRelation(c *gin.Context) {
 		return
 	}
 
-	var req services.UpdateRelationRequest
+	var req knowledge.UpdateRelationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -354,7 +352,7 @@ func (h *KnowledgeGraphHandler) SearchNodes(c *gin.Context) {
 		}
 	}
 
-	req := &services.GraphSearchRequest{
+	req := &knowledge.GraphSearchRequest{
 		Query:     c.Query("q"),
 		NodeTypes: []string{c.Query("type")},
 		Limit:     limit,
@@ -507,12 +505,12 @@ func (h *KnowledgeGraphHandler) FindShortestPath(c *gin.Context) {
 // @Tags knowledge-graph
 // @Accept json
 // @Produce json
-// @Param request body services.LearningPathRequest true "学习路径请求"
-// @Success 200 {object} services.LearningPathResponse
+// @Param request body knowledge.LearningPathRequest true "学习路径请求"
+// @Success 200 {object} knowledge.LearningPathResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/learning-path [post]
 func (h *KnowledgeGraphHandler) GenerateLearningPath(c *gin.Context) {
-	var req services.LearningPathRequest
+	var req knowledge.LearningPathRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -539,12 +537,12 @@ func (h *KnowledgeGraphHandler) GenerateLearningPath(c *gin.Context) {
 // @Tags knowledge-graph
 // @Accept json
 // @Produce json
-// @Param request body services.ConceptMapRequest true "概念图请求"
-// @Success 200 {object} services.ConceptMapResponse
+// @Param request body knowledge.ConceptMapRequest true "概念图请求"
+// @Success 200 {object} knowledge.ConceptMapResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/concept-map [post]
 func (h *KnowledgeGraphHandler) GenerateConceptMap(c *gin.Context) {
-	var req services.ConceptMapRequest
+	var req knowledge.ConceptMapRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -571,12 +569,12 @@ func (h *KnowledgeGraphHandler) GenerateConceptMap(c *gin.Context) {
 // @Tags knowledge-graph
 // @Accept json
 // @Produce json
-// @Param request body services.GraphAnalysisRequest true "分析请求"
+// @Param request body knowledge.GraphAnalysisRequest true "分析请求"
 // @Success 200 {object} object
 // @Failure 400 {object} ErrorResponse
 // @Router /api/v1/knowledge-graph/analyze [post]
 func (h *KnowledgeGraphHandler) AnalyzeGraph(c *gin.Context) {
-	var req services.GraphAnalysisRequest
+	var req domainknowledge.GraphAnalysisRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request body",
@@ -639,29 +637,34 @@ func (h *KnowledgeGraphHandler) ValidateGraph(c *gin.Context) {
 	c.JSON(http.StatusOK, validation)
 }
 
-// 响应结构体
+// 响应结构
+// ErrorResponse 错误响应
+type ErrorResponse struct {
+	Error   string `json:"error"`
+	Message string `json:"message"`
+}
 
 // NodeSearchResponse 节点搜索响应
 type NodeSearchResponse struct {
-	Nodes  []*services.NodeResponse `json:"nodes"`
-	Total  int                      `json:"total"`
-	Limit  int                      `json:"limit"`
-	Offset int                      `json:"offset"`
-	Query  string                   `json:"query"`
+	Nodes  []*domainknowledge.NodeResponse `json:"nodes"`
+	Total  int                             `json:"total"`
+	Limit  int                             `json:"limit"`
+	Offset int                             `json:"offset"`
+	Query  string                          `json:"query"`
 }
 
 // NodeNeighborsResponse 节点邻居响应
 type NodeNeighborsResponse struct {
-	NodeID    uuid.UUID                `json:"node_id"`
-	Neighbors []*services.NodeResponse `json:"neighbors"`
-	Direction string                   `json:"direction"`
-	Limit     int                      `json:"limit"`
+	NodeID    uuid.UUID                 `json:"node_id"`
+	Neighbors []*knowledge.NodeResponse `json:"neighbors"`
+	Direction string                    `json:"direction"`
+	Limit     int                       `json:"limit"`
 }
 
 // ShortestPathResponse 最短路径响应
 type ShortestPathResponse struct {
-	FromID   uuid.UUID                `json:"from_id"`
-	ToID     uuid.UUID                `json:"to_id"`
-	Path     []*services.NodeResponse `json:"path"`
-	MaxDepth int                      `json:"max_depth"`
+	FromID   uuid.UUID                       `json:"from_id"`
+	ToID     uuid.UUID                       `json:"to_id"`
+	Path     []*domainknowledge.NodeResponse `json:"path"`
+	MaxDepth int                             `json:"max_depth"`
 }

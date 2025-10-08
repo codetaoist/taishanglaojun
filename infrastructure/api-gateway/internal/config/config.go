@@ -84,6 +84,7 @@ type SecurityConfig struct {
 
 // AuthConfig 认证配置
 type AuthConfig struct {
+	Enabled       bool          `yaml:"enabled" mapstructure:"enabled"`
 	JWTSecret     string        `yaml:"jwt_secret" mapstructure:"jwt_secret"`
 	TokenExpiry   time.Duration `yaml:"token_expiry" mapstructure:"token_expiry"`
 	RefreshExpiry time.Duration `yaml:"refresh_expiry" mapstructure:"refresh_expiry"`

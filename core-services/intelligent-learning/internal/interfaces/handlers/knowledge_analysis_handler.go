@@ -9,16 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
 )
 
 // KnowledgeAnalysisHandler 知识分析处理器
 type KnowledgeAnalysisHandler struct {
-	knowledgeAnalysisService *services.KnowledgeAnalysisService
+	knowledgeAnalysisService *knowledge.KnowledgeAnalysisService
 }
 
 // NewKnowledgeAnalysisHandler 创建知识分析处理器
-func NewKnowledgeAnalysisHandler(knowledgeAnalysisService *services.KnowledgeAnalysisService) *KnowledgeAnalysisHandler {
+func NewKnowledgeAnalysisHandler(knowledgeAnalysisService *knowledge.KnowledgeAnalysisService) *KnowledgeAnalysisHandler {
 	return &KnowledgeAnalysisHandler{
 		knowledgeAnalysisService: knowledgeAnalysisService,
 	}
@@ -26,17 +26,17 @@ func NewKnowledgeAnalysisHandler(knowledgeAnalysisService *services.KnowledgeAna
 
 // AnalyzeConceptRelationships 分析概念关系
 // @Summary 分析概念关系
-// @Description 分析知识图谱中概念之间的关系，识别概念集群、中心概念和弱连接
+// @Description 分析知识图谱中概念之间的关系，识别概念集群、中心概念和弱连接概念
 // @Tags 知识分析
 // @Accept json
 // @Produce json
-// @Param request body services.ConceptRelationshipAnalysisRequest true "概念关系分析请求"
-// @Success 200 {object} services.ConceptRelationshipAnalysisResponse "分析结果"
+// @Param request body knowledge.ConceptRelationshipAnalysisRequest true "概念关系分析请求"
+// @Success 200 {object} knowledge.ConceptRelationshipAnalysisResponse "分析结果"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
 // @Router /api/v1/knowledge-analysis/concept-relationships [post]
 func (h *KnowledgeAnalysisHandler) AnalyzeConceptRelationships(c *gin.Context) {
-	var req services.ConceptRelationshipAnalysisRequest
+	var req knowledge.ConceptRelationshipAnalysisRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request format",
@@ -71,13 +71,13 @@ func (h *KnowledgeAnalysisHandler) AnalyzeConceptRelationships(c *gin.Context) {
 // @Tags 知识分析
 // @Accept json
 // @Produce json
-// @Param request body services.DependencyGraphRequest true "依赖图构建请求"
-// @Success 200 {object} services.DependencyGraphResponse "依赖图构建结果"
+// @Param request body knowledge.DependencyGraphRequest true "依赖图构建请求"
+// @Success 200 {object} knowledge.DependencyGraphResponse "依赖图构建结果"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
 // @Router /api/v1/knowledge-analysis/dependency-graph [post]
 func (h *KnowledgeAnalysisHandler) BuildDependencyGraph(c *gin.Context) {
-	var req services.DependencyGraphRequest
+	var req knowledge.DependencyGraphRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request format",
@@ -109,13 +109,13 @@ func (h *KnowledgeAnalysisHandler) BuildDependencyGraph(c *gin.Context) {
 // @Tags 知识分析
 // @Accept json
 // @Produce json
-// @Param request body services.ContentRecommendationRequest true "内容推荐请求"
-// @Success 200 {object} services.ContentRecommendationResponse "内容推荐结果"
+// @Param request body knowledge.ContentRecommendationRequest true "内容推荐请求"
+// @Success 200 {object} knowledge.ContentRecommendationResponse "内容推荐结果"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
 // @Router /api/v1/knowledge-analysis/content-recommendations [post]
 func (h *KnowledgeAnalysisHandler) RecommendContent(c *gin.Context) {
-	var req services.ContentRecommendationRequest
+	var req knowledge.KnowledgeContentRecommendationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "Invalid request format",
@@ -146,7 +146,7 @@ func (h *KnowledgeAnalysisHandler) RecommendContent(c *gin.Context) {
 
 // GetConceptClusters 获取概念集群
 // @Summary 获取概念集群信息
-// @Description 获取指定知识图谱的概念集群分析结果
+// @Description 获取指定知识图谱的概念集群分析结果，包括概念集群、中心概念和弱连接概念
 // @Tags 知识分析
 // @Accept json
 // @Produce json
@@ -176,7 +176,7 @@ func (h *KnowledgeAnalysisHandler) GetConceptClusters(c *gin.Context) {
 	}
 
 	// 构建分析请求
-	req := services.ConceptRelationshipAnalysisRequest{
+	req := knowledge.ConceptRelationshipAnalysisRequest{
 		GraphID:        graphID,
 		AnalysisDepth:  3,
 		IncludeMetrics: includeMetrics,
@@ -193,7 +193,7 @@ func (h *KnowledgeAnalysisHandler) GetConceptClusters(c *gin.Context) {
 	}
 
 	// 过滤集群大小
-	filteredClusters := []services.ConceptCluster{}
+	filteredClusters := []knowledge.ConceptCluster{}
 	for _, cluster := range response.ConceptClusters {
 		if len(cluster.ConceptIDs) >= minClusterSize {
 			filteredClusters = append(filteredClusters, cluster)
@@ -201,12 +201,12 @@ func (h *KnowledgeAnalysisHandler) GetConceptClusters(c *gin.Context) {
 	}
 
 	clusterResponse := ConceptClustersResponse{
-		GraphID:         graphID,
-		Clusters:        filteredClusters,
-		TotalClusters:   len(filteredClusters),
-		AnalysisTime:    response.AnalysisTimestamp,
-		IncludeMetrics:  includeMetrics,
-		MinClusterSize:  minClusterSize,
+		GraphID:        graphID,
+		Clusters:       filteredClusters,
+		TotalClusters:  len(filteredClusters),
+		AnalysisTime:   response.AnalysisTimestamp,
+		IncludeMetrics: includeMetrics,
+		MinClusterSize: minClusterSize,
 	}
 
 	c.JSON(http.StatusOK, clusterResponse)
@@ -260,7 +260,7 @@ func (h *KnowledgeAnalysisHandler) GetLearningPath(c *gin.Context) {
 	includeOptional := c.Query("include_optional") == "true"
 
 	// 构建依赖图请求
-	req := services.DependencyGraphRequest{
+	req := knowledge.DependencyGraphRequest{
 		GraphID:         graphID,
 		RootConceptID:   targetConceptID,
 		MaxDepth:        maxDepth,
@@ -277,15 +277,15 @@ func (h *KnowledgeAnalysisHandler) GetLearningPath(c *gin.Context) {
 	}
 
 	pathResponse := LearningPathResponse{
-		GraphID:              graphID,
-		TargetConceptID:      targetConceptID,
-		DependencyLayers:     response.DependencyLayers,
-		CriticalPath:         response.CriticalPath,
-		OptionalPaths:        response.OptionalPaths,
-		LearningSequence:     response.LearningSequence,
-		EstimatedDuration:    response.EstimatedDuration,
+		GraphID:               graphID,
+		TargetConceptID:       targetConceptID,
+		DependencyLayers:      response.DependencyLayers,
+		CriticalPath:          response.CriticalPath,
+		OptionalPaths:         response.OptionalPaths,
+		LearningSequence:      response.LearningSequence,
+		EstimatedDuration:     response.EstimatedDuration,
 		DifficultyProgression: response.DifficultyProgression,
-		GeneratedAt:          time.Now(),
+		GeneratedAt:           time.Now(),
 	}
 
 	c.JSON(http.StatusOK, pathResponse)
@@ -299,7 +299,7 @@ func (h *KnowledgeAnalysisHandler) GetLearningPath(c *gin.Context) {
 // @Produce json
 // @Param learner_id path string true "学习者ID"
 // @Param concept_id query string false "概念ID"
-// @Param max_recommendations query int false "最大推荐数量"
+// @Param max_recommendations query int false "最大推荐数"
 // @Param personalization_level query string false "个性化级别"
 // @Param content_types query string false "内容类型（逗号分隔）"
 // @Success 200 {object} PersonalizedRecommendationsResponse "个性化推荐结果"
@@ -344,7 +344,7 @@ func (h *KnowledgeAnalysisHandler) GetPersonalizedRecommendations(c *gin.Context
 	}
 
 	// 构建推荐请求
-	req := services.ContentRecommendationRequest{
+	req := knowledge.KnowledgeContentRecommendationRequest{
 		LearnerID:            learnerID,
 		ConceptID:            conceptID,
 		PreferredTypes:       contentTypes,
@@ -401,63 +401,62 @@ func (h *KnowledgeAnalysisHandler) AnalyzeKnowledgeGaps(c *gin.Context) {
 	// 这里应该调用知识缺口分析服务
 	// 为了示例，我们创建一个模拟响应
 	response := KnowledgeGapAnalysisResponse{
-		LearnerID:   req.LearnerID,
-		GraphID:     req.GraphID,
-		AnalysisID:  uuid.New(),
-		Gaps:        []KnowledgeGap{},
+		LearnerID:       req.LearnerID,
+		GraphID:         req.GraphID,
+		AnalysisID:      uuid.New(),
+		Gaps:            []KnowledgeGap{},
 		Recommendations: []GapRecommendation{},
-		OverallScore: 0.75,
-		AnalyzedAt:  time.Now(),
+		OverallScore:    0.75,
+		AnalyzedAt:      time.Now(),
 	}
 
 	c.JSON(http.StatusOK, response)
 }
 
 // 响应结构体定义
-
-// ConceptClustersResponse 概念集群响应
+// KnowledgeGapAnalysisResponse 知识缺口分析响应
 type ConceptClustersResponse struct {
-	GraphID        uuid.UUID                      `json:"graph_id"`
-	Clusters       []services.ConceptCluster      `json:"clusters"`
-	TotalClusters  int                            `json:"total_clusters"`
-	AnalysisTime   time.Time                      `json:"analysis_time"`
-	IncludeMetrics bool                           `json:"include_metrics"`
-	MinClusterSize int                            `json:"min_cluster_size"`
+	GraphID        uuid.UUID                  `json:"graph_id"`
+	Clusters       []knowledge.ConceptCluster `json:"clusters"`
+	TotalClusters  int                        `json:"total_clusters"`
+	AnalysisTime   time.Time                  `json:"analysis_time"`
+	IncludeMetrics bool                       `json:"include_metrics"`
+	MinClusterSize int                        `json:"min_cluster_size"`
 }
 
 // LearningPathResponse 学习路径响应
 type LearningPathResponse struct {
-	GraphID               uuid.UUID                        `json:"graph_id"`
-	TargetConceptID       *uuid.UUID                       `json:"target_concept_id"`
-	DependencyLayers      []services.DependencyLayer       `json:"dependency_layers"`
-	CriticalPath          []uuid.UUID                      `json:"critical_path"`
-	OptionalPaths         [][]uuid.UUID                    `json:"optional_paths"`
-	LearningSequence      []services.LearningStep          `json:"learning_sequence"`
-	EstimatedDuration     time.Duration                    `json:"estimated_duration"`
-	DifficultyProgression []services.DifficultyPoint       `json:"difficulty_progression"`
-	GeneratedAt           time.Time                        `json:"generated_at"`
+	GraphID               uuid.UUID                   `json:"graph_id"`
+	TargetConceptID       *uuid.UUID                  `json:"target_concept_id"`
+	DependencyLayers      []knowledge.DependencyLayer `json:"dependency_layers"`
+	CriticalPath          []uuid.UUID                 `json:"critical_path"`
+	OptionalPaths         [][]uuid.UUID               `json:"optional_paths"`
+	LearningSequence      []knowledge.LearningStep    `json:"learning_sequence"`
+	EstimatedDuration     time.Duration               `json:"estimated_duration"`
+	DifficultyProgression []knowledge.DifficultyPoint `json:"difficulty_progression"`
+	GeneratedAt           time.Time                   `json:"generated_at"`
 }
 
 // PersonalizedRecommendationsResponse 个性化推荐响应
 type PersonalizedRecommendationsResponse struct {
-	LearnerID              uuid.UUID                           `json:"learner_id"`
-	ConceptID              *uuid.UUID                          `json:"concept_id"`
-	Recommendations        []services.KnowledgeContentRecommendation    `json:"recommendations"`
-	PersonalizationFactors []services.PersonalizationFactor   `json:"personalization_factors"`
-	LearningPath           []uuid.UUID                         `json:"learning_path"`
-	TotalRecommendations   int                                 `json:"total_recommendations"`
-	PersonalizationLevel   string                              `json:"personalization_level"`
-	GeneratedAt            time.Time                           `json:"generated_at"`
-	ValidUntil             time.Time                           `json:"valid_until"`
+	LearnerID              uuid.UUID                                  `json:"learner_id"`
+	ConceptID              *uuid.UUID                                 `json:"concept_id"`
+	Recommendations        []knowledge.KnowledgeContentRecommendation `json:"recommendations"`
+	PersonalizationFactors []knowledge.KnowledgePersonalizationFactor `json:"personalization_factors"`
+	LearningPath           []uuid.UUID                                `json:"learning_path"`
+	TotalRecommendations   int                                        `json:"total_recommendations"`
+	PersonalizationLevel   string                                     `json:"personalization_level"`
+	GeneratedAt            time.Time                                  `json:"generated_at"`
+	ValidUntil             time.Time                                  `json:"valid_until"`
 }
 
 // KnowledgeGapAnalysisRequest 知识缺口分析请求
 type KnowledgeGapAnalysisRequest struct {
-	LearnerID     uuid.UUID   `json:"learner_id" binding:"required"`
-	GraphID       uuid.UUID   `json:"graph_id" binding:"required"`
-	TargetSkills  []string    `json:"target_skills,omitempty"`
-	CurrentLevel  string      `json:"current_level,omitempty"`
-	AnalysisDepth int         `json:"analysis_depth"`
+	LearnerID     uuid.UUID `json:"learner_id" binding:"required"`
+	GraphID       uuid.UUID `json:"graph_id" binding:"required"`
+	TargetSkills  []string  `json:"target_skills,omitempty"`
+	CurrentLevel  string    `json:"current_level,omitempty"`
+	AnalysisDepth int       `json:"analysis_depth"`
 }
 
 // KnowledgeGapAnalysisResponse 知识缺口分析响应
@@ -484,13 +483,13 @@ type KnowledgeGap struct {
 
 // GapRecommendation 缺口推荐
 type GapRecommendation struct {
-	GapID           uuid.UUID `json:"gap_id"`
-	RecommendationType string `json:"recommendation_type"`
-	ContentID       *uuid.UUID `json:"content_id,omitempty"`
-	Description     string    `json:"description"`
-	EstimatedTime   time.Duration `json:"estimated_time"`
-	Priority        string    `json:"priority"`
-	ExpectedImprovement float64 `json:"expected_improvement"`
+	GapID               uuid.UUID     `json:"gap_id"`
+	RecommendationType  string        `json:"recommendation_type"`
+	ContentID           *uuid.UUID    `json:"content_id,omitempty"`
+	Description         string        `json:"description"`
+	EstimatedTime       time.Duration `json:"estimated_time"`
+	Priority            string        `json:"priority"`
+	ExpectedImprovement float64       `json:"expected_improvement"`
 }
 
 // ErrorResponse 错误响应
@@ -505,7 +504,7 @@ func parseCommaSeparated(str string) []string {
 	if str == "" {
 		return []string{}
 	}
-	
+
 	var result []string
 	for _, item := range strings.Split(str, ",") {
 		trimmed := strings.TrimSpace(item)

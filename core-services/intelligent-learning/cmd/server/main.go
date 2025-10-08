@@ -13,7 +13,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/content"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation"
 	domainservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/infrastructure/config"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/infrastructure/external"
@@ -47,19 +52,19 @@ func main() {
 	logrus.SetLevel(logrus.InfoLevel)
 
 	// 加载配置
-	cfg, err := config.Load("")
+	cfg, err := config.Load("configs/config.yaml")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// 初始化数据库管理器
+	// 初始化数据库管理
 	dbManager, err := persistence.NewDatabaseManager(&cfg.Storage)
 	if err != nil {
 		log.Fatalf("Failed to initialize database manager: %v", err)
 	}
 	defer dbManager.Close()
 
-	// 健康检查
+	// 健康检查数据库连接
 	healthResults := dbManager.Health(context.Background())
 	for name, err := range healthResults {
 		if err != nil {
@@ -87,25 +92,29 @@ func main() {
 		contentRepo,
 		knowledgeGraphRepo,
 	)
-	adaptiveLearningService := services.NewAdaptiveLearningService(
+
+	// 创建学习路径服务适配层
+	learningPathServiceAdapter := adaptive.NewLearningPathServiceAdapter(learningPathService)
+
+	adaptiveLearningService := adaptive.NewAdaptiveLearningService(
 		learnerRepo,
 		contentRepo,
 		knowledgeGraphRepo,
-		analyticsService,    // 正确的参数类型
-		learningPathService, // 正确的参数类型
+		analyticsService,           // 正确的参数类型
+		learningPathServiceAdapter, // 使用适配层
 	)
 
 	// 初始化应用服务
-	learnerService := services.NewLearnerService(
+	learnerService := learner.NewLearnerService(
 		learnerRepo,
 		knowledgeGraphRepo,
 		contentRepo,
-		learningPathService,
+		learningPathServiceAdapter,
 		analyticsService,
 		kgDomainService,
 	)
 
-	contentService := services.NewContentService(
+	contentService := content.NewContentService(
 		contentRepo,
 		learnerRepo,
 		knowledgeGraphRepo,
@@ -114,8 +123,8 @@ func main() {
 
 	// 使用默认的知识图谱ID
 	defaultGraphID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
-	
-	kgAppService := services.NewKnowledgeGraphAppService(
+
+	kgAppService := knowledge.NewKnowledgeGraphAppService(
 		knowledgeGraphRepo,
 		contentRepo,
 		learnerRepo,
@@ -125,7 +134,7 @@ func main() {
 	)
 
 	// 初始化进度追踪服务
-	progressService := services.NewProgressTrackingService(
+	progressService := analytics.NewProgressTrackingService(
 		learnerRepo,
 		contentRepo,
 		knowledgeGraphRepo,
@@ -133,7 +142,7 @@ func main() {
 	)
 
 	// 初始化知识分析服务
-	knowledgeAnalysisService := services.NewKnowledgeAnalysisService(
+	knowledgeAnalysisService := knowledge.NewKnowledgeAnalysisService(
 		knowledgeGraphRepo,
 		contentRepo,
 		learnerRepo,
@@ -143,68 +152,86 @@ func main() {
 
 	// 初始化外部服务
 	locationService := external.NewMockLocationService()
-	deviceService := external.NewMockDeviceService()
 	weatherService := external.NewMockWeatherService()
 
-	// 初始化推荐系统核心组件
-	personalizationEngine := services.NewPersonalizationEngine(
+	// 创建适配层
+	behaviorRepoAdapter := recommendation.NewBehaviorRepositoryAdapter(recommendationRepo)
+	eventStoreAdapter := recommendation.NewEventStoreAdapter(analyticsService)
+	environmentRepoAdapter := recommendation.NewEnvironmentRepositoryAdapter(recommendationRepo)
+	locationServiceAdapter := recommendation.NewLocationServiceAdapter(locationService)
+	weatherServiceAdapter := recommendation.NewWeatherServiceAdapter(weatherService)
+	contentRepoAdapter := recommendation.NewContentRepositoryAdapter(contentRepo)
+	userRepoAdapter := recommendation.NewUserRepositoryAdapter(learnerRepo)
+
+	// 初始化用户行为跟踪器
+	userBehaviorTracker := domainservices.NewUserBehaviorTracker(
+		behaviorRepoAdapter,
+		eventStoreAdapter,
+	)
+
+	preferenceAnalyzer := domainservices.NewPreferenceAnalyzer(
+		userBehaviorTracker,
+		contentRepoAdapter,
+		userRepoAdapter,
+	)
+
+	contextAnalyzer := domainservices.NewContextAnalyzer(
+		userBehaviorTracker,
+		preferenceAnalyzer,
+		environmentRepoAdapter,
+		locationServiceAdapter,
+		weatherServiceAdapter,
+	)
+
+	// 创建一个简单的推荐模型实现
+	recommendationModel := &recommendation.SimpleRecommendationModel{}
+
+	// 初始化个性化引擎
+	personalizationEngine := domainservices.NewPersonalizationEngine(
 		learnerRepo,
 		contentRepo,
-		recommendationRepo,
-		analyticsService,
-	)
-
-	userBehaviorTracker := services.NewUserBehaviorTracker(
-		recommendationRepo,
-		analyticsService,
-	)
-
-	preferenceAnalyzer := services.NewPreferenceAnalyzer(
-		recommendationRepo,
-		learnerRepo,
-		analyticsService,
-	)
-
-	contextAnalyzer := services.NewContextAnalyzer(
-		locationService,
-		deviceService,
-		weatherService,
-		recommendationRepo,
+		knowledgeGraphRepo,
+		userBehaviorTracker,
+		preferenceAnalyzer,
+		contextAnalyzer,
+		recommendationModel,
 	)
 
 	// 初始化实时推荐服务
-	realtimeRecommendationService := services.NewRealtimeRecommendationService(
+	realtimeRecommendationService := recommendation.NewRealtimeRecommendationService(
 		personalizationEngine,
 		userBehaviorTracker,
+		preferenceAnalyzer,
 		contextAnalyzer,
-		recommendationRepo,
 	)
 
 	// 初始化推荐集成服务
-	recommendationIntegrationService := services.NewRecommendationIntegrationService(
+	recommendationIntegrationService := recommendation.NewRecommendationIntegrationService(
 		personalizationEngine,
-		realtimeRecommendationService,
 		userBehaviorTracker,
+		preferenceAnalyzer,
 		contextAnalyzer,
+		realtimeRecommendationService,
+		nil, // 使用默认配置
 	)
 
 	// 设置路由
 	router := routes.SetupRoutes(&routes.RouterConfig{
-		LearnerService:                    learnerService,
-		ContentService:                    contentService,
-		KnowledgeGraphService:             kgAppService,
-		ProgressTrackingService:           progressService,
-		AdaptiveLearningService:           adaptiveLearningService,
-		KnowledgeAnalysisService:          knowledgeAnalysisService,
-		PersonalizationEngine:             personalizationEngine,
-		UserBehaviorTracker:               userBehaviorTracker,
-		PreferenceAnalyzer:                preferenceAnalyzer,
-		ContextAnalyzer:                   contextAnalyzer,
-		RealtimeRecommendationService:     realtimeRecommendationService,
-		RecommendationIntegrationService:  recommendationIntegrationService,
+		LearnerService:                   learnerService,
+		ContentService:                   contentService,
+		KnowledgeGraphService:            kgAppService,
+		ProgressTrackingService:          progressService,
+		AdaptiveLearningService:          adaptiveLearningService,
+		KnowledgeAnalysisService:         knowledgeAnalysisService,
+		PersonalizationEngine:            personalizationEngine,
+		UserBehaviorTracker:              userBehaviorTracker,
+		PreferenceAnalyzer:               preferenceAnalyzer,
+		ContextAnalyzer:                  contextAnalyzer,
+		RealtimeRecommendationService:    realtimeRecommendationService,
+		RecommendationIntegrationService: recommendationIntegrationService,
 	})
 
-	// 创建HTTP服务器
+	// 创建HTTP服务
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
 		Handler:      router,
@@ -213,7 +240,7 @@ func main() {
 		IdleTimeout:  time.Duration(cfg.Server.IdleTimeout) * time.Second,
 	}
 
-	// 启动服务器
+	// 启动服务
 	go func() {
 		logrus.WithFields(logrus.Fields{
 			"port":    cfg.Server.Port,

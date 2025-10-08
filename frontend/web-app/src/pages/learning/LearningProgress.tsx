@@ -42,7 +42,7 @@ import {
   PlayCircleOutlined,
   PauseCircleOutlined,
   StarOutlined,
-  TargetOutlined,
+  AimOutlined,
   RocketOutlined,
   BulbOutlined,
   HeartOutlined,

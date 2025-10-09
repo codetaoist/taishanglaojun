@@ -5,18 +5,19 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	analyticsServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
 )
 
 // ProgressWebSocketHandler WebSocket进度处理器
 type ProgressWebSocketHandler struct {
-	progressService *analytics.ProgressTrackingService
+	progressService analyticsServices.ProgressTrackingService
 	upgrader        websocket.Upgrader
 	clients         map[uuid.UUID]*Client
 	clientsMutex    sync.RWMutex
@@ -67,7 +68,7 @@ type SubscriptionMessage struct {
 
 // NewProgressWebSocketHandler 创建新的WebSocket处理
 // 该处理用于实时跟踪学习者的学习进度和互动数据。
-func NewProgressWebSocketHandler(progressService *analytics.ProgressTrackingService) *ProgressWebSocketHandler {
+func NewProgressWebSocketHandler(progressService analyticsServices.ProgressTrackingService) *ProgressWebSocketHandler {
 	handler := &ProgressWebSocketHandler{
 		progressService: progressService,
 		upgrader: websocket.Upgrader{
@@ -288,12 +289,12 @@ func (c *Client) handleProgressUpdate(data json.RawMessage) {
 	}
 
 	// 构建进度更新请求
-	req := &analytics.ProgressUpdateRequest{
+	req := &analyticsServices.ProgressUpdateRequest{
 		LearnerID:       c.LearnerID,
 		ContentID:       updateMsg.ContentID,
 		Progress:        updateMsg.Progress,
-		TimeSpent:       updateMsg.TimeSpent,
-		LastPosition:    updateMsg.LastPosition,
+		TimeSpent:       int64(updateMsg.TimeSpent),
+		LastPosition:    strconv.Itoa(updateMsg.LastPosition),
 		InteractionData: updateMsg.InteractionData,
 	}
 

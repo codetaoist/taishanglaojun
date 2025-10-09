@@ -130,6 +130,64 @@ type RealtimeRecommendationEngine struct {
 	Performance *EnginePerformance     `json:"performance"`
 }
 
+// PersonalizationEngine 个性化引擎
+type PersonalizationEngine struct {
+	EngineID               string                        `json:"engine_id"`
+	EngineType             string                        `json:"engine_type"`
+	PersonalizationModels  map[string]*PersonalizationModel `json:"personalization_models"`
+	LearnerModels          map[string]*LearnerModel      `json:"learner_models"`
+	PersonalizationRules   []*PersonalizationRule       `json:"personalization_rules"`
+	PersonalizationHistory []*PersonalizationRecord     `json:"personalization_history"`
+	PersonalizationMetrics *PersonalizationMetrics      `json:"personalization_metrics"`
+	Config                 map[string]interface{}       `json:"config"`
+	Metadata               map[string]interface{}       `json:"metadata"`
+	IsActive               bool                          `json:"is_active"`
+	Performance            *EnginePerformance           `json:"performance"`
+}
+
+// PersonalizationModel 个性化模型
+type PersonalizationModel struct {
+	ModelID     string                 `json:"model_id"`
+	ModelType   string                 `json:"model_type"`
+	Features    []string               `json:"features"`
+	Parameters  map[string]interface{} `json:"parameters"`
+	Accuracy    float64                `json:"accuracy"`
+	LastTrained time.Time              `json:"last_trained"`
+}
+
+// LearnerModel 学习者模型
+type LearnerModel struct {
+	LearnerID    string                 `json:"learner_id"`
+	ModelData    map[string]interface{} `json:"model_data"`
+	LastUpdated  time.Time              `json:"last_updated"`
+	Confidence   float64                `json:"confidence"`
+}
+
+// PersonalizationRule 个性化规则
+type PersonalizationRule struct {
+	RuleID      string                 `json:"rule_id"`
+	Condition   string                 `json:"condition"`
+	Action      string                 `json:"action"`
+	Priority    int                    `json:"priority"`
+	IsActive    bool                   `json:"is_active"`
+}
+
+// PersonalizationRecord 个性化记录
+type PersonalizationRecord struct {
+	RecordID    string                 `json:"record_id"`
+	LearnerID   string                 `json:"learner_id"`
+	Action      string                 `json:"action"`
+	Result      map[string]interface{} `json:"result"`
+	Timestamp   time.Time              `json:"timestamp"`
+}
+
+// PersonalizationMetrics 个性化指标
+type PersonalizationMetrics struct {
+	TotalPersonalizations int                    `json:"total_personalizations"`
+	SuccessRate           float64                `json:"success_rate"`
+	Metadata              map[string]interface{} `json:"metadata"`
+}
+
 // PersonalizationEngineImpl 个性化引擎实现
 type PersonalizationEngineImpl struct {
 	EngineID    string                 `json:"engine_id"`
@@ -538,6 +596,18 @@ type AnalysisModel struct {
 	Config      map[string]interface{} `json:"config"`
 	IsActive    bool                   `json:"is_active"`
 	Performance *ModelPerformance      `json:"performance"`
+}
+
+// ModelPerformance 模型性能
+type ModelPerformance struct {
+	Accuracy       float64                `json:"accuracy"`
+	Precision      float64                `json:"precision"`
+	Recall         float64                `json:"recall"`
+	F1Score        float64                `json:"f1_score"`
+	ProcessingTime time.Duration          `json:"processing_time"`
+	MemoryUsage    int64                  `json:"memory_usage"`
+	LastEvaluated  time.Time              `json:"last_evaluated"`
+	Metadata       map[string]interface{} `json:"metadata"`
 }
 
 // AnalyzerPerformance 分析器性能

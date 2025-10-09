@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/interfaces"
 	"strconv"
 	"strings"
 )
@@ -20,16 +20,16 @@ type ContentService struct {
 	contentRepo        repositories.LearningContentRepository
 	learnerRepo        repositories.LearnerRepository
 	knowledgeGraphRepo repositories.KnowledgeGraphRepository
-	analyticsService   analytics.LearningAnalyticsService
+	analyticsService   interfaces.LearningAnalyticsService
 }
 
 // NewContentService 创建新的学习内容应用服务
 func NewContentService(
 	contentRepo repositories.LearningContentRepository,
-	learnerRepo repositories.LearnerRepository,
 	knowledgeGraphRepo repositories.KnowledgeGraphRepository,
-	analyticsService analytics.LearningAnalyticsService,
-) *ContentService {
+	learnerRepo repositories.LearnerRepository,
+	analyticsService interfaces.LearningAnalyticsService,
+) *ContentService { {
 	return &ContentService{
 		contentRepo:        contentRepo,
 		learnerRepo:        learnerRepo,

@@ -8,16 +8,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	analyticsServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
 )
 
 // ProgressHandler 进度追踪处理器
 type ProgressHandler struct {
-	progressService *analytics.ProgressTrackingService
+	progressService analyticsServices.ProgressTrackingService
 }
 
 // NewProgressHandler 创建新的进度处理器
-func NewProgressHandler(progressService *analytics.ProgressTrackingService) *ProgressHandler {
+func NewProgressHandler(progressService analyticsServices.ProgressTrackingService) *ProgressHandler {
 	return &ProgressHandler{
 		progressService: progressService,
 	}
@@ -29,14 +29,14 @@ func NewProgressHandler(progressService *analytics.ProgressTrackingService) *Pro
 // @Tags 进度追踪
 // @Accept json
 // @Produce json
-// @Param request body analytics.ProgressUpdateRequest true "进度更新请求"
-// @Success 200 {object} analytics.ProgressResponse "进度更新响应"
+// @Param request body analyticsServices.ProgressUpdateRequest true "进度更新请求"
+// @Success 200 {object} analyticsServices.ProgressResponse "进度更新响应"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 404 {object} ErrorResponse "学习者或内容不存在"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
 // @Router /api/v1/progress/update [post]
 func (h *ProgressHandler) UpdateProgress(c *gin.Context) {
-	var req analytics.ProgressUpdateRequest
+	var req analyticsServices.ProgressUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
@@ -80,7 +80,7 @@ func (h *ProgressHandler) UpdateProgress(c *gin.Context) {
 // @Param period query string false "报告周期" Enums(daily,weekly,monthly,custom) default(weekly)
 // @Param start_date query string false "开始日期 (YYYY-MM-DD)"
 // @Param end_date query string false "结束日期 (YYYY-MM-DD)"
-// @Success 200 {object} analytics.LearningReport "学习报告"
+// @Success 200 {object} analyticsServices.LearningReport "学习报告"
 // @Failure 400 {object} ErrorResponse "请求参数错误"
 // @Failure 404 {object} ErrorResponse "学习者不存在"
 // @Failure 500 {object} ErrorResponse "服务器内部错误"
@@ -257,7 +257,7 @@ func (h *ProgressHandler) BatchUpdateProgress(c *gin.Context) {
 // 辅助方法
 
 // validateProgressUpdateRequest 验证进度更新请求
-func (h *ProgressHandler) validateProgressUpdateRequest(req *analytics.ProgressUpdateRequest) error {
+func (h *ProgressHandler) validateProgressUpdateRequest(req *analyticsServices.ProgressUpdateRequest) error {
 	if req.LearnerID == uuid.Nil {
 		return fmt.Errorf("学习者ID不能为空")
 	}
@@ -274,7 +274,7 @@ func (h *ProgressHandler) validateProgressUpdateRequest(req *analytics.ProgressU
 }
 
 // parseReportPeriod 解析报告周期
-func (h *ProgressHandler) parseReportPeriod(period, startDateStr, endDateStr string) (*analytics.ReportPeriod, error) {
+func (h *ProgressHandler) parseReportPeriod(period, startDateStr, endDateStr string) (*analyticsServices.ReportPeriod, error) {
 	now := time.Now()
 	var startDate, endDate time.Time
 
@@ -313,7 +313,7 @@ func (h *ProgressHandler) parseReportPeriod(period, startDateStr, endDateStr str
 		return nil, fmt.Errorf("不支持的报告周期: %s", period)
 	}
 
-	return &analytics.ReportPeriod{
+	return &analyticsServices.ReportPeriod{
 		StartDate: startDate,
 		EndDate:   endDate,
 		Type:      period,
@@ -338,9 +338,9 @@ type ProgressSummaryResponse struct {
 	ContentInProgress   int                                `json:"content_in_progress"`
 	CurrentStreak       int                                `json:"current_streak"`
 	WeeklyGoalProgress  float64                            `json:"weekly_goal_progress"`
-	RecentAchievements  []analytics.ProgressAchievement    `json:"recent_achievements"`
+	RecentAchievements  []analyticsServices.ProgressAchievement    `json:"recent_achievements"`
 	ActiveContent       []ActiveContentInfo                `json:"active_content"`
-	NextRecommendations []analytics.NextStepRecommendation `json:"next_recommendations"`
+	NextRecommendations []analyticsServices.NextStepRecommendation `json:"next_recommendations"`
 	UpdatedAt           time.Time                          `json:"updated_at"`
 }
 
@@ -365,8 +365,8 @@ type ContentProgressResponse struct {
 	IsCompleted      bool                     `json:"is_completed"`
 	CompletedAt      *time.Time               `json:"completed_at"`
 	QuizScores       map[uuid.UUID]float64    `json:"quiz_scores"`
-	Notes            []analytics.NoteData     `json:"notes"`
-	Bookmarks        []analytics.BookmarkData `json:"bookmarks"`
+	Notes            []analyticsServices.NoteData     `json:"notes"`
+	Bookmarks        []analyticsServices.BookmarkData `json:"bookmarks"`
 	InteractionCount int                      `json:"interaction_count"`
 	PerformanceScore float64                  `json:"performance_score"`
 	EngagementLevel  string                   `json:"engagement_level"`
@@ -375,7 +375,7 @@ type ContentProgressResponse struct {
 
 // BatchProgressUpdateRequest 批量进度更新请求
 type BatchProgressUpdateRequest struct {
-	Updates []analytics.ProgressUpdateRequest `json:"updates" validate:"required,min=1,max=50"`
+	Updates []analyticsServices.ProgressUpdateRequest `json:"updates" validate:"required,min=1,max=50"`
 }
 
 // BatchProgressUpdateResponse 批量进度更新响应
@@ -391,7 +391,7 @@ type BatchUpdateResult struct {
 	LearnerID uuid.UUID                   `json:"learner_id"`
 	ContentID uuid.UUID                   `json:"content_id"`
 	Success   bool                        `json:"success"`
-	Response  *analytics.ProgressResponse `json:"response,omitempty"`
+	Response  *analyticsServices.ProgressResponse `json:"response,omitempty"`
 	Error     string                      `json:"error,omitempty"`
 }
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/interfaces"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
@@ -19,7 +20,7 @@ type ProgressTrackingService struct {
 	learnerRepo         repositories.LearnerRepository
 	contentRepo         repositories.LearningContentRepository
 	knowledgeGraphRepo  repositories.KnowledgeGraphRepository
-	analyticsService    LearningAnalyticsService
+	analyticsService    interfaces.LearningAnalyticsService
 }
 
 // NewProgressTrackingService 创建新的进度追踪服务
@@ -27,7 +28,7 @@ func NewProgressTrackingService(
 	learnerRepo repositories.LearnerRepository,
 	contentRepo repositories.LearningContentRepository,
 	knowledgeGraphRepo repositories.KnowledgeGraphRepository,
-	analyticsService LearningAnalyticsService,
+	analyticsService interfaces.LearningAnalyticsService,
 ) *ProgressTrackingService {
 	return &ProgressTrackingService{
 		learnerRepo:        learnerRepo,

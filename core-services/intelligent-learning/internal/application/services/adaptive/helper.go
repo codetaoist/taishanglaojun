@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/shared"
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
@@ -534,18 +535,22 @@ func (e *AdaptiveLearningEngine) AdaptToRealtimePerformance(
 	learnerID uuid.UUID,
 	currentPerformance *PerformanceData,
 	currentStrategy *LearningStrategy,
-) (*AdaptationResponse, error) {
+) (*shared.AdaptationResponse, error) {
 	// 分析性能变化
 	performanceAnalysis := e.analyzePerformanceChange(learnerID, currentPerformance)
 	
 	// 检查是否需要适应
 	if !e.shouldAdaptToPerformance(performanceAnalysis) {
-		return &AdaptationResponse{
-			Success:    true,
-			Confidence: 1.0,
-			Explanation: &AdaptationExplanation{
-				Reason: "No adaptation needed - performance within acceptable range",
+		return &shared.AdaptationResponse{
+			ResponseID: uuid.New().String(),
+			Data: map[string]interface{}{
+				"success":    true,
+				"confidence": 1.0,
+				"explanation": map[string]interface{}{
+					"reason": "No adaptation needed - performance within acceptable range",
+				},
 			},
+			Metadata: make(map[string]interface{}),
 		}, nil
 	}
 	
@@ -562,23 +567,25 @@ func (e *AdaptiveLearningEngine) AdaptToRealtimePerformance(
 	}
 	
 	// 构建响应
-	response := &AdaptationResponse{
-		RequestID:       uuid.New(),
-		ResponseID:      uuid.New(),
-		Success:         true,
-		AdaptedStrategy: adaptedStrategy,
-		AdaptationChanges: []*AdaptationChange{
-			{
-				Type:        "performance_based",
-				Description: selectedAdaptation.Description,
-				Confidence:  selectedAdaptation.Confidence,
-				Metadata:    selectedAdaptation.Metadata,
+	response := &shared.AdaptationResponse{
+		ResponseID: uuid.New().String(),
+		Data: map[string]interface{}{
+			"request_id":       uuid.New().String(),
+			"success":         true,
+			"adapted_strategy": adaptedStrategy,
+			"adaptation_changes": []map[string]interface{}{
+				{
+					"type":        "performance_based",
+					"description": selectedAdaptation.Description,
+					"confidence":  selectedAdaptation.Confidence,
+					"metadata":    selectedAdaptation.Metadata,
+				},
 			},
+			"confidence":      selectedAdaptation.Confidence,
+			"processing_time": time.Since(time.Now()).String(),
+			"timestamp":       time.Now(),
 		},
-		Confidence:     selectedAdaptation.Confidence,
-		ProcessingTime: time.Since(time.Now()),
-		Timestamp:      time.Now(),
-		Metadata:       make(map[string]interface{}),
+		Metadata: make(map[string]interface{}),
 	}
 	
 	return response, nil

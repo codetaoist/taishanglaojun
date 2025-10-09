@@ -10,6 +10,7 @@ import (
 
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/interfaces"
 )
 
 // TimeSlot 时间段
@@ -74,8 +75,8 @@ type AdaptiveLearningService struct {
 	learnerRepo         repositories.LearnerRepository
 	contentRepo         repositories.LearningContentRepository
 	knowledgeGraphRepo  repositories.KnowledgeGraphRepository
-	analyticsService    LearningAnalyticsService
-	pathService         LearningPathService
+	analyticsService    interfaces.LearningAnalyticsService
+	pathService         interfaces.LearningPathService
 }
 
 // NewAdaptiveLearningService 创建自适应学习服务
@@ -83,8 +84,8 @@ func NewAdaptiveLearningService(
 	learnerRepo repositories.LearnerRepository,
 	contentRepo repositories.LearningContentRepository,
 	knowledgeGraphRepo repositories.KnowledgeGraphRepository,
-	analyticsService LearningAnalyticsService,
-	pathService LearningPathService,
+	analyticsService interfaces.LearningAnalyticsService,
+	pathService interfaces.LearningPathService,
 ) *AdaptiveLearningService {
 	return &AdaptiveLearningService{
 		learnerRepo:        learnerRepo,

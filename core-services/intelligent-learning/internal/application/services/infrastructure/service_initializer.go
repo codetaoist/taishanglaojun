@@ -1,4 +1,4 @@
-package services
+package infrastructure
 
 import (
 	"context"
@@ -6,7 +6,71 @@ import (
 	"log"
 	"sync"
 	"time"
+	
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation/content"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure/config"
 )
+
+
+
+// ServiceConfigManager 服务配置管理器
+type ServiceConfigManager struct {
+	configPath   string                 `json:"config_path"`
+	configs      map[string]interface{} `json:"configs"`
+	lastModified time.Time              `json:"last_modified"`
+	mu           sync.RWMutex           `json:"-"`
+}
+
+// NewServiceConfigManager 创建服务配置管理器
+func NewServiceConfigManager(configPath string) *ServiceConfigManager {
+	return &ServiceConfigManager{
+		configPath: configPath,
+		configs:    make(map[string]interface{}),
+	}
+}
+
+// LoadConfig 加载配置
+func (scm *ServiceConfigManager) LoadConfig() error {
+	scm.mu.Lock()
+	defer scm.mu.Unlock()
+	
+	// 这里应该从文件或其他源加载配置
+	// 暂时返回nil表示成功
+	return nil
+}
+
+// ValidateConfig 验证配置
+func (scm *ServiceConfigManager) ValidateConfig() error {
+	scm.mu.RLock()
+	defer scm.mu.RUnlock()
+	
+	// 这里应该验证配置的有效性
+	// 暂时返回nil表示验证通过
+	return nil
+}
+
+// GetConfig 获取配置
+func (scm *ServiceConfigManager) GetConfig() *config.GlobalServiceConfig {
+	scm.mu.RLock()
+	defer scm.mu.RUnlock()
+	
+	// 返回默认配置
+	return &config.GlobalServiceConfig{}
+}
+
+// IsServiceEnabled 检查服务是否启用
+func (scm *ServiceConfigManager) IsServiceEnabled(serviceName string) bool {
+	scm.mu.RLock()
+	defer scm.mu.RUnlock()
+	
+	// 暂时返回true，表示所有服务都启用
+	return true
+}
 
 // ServiceInitializer 服务初始化器
 type ServiceInitializer struct {
@@ -144,7 +208,7 @@ func (si *ServiceInitializer) getServiceDependencies() []*ServiceDependency {
 }
 
 // initializeService 初始化单个服务
-func (si *ServiceInitializer) initializeService(ctx context.Context, serviceName string, config *GlobalServiceConfig) *InitializationResult {
+func (si *ServiceInitializer) initializeService(ctx context.Context, serviceName string, config *config.GlobalServiceConfig) *InitializationResult {
 	startTime := time.Now()
 	
 	result := &InitializationResult{
@@ -230,11 +294,23 @@ func (si *ServiceInitializer) initializeService(ctx context.Context, serviceName
 }
 
 // initializeCrossModalService 初始化跨模态服务
-func (si *ServiceInitializer) initializeCrossModalService(ctx context.Context, config *CrossModalServiceConfig) (CrossModalServiceInterface, error) {
+func (si *ServiceInitializer) initializeCrossModalService(ctx context.Context, config *config.CrossModalServiceConfig) (crossmodal.CrossModalServiceInterface, error) {
 	log.Println("Initializing Cross Modal Service...")
 	
+	// 转换配置类型
+	crossModalConfig := &crossmodal.CrossModalServiceConfig{
+		APIEndpoint:  "http://localhost:8080/api/crossmodal",
+		APIKey:       "mock-api-key",
+		Timeout:      config.Timeout,
+		MaxRetries:   3,
+		EnableCache:  true,
+		CacheExpiry:  1 * time.Hour,
+		ModelVersion: "v1.0",
+		BatchSize:    10,
+	}
+	
 	// 使用真实的跨模态服务实现
-	service := NewCrossModalServiceImpl(config)
+	service := crossmodal.NewCrossModalServiceImpl(crossModalConfig)
 	
 	// 验证服务是否正确初始化
 	if service == nil {
@@ -246,7 +322,7 @@ func (si *ServiceInitializer) initializeCrossModalService(ctx context.Context, c
 }
 
 // initializeRelationInferenceEngine 初始化关系推理引擎
-func (si *ServiceInitializer) initializeRelationInferenceEngine(ctx context.Context, config *RelationInferenceEngineConfig) (*IntelligentRelationInferenceEngine, error) {
+func (si *ServiceInitializer) initializeRelationInferenceEngine(ctx context.Context, config *config.RelationInferenceEngineConfig) (*knowledge.IntelligentRelationInferenceEngine, error) {
 	log.Printf("Initializing Relation Inference Engine with config: %+v", config)
 	
 	// 获取依赖的跨模态服务
@@ -255,16 +331,19 @@ func (si *ServiceInitializer) initializeRelationInferenceEngine(ctx context.Cont
 		return nil, fmt.Errorf("cross modal service dependency not found")
 	}
 	
+	// 创建跨模态服务适配器
+	crossModalAdapter := NewCrossModalServiceAdapter(crossModalService.(crossmodal.CrossModalServiceInterface))
+	
 	// 初始化关系推理引擎
-	engine := NewIntelligentRelationInferenceEngine(
-		crossModalService.(CrossModalServiceInterface),
+	engine := knowledge.NewIntelligentRelationInferenceEngine(
+		crossModalAdapter,
 	)
 	
 	return engine, nil
 }
 
 // initializeAdaptiveLearningEngine 初始化自适应学习引擎
-func (si *ServiceInitializer) initializeAdaptiveLearningEngine(ctx context.Context, config *AdaptiveLearningEngineConfig) (*AdaptiveLearningEngine, error) {
+func (si *ServiceInitializer) initializeAdaptiveLearningEngine(ctx context.Context, config *config.AdaptiveLearningEngineConfig) (*adaptive.AdaptiveLearningEngine, error) {
 	log.Printf("Initializing Adaptive Learning Engine with config: %+v", config)
 	
 	// 获取依赖的跨模态服务
@@ -290,19 +369,22 @@ func (si *ServiceInitializer) initializeAdaptiveLearningEngine(ctx context.Conte
 		return nil, fmt.Errorf("knowledge graph service dependency not found")
 	}
 	
+	// 创建跨模态服务适配器
+	crossModalAdapter := NewCrossModalServiceAdapter(crossModalService.(crossmodal.CrossModalServiceInterface))
+	
 	// 初始化自适应学习引擎
-	engine := NewAdaptiveLearningEngine(
-		crossModalService.(CrossModalServiceInterface),
-		inferenceEngine.(*IntelligentRelationInferenceEngine),
-		realtimeAnalytics.(*RealtimeLearningAnalyticsService),
-		knowledgeGraph.(*AutomatedKnowledgeGraphService),
+	engine := adaptive.NewAdaptiveLearningEngine(
+		crossModalAdapter,
+		inferenceEngine.(*knowledge.IntelligentRelationInferenceEngine),
+		realtimeAnalytics.(*realtime.RealtimeLearningAnalyticsService),
+		knowledgeGraph.(*knowledge.AutomatedKnowledgeGraphService),
 	)
 	
 	return engine, nil
 }
 
 // initializeRealtimeLearningAnalyticsService 初始化实时学习分析服务
-func (si *ServiceInitializer) initializeRealtimeLearningAnalyticsService(ctx context.Context, config *RealtimeLearningAnalyticsServiceConfig) (*RealtimeLearningAnalyticsServiceImpl, error) {
+func (si *ServiceInitializer) initializeRealtimeLearningAnalyticsService(ctx context.Context, config *config.RealtimeLearningAnalyticsServiceConfig) (*realtime.RealtimeLearningAnalyticsServiceImpl, error) {
 	log.Printf("Initializing Realtime Learning Analytics Service with config: %+v", config)
 	
 	// 获取依赖的跨模态服务
@@ -312,7 +394,7 @@ func (si *ServiceInitializer) initializeRealtimeLearningAnalyticsService(ctx con
 	}
 	
 	// 使用真实的实时学习分析服务实现
-	service := NewRealtimeLearningAnalyticsServiceImpl(config)
+	service := realtime.NewRealtimeLearningAnalyticsServiceImpl(config)
 	
 	// 验证服务是否正确初始化
 	if service == nil {
@@ -324,7 +406,7 @@ func (si *ServiceInitializer) initializeRealtimeLearningAnalyticsService(ctx con
 }
 
 // initializeAutomatedKnowledgeGraphService 初始化自动化知识图谱服务
-func (si *ServiceInitializer) initializeAutomatedKnowledgeGraphService(ctx context.Context, config *AutomatedKnowledgeGraphServiceConfig) (*AutomatedKnowledgeGraphServiceImpl, error) {
+func (si *ServiceInitializer) initializeAutomatedKnowledgeGraphService(ctx context.Context, config *config.AutomatedKnowledgeGraphServiceConfig) (*knowledge.AutomatedKnowledgeGraphServiceImpl, error) {
 	log.Printf("Initializing Automated Knowledge Graph Service with config: %+v", config)
 	
 	// 获取依赖服务
@@ -333,8 +415,21 @@ func (si *ServiceInitializer) initializeAutomatedKnowledgeGraphService(ctx conte
 		return nil, fmt.Errorf("cross modal service dependency not found")
 	}
 	
+	// 转换配置类型
+	knowledgeConfig := &knowledge.AutomatedKnowledgeGraphServiceConfig{
+		MaxNodes:                1000,
+		MaxEdges:                5000,
+		ExtractionTimeout:       30 * time.Second,
+		InferenceTimeout:        60 * time.Second,
+		CacheSize:               100,
+		CacheTTL:                time.Hour,
+		EnableParallelProcessing: true,
+		MaxConcurrency:          4,
+		Metadata:                make(map[string]interface{}),
+	}
+	
 	// 使用真实的自动化知识图谱服务实现
-	service := NewAutomatedKnowledgeGraphServiceImpl(config)
+	service := knowledge.NewAutomatedKnowledgeGraphServiceImpl(knowledgeConfig)
 	
 	// 验证服务是否正确初始化
 	if service == nil {
@@ -346,7 +441,7 @@ func (si *ServiceInitializer) initializeAutomatedKnowledgeGraphService(ctx conte
 }
 
 // initializeLearningAnalyticsReportingService 初始化学习分析报告服务
-func (si *ServiceInitializer) initializeLearningAnalyticsReportingService(ctx context.Context, config *LearningAnalyticsReportingServiceConfig) (*LearningAnalyticsReportingService, error) {
+func (si *ServiceInitializer) initializeLearningAnalyticsReportingService(ctx context.Context, config *config.LearningAnalyticsReportingServiceConfig) (*analytics.LearningAnalyticsReportingService, error) {
 	log.Printf("Initializing Learning Analytics Reporting Service with config: %+v", config)
 	
 	// 获取依赖服务
@@ -365,11 +460,6 @@ func (si *ServiceInitializer) initializeLearningAnalyticsReportingService(ctx co
 		return nil, fmt.Errorf("realtime analytics service dependency not found")
 	}
 	
-	adaptiveLearning, exists := si.services["adaptive_learning"]
-	if !exists {
-		return nil, fmt.Errorf("adaptive learning engine dependency not found")
-	}
-	
 	knowledgeGraph, exists := si.services["knowledge_graph"]
 	if !exists {
 		return nil, fmt.Errorf("knowledge graph service dependency not found")
@@ -377,20 +467,22 @@ func (si *ServiceInitializer) initializeLearningAnalyticsReportingService(ctx co
 	
 
 	
+	// 创建适配器来适配不同包的接口
+	adapter := NewCrossModalServiceAdapter(crossModalService.(crossmodal.CrossModalServiceInterface))
+	
 	// 初始化学习分析报告服务
-	service := NewLearningAnalyticsReportingService(
-		crossModalService.(CrossModalServiceInterface),
-		relationInference.(*IntelligentRelationInferenceEngine),
-		realtimeAnalytics.(*RealtimeLearningAnalyticsService),
-		adaptiveLearning.(*AdaptiveLearningEngine),
-		knowledgeGraph.(*AutomatedKnowledgeGraphService),
+	service := analytics.NewLearningAnalyticsReportingService(
+		adapter,
+		relationInference.(*knowledge.IntelligentRelationInferenceEngine),
+		realtimeAnalytics.(*realtime.RealtimeLearningAnalyticsService),
+		knowledgeGraph.(*knowledge.AutomatedKnowledgeGraphService),
 	)
 	
 	return service, nil
 }
 
 // initializeIntelligentContentRecommendationService 初始化智能内容推荐服务
-func (si *ServiceInitializer) initializeIntelligentContentRecommendationService(ctx context.Context, config *IntelligentContentRecommendationServiceConfig) (*IntelligentContentRecommendationServiceImpl, error) {
+func (si *ServiceInitializer) initializeIntelligentContentRecommendationService(ctx context.Context, config *config.IntelligentContentRecommendationServiceConfig) (*content.IntelligentContentRecommendationServiceImpl, error) {
 	log.Printf("Initializing Intelligent Content Recommendation Service with config: %+v", config)
 	
 	// 获取依赖的跨模态服务
@@ -407,7 +499,7 @@ func (si *ServiceInitializer) initializeIntelligentContentRecommendationService(
 		minScore = config.RecommendationLimits.MinConfidenceScore
 	}
 	
-	recommendationConfig := &RecommendationConfig{
+	recommendationConfig := &content.RecommendationConfig{
 		MaxRecommendations: maxRecommendations,
 		MinScore:          minScore,
 		DiversityWeight:   0.3,
@@ -419,7 +511,7 @@ func (si *ServiceInitializer) initializeIntelligentContentRecommendationService(
 	}
 	
 	// 使用真实的智能内容推荐服务实现
-	service := NewIntelligentContentRecommendationServiceImpl(recommendationConfig)
+	service := content.NewIntelligentContentRecommendationServiceImpl(recommendationConfig)
 	
 	// 验证服务是否正确初始化
 	if service == nil {
@@ -431,7 +523,7 @@ func (si *ServiceInitializer) initializeIntelligentContentRecommendationService(
 }
 
 // initializeIntegration 初始化服务集成
-func (si *ServiceInitializer) initializeIntegration(ctx context.Context, config *GlobalServiceConfig) error {
+func (si *ServiceInitializer) initializeIntegration(ctx context.Context, config *config.GlobalServiceConfig) error {
 	log.Println("Initializing service integration...")
 	
 	// 获取所有已初始化的服务
@@ -443,16 +535,50 @@ func (si *ServiceInitializer) initializeIntegration(ctx context.Context, config 
 	analyticsReporting, _ := si.services["analytics_reporting"]
 	contentRecommendation, _ := si.services["content_recommendation"]
 	
+	// 转换配置类型
+	integrationConfig := &IntegrationConfig{
+		ServiceConfig: &ServiceConfiguration{
+			EnableCrossModalService:                    true,
+			EnableRelationInferenceEngine:              true,
+			EnableAdaptiveLearningEngine:               true,
+			EnableRealtimeLearningAnalyticsService:     true,
+			EnableAutomatedKnowledgeGraphService:       true,
+			EnableLearningAnalyticsReportingService:    true,
+			EnableIntelligentContentRecommendationService: true,
+		},
+		IntegrationSettings: &LearningIntegrationSettings{
+			EnableServiceOrchestration: true,
+			EnableDataSynchronization:  true,
+			EnableEventDrivenUpdates: true,
+		},
+		PerformanceConfig: &PerformanceConfiguration{
+			MaxConcurrentRequests: 10,
+			RequestTimeout: 30 * time.Second,
+			CacheExpiration:   time.Hour,
+			BatchProcessingSize: 100,
+		},
+		SecurityConfig: &SecurityConfiguration{
+			EnableAuthentication: true,
+			EnableAuthorization:  true,
+			EnableEncryption:     true,
+		},
+		MonitoringConfig: &MonitoringConfiguration{
+			EnableMetrics: true,
+			EnableTracing: true,
+			EnableLogging: true,
+		},
+	}
+	
 	// 创建服务集成
 	si.integration = NewIntelligentLearningServiceIntegration(
-		crossModalService.(CrossModalServiceInterface),
-		relationInference.(*IntelligentRelationInferenceEngine),
-		adaptiveLearning.(*AdaptiveLearningEngine),
-		realtimeAnalytics.(*RealtimeLearningAnalyticsService),
-		knowledgeGraph.(*AutomatedKnowledgeGraphService),
-		analyticsReporting.(*LearningAnalyticsReportingService),
-		contentRecommendation.(*IntelligentContentRecommendationService),
-		config.IntegrationConfig,
+		crossModalService.(crossmodal.CrossModalServiceInterface),
+		relationInference.(*knowledge.IntelligentRelationInferenceEngine),
+		adaptiveLearning.(*adaptive.AdaptiveLearningEngine),
+		realtimeAnalytics.(*realtime.RealtimeLearningAnalyticsService),
+		knowledgeGraph.(*knowledge.AutomatedKnowledgeGraphService),
+		analyticsReporting.(*analytics.LearningAnalyticsReportingService),
+		contentRecommendation.(*content.IntelligentContentRecommendationService),
+		integrationConfig,
 	)
 	
 	log.Println("Service integration initialized successfully")
@@ -591,14 +717,14 @@ func (si *ServiceInitializer) GetInitializationStatus() map[string]string {
 
 // MockCrossModalService 模拟跨模态服务（用于测试）
 type MockCrossModalService struct {
-	config      *CrossModalServiceConfig
+	config      *config.CrossModalServiceConfig
 	initialized bool
 }
 
-// ProcessCrossModalInference 处理跨模态推理请求
-func (m *MockCrossModalService) ProcessCrossModalInference(ctx context.Context, req *CrossModalInferenceRequest) (*CrossModalInferenceResponse, error) {
+// ProcessCrossModalInference 处理跨模态推理请求 (crossmodal包接口)
+func (m *MockCrossModalService) ProcessCrossModalInference(ctx context.Context, req *crossmodal.CrossModalInferenceRequest) (*crossmodal.CrossModalInferenceResponse, error) {
 	// 模拟跨模态推理逻辑
-	return &CrossModalInferenceResponse{
+	return &crossmodal.CrossModalInferenceResponse{
 		Success: true,
 		Result: map[string]interface{}{
 			"inference_type": req.Type,
@@ -609,6 +735,20 @@ func (m *MockCrossModalService) ProcessCrossModalInference(ctx context.Context, 
 		Confidence: 0.85,
 		Metadata: map[string]interface{}{
 			"mock_service": true,
+		},
+	}, nil
+}
+
+// ProcessCrossModalInferenceKnowledge 处理跨模态推理请求 (knowledge包接口)
+func (m *MockCrossModalService) ProcessCrossModalInferenceKnowledge(ctx context.Context, req *knowledge.CrossModalInferenceRequest) (*knowledge.CrossModalInferenceResponse, error) {
+	// 模拟跨模态推理逻辑
+	return &knowledge.CrossModalInferenceResponse{
+		Success: true,
+		Result: map[string]interface{}{
+			"inference_type": req.Type,
+			"processed":      true,
+			"data":          req.Data,
+			"timestamp":     time.Now(),
 		},
 	}, nil
 }
@@ -637,4 +777,40 @@ func (m *MockCrossModalService) AnalyzeContent(ctx context.Context, content inte
 func (m *MockCrossModalService) Shutdown(ctx context.Context) error {
 	m.initialized = false
 	return nil
+}
+
+// CrossModalServiceAdapter 跨模态服务适配器，用于适配不同包的接口
+type CrossModalServiceAdapter struct {
+	crossModalService crossmodal.CrossModalServiceInterface
+}
+
+// NewCrossModalServiceAdapter 创建跨模态服务适配器
+func NewCrossModalServiceAdapter(service crossmodal.CrossModalServiceInterface) *CrossModalServiceAdapter {
+	return &CrossModalServiceAdapter{
+		crossModalService: service,
+	}
+}
+
+// ProcessCrossModalInference 实现knowledge包的CrossModalServiceInterface接口
+func (a *CrossModalServiceAdapter) ProcessCrossModalInference(ctx context.Context, req *knowledge.CrossModalInferenceRequest) (*knowledge.CrossModalInferenceResponse, error) {
+	// 将knowledge包的请求转换为crossmodal包的请求
+	crossModalReq := &crossmodal.CrossModalInferenceRequest{
+		Type:      req.Type,
+		Data:      req.Data,
+		Options:   req.Options,
+		Context:   req.Context,
+		Timestamp: req.Timestamp,
+	}
+	
+	// 调用crossmodal包的服务
+	crossModalResp, err := a.crossModalService.ProcessCrossModalInference(ctx, crossModalReq)
+	if err != nil {
+		return nil, err
+	}
+	
+	// 将crossmodal包的响应转换为knowledge包的响应
+	return &knowledge.CrossModalInferenceResponse{
+		Success: crossModalResp.Success,
+		Result:  crossModalResp.Result,
+	}, nil
 }

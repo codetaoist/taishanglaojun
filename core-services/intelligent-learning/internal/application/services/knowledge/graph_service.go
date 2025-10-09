@@ -1,4 +1,4 @@
-package services
+package knowledge
 
 import (
 	"context"
@@ -12,6 +12,13 @@ import (
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
+
+// KnowledgeGraphService 知识图谱服务接口
+type KnowledgeGraphService interface {
+	AnalyzeGraph(ctx context.Context, req *domainServices.GraphAnalysisRequest) (*domainServices.GraphAnalysisResult, error)
+	RecommendConcepts(ctx context.Context, req *domainServices.ConceptRecommendationRequest) ([]*domainServices.ConceptRecommendation, error)
+}
+
 
 
 
@@ -140,7 +147,46 @@ type LearningPathRequest struct {
 	PreferredTypes []string  `json:"preferred_types"`
 }
 
+// LearningPathResponse 学习路径响应
+type LearningPathResponse struct {
+	ID                uuid.UUID                     `json:"id"`
+	LearnerID         uuid.UUID                     `json:"learner_id"`
+	Title             string                        `json:"title"`
+	Description       string                        `json:"description"`
+	EstimatedDuration int                           `json:"estimated_duration"`
+	DifficultyLevel   string                        `json:"difficulty_level"`
+	Progress          float64                       `json:"progress"`
+	Status            string                        `json:"status"`
+	Steps             []LearningPathStepResponse    `json:"steps"`
+	Milestones        []LearningMilestoneResponse   `json:"milestones"`
+	CreatedAt         time.Time                     `json:"created_at"`
+	UpdatedAt         time.Time                     `json:"updated_at"`
+}
 
+// LearningPathStepResponse 学习路径步骤响应
+type LearningPathStepResponse struct {
+	ID              uuid.UUID `json:"id"`
+	Order           int       `json:"order"`
+	ContentID       uuid.UUID `json:"content_id"`
+	ContentTitle    string    `json:"content_title"`
+	ContentType     string    `json:"content_type"`
+	EstimatedTime   int       `json:"estimated_time"`
+	Prerequisites   []string  `json:"prerequisites"`
+	LearningGoals   []string  `json:"learning_goals"`
+	IsCompleted     bool      `json:"is_completed"`
+	CompletionRate  float64   `json:"completion_rate"`
+}
+
+// LearningMilestoneResponse 学习里程碑响应
+type LearningMilestoneResponse struct {
+	ID          uuid.UUID  `json:"id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	TargetStep  int        `json:"target_step"`
+	IsAchieved  bool       `json:"is_achieved"`
+	AchievedAt  *time.Time `json:"achieved_at,omitempty"`
+	Reward      string     `json:"reward"`
+}
 
 // PathMilestone 路径里程碑
 type PathMilestone struct {

@@ -8,6 +8,7 @@ import (
 	domainservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/infrastructure/external"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/infrastructure/persistence"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure"
 )
 
 // BehaviorRepositoryAdapter 行为仓库适配器
@@ -35,7 +36,7 @@ func NewLearningPathServiceAdapter(domainService *domainservices.LearningPathSer
 }
 
 // GetRecommendedPaths 获取推荐路径
-func (a *LearningPathServiceAdapter) GetRecommendedPaths(ctx context.Context, request *PathRecommendationRequest) (*PathRecommendationResponse, error) {
+func (a *LearningPathServiceAdapter) GetRecommendedPaths(ctx context.Context, request *infrastructure.PathRecommendationRequest) (*infrastructure.PathRecommendationResponse, error) {
 	// 转换应用层请求到领域层请求
 	domainRequest := &domainservices.PathRecommendationRequest{
 		LearnerID:    request.LearnerID,
@@ -56,9 +57,9 @@ func (a *LearningPathServiceAdapter) GetRecommendedPaths(ctx context.Context, re
 	}
 	
 	// 转换领域层响应到应用层响应
-	recommendedPaths := make([]RecommendedPath, len(domainPaths))
+	recommendedPaths := make([]infrastructure.RecommendedPath, len(domainPaths))
 	for i, domainPath := range domainPaths {
-		recommendedPaths[i] = RecommendedPath{
+		recommendedPaths[i] = infrastructure.RecommendedPath{
 			PathID:          domainPath.Path.ID,
 			Title:           domainPath.Path.Name,
 			Description:     domainPath.Path.Description,
@@ -70,7 +71,7 @@ func (a *LearningPathServiceAdapter) GetRecommendedPaths(ctx context.Context, re
 		}
 	}
 	
-	response := &PathRecommendationResponse{
+	response := &infrastructure.PathRecommendationResponse{
 		RecommendedPaths: recommendedPaths,
 		Reasoning:        "基于您的技能水平和学习目标推荐的个性化学习路径",
 		Confidence:       0.85, // 默认置信度

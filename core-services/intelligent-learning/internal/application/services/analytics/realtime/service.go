@@ -7,18 +7,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
+	knowledgeServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	learnerServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // RealtimeLearningAnalyticsService 实时学习分析服务
 type RealtimeLearningAnalyticsService struct {
-	crossModalService crossmodal.CrossModalServiceInterface
-	inferenceEngine  *knowledge.IntelligentRelationInferenceEngine
+	crossModalService knowledgeServices.CrossModalServiceInterface
+	inferenceEngine  *knowledgeServices.IntelligentRelationInferenceEngine
 	config           *AnalyticsConfig
 	cache            *AnalyticsCache
 	metrics          *AnalyticsMetrics
@@ -39,6 +37,20 @@ type AnalyticsConfig struct {
 	EnableEmotionalAnalysis  bool    `json:"enable_emotional_analysis"`  // 启用情感分析
 }
 
+// CachedInsight 缓存洞察
+type CachedInsight struct {
+	InsightID             string                         `json:"insight_id"`
+	Type                  string                         `json:"type"`
+	Data                  map[string]interface{}         `json:"data"`
+	Timestamp             time.Time                      `json:"timestamp"`
+	ExpiresAt             time.Time                      `json:"expires_at"`
+	TTL                   time.Duration                  `json:"ttl"`
+	Relevance             float64                        `json:"relevance"`
+	AccessCount           int                            `json:"access_count"`
+	LastAccessed          time.Time                      `json:"last_accessed"`
+	Metadata              map[string]interface{}         `json:"metadata"`
+}
+
 // AnalyticsCache 分析缓存
 type AnalyticsCache struct {
 	LearningStates      map[uuid.UUID]*RealtimeLearningState `json:"learning_states"`      // 学习状态
@@ -46,7 +58,7 @@ type AnalyticsCache struct {
 	AnalysisResults     map[uuid.UUID]*AnalysisResult        `json:"analysis_results"`     // 分析结果
 	EmotionalProfiles   map[uuid.UUID]*EmotionalProfile      `json:"emotional_profiles"`   // 情感档案
 	LearningPatterns    map[uuid.UUID]*LearningPattern       `json:"learning_patterns"`    // 学习模式
-	insights            map[string]*analytics.CachedInsight            `json:"insights"`             // 洞察缓存
+	insights            map[string]*CachedInsight            `json:"insights"`             // 洞察缓存
 	results             map[string]interface{}               `json:"results"`              // 结果缓存
 	queries             map[string]interface{}               `json:"queries"`              // 查询缓存
 	maxSize             int                                  `json:"max_size"`             // 最大缓存大小
@@ -392,7 +404,7 @@ const (
 // Achievement 成就
 type RealtimeAchievement struct {
 	AchievementID uuid.UUID                  `json:"achievement_id"` // 成就ID
-	Type          learner.AchievementType    `json:"type"`           // 成就类型
+	Type          learnerServices.AchievementType    `json:"type"`           // 成就类型
 	Name          string                     `json:"name"`           // 名称
 	Description   string                     `json:"description"`    // 描述
 	Points        int                        `json:"points"`         // 积分
@@ -704,8 +716,9 @@ const (
 
 // NewRealtimeLearningAnalyticsService 创建实时学习分析服务
 func NewRealtimeLearningAnalyticsService(
-	crossModalService crossmodal.CrossModalServiceInterface,
-	inferenceEngine *knowledge.IntelligentRelationInferenceEngine,
+	crossModalService knowledgeServices.CrossModalServiceInterface,
+	inferenceEngine *knowledgeServices.IntelligentRelationInferenceEngine,
+	config *AnalyticsConfig,
 ) *RealtimeLearningAnalyticsService {
 	return &RealtimeLearningAnalyticsService{
 		crossModalService: crossModalService,
@@ -922,7 +935,7 @@ func (s *RealtimeLearningAnalyticsService) GeneratePersonalizedInsights(
 	}
 	
 	// 使用跨模态AI服务进行深度分析
-	crossModalRequest := &CrossModalInferenceRequest{
+	crossModalRequest := &knowledgeServices.CrossModalInferenceRequest{
 		Type: "personalized_insight_generation",
 		Data: map[string]interface{}{
 			"learning_state": learningState,

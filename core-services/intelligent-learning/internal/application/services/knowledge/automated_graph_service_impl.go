@@ -1,4 +1,4 @@
-package services
+package knowledge
 
 import (
 	"context"
@@ -8,6 +8,54 @@ import (
 
 	"github.com/google/uuid"
 )
+
+// AutomatedKnowledgeGraphServiceConfig 自动化知识图谱服务配置
+type AutomatedKnowledgeGraphServiceConfig struct {
+	MaxNodes                int                    `json:"max_nodes"`
+	MaxEdges                int                    `json:"max_edges"`
+	ExtractionTimeout       time.Duration          `json:"extraction_timeout"`
+	InferenceTimeout        time.Duration          `json:"inference_timeout"`
+	CacheSize               int                    `json:"cache_size"`
+	CacheTTL                time.Duration          `json:"cache_ttl"`
+	EnableParallelProcessing bool                   `json:"enable_parallel_processing"`
+	MaxConcurrency          int                    `json:"max_concurrency"`
+	Metadata                map[string]interface{} `json:"metadata"`
+}
+
+// AlgorithmPerformance 算法性能指标
+type AlgorithmPerformance struct {
+	AlgorithmID     string        `json:"algorithm_id"`
+	ExecutionTime   time.Duration `json:"execution_time"`
+	MemoryUsage     int64         `json:"memory_usage"`
+	CPUUsage        float64       `json:"cpu_usage"`
+	Accuracy        float64       `json:"accuracy"`
+	Throughput      float64       `json:"throughput"`
+	ErrorRate       float64       `json:"error_rate"`
+	LastMeasured    time.Time     `json:"last_measured"`
+}
+
+// ValidationRule 验证规则
+type ValidationRule struct {
+	RuleID      string                 `json:"rule_id"`
+	Name        string                 `json:"name"`
+	Type        string                 `json:"type"`
+	Description string                 `json:"description"`
+	Condition   map[string]interface{} `json:"condition"`
+	Action      string                 `json:"action"`
+	Severity    string                 `json:"severity"`
+	Enabled     bool                   `json:"enabled"`
+}
+
+// OptimizationStrategy 优化策略
+type OptimizationStrategy struct {
+	StrategyID  string                 `json:"strategy_id"`
+	Name        string                 `json:"name"`
+	Type        string                 `json:"type"`
+	Description string                 `json:"description"`
+	Parameters  map[string]interface{} `json:"parameters"`
+	Priority    int                    `json:"priority"`
+	Enabled     bool                   `json:"enabled"`
+}
 
 // KnowledgeGraph 知识图谱
 type KnowledgeGraph struct {

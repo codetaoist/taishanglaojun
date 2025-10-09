@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	knowledge "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
 )
 
 // KnowledgeAnalysisHandler 知识分析处理器

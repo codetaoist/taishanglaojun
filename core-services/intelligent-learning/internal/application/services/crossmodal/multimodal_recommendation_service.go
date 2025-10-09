@@ -1,4 +1,4 @@
-package services
+package crossmodal
 
 import (
 	"context"
@@ -39,10 +39,7 @@ type MultimodalRecommendationService struct {
 	metricsMutex        sync.RWMutex
 }
 
-// CrossModalServiceInterface 跨模态服务接口
-type CrossModalServiceInterface interface {
-	ProcessCrossModalInference(ctx context.Context, req *CrossModalInferenceRequest) (*CrossModalInferenceResponse, error)
-}
+
 
 // MultimodalRecommendationConfig 多模态推荐配置
 type MultimodalRecommendationConfig struct {
@@ -339,12 +336,17 @@ func (s *MultimodalRecommendationService) analyzeEmotionalState(
 ) (*EmotionalProfile, error) {
 	if !s.config.UseEmotionAnalysis {
 		return &EmotionalProfile{
-			CurrentMood:     "neutral",
-			StressLevel:     0.5,
-			MotivationLevel: 0.7,
-			FocusLevel:      0.6,
-			PreferredTone:   "encouraging",
-			LastUpdated:     time.Now(),
+			Mood:        "neutral",
+			Stress:      0.5,
+			Motivation:  0.7,
+			Focus:       0.6,
+			Energy:      0.7,
+			Confidence:  0.6,
+			Engagement:  0.5,
+			Satisfaction: 0.6,
+			Frustration: 0.3,
+			Curiosity:   0.7,
+			Timestamp:   time.Now(),
 		}, nil
 	}
 
@@ -685,23 +687,33 @@ func (s *MultimodalRecommendationService) getAllowedDifficultyLevels(maxDifficul
 func (s *MultimodalRecommendationService) parseEmotionalProfile(result map[string]interface{}) (*EmotionalProfile, error) {
 	// 解析AI返回的情感分析结果
 	return &EmotionalProfile{
-		CurrentMood:     "positive",
-		StressLevel:     0.3,
-		MotivationLevel: 0.8,
-		FocusLevel:      0.7,
-		PreferredTone:   "encouraging",
-		LastUpdated:     time.Now(),
+		Mood:        "positive",
+		Stress:      0.3,
+		Motivation:  0.8,
+		Focus:       0.7,
+		Energy:      0.8,
+		Confidence:  0.7,
+		Engagement:  0.8,
+		Satisfaction: 0.7,
+		Frustration: 0.2,
+		Curiosity:   0.8,
+		Timestamp:   time.Now(),
 	}, nil
 }
 
 func (s *MultimodalRecommendationService) inferEmotionalStateFromHistory(learner *entities.Learner) *EmotionalProfile {
 	return &EmotionalProfile{
-		CurrentMood:     "neutral",
-		StressLevel:     0.5,
-		MotivationLevel: 0.7,
-		FocusLevel:      0.6,
-		PreferredTone:   "encouraging",
-		LastUpdated:     time.Now(),
+		Mood:        "neutral",
+		Stress:      0.5,
+		Motivation:  0.7,
+		Focus:       0.6,
+		Energy:      0.6,
+		Confidence:  0.6,
+		Engagement:  0.5,
+		Satisfaction: 0.6,
+		Frustration: 0.4,
+		Curiosity:   0.7,
+		Timestamp:   time.Now(),
 	}
 }
 
@@ -809,3 +821,24 @@ func (s *MultimodalRecommendationService) GetMetrics() *MultimodalRecommendation
 func (s *MultimodalRecommendationService) UpdateConfig(config *MultimodalRecommendationConfig) {
 	s.config = config
 }
+
+// EmotionalProfile 情感档案
+type EmotionalProfile struct {
+	UserID              string                         `json:"user_id"`
+	Mood                string                         `json:"mood"`
+	Energy              float64                        `json:"energy"`
+	Stress              float64                        `json:"stress"`
+	Motivation          float64                        `json:"motivation"`
+	Focus               float64                        `json:"focus"`
+	Confidence          float64                        `json:"confidence"`
+	Engagement          float64                        `json:"engagement"`
+	Satisfaction        float64                        `json:"satisfaction"`
+	Frustration         float64                        `json:"frustration"`
+	Curiosity           float64                        `json:"curiosity"`
+	EmotionalState      *MultimodalEmotionalState      `json:"emotional_state"`
+	LearningPreferences map[string]interface{}         `json:"learning_preferences"`
+	Timestamp           time.Time                      `json:"timestamp"`
+	Metadata            map[string]interface{}         `json:"metadata"`
+}
+
+// MultimodalRecommendationService 多模态个性化推荐服务

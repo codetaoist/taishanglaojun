@@ -7,14 +7,15 @@ import (
 
 	"github.com/google/uuid"
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	crossmodalServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
+	knowledgeServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure"
 )
 
 // LearningEffectivenessEvaluationService 学习效果评估服务
 type LearningEffectivenessEvaluationService struct {
-	crossModalService crossmodal.CrossModalServiceInterface
-	inferenceEngine   *knowledge.IntelligentRelationInferenceEngine
+	crossModalService crossmodalServices.CrossModalServiceInterface
+	inferenceEngine   *knowledgeServices.IntelligentRelationInferenceEngine
 	config            *EffectivenessEvaluationConfig
 	cache             *EffectivenessEvaluationCache
 	metrics           *EffectivenessEvaluationMetrics
@@ -224,7 +225,7 @@ type LearnerEffectivenessProfile struct {
 	PredictedOutcomes   []*PredictedOutcome            `json:"predicted_outcomes"`
 	RiskFactors         []*RiskFactor                  `json:"risk_factors"`
 	SuccessFactors      []*SuccessFactor               `json:"success_factors"`
-	PersonalizationData *PersonalizationData           `json:"personalization_data"`
+	PersonalizationData *infrastructure.PersonalizationData           `json:"personalization_data"`
 	LastUpdated         time.Time                      `json:"last_updated"`
 	Metadata            map[string]interface{}         `json:"metadata"`
 }
@@ -370,7 +371,7 @@ type ComparisonResult struct {
 type EffectivenessRecommendation struct {
 	RecommendationID string                         `json:"recommendation_id"`
 	Type            RecommendationType             `json:"type"`
-	Category        RecommendationCategory         `json:"category"`
+	Category        infrastructure.RecommendationCategory         `json:"category"`
 	Priority        int                            `json:"priority"`
 	Title           string                         `json:"title"`
 	Description     string                         `json:"description"`
@@ -537,8 +538,8 @@ type EvaluationRiskAssessment struct{}
 
 // NewLearningEffectivenessEvaluationService 创建学习效果评估服务
 func NewLearningEffectivenessEvaluationService(
-	crossModalService crossmodal.CrossModalServiceInterface,
-	inferenceEngine *knowledge.IntelligentRelationInferenceEngine,
+	crossModalService crossmodalServices.CrossModalServiceInterface,
+	inferenceEngine *knowledgeServices.IntelligentRelationInferenceEngine,
 ) *LearningEffectivenessEvaluationService {
 	config := &EffectivenessEvaluationConfig{
 		EvaluationInterval:  24 * time.Hour,
@@ -836,7 +837,7 @@ func (s *LearningEffectivenessEvaluationService) calculateOverallEffectiveness(
 		Grade:      grade,
 		Percentile: s.calculatePercentile(overallScore),
 		Improvement: data.PerformanceData.Improvement,
-		Trend:      TrendUp,
+		Trend:      infrastructure.TrendUp,
 		Confidence: 0.8,
 		Factors: []*EffectivenessFactor{
 			{Factor: "performance", Impact: performanceScore, Confidence: 0.9},
@@ -1001,4 +1002,145 @@ func (s *LearningEffectivenessEvaluationService) ClearCache() {
 	s.cache.ComparisonData = make(map[string]*CachedComparisonData)
 	s.cache.CacheSize = 0
 	s.cache.LastCleanup = time.Now()
+}
+
+// QualityMetrics 质量指标
+type QualityMetrics struct {
+	Accuracy    float64                `json:"accuracy"`
+	Precision   float64                `json:"precision"`
+	Recall      float64                `json:"recall"`
+	F1Score     float64                `json:"f1_score"`
+	Consistency float64                `json:"consistency"`
+	Reliability float64                `json:"reliability"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// TrendDirection 趋势方向
+type TrendDirection string
+
+const (
+	TrendDirectionUp    TrendDirection = "up"
+	TrendDirectionDown  TrendDirection = "down"
+	TrendDirectionFlat  TrendDirection = "flat"
+)
+
+// Evidence 证据
+type Evidence struct {
+	EvidenceID   uuid.UUID              `json:"evidence_id"`
+	Type         string                 `json:"type"`
+	Description  string                 `json:"description"`
+	Source       string                 `json:"source"`
+	Confidence   float64                `json:"confidence"`
+	Weight       float64                `json:"weight"`
+	Timestamp    time.Time              `json:"timestamp"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// ConfidenceInterval 置信区间
+type ConfidenceInterval struct {
+	Lower      float64 `json:"lower"`
+	Upper      float64 `json:"upper"`
+	Confidence float64 `json:"confidence"`
+}
+
+// RecommendationType 推荐类型
+type RecommendationType string
+
+const (
+	RecommendationTypeContent  RecommendationType = "content"
+	RecommendationTypeStrategy RecommendationType = "strategy"
+	RecommendationTypePath     RecommendationType = "path"
+	RecommendationTypeResource RecommendationType = "resource"
+	RecommendationTypePeer     RecommendationType = "peer"
+)
+
+// RiskAssessment 风险评估
+type RiskAssessment struct {
+	Level       string                 `json:"level"`
+	Score       float64                `json:"score"`
+	Factors     []string               `json:"factors"`
+	Mitigation  []string               `json:"mitigation"`
+	Probability float64                `json:"probability"`
+	Impact      float64                `json:"impact"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// InsightType 洞察类型
+type InsightType string
+
+const (
+	InsightTypePerformance InsightType = "performance"
+	InsightTypeEngagement  InsightType = "engagement"
+	InsightTypeProgress    InsightType = "progress"
+	InsightTypeBehavior    InsightType = "behavior"
+	InsightTypeContent     InsightType = "content"
+	InsightTypePredictive  InsightType = "predictive"
+)
+
+// InsightCategory 洞察分类
+type InsightCategory string
+
+const (
+	InsightCategoryPositive InsightCategory = "positive"
+	InsightCategoryNegative InsightCategory = "negative"
+	InsightCategoryNeutral  InsightCategory = "neutral"
+	InsightCategoryWarning  InsightCategory = "warning"
+	InsightCategoryCritical InsightCategory = "critical"
+)
+
+// ImplementationPlan 实施计划
+type ImplementationPlan struct {
+	ID          uuid.UUID              `json:"id"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Steps       []ImplementationStep   `json:"steps"`
+	Timeline    string                 `json:"timeline"`
+	Resources   []string               `json:"resources"`
+	Success     []string               `json:"success_criteria"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// ImplementationStep 实施步骤
+type ImplementationStep struct {
+	ID          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Order       int       `json:"order"`
+	Duration    string    `json:"duration"`
+	Dependencies []uuid.UUID `json:"dependencies"`
+}
+
+// LearningActivity 学习活动
+type LearningActivity struct {
+	ID          uuid.UUID              `json:"id"`
+	Name        string                 `json:"name"`
+	Type        string                 `json:"type"`
+	Duration    int64                  `json:"duration"`
+	Difficulty  string                 `json:"difficulty"`
+	Objectives  []string               `json:"objectives"`
+	Resources   []string               `json:"resources"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// UserInteraction 用户交互
+type UserInteraction struct {
+	ID          uuid.UUID              `json:"id"`
+	UserID      uuid.UUID              `json:"user_id"`
+	Type        string                 `json:"type"`
+	Timestamp   time.Time              `json:"timestamp"`
+	Duration    int64                  `json:"duration"`
+	Data        map[string]interface{} `json:"data"`
+	Context     string                 `json:"context"`
+}
+
+// ContentAccess 内容访问
+type ContentAccess struct {
+	ID          uuid.UUID `json:"id"`
+	UserID      uuid.UUID `json:"user_id"`
+	ContentID   uuid.UUID `json:"content_id"`
+	AccessTime  time.Time `json:"access_time"`
+	Duration    int64     `json:"duration"`
+	Progress    float64   `json:"progress"`
+	Completed   bool      `json:"completed"`
+	Source      string    `json:"source"`
 }

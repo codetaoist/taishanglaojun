@@ -152,6 +152,7 @@ const (
 	RecommendationTypePath        RecommendationType = "path"        // 路径建议
 	RecommendationTypeResource    RecommendationType = "resource"    // 资源建议
 	RecommendationTypePeer        RecommendationType = "peer"        // 同伴建议
+	RecommendationTypeOptimization RecommendationType = "optimization" // 优化建议
 )
 
 // PriorityLevel 优先级

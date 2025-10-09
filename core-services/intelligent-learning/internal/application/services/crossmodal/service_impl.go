@@ -1,4 +1,4 @@
-package services
+package crossmodal
 
 import (
 	"context"

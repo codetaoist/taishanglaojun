@@ -1,31 +1,52 @@
-package services
+package infrastructure
 
 import (
 	"context"
 	"time"
 
 	"github.com/google/uuid"
-	domainservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 	learnerservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/shared"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/interfaces"
 )
 
 // 共享服务接口定义
 
-// LearningAnalyticsService 学习分析服务接口
-type LearningAnalyticsService interface {
-	GenerateAnalyticsReport(ctx context.Context, req *domainservices.AnalyticsRequest) (*domainservices.LearningAnalyticsReport, error)
+// 类型别名，引用interfaces包中的接口
+type LearningAnalyticsService = interfaces.LearningAnalyticsService
+type KnowledgeGraphService = interfaces.KnowledgeGraphService
+
+// PathRecommendationRequest 路径推荐请求
+type PathRecommendationRequest struct {
+	LearnerID      uuid.UUID `json:"learner_id" binding:"required"`
+	CurrentSkills  []string  `json:"current_skills"`
+	InterestAreas  []string  `json:"interest_areas"`
+	AvailableTime  int       `json:"available_time,omitempty"` // 可用学习时间（小时/周）
+	LearningGoals  []string  `json:"learning_goals"`
+}
+
+// PathRecommendationResponse 路径推荐响应
+type PathRecommendationResponse struct {
+	RecommendedPaths []RecommendedPath `json:"recommended_paths"`
+	Reasoning        string            `json:"reasoning"`
+	Confidence       float64           `json:"confidence"`
+}
+
+// RecommendedPath 推荐路径
+type RecommendedPath struct {
+	PathID          uuid.UUID `json:"path_id"`
+	Title           string    `json:"title"`
+	Description     string    `json:"description"`
+	MatchScore      float64   `json:"match_score"`
+	EstimatedTime   int       `json:"estimated_time"`
+	DifficultyLevel string    `json:"difficulty_level"`
+	SkillsGained    []string  `json:"skills_gained"`
+	Reasons         []string  `json:"reasons"`
 }
 
 // LearningPathServiceInterface 学习路径服务接口
 type LearningPathServiceInterface interface {
 	GetRecommendedPaths(ctx context.Context, req *learnerservices.PathRecommendationRequest) (*learnerservices.PathRecommendationResponse, error)
-}
-
-// KnowledgeGraphService 知识图谱服务接口
-type KnowledgeGraphService interface {
-	RecommendConcepts(ctx context.Context, req *domainservices.ConceptRecommendationRequest) ([]*domainservices.ConceptRecommendation, error)
-	AnalyzeGraph(ctx context.Context, req *domainservices.GraphAnalysisRequest) (*domainservices.GraphAnalysisResult, error)
 }
 
 // 共享数据类型定义
@@ -171,6 +192,131 @@ type StatisticalSummary struct {
 	SampleSize     int                        `json:"sample_size"`
 }
 
+// AnalyticsReportType 分析报告类型
+type AnalyticsReportType string
+
+const (
+	ReportTypePerformance AnalyticsReportType = "performance"
+	ReportTypeProgress    AnalyticsReportType = "progress"
+	ReportTypeBehavior    AnalyticsReportType = "behavior"
+	ReportTypeEngagement  AnalyticsReportType = "engagement"
+	ReportTypeComparative AnalyticsReportType = "comparative"
+)
+
+// ReportTarget 报告目标
+type ReportTarget struct {
+	Type       string    `json:"type"`        // learner, group, course, etc.
+	ID         uuid.UUID `json:"id"`
+	Name       string    `json:"name"`
+	Metadata   map[string]interface{} `json:"metadata"`
+}
+
+// ReportingTimeRange 报告时间范围
+type ReportingTimeRange struct {
+	StartTime   time.Time `json:"start_time"`
+	EndTime     time.Time `json:"end_time"`
+	Granularity string    `json:"granularity"` // daily, weekly, monthly
+	Timezone    string    `json:"timezone"`
+}
+
+// DataSource 数据源
+type DataSource struct {
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Type        string                 `json:"type"`
+	Description string                 `json:"description"`
+	LastUpdated time.Time              `json:"last_updated"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// ReportSection 报告章节
+type ReportSection struct {
+	ID          string                 `json:"id"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Content     map[string]interface{} `json:"content"`
+	Order       int                    `json:"order"`
+	Type        string                 `json:"type"`
+}
+
+// Visualization 可视化
+type Visualization struct {
+	ID          string                 `json:"id"`
+	Type        string                 `json:"type"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Data        map[string]interface{} `json:"data"`
+	Config      map[string]interface{} `json:"config"`
+	Order       int                    `json:"order"`
+}
+
+// Insight 洞察
+type Insight struct {
+	ID          string                 `json:"id"`
+	Type        string                 `json:"type"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Severity    string                 `json:"severity"`
+	Confidence  float64                `json:"confidence"`
+	Data        map[string]interface{} `json:"data"`
+	CreatedAt   time.Time              `json:"created_at"`
+}
+
+// Recommendation 推荐
+type Recommendation struct {
+	ID          string                 `json:"id"`
+	Type        string                 `json:"type"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Priority    string                 `json:"priority"`
+	Confidence  float64                `json:"confidence"`
+	Data        map[string]interface{} `json:"data"`
+	CreatedAt   time.Time              `json:"created_at"`
+}
+
+// ReportSummary 报告摘要
+type ReportSummary struct {
+	TotalDataPoints    int                    `json:"total_data_points"`
+	KeyFindings        []string               `json:"key_findings"`
+	MainInsights       []string               `json:"main_insights"`
+	RecommendationCount int                   `json:"recommendation_count"`
+	QualityScore       float64                `json:"quality_score"`
+	CompletionRate     float64                `json:"completion_rate"`
+	Metadata           map[string]interface{} `json:"metadata"`
+}
+
+// ReportMetadata 报告元数据
+type ReportMetadata struct {
+	GeneratedBy     string                 `json:"generated_by"`
+	GenerationTime  time.Duration          `json:"generation_time"`
+	DataSources     []string               `json:"data_sources"`
+	ProcessingSteps []string               `json:"processing_steps"`
+	Version         string                 `json:"version"`
+	Checksum        string                 `json:"checksum"`
+	Metadata        map[string]interface{} `json:"metadata"`
+}
+
+// AccessLevel 访问级别
+type AccessLevel string
+
+const (
+	AccessLevelPublic     AccessLevel = "public"
+	AccessLevelPrivate    AccessLevel = "private"
+	AccessLevelRestricted AccessLevel = "restricted"
+	AccessLevelInternal   AccessLevel = "internal"
+)
+
+// ExportFormat 导出格式
+type ExportFormat string
+
+const (
+	ExportFormatPDF   ExportFormat = "pdf"
+	ExportFormatExcel ExportFormat = "excel"
+	ExportFormatCSV   ExportFormat = "csv"
+	ExportFormatJSON  ExportFormat = "json"
+	ExportFormatHTML  ExportFormat = "html"
+)
+
 // VisualizationConfig 可视化配置
 type VisualizationConfig struct {
 	Type       string                 `json:"type"`
@@ -182,6 +328,20 @@ type VisualizationConfig struct {
 }
 
 
+
+// AnalyticsDataCollection 分析数据集合
+type AnalyticsDataCollection struct {
+	ID          uuid.UUID              `json:"id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	DataType    string                 `json:"data_type"`
+	Source      string                 `json:"source"`
+	Data        map[string]interface{} `json:"data"`
+	Schema      map[string]interface{} `json:"schema"`
+	CollectedAt time.Time              `json:"collected_at"`
+	UpdatedAt   time.Time              `json:"updated_at"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
 
 // ProcessedAnalyticsData 处理后的分析数据
 type ProcessedAnalyticsData struct {

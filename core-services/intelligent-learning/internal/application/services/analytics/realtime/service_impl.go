@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	configServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure/config"
 )
 
 // RealtimeLearningAnalyticsServiceImpl 实时学习分析服务实现
 type RealtimeLearningAnalyticsServiceImpl struct {
-	config           *RealtimeLearningAnalyticsServiceConfig
+	config           *configServices.RealtimeLearningAnalyticsServiceConfig
 	dataCollector    *RealTimeDataCollector
 	streamProcessor  *StreamProcessor
 	analyticsEngine  *AnalyticsEngine
@@ -22,6 +23,39 @@ type RealtimeLearningAnalyticsServiceImpl struct {
 	cache           *AnalyticsCache
 	metrics         *RealtimeAnalyticsMetrics
 	mu              sync.RWMutex
+}
+
+// ValidationRule 验证规则
+type ValidationRule struct {
+	RuleID      string                 `json:"rule_id"`
+	Type        string                 `json:"type"`
+	Field       string                 `json:"field"`
+	Condition   string                 `json:"condition"`
+	Value       interface{}            `json:"value"`
+	ErrorMsg    string                 `json:"error_msg"`
+	IsRequired  bool                   `json:"is_required"`
+	Parameters  map[string]interface{} `json:"parameters"`
+}
+
+// Analyzer 分析器
+type Analyzer struct {
+	AnalyzerID   string                 `json:"analyzer_id"`
+	Type         string                 `json:"type"`
+	Algorithm    string                 `json:"algorithm"`
+	Parameters   map[string]interface{} `json:"parameters"`
+	IsEnabled    bool                   `json:"is_enabled"`
+	LastUpdated  time.Time              `json:"last_updated"`
+}
+
+// Predictor 预测器
+type Predictor struct {
+	PredictorID  string                 `json:"predictor_id"`
+	ModelType    string                 `json:"model_type"`
+	Algorithm    string                 `json:"algorithm"`
+	Parameters   map[string]interface{} `json:"parameters"`
+	Accuracy     float64                `json:"accuracy"`
+	IsEnabled    bool                   `json:"is_enabled"`
+	LastTrained  time.Time              `json:"last_trained"`
 }
 
 // RealTimeDataCollector 实时数据收集器
@@ -625,9 +659,9 @@ type RealtimeSystemHealthMetrics struct {
 }
 
 // NewRealtimeLearningAnalyticsServiceImpl 创建实时学习分析服务实现
-func NewRealtimeLearningAnalyticsServiceImpl(config *RealtimeLearningAnalyticsServiceConfig) *RealtimeLearningAnalyticsServiceImpl {
+func NewRealtimeLearningAnalyticsServiceImpl(cfg *configServices.RealtimeLearningAnalyticsServiceConfig) *RealtimeLearningAnalyticsServiceImpl {
 	return &RealtimeLearningAnalyticsServiceImpl{
-		config:           config,
+		config:           cfg,
 		dataCollector:    newRealTimeDataCollector(),
 		streamProcessor:  newStreamProcessor(),
 		analyticsEngine:  newAnalyticsEngine(),

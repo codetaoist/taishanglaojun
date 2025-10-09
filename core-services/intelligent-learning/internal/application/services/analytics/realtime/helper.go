@@ -11,6 +11,23 @@ import (
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
+// 趋势方向常量
+const (
+	TrendUp   = "up"
+	TrendDown = "down"
+	TrendFlat = "flat"
+)
+
+// Trend 趋势
+type Trend struct {
+	Direction   string    `json:"direction"`
+	Strength    float64   `json:"strength"`
+	Confidence  float64   `json:"confidence"`
+	StartTime   time.Time `json:"start_time"`
+	EndTime     time.Time `json:"end_time"`
+	Description string    `json:"description"`
+}
+
 // 辅助方法实现
 
 // updateSessionInfo 更新会话信息

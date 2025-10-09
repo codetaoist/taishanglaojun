@@ -1,4 +1,4 @@
-package services
+package knowledge
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/interfaces"
 )
 
 
@@ -21,8 +21,8 @@ type KnowledgeAnalysisService struct {
 	kgRepo              repositories.KnowledgeGraphRepository
 	contentRepo         repositories.LearningContentRepository
 	learnerRepo         repositories.LearnerRepository
-	kgService           infrastructure.KnowledgeGraphService
-	analyticsService    infrastructure.LearningAnalyticsService
+	kgService           interfaces.KnowledgeGraphService
+	analyticsService    interfaces.LearningAnalyticsService
 }
 
 // NewKnowledgeAnalysisService 创建知识分析服务
@@ -30,8 +30,8 @@ func NewKnowledgeAnalysisService(
 	kgRepo repositories.KnowledgeGraphRepository,
 	contentRepo repositories.LearningContentRepository,
 	learnerRepo repositories.LearnerRepository,
-	kgService infrastructure.KnowledgeGraphService,
-	analyticsService infrastructure.LearningAnalyticsService,
+	kgService interfaces.KnowledgeGraphService,
+	analyticsService interfaces.LearningAnalyticsService,
 ) *KnowledgeAnalysisService {
 	return &KnowledgeAnalysisService{
 		kgRepo:           kgRepo,

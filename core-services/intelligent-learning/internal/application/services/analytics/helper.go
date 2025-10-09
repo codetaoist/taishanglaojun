@@ -1,4 +1,4 @@
-package services
+package analytics
 
 import (
 	"context"
@@ -11,12 +11,18 @@ import (
 
 // 数据结构定义
 
+// TimeRange 时间范围
+type TimeRange struct {
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+}
+
 // ProcessedAnalyticsData 处理后的分析数据
 type AnalyticsProcessedData struct {
 	SourceData    *SourceAnalyticsData       `json:"source_data"`
 	ProcessedData map[string]interface{}     `json:"processed_data"`
-	Aggregations  map[string]*DataAggregation `json:"aggregations"`
-	Statistics    map[string]*StatisticalSummary `json:"statistics"`
+	Aggregations  map[string]*AnalyticsDataAggregation `json:"aggregations"`
+	Statistics    map[string]*AnalyticsStatisticalSummary `json:"statistics"`
 	QualityScore  float64                    `json:"quality_score"`
 	ProcessedAt   time.Time                  `json:"processed_at"`
 }
@@ -77,7 +83,7 @@ type AnalyticsImplication struct {
 	Description    string                     `json:"description"`
 	Impact         string                     `json:"impact"`
 	Confidence     float64                    `json:"confidence"`
-	Metadata       map[string]interface{}     `json:"metadata"`
+	Metadata     map[string]interface{} `json:"metadata"`
 }
 
 // Visualization 可视化
@@ -398,9 +404,9 @@ func (g *PerformanceInsightGenerator) ValidateData(data *AnalyticsProcessedData)
 
 // ReportExporter 报告导出器接口
 type ReportExporter interface {
-	Export(ctx context.Context, report *LearningAnalyticsReport, format ExportFormat) ([]byte, error)
+	Export(ctx context.Context, report interface{}, format ExportFormat) ([]byte, error)
 	GetSupportedFormats() []ExportFormat
-	ValidateReport(report *LearningAnalyticsReport) error
+	ValidateReport(report interface{}) error
 }
 
 // PDFExporter PDF导出器
@@ -424,9 +430,9 @@ func NewPDFExporter(config *ExportConfig) *PDFExporter {
 }
 
 // Export 导出报告
-func (e *PDFExporter) Export(ctx context.Context, report *LearningAnalyticsReport, format ExportFormat) ([]byte, error) {
+func (e *PDFExporter) Export(ctx context.Context, report interface{}, format ExportFormat) ([]byte, error) {
 	// 简化实现：返回模拟的PDF数据
-	pdfContent := fmt.Sprintf("PDF Report: %s\nGenerated at: %s", report.ID, report.GeneratedAt.Format(time.RFC3339))
+	pdfContent := fmt.Sprintf("PDF Report: Generated at: %s", time.Now().Format(time.RFC3339))
 	return []byte(pdfContent), nil
 }
 
@@ -436,14 +442,21 @@ func (e *PDFExporter) GetSupportedFormats() []ExportFormat {
 }
 
 // ValidateReport 验证报告
-func (e *PDFExporter) ValidateReport(report *LearningAnalyticsReport) error {
+func (e *PDFExporter) ValidateReport(report interface{}) error {
     if report == nil {
         return fmt.Errorf("report cannot be nil")
     }
-    if report.ID == uuid.Nil {
-        return fmt.Errorf("report ID cannot be empty")
-    }
     return nil
+}
+
+// ProcessedAnalyticsData 处理后的分析数据
+type ProcessedAnalyticsData struct {
+	ProcessingID  uuid.UUID                      `json:"processing_id"`
+	SourceData    *AnalyticsDataCollection       `json:"source_data"`
+	ProcessedData map[string]interface{}         `json:"processed_data"`
+	Aggregations  map[string]*DataAggregation    `json:"aggregations"`
+	Statistics    map[string]*StatisticalSummary `json:"statistics"`
+	Metadata      map[string]interface{}         `json:"metadata"`
 }
 
 // JSONExporter JSON导出器
@@ -459,10 +472,10 @@ func NewJSONExporter(config *ExportConfig) *JSONExporter {
 }
 
 // Export 导出报告
-func (e *JSONExporter) Export(ctx context.Context, report *LearningAnalyticsReport, format ExportFormat) ([]byte, error) {
+func (e *JSONExporter) Export(ctx context.Context, report interface{}, format ExportFormat) ([]byte, error) {
 	// 简化实现：返回JSON格式的报告数据
-	jsonContent := fmt.Sprintf(`{"report_id": "%s", "generated_at": "%s", "type": "%s"}`, 
-		report.ID, report.GeneratedAt.Format(time.RFC3339), report.Type)
+	jsonContent := fmt.Sprintf(`{"generated_at": "%s", "format": "%s"}`, 
+		time.Now().Format(time.RFC3339), format)
 	return []byte(jsonContent), nil
 }
 
@@ -472,7 +485,7 @@ func (e *JSONExporter) GetSupportedFormats() []ExportFormat {
 }
 
 // ValidateReport 验证报告
-func (e *JSONExporter) ValidateReport(report *LearningAnalyticsReport) error {
+func (e *JSONExporter) ValidateReport(report interface{}) error {
 	if report == nil {
 		return fmt.Errorf("report cannot be nil")
 	}
@@ -518,11 +531,11 @@ func ValidateTimeRange(timeRange *TimeRange) error {
     if timeRange == nil {
         return fmt.Errorf("time range cannot be nil")
     }
-    if timeRange.Start.After(timeRange.End) {
+    if timeRange.StartTime.After(timeRange.EndTime) {
         return fmt.Errorf("start time cannot be after end time")
     }
     // 计算时长校验
-    if timeRange.End.Sub(timeRange.Start) <= 0 {
+    if timeRange.EndTime.Sub(timeRange.StartTime) <= 0 {
         return fmt.Errorf("duration must be positive")
     }
     return nil

@@ -1,4 +1,4 @@
-package services
+package knowledge
 
 import (
 	"context"
@@ -12,6 +12,37 @@ import (
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
 )
+
+// CrossModalServiceInterface 跨模态服务接口
+type CrossModalServiceInterface interface {
+	ProcessCrossModalInference(ctx context.Context, request *CrossModalInferenceRequest) (*CrossModalInferenceResponse, error)
+}
+
+// CrossModalInferenceRequest 跨模态推理请求
+type CrossModalInferenceRequest struct {
+	Type      string                 `json:"type"`
+	Data      map[string]interface{} `json:"data"`
+	Options   map[string]interface{} `json:"options"`
+	Context   map[string]interface{} `json:"context"`
+	Timestamp time.Time              `json:"timestamp"`
+}
+
+// CrossModalInferenceResponse 跨模态推理响应
+type CrossModalInferenceResponse struct {
+	Success bool                   `json:"success"`
+	Result  map[string]interface{} `json:"result"`
+	Error   string                 `json:"error,omitempty"`
+}
+
+// LearnerProfile 学习者档案
+type LearnerProfile struct {
+	UserID             string                 `json:"user_id"`
+	LearningStyle      string                 `json:"learning_style"`
+	PreferredDifficulty string                `json:"preferred_difficulty"`
+	Interests          []string               `json:"interests"`
+	Goals              []string               `json:"goals"`
+	Metadata           map[string]interface{} `json:"metadata"`
+}
 
 // AutomatedKnowledgeGraphService 自动化知识图谱构建服务
 type AutomatedKnowledgeGraphService struct {

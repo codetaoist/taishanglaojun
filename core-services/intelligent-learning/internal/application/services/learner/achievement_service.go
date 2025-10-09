@@ -3,9 +3,11 @@ package services
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/interfaces"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
 )
@@ -14,7 +16,7 @@ import (
 type LearningAchievementService struct {
 	learnerRepo      repositories.LearnerRepository
 	achievementRepo  repositories.AchievementRepository
-	analyticsService LearningAnalyticsService
+	analyticsService interfaces.LearningAnalyticsService
 	notificationService NotificationService
 }
 
@@ -22,7 +24,7 @@ type LearningAchievementService struct {
 func NewLearningAchievementService(
 	learnerRepo repositories.LearnerRepository,
 	achievementRepo repositories.AchievementRepository,
-	analyticsService LearningAnalyticsService,
+	analyticsService interfaces.LearningAnalyticsService,
 	notificationService NotificationService,
 ) *LearningAchievementService {
 	return &LearningAchievementService{
@@ -235,7 +237,7 @@ func (s *LearningAchievementService) CheckAchievements(ctx context.Context, req 
 	}
 
 	// 计算总积分
-	totalPoints := s.calculateTotalPoints(currentAchievements)
+	totalPoints := s.calculateTotalPoints(convertedCurrentAchievements)
 
 	return &CheckAchievementsResponse{
 		NewAchievements:     newAchievements,
@@ -256,11 +258,14 @@ func (s *LearningAchievementService) GetLearnerAchievements(ctx context.Context,
 	}
 
 	// 获取学习者成就
-	achievements, err := s.achievementRepo.GetLearnerAchievements(ctx, req.LearnerID, (req.Page-1)*req.Limit, req.Limit)
-	total := len(achievements)
+	domainAchievements, err := s.achievementRepo.GetLearnerAchievements(ctx, req.LearnerID, (req.Page-1)*req.Limit, req.Limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get learner achievements: %w", err)
 	}
+
+	// 转换为应用层类型
+	achievements := s.convertDomainLearnerAchievements(domainAchievements)
+	total := len(achievements)
 
 	// 生成成就摘要
 	summary, err := s.generateAchievementSummary(ctx, req.LearnerID)
@@ -592,4 +597,23 @@ func (s *LearningAchievementService) sendAchievementNotification(ctx context.Con
 // NotificationService 通知服务接口
 type NotificationService interface {
 	SendNotification(ctx context.Context, notification map[string]interface{}) error
+}
+
+// getTargetValueFromCriteria 从成就标准中提取目标值
+func (s *LearningAchievementService) getTargetValueFromCriteria(criteria map[string]interface{}) float64 {
+	if targetValue, ok := criteria["target_value"]; ok {
+		switch v := targetValue.(type) {
+		case float64:
+			return v
+		case int:
+			return float64(v)
+		case string:
+			// 尝试解析字符串为数字
+			if val, err := strconv.ParseFloat(v, 64); err == nil {
+				return val
+			}
+		}
+	}
+	// 默认返回0
+	return 0.0
 }

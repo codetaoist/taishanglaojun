@@ -1,4 +1,4 @@
-package services
+package crossmodal
 
 import (
 	"time"
@@ -22,4 +22,16 @@ type CrossModalInferenceResponse struct {
 	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
 	ProcessTime int64                  `json:"process_time"` // 处理时间(毫秒)
 	Timestamp   time.Time              `json:"timestamp"`   // 响应时间戳
+}
+
+// CrossModalServiceConfig 跨模态服务配置
+type CrossModalServiceConfig struct {
+	APIEndpoint     string        `json:"api_endpoint"`     // API端点
+	APIKey          string        `json:"api_key"`          // API密钥
+	Timeout         time.Duration `json:"timeout"`          // 超时时间
+	MaxRetries      int           `json:"max_retries"`      // 最大重试次数
+	EnableCache     bool          `json:"enable_cache"`     // 是否启用缓存
+	CacheExpiry     time.Duration `json:"cache_expiry"`     // 缓存过期时间
+	ModelVersion    string        `json:"model_version"`    // 模型版本
+	BatchSize       int           `json:"batch_size"`       // 批处理大小
 }

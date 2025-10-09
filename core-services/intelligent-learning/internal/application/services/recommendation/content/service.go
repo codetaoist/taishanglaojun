@@ -6,6 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
 )
 
 // ContentAnalyzer 内容分析器
@@ -90,13 +95,54 @@ type KnowledgeState struct {
 	LearningGoals     []string               `json:"learning_goals"`
 }
 
+// PersonalizationSettings 个性化设置
+type PersonalizationSettings struct {
+	Enabled                               bool                   `json:"enabled"`
+	PersonalizationLevel                  string                 `json:"personalization_level"`
+	AdaptationSpeed                       float64                `json:"adaptation_speed"`
+	LearningStyleWeight                   float64                `json:"learning_style_weight"`
+	PreferenceWeight                      float64                `json:"preference_weight"`
+	PerformanceWeight                     float64                `json:"performance_weight"`
+	EnableBehaviorBasedPersonalization    bool                   `json:"enable_behavior_based_personalization"`
+	EnablePreferenceBasedPersonalization  bool                   `json:"enable_preference_based_personalization"`
+	EnablePerformanceBasedPersonalization bool                   `json:"enable_performance_based_personalization"`
+	PersonalizationWeight                 float64                `json:"personalization_weight"`
+	AdaptationRate                        float64                `json:"adaptation_rate"`
+	Metadata                              map[string]interface{} `json:"metadata"`
+}
+
+// PerformanceSettings 性能设置
+type PerformanceSettings struct {
+	CacheEnabled             bool                   `json:"cache_enabled"`
+	CacheSize                int                    `json:"cache_size"`
+	CacheTTL                 time.Duration          `json:"cache_ttl"`
+	MaxConcurrentRequests    int                    `json:"max_concurrent_requests"`
+	RequestTimeout           time.Duration          `json:"request_timeout"`
+	EnableParallelProcessing bool                   `json:"enable_parallel_processing"`
+	BatchSize                int                    `json:"batch_size"`
+	Metadata                 map[string]interface{} `json:"metadata"`
+}
+
+// CacheSettings 缓存设置
+type CacheSettings struct {
+	Enabled                bool                   `json:"enabled"`
+	EnableCaching          bool                   `json:"enable_caching"`
+	Size                   int                    `json:"size"`
+	MaxCacheSize           int                    `json:"max_cache_size"`
+	TTL                    time.Duration          `json:"ttl"`
+	CacheTTL               time.Duration          `json:"cache_ttl"`
+	EvictionPolicy         string                 `json:"eviction_policy"`
+	CleanupInterval        time.Duration          `json:"cleanup_interval"`
+	Metadata               map[string]interface{} `json:"metadata"`
+}
+
 // IntelligentContentRecommendationService 智能内容推荐服务
 type IntelligentContentRecommendationService struct {
-	crossModalService    CrossModalServiceInterface
-	inferenceEngine      *IntelligentRelationInferenceEngine
-	knowledgeGraphService *AutomatedKnowledgeGraphService
-	analyticsService     *RealtimeLearningAnalyticsService
-	adaptiveEngine       *AdaptiveLearningEngine
+	crossModalService    crossmodal.CrossModalServiceInterface
+	inferenceEngine      *knowledge.IntelligentRelationInferenceEngine
+	knowledgeGraphService *knowledge.AutomatedKnowledgeGraphService
+	analyticsService     *realtime.RealtimeLearningAnalyticsService
+	adaptiveEngine       *adaptive.AdaptiveLearningEngine
 	
 	config               *ContentRecommendationConfig
 	cache                *ContentRecommendationCache
@@ -625,11 +671,11 @@ func DifficultyLevelToFloat64(level DifficultyLevel) float64 {
 
 // NewIntelligentContentRecommendationService 创建智能内容推荐服务
 func NewIntelligentContentRecommendationService(
-	crossModalService CrossModalServiceInterface,
-	inferenceEngine *IntelligentRelationInferenceEngine,
-	knowledgeGraphService *AutomatedKnowledgeGraphService,
-	analyticsService *RealtimeLearningAnalyticsService,
-	adaptiveEngine *AdaptiveLearningEngine,
+	crossModalService crossmodal.CrossModalServiceInterface,
+	inferenceEngine *knowledge.IntelligentRelationInferenceEngine,
+	knowledgeGraphService *knowledge.AutomatedKnowledgeGraphService,
+	analyticsService *realtime.RealtimeLearningAnalyticsService,
+	adaptiveEngine *adaptive.AdaptiveLearningEngine,
 ) *IntelligentContentRecommendationService {
 	
 	service := &IntelligentContentRecommendationService{

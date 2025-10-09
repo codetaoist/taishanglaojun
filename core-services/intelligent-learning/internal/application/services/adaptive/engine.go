@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	knowledgeServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/shared"
 )
@@ -23,15 +22,243 @@ type PersonalizationFactor struct {
 	Metadata     map[string]interface{} `json:"metadata"`
 }
 
-// RecommendationMetrics 推荐指标
-type RecommendationMetrics struct {
-	TotalRecommendations     int                    `json:"total_recommendations"`
-	AcceptedRecommendations  int                    `json:"accepted_recommendations"`
-	RejectedRecommendations  int                    `json:"rejected_recommendations"`
-	AverageAcceptanceRate    float64                `json:"average_acceptance_rate"`
-	RecommendationQuality    float64                `json:"recommendation_quality"`
-	Metadata                 map[string]interface{} `json:"metadata"`
+// AdaptiveLearningEngineConfig 自适应学习引擎配置
+type AdaptiveLearningEngineConfig struct {
+	ConfigID         uuid.UUID              `json:"config_id"`
+	MaxRecommendations int                  `json:"max_recommendations"`
+	DifficultyRange   []float64             `json:"difficulty_range"`
+	UpdateInterval    time.Duration         `json:"update_interval"`
+	CacheSize        int                   `json:"cache_size"`
+	Settings         map[string]interface{} `json:"settings"`
+	Metadata         map[string]interface{} `json:"metadata"`
 }
+
+// ContentItem 内容项
+type ContentItem struct {
+	ItemID       uuid.UUID              `json:"item_id"`
+	Title        string                 `json:"title"`
+	Description  string                 `json:"description"`
+	ContentType  string                 `json:"content_type"`
+	Difficulty   float64                `json:"difficulty"`
+	Duration     time.Duration          `json:"duration"`
+	Prerequisites []uuid.UUID           `json:"prerequisites"`
+	Tags         []string               `json:"tags"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// LearningProgress 学习进度
+type LearningProgress struct {
+	ProgressID   uuid.UUID              `json:"progress_id"`
+	LearnerID    uuid.UUID              `json:"learner_id"`
+	ContentID    uuid.UUID              `json:"content_id"`
+	Completion   float64                `json:"completion"`
+	TimeSpent    time.Duration          `json:"time_spent"`
+	Score        float64                `json:"score"`
+	LastAccessed time.Time              `json:"last_accessed"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// ContentRecommendation 内容推荐
+type ContentRecommendation struct {
+	RecommendationID uuid.UUID              `json:"recommendation_id"`
+	ContentID        uuid.UUID              `json:"content_id"`
+	LearnerID        uuid.UUID              `json:"learner_id"`
+	Confidence       float64                `json:"confidence"`
+	Reason           string                 `json:"reason"`
+	Priority         int                    `json:"priority"`
+	CreatedAt        time.Time              `json:"created_at"`
+	Metadata         map[string]interface{} `json:"metadata"`
+}
+
+// PersonalizedFeedback 个性化反馈
+type PersonalizedFeedback struct {
+	FeedbackID   uuid.UUID              `json:"feedback_id"`
+	LearnerID    uuid.UUID              `json:"learner_id"`
+	ContentID    uuid.UUID              `json:"content_id"`
+	FeedbackType string                 `json:"feedback_type"`
+	Message      string                 `json:"message"`
+	Suggestions  []string               `json:"suggestions"`
+	CreatedAt    time.Time              `json:"created_at"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// Skill 技能
+type Skill struct {
+	SkillID     uuid.UUID              `json:"skill_id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Category    string                 `json:"category"`
+	Level       int                    `json:"level"`
+	Prerequisites []uuid.UUID          `json:"prerequisites"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// LearningGap 学习差距
+type LearningGap struct {
+	GapID       uuid.UUID              `json:"gap_id"`
+	SkillID     uuid.UUID              `json:"skill_id"`
+	CurrentLevel float64               `json:"current_level"`
+	TargetLevel  float64               `json:"target_level"`
+	Priority     int                   `json:"priority"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// LearningResource 学习资源
+type LearningResource struct {
+	ResourceID  uuid.UUID              `json:"resource_id"`
+	Title       string                 `json:"title"`
+	Type        string                 `json:"type"`
+	URL         string                 `json:"url"`
+	Description string                 `json:"description"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// Assessment 评估
+type Assessment struct {
+	AssessmentID uuid.UUID              `json:"assessment_id"`
+	Title        string                 `json:"title"`
+	Type         string                 `json:"type"`
+	Questions    []string               `json:"questions"`
+	MaxScore     float64                `json:"max_score"`
+	Duration     time.Duration          `json:"duration"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// LearningAnalytics 学习分析
+type LearningAnalytics struct {
+	AnalyticsID uuid.UUID              `json:"analytics_id"`
+	LearnerID   uuid.UUID              `json:"learner_id"`
+	Metrics     map[string]float64     `json:"metrics"`
+	Insights    []string               `json:"insights"`
+	CreatedAt   time.Time              `json:"created_at"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// TimeRange 时间范围
+type TimeRange struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
+
+// LearningInsights 学习洞察
+type LearningInsights struct {
+	InsightID   uuid.UUID              `json:"insight_id"`
+	Type        string                 `json:"type"`
+	Description string                 `json:"description"`
+	Confidence  float64                `json:"confidence"`
+	CreatedAt   time.Time              `json:"created_at"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// LearningOutcome 学习结果
+type LearningOutcome struct {
+	OutcomeID   uuid.UUID              `json:"outcome_id"`
+	LearnerID   uuid.UUID              `json:"learner_id"`
+	ContentID   uuid.UUID              `json:"content_id"`
+	Score       float64                `json:"score"`
+	Achieved    bool                   `json:"achieved"`
+	CompletedAt time.Time              `json:"completed_at"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// OutcomePrediction 结果预测
+type OutcomePrediction struct {
+	PredictionID uuid.UUID              `json:"prediction_id"`
+	LearnerID    uuid.UUID              `json:"learner_id"`
+	ContentID    uuid.UUID              `json:"content_id"`
+	Probability  float64                `json:"probability"`
+	Confidence   float64                `json:"confidence"`
+	CreatedAt    time.Time              `json:"created_at"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// UserInterface 用户界面
+type UserInterface struct {
+	InterfaceID uuid.UUID              `json:"interface_id"`
+	Type        string                 `json:"type"`
+	Layout      string                 `json:"layout"`
+	Theme       string                 `json:"theme"`
+	Settings    map[string]interface{} `json:"settings"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// UsageAnalytics 使用分析
+type UsageAnalytics struct {
+	AnalyticsID uuid.UUID              `json:"analytics_id"`
+	UserID      uuid.UUID              `json:"user_id"`
+	SessionTime time.Duration          `json:"session_time"`
+	Actions     []string               `json:"actions"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// MotivationAnalysis 动机分析
+type MotivationAnalysis struct {
+	AnalysisID     uuid.UUID              `json:"analysis_id"`
+	LearnerID      uuid.UUID              `json:"learner_id"`
+	MotivationLevel float64               `json:"motivation_level"`
+	Factors        []string               `json:"factors"`
+	Metadata       map[string]interface{} `json:"metadata"`
+}
+
+// MotivationalContent 激励内容
+type MotivationalContent struct {
+	ContentID   uuid.UUID              `json:"content_id"`
+	Type        string                 `json:"type"`
+	Message     string                 `json:"message"`
+	Triggers    []string               `json:"triggers"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// LearningPace 学习节奏
+type LearningPace struct {
+	PaceID      uuid.UUID              `json:"pace_id"`
+	LearnerID   uuid.UUID              `json:"learner_id"`
+	Speed       float64                `json:"speed"`
+	Consistency float64                `json:"consistency"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// PerformanceMetrics 性能指标
+type PerformanceMetrics struct {
+	MetricsID   uuid.UUID              `json:"metrics_id"`
+	LearnerID   uuid.UUID              `json:"learner_id"`
+	Scores      map[string]float64     `json:"scores"`
+	Trends      []string               `json:"trends"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// LearningObjective 学习目标
+type LearningObjective struct {
+	ObjectiveID uuid.UUID              `json:"objective_id"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Priority    int                    `json:"priority"`
+	Deadline    time.Time              `json:"deadline"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// ContentVariation 内容变化
+type ContentVariation struct {
+	VariationID uuid.UUID              `json:"variation_id"`
+	BaseContentID uuid.UUID            `json:"base_content_id"`
+	Type        string                 `json:"type"`
+	Changes     map[string]interface{} `json:"changes"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// PersonalizationRule 个性化规则
+type PersonalizationRule struct {
+	RuleID      uuid.UUID              `json:"rule_id"`
+	Name        string                 `json:"name"`
+	Conditions  []string               `json:"conditions"`
+	Actions     []string               `json:"actions"`
+	Priority    int                    `json:"priority"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+
+
+
 
 // QualityMetrics 已移至 shared_types.go
 
@@ -100,10 +327,10 @@ type AdaptationRecord struct {
 
 // AdaptiveLearningEngine 自适应学习引擎
 type AdaptiveLearningEngine struct {
-	crossModalService    crossmodal.CrossModalServiceInterface
-	inferenceEngine      *knowledge.IntelligentRelationInferenceEngine
-	analyticsService     *realtime.RealtimeLearningAnalyticsService
-	knowledgeGraphService *knowledge.AutomatedKnowledgeGraphService
+	crossModalService    knowledgeServices.CrossModalServiceInterface
+	inferenceEngine      *knowledgeServices.IntelligentRelationInferenceEngine
+	realtimeAnalytics    *realtime.RealtimeLearningAnalyticsService
+	knowledgeGraphService *knowledgeServices.AutomatedKnowledgeGraphService
 	config               *AdaptiveLearningConfig
 	cache                *AdaptiveLearningCache
 	metrics              *AdaptiveLearningMetrics
@@ -435,12 +662,6 @@ type FeedbackEffectivenessConfig struct {
 }
 
 // 添加缺失的类型定义
-type LearningPathMetrics struct {
-	Metrics map[string]interface{} `json:"metrics"`
-}
-type AssessmentMetrics struct {
-	Metrics map[string]interface{} `json:"metrics"`
-}
 type RegisteredStrategy struct {
 	Strategy map[string]interface{} `json:"strategy"`
 }
@@ -479,10 +700,10 @@ type AdaptationMetrics struct {
 
 // NewAdaptiveLearningEngine 创建自适应学习引擎
 func NewAdaptiveLearningEngine(
-	crossModalService crossmodal.CrossModalServiceInterface,
-	inferenceEngine *knowledge.IntelligentRelationInferenceEngine,
+	crossModalService knowledgeServices.CrossModalServiceInterface,
+	inferenceEngine *knowledgeServices.IntelligentRelationInferenceEngine,
 	analyticsService *realtime.RealtimeLearningAnalyticsService,
-	knowledgeGraphService *knowledge.AutomatedKnowledgeGraphService,
+	knowledgeGraphService *knowledgeServices.AutomatedKnowledgeGraphService,
 ) *AdaptiveLearningEngine {
 	config := &AdaptiveLearningConfig{
 		AdaptationSettings: &AdaptationSettings{
@@ -532,7 +753,7 @@ func NewAdaptiveLearningEngine(
 				"location",
 				"social_context",
 			},
-			PersonalizationRules: make([]*PersonalizationRule, 0),
+			PersonalizationRules: make([]*shared.PersonalizationRule, 0),
 			Metadata:             make(map[string]interface{}),
 		},
 		StrategySettings: &StrategySettings{
@@ -582,26 +803,35 @@ func NewAdaptiveLearningEngine(
 			FeedbackEffectiveness:   &FeedbackEffectivenessConfig{},
 			Metadata:                make(map[string]interface{}),
 		},
-		RecommendationSettings: &RecommendationSettings{
-			RecommendationTypes: []RecommendationType{
-				RecommendationTypeContent,
-				RecommendationTypeStrategy,
-				RecommendationTypePath,
-				RecommendationTypeResource,
-				RecommendationTypePeer,
+		RecommendationSettings: &shared.RecommendationSettings{
+			RecommendationTypes: []shared.RecommendationType{
+				"content",
+				"strategy",
+				"path",
+				"resource",
+				"peer",
 			},
-			RecommendationAlgorithms: []AdaptiveRecommendationAlgorithm{
+			RecommendationAlgorithms: []shared.AdaptiveRecommendationAlgorithm{
 				"collaborative_filtering",
 				"content_based",
 				"knowledge_based",
 				"hybrid",
 			},
-			RecommendationFilters:   make([]*RecommendationFilter, 0),
-			RecommendationRanking:   &RecommendationRankingConfig{},
-			RecommendationDiversity: &RecommendationDiversityConfig{},
+			RecommendationFilters:   make([]*shared.RecommendationFilter, 0),
+			RecommendationRanking:   &shared.RecommendationRankingConfig{},
+			RecommendationDiversity: &shared.RecommendationDiversityConfig{},
+			MaxRecommendations:      10,
+			MinConfidence:           0.7,
+			MinConfidenceScore:      0.7,
+			DiversityWeight:         0.3,
+			NoveltyWeight:           0.2,
+			RelevanceWeight:         0.5,
+			PopularityWeight:        0.1,
+			EnabledStrategies:       make([]shared.RecommendationStrategy, 0),
+			RefreshInterval:         time.Hour,
 			Metadata:                make(map[string]interface{}),
 		},
-		OptimizationSettings: &OptimizationSettings{},
+		OptimizationSettings: &shared.OptimizationSettings{},
 		QualityThresholds: map[string]float64{
 			"min_adaptation_confidence": 0.7,
 			"min_strategy_effectiveness": 0.6,
@@ -616,13 +846,13 @@ func NewAdaptiveLearningEngine(
 	}
 
 	cache := &AdaptiveLearningCache{
-		LearnerProfiles:       make(map[string]*AdaptiveCachedLearnerProfile),
-		LearningStrategies:    make(map[string]*CachedLearningStrategy),
-		AdaptationResults:     make(map[string]*CachedAdaptationResult),
-		PersonalizationData:   make(map[string]*CachedPersonalizationData),
-		LearningPaths:         make(map[string]*CachedLearningPath),
-		AssessmentResults:     make(map[string]*CachedAssessmentResult),
-		RecommendationResults: make(map[string]*CachedRecommendationResult),
+		LearnerProfiles:       make(map[string]*shared.AdaptiveCachedLearnerProfile),
+		LearningStrategies:    make(map[string]*shared.CachedLearningStrategy),
+		AdaptationResults:     make(map[string]*shared.CachedAdaptationResult),
+		PersonalizationData:   make(map[string]*shared.CachedPersonalizationData),
+		LearningPaths:         make(map[string]*shared.CachedLearningPath),
+		AssessmentResults:     make(map[string]*shared.CachedAssessmentResult),
+		RecommendationResults: make(map[string]*shared.CachedRecommendationResult),
 		TTL:                   2 * time.Hour,
 		LastCleanup:           time.Now(),
 		CacheSize:             0,
@@ -684,7 +914,7 @@ func NewAdaptiveLearningEngine(
 	return &AdaptiveLearningEngine{
 		crossModalService:     crossModalService,
 		inferenceEngine:       inferenceEngine,
-		analyticsService:      analyticsService,
+		realtimeAnalytics:     analyticsService,
 		knowledgeGraphService: knowledgeGraphService,
 		config:                config,
 		cache:                 cache,
@@ -699,7 +929,7 @@ func NewAdaptiveLearningEngine(
 func (e *AdaptiveLearningEngine) AdaptLearningStrategy(
 	ctx context.Context,
 	request *AdaptationRequest,
-) (*AdaptationResponse, error) {
+) (*shared.AdaptationResponse, error) {
 	startTime := time.Now()
 	
 	// 验证请求
@@ -756,21 +986,23 @@ func (e *AdaptiveLearningEngine) AdaptLearningStrategy(
 	explanation := e.generateAdaptationExplanation(adaptedStrategy, adaptationNeeds, request)
 	
 	// 构建响应
-	response := &AdaptationResponse{
-		RequestID:           request.RequestID,
-		ResponseID:          uuid.New(),
-		Success:             true,
-		AdaptedStrategy:     adaptedStrategy,
-		AdaptedPath:         personalizedPath,
-		AdaptationChanges:   e.generateAdaptationChanges(adaptedStrategy, request),
-		PersonalizationData: e.generatePersonalizationData(request),
-		Recommendations:     recommendations,
-		QualityMetrics:      qualityMetrics,
-		Confidence:          e.calculateAdaptationConfidence(adaptedStrategy, qualityMetrics),
-		Explanation:         explanation,
-		ProcessingTime:      time.Since(startTime),
-		Timestamp:           time.Now(),
-		Metadata:            make(map[string]interface{}),
+	response := &shared.AdaptationResponse{
+		ResponseID: uuid.New().String(),
+		Data: map[string]interface{}{
+			"request_id":             request.RequestID.String(),
+			"success":               true,
+			"adapted_strategy":      adaptedStrategy,
+			"adapted_path":          personalizedPath,
+			"adaptation_changes":    e.generateAdaptationChanges(adaptedStrategy, request),
+			"personalization_data":  e.generatePersonalizationData(request),
+			"recommendations":       recommendations,
+			"quality_metrics":       qualityMetrics,
+			"confidence":            e.calculateAdaptationConfidence(adaptedStrategy, qualityMetrics),
+			"explanation":           explanation,
+			"processing_time":       time.Since(startTime).String(),
+			"timestamp":             time.Now(),
+		},
+		Metadata: make(map[string]interface{}),
 	}
 	
 	// 缓存结果
@@ -904,7 +1136,7 @@ func (e *AdaptiveLearningEngine) validateAdaptationRequest(request *AdaptationRe
 }
 
 // getCachedAdaptationResult 获取缓存的适应结果
-func (e *AdaptiveLearningEngine) getCachedAdaptationResult(request *AdaptationRequest) *AdaptationResponse {
+func (e *AdaptiveLearningEngine) getCachedAdaptationResult(request *AdaptationRequest) *shared.AdaptationResponse {
 	key := e.generateAdaptationCacheKey(request)
 	if cached, exists := e.cache.AdaptationResults[key]; exists {
 		if time.Now().Before(cached.ExpiresAt) {
@@ -936,7 +1168,7 @@ func (e *AdaptiveLearningEngine) analyzeLearningState(
 	}
 	
 	// 使用分析服务分析学习状态
-	analysisResult, err := e.analyticsService.AnalyzeLearningState(ctx, request.LearnerID, sessionData)
+	analysisResult, err := e.realtimeAnalytics.AnalyzeLearningState(ctx, request.LearnerID, sessionData)
 	if err != nil {
 		return nil, fmt.Errorf("analytics service analysis failed: %w", err)
 	}
@@ -1097,15 +1329,15 @@ func (e *AdaptiveLearningEngine) calculateLearningProgress(state *LearningState)
 	return 0.65 // 简化实现
 }
 
-func (e *AdaptiveLearningEngine) identifyLearningIssues(result *AnalysisResult) []string {
+func (e *AdaptiveLearningEngine) identifyLearningIssues(result *realtime.AnalysisResult) []string {
 	return []string{"attention_deficit", "knowledge_gap"}
 }
 
-func (e *AdaptiveLearningEngine) identifyLearningStrengths(result *AnalysisResult) []string {
+func (e *AdaptiveLearningEngine) identifyLearningStrengths(result *realtime.AnalysisResult) []string {
 	return []string{"visual_learning", "problem_solving"}
 }
 
-func (e *AdaptiveLearningEngine) extractAnalysisRecommendations(result *AnalysisResult) []string {
+func (e *AdaptiveLearningEngine) extractAnalysisRecommendations(result *realtime.AnalysisResult) []string {
 	return []string{"increase_visual_content", "provide_more_practice"}
 }
 
@@ -1179,13 +1411,13 @@ func (e *AdaptiveLearningEngine) calculateAdaptationConfidence(strategy *Learnin
 	return 0.85
 }
 
-func (e *AdaptiveLearningEngine) cacheAdaptationResult(request *AdaptationRequest, response *AdaptationResponse) {
+func (e *AdaptiveLearningEngine) cacheAdaptationResult(request *AdaptationRequest, response *shared.AdaptationResponse) {
 	// 简化的缓存实现
 }
 
-func (e *AdaptiveLearningEngine) updateAdaptationMetrics(duration time.Duration, response *AdaptationResponse) {
+func (e *AdaptiveLearningEngine) updateAdaptationMetrics(duration time.Duration, response *shared.AdaptationResponse) {
 	e.metrics.TotalAdaptations++
-	if response.Success {
+	if success, ok := response.Data["success"].(bool); ok && success {
 		e.metrics.SuccessfulAdaptations++
 	} else {
 		e.metrics.FailedAdaptations++
@@ -1272,13 +1504,157 @@ func (e *AdaptiveLearningEngine) UpdateConfig(config *AdaptiveLearningConfig) {
 
 // ClearCache 清理缓存
 func (e *AdaptiveLearningEngine) ClearCache() {
-	e.cache.LearnerProfiles = make(map[string]*AdaptiveCachedLearnerProfile)
-	e.cache.LearningStrategies = make(map[string]*CachedLearningStrategy)
-	e.cache.AdaptationResults = make(map[string]*CachedAdaptationResult)
-	e.cache.PersonalizationData = make(map[string]*CachedPersonalizationData)
-	e.cache.LearningPaths = make(map[string]*CachedLearningPath)
-	e.cache.AssessmentResults = make(map[string]*CachedAssessmentResult)
-	e.cache.RecommendationResults = make(map[string]*CachedRecommendationResult)
+	e.cache.LearnerProfiles = make(map[string]*shared.AdaptiveCachedLearnerProfile)
+	e.cache.LearningStrategies = make(map[string]*shared.CachedLearningStrategy)
+	e.cache.AdaptationResults = make(map[string]*shared.CachedAdaptationResult)
+	e.cache.PersonalizationData = make(map[string]*shared.CachedPersonalizationData)
+	e.cache.LearningPaths = make(map[string]*shared.CachedLearningPath)
+	e.cache.AssessmentResults = make(map[string]*shared.CachedAssessmentResult)
+	e.cache.RecommendationResults = make(map[string]*shared.CachedRecommendationResult)
 	e.cache.CacheSize = 0
 	e.cache.LastCleanup = time.Now()
+}
+
+// 缺失的类型定义
+type PersonalizationMetrics struct {
+	PersonalizationAccuracy float64                `json:"personalization_accuracy"`
+	PersonalizationCoverage float64                `json:"personalization_coverage"`
+	PersonalizationDiversity float64               `json:"personalization_diversity"`
+	PersonalizationLatency  time.Duration          `json:"personalization_latency"`
+	Metadata                map[string]interface{} `json:"metadata"`
+}
+
+type QualityMetrics struct {
+	ContentQuality      float64                `json:"content_quality"`
+	RecommendationQuality float64              `json:"recommendation_quality"`
+	PathQuality         float64                `json:"path_quality"`
+	OverallQuality      float64                `json:"overall_quality"`
+	OverallScore        float64                `json:"overall_score"`
+	Confidence          float64                `json:"confidence"`
+	DeliveryQuality     float64                `json:"delivery_quality"`
+	EngagementQuality   float64                `json:"engagement_quality"`
+	LearningEffectiveness float64              `json:"learning_effectiveness"`
+	Metadata            map[string]interface{} `json:"metadata"`
+}
+
+type LearningState struct {
+	LearnerID           string                 `json:"learner_id"`
+	CurrentLevel        float64                `json:"current_level"`
+	Progress            float64                `json:"progress"`
+	Engagement          float64                `json:"engagement"`
+	Performance         float64                `json:"performance"`
+	LastActivity        time.Time              `json:"last_activity"`
+	CurrentContent      string                 `json:"current_content"`
+	Difficulty          float64                `json:"difficulty"`
+	LearningStyle       string                 `json:"learning_style"`
+	FocusLevel          float64                `json:"focus_level"`
+	ComprehensionRate   float64                `json:"comprehension_rate"`
+	Metadata            map[string]interface{} `json:"metadata"`
+}
+
+type LearningPathMetrics struct {
+	PathCompletion      float64                `json:"path_completion"`
+	PathEffectiveness   float64                `json:"path_effectiveness"`
+	PathSatisfaction    float64                `json:"path_satisfaction"`
+	AveragePathLength   float64                `json:"average_path_length"`
+	Metadata            map[string]interface{} `json:"metadata"`
+}
+
+type AssessmentMetrics struct {
+	AssessmentAccuracy  float64                `json:"assessment_accuracy"`
+	AssessmentCoverage  float64                `json:"assessment_coverage"`
+	AverageScore        float64                `json:"average_score"`
+	CompletionRate      float64                `json:"completion_rate"`
+	Metadata            map[string]interface{} `json:"metadata"`
+}
+
+type RecommendationMetrics struct {
+	RecommendationAccuracy float64                `json:"recommendation_accuracy"`
+	ClickThroughRate       float64                `json:"click_through_rate"`
+	ConversionRate         float64                `json:"conversion_rate"`
+	UserSatisfaction       float64                `json:"user_satisfaction"`
+	Metadata               map[string]interface{} `json:"metadata"`
+}
+
+// AnalysisResult 分析结果
+type AnalysisResult struct {
+	ResultID    uuid.UUID              `json:"result_id"`
+	AnalysisType string                `json:"analysis_type"`
+	Results     map[string]interface{} `json:"results"`
+	Confidence  float64                `json:"confidence"`
+	Timestamp   time.Time              `json:"timestamp"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// LearningPreferences 学习偏好
+type LearningPreferences struct {
+	PreferenceID     uuid.UUID              `json:"preference_id"`
+	LearningStyle    string                 `json:"learning_style"`
+	ContentType      []string               `json:"content_type"`
+	DifficultyLevel  string                 `json:"difficulty_level"`
+	PacingPreference string                 `json:"pacing_preference"`
+	InteractionMode  string                 `json:"interaction_mode"`
+	FeedbackStyle    string                 `json:"feedback_style"`
+	Metadata         map[string]interface{} `json:"metadata"`
+}
+
+// PersonalizationEngine 个性化引擎（应用层）
+type PersonalizationEngine struct {
+	PersonalizationModels  map[string]*PersonalizationModel `json:"personalization_models"`
+	LearnerModels          map[string]*LearnerModel         `json:"learner_models"`
+	PersonalizationRules   []*PersonalizationRule           `json:"personalization_rules"`
+	PersonalizationHistory []*PersonalizationRecord         `json:"personalization_history"`
+	PersonalizationMetrics *PersonalizationMetrics          `json:"personalization_metrics"`
+	Metadata               map[string]interface{}           `json:"metadata"`
+}
+
+// PersonalizationModel 个性化模型
+type PersonalizationModel struct {
+	ModelID     string                 `json:"model_id"`
+	Type        string                 `json:"type"`
+	Algorithm   string                 `json:"algorithm"`
+	Features    []string               `json:"features"`
+	Config      map[string]interface{} `json:"config"`
+	IsActive    bool                   `json:"is_active"`
+	Performance *ModelPerformance      `json:"performance"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// LearnerModel 学习者模型
+type LearnerModel struct {
+	ModelID        string                 `json:"model_id"`
+	LearnerID      string                 `json:"learner_id"`
+	LearningStyle  string                 `json:"learning_style"`
+	KnowledgeLevel map[string]float64     `json:"knowledge_level"`
+	Preferences    map[string]interface{} `json:"preferences"`
+	Goals          []LearningGoal         `json:"goals"`
+	Progress       map[string]float64     `json:"progress"`
+	Strengths      []string               `json:"strengths"`
+	Weaknesses     []string               `json:"weaknesses"`
+	LastUpdated    time.Time              `json:"last_updated"`
+	Metadata       map[string]interface{} `json:"metadata"`
+}
+
+// PersonalizationRecord 个性化记录
+type PersonalizationRecord struct {
+	RecordID      string                 `json:"record_id"`
+	LearnerID     string                 `json:"learner_id"`
+	Timestamp     time.Time              `json:"timestamp"`
+	Type          string                 `json:"type"`
+	Description   string                 `json:"description"`
+	Effectiveness float64                `json:"effectiveness"`
+	Metadata      map[string]interface{} `json:"metadata"`
+}
+
+
+
+// ModelPerformance 模型性能
+type ModelPerformance struct {
+	Accuracy    float64                `json:"accuracy"`
+	Precision   float64                `json:"precision"`
+	Recall      float64                `json:"recall"`
+	F1Score     float64                `json:"f1_score"`
+	Latency     time.Duration          `json:"latency"`
+	Throughput  float64                `json:"throughput"`
+	Metadata    map[string]interface{} `json:"metadata"`
 }

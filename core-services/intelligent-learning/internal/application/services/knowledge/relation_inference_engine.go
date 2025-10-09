@@ -1,4 +1,4 @@
-package services
+package knowledge
 
 import (
 	"context"
@@ -21,6 +21,18 @@ const (
 	EvidenceTypeExperimental EvidenceType = "experimental"
 	EvidenceTypeCorrelation EvidenceType = "correlation"
 )
+
+// Evidence 证据
+type Evidence struct {
+	ID          string                 `json:"id"`          // 证据ID
+	Type        EvidenceType           `json:"type"`        // 证据类型
+	Source      string                 `json:"source"`      // 来源
+	Content     interface{}            `json:"content"`     // 内容
+	Reliability float64               `json:"reliability"` // 可靠性
+	Confidence  float64               `json:"confidence"`  // 置信度
+	Timestamp   time.Time             `json:"timestamp"`   // 时间戳
+	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
+}
 
 // IntelligentRelationInferenceEngine 智能关系推理引擎
 type IntelligentRelationInferenceEngine struct {
@@ -180,16 +192,6 @@ type TemporalInfo struct {
 	EndTime   *time.Time `json:"end_time"`   // 结束时间
 	Duration  *int64     `json:"duration"`   // 持续时间
 	Frequency string     `json:"frequency"`  // 频率
-}
-
-// Evidence 证据
-type RelationEvidence struct {
-	Type        EvidenceType           `json:"type"`        // 证据类型
-	Source      string                 `json:"source"`      // 来源
-	Content     interface{}            `json:"content"`     // 内容
-	Reliability float64               `json:"reliability"` // 可靠性
-	Timestamp   time.Time             `json:"timestamp"`   // 时间戳
-	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
 }
 
 // EvidenceType 证据类型

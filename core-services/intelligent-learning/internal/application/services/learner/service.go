@@ -9,6 +9,7 @@ import (
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
 	domainservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/interfaces"
 )
 
 
@@ -19,8 +20,8 @@ type LearnerService struct {
 	knowledgeGraphRepo  repositories.KnowledgeGraphRepository
 	learningContentRepo repositories.LearningContentRepository
 	pathService         LearningPathService
-	analyticsService    LearningAnalyticsService
-	knowledgeService    KnowledgeGraphService
+	analyticsService    interfaces.LearningAnalyticsService
+	knowledgeService    interfaces.KnowledgeGraphService
 }
 
 // NewLearnerService 创建新的学习者应用服务
@@ -29,8 +30,8 @@ func NewLearnerService(
 	knowledgeGraphRepo repositories.KnowledgeGraphRepository,
 	learningContentRepo repositories.LearningContentRepository,
 	pathService LearningPathService,
-	analyticsService LearningAnalyticsService,
-	knowledgeService KnowledgeGraphService,
+	analyticsService interfaces.LearningAnalyticsService,
+	knowledgeService interfaces.KnowledgeGraphService,
 ) *LearnerService {
 	return &LearnerService{
 		learnerRepo:         learnerRepo,
@@ -50,7 +51,7 @@ type CreateLearnerRequest struct {
 	EducationLevel  string                 `json:"education_level" validate:"required"`
 	LearningStyle   string                 `json:"learning_style"`
 	Goals           []LearningGoalRequest  `json:"goals"`
-	Preferences     LearningPreferences    `json:"preferences"`
+	Preferences     LearnerLearningPreferences    `json:"preferences"`
 	InitialSkills   []SkillRequest         `json:"initial_skills"`
 }
 
@@ -529,11 +530,16 @@ func (s *LearnerService) GetPersonalizedRecommendations(ctx context.Context, lea
 	var convertedConceptRecommendations []*ConceptRecommendation
 	for _, rec := range conceptRecommendations {
 		convertedConceptRecommendations = append(convertedConceptRecommendations, &ConceptRecommendation{
-			ConceptID:   rec.NodeID,
-			Name:        rec.RecommendationType,
-			Description: rec.RecommendationType,
-			Relevance:   rec.Score,
-			Reason:      fmt.Sprintf("Score: %.2f, Confidence: %.2f", rec.Score, rec.Confidence),
+			ConceptID:       rec.NodeID,
+			ConceptName:     rec.RecommendationType,
+			Description:     rec.RecommendationType,
+			RelevanceScore:  rec.Score,
+			Reason:          fmt.Sprintf("Score: %.2f, Confidence: %.2f", rec.Score, rec.Confidence),
+			Difficulty:      "intermediate",
+			Prerequisites:   []string{},
+			RelatedConcepts: []string{},
+			EstimatedTime:   time.Hour,
+			LearningResources: []LearningResource{},
 		})
 	}
 
@@ -541,11 +547,19 @@ func (s *LearnerService) GetPersonalizedRecommendations(ctx context.Context, lea
 	var convertedPathRecommendations []*PersonalizedPath
 	for _, path := range pathRecommendations.RecommendedPaths {
 		convertedPathRecommendations = append(convertedPathRecommendations, &PersonalizedPath{
-			ID:            path.PathID,
-			Name:          path.Title,
-			Description:   path.Description,
-			Difficulty:    path.DifficultyLevel,
-			EstimatedTime: time.Duration(path.EstimatedTime) * time.Hour,
+			ID:                  path.PathID,
+			LearnerID:           learnerID,
+			Title:               path.Title,
+			Description:         path.Description,
+			Difficulty:          path.DifficultyLevel,
+			EstimatedTime:       time.Duration(path.EstimatedTime) * time.Hour,
+			Prerequisites:       []string{},
+			LearningGoals:       []string{},
+			Steps:               []*LearningStep{},
+			Progress:            0.0,
+			Status:              "recommended",
+			RecommendationScore: path.MatchScore,
+			CreatedAt:           time.Now(),
 		})
 	}
 
@@ -710,4 +724,60 @@ func (s *LearnerService) getContentRecommendations(ctx context.Context, learner 
 	}
 	
 	return recommendations, nil
+}
+
+// PersonalizedPath 个性化学习路径
+type PersonalizedPath struct {
+	ID              uuid.UUID                `json:"id"`
+	LearnerID       uuid.UUID                `json:"learner_id"`
+	Title           string                   `json:"title"`
+	Description     string                   `json:"description"`
+	Difficulty      string                   `json:"difficulty"`
+	EstimatedTime   time.Duration            `json:"estimated_time"`
+	Prerequisites   []string                 `json:"prerequisites"`
+	LearningGoals   []string                 `json:"learning_goals"`
+	Steps           []*LearningStep          `json:"steps"`
+	Progress        float64                  `json:"progress"`
+	Status          string                   `json:"status"`
+	RecommendationScore float64              `json:"recommendation_score"`
+	CreatedAt       time.Time                `json:"created_at"`
+	UpdatedAt       time.Time                `json:"updated_at"`
+}
+
+// LearningStep 学习步骤
+type LearningStep struct {
+	ID            uuid.UUID     `json:"id"`
+	Title         string        `json:"title"`
+	Description   string        `json:"description"`
+	ContentType   string        `json:"content_type"`
+	ContentID     uuid.UUID     `json:"content_id"`
+	EstimatedTime time.Duration `json:"estimated_time"`
+	Order         int           `json:"order"`
+	IsCompleted   bool          `json:"is_completed"`
+	CompletedAt   *time.Time    `json:"completed_at,omitempty"`
+}
+
+// ConceptRecommendation 概念推荐
+type ConceptRecommendation struct {
+	ConceptID       uuid.UUID `json:"concept_id"`
+	ConceptName     string    `json:"concept_name"`
+	Description     string    `json:"description"`
+	Difficulty      string    `json:"difficulty"`
+	Prerequisites   []string  `json:"prerequisites"`
+	RelatedConcepts []string  `json:"related_concepts"`
+	RelevanceScore  float64   `json:"relevance_score"`
+	Reason          string    `json:"reason"`
+	EstimatedTime   time.Duration `json:"estimated_time"`
+	LearningResources []LearningResource `json:"learning_resources"`
+}
+
+// LearningResource 学习资源
+type LearningResource struct {
+	ID          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Type        string    `json:"type"`
+	URL         string    `json:"url"`
+	Description string    `json:"description"`
+	Difficulty  string    `json:"difficulty"`
+	Duration    time.Duration `json:"duration"`
 }

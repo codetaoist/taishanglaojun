@@ -14,7 +14,7 @@ import (
 
 // AdaptiveLearningEngineImpl 自适应学习引擎实现
 type AdaptiveLearningEngineImpl struct {
-	config              *AdaptiveLearningEngineConfig
+	config              *AdaptiveLearningConfig
 	learnerProfiler     *AdaptiveLearnerProfiler
 	contentAnalyzer     *AdaptiveContentAnalyzer
 	pathGenerator       *LearningPathGenerator
@@ -580,7 +580,7 @@ type SystemPerformanceMetrics struct {
 }
 
 // NewAdaptiveLearningEngineImpl 创建自适应学习引擎实现
-func NewAdaptiveLearningEngineImpl(config *AdaptiveLearningEngineConfig) *AdaptiveLearningEngineImpl {
+func NewAdaptiveLearningEngineImpl(config *AdaptiveLearningConfig) *AdaptiveLearningEngineImpl {
 	return &AdaptiveLearningEngineImpl{
 		config:              config,
 		learnerProfiler:     newLearnerProfiler(),

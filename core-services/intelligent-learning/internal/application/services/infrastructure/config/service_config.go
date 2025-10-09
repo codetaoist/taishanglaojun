@@ -1,4 +1,4 @@
-package services
+package config
 
 import (
 	"encoding/json"
@@ -186,6 +186,73 @@ type GlobalSettings struct {
 	MonitoringConfig    *MonitoringConfiguration `json:"monitoring_config"`
 }
 
+// IntegrationConfig 集成配置
+type IntegrationConfig struct {
+	ServiceTimeouts    map[string]time.Duration `json:"service_timeouts"`
+	ServiceRetries     map[string]int           `json:"service_retries"`
+	IntegrationSettings *LearningIntegrationSettings `json:"integration_settings"`
+	PerformanceConfig  *PerformanceConfiguration    `json:"performance_config"`
+}
+
+// LearningIntegrationSettings 学习集成设置
+type LearningIntegrationSettings struct {
+	EnableServiceOrchestration bool     `json:"enable_service_orchestration"`
+	EnableDataSynchronization  bool     `json:"enable_data_synchronization"`
+	EnableCrossServiceCaching  bool     `json:"enable_cross_service_caching"`
+	EnableEventDrivenUpdates   bool     `json:"enable_event_driven_updates"`
+	DataFlowPriority          []string `json:"data_flow_priority"`
+}
+
+// PerformanceConfiguration 性能配置
+type PerformanceConfiguration struct {
+	MaxConcurrentRequests int                          `json:"max_concurrent_requests"`
+	RequestTimeout        time.Duration                `json:"request_timeout"`
+	CacheExpiration       time.Duration                `json:"cache_expiration"`
+	BatchProcessingSize   int                          `json:"batch_processing_size"`
+	LoadBalancing         *LearningLoadBalancingConfig `json:"load_balancing"`
+	CircuitBreaker        *CircuitBreakerConfig        `json:"circuit_breaker"`
+}
+
+// LearningLoadBalancingConfig 学习负载均衡配置
+type LearningLoadBalancingConfig struct {
+	Strategy            string        `json:"strategy"`
+	HealthCheckInterval time.Duration `json:"health_check_interval"`
+	MaxRetries          int           `json:"max_retries"`
+}
+
+// CircuitBreakerConfig 断路器配置
+type CircuitBreakerConfig struct {
+	FailureThreshold int           `json:"failure_threshold"`
+	RecoveryTimeout  time.Duration `json:"recovery_timeout"`
+	HalfOpenRequests int           `json:"half_open_requests"`
+}
+
+// SecurityConfiguration 安全配置
+type SecurityConfiguration struct {
+	EnableAuthentication bool          `json:"enable_authentication"`
+	EnableAuthorization  bool          `json:"enable_authorization"`
+	TokenExpiration      time.Duration `json:"token_expiration"`
+	EncryptionEnabled    bool          `json:"encryption_enabled"`
+	AuditLogging         bool          `json:"audit_logging"`
+}
+
+// MonitoringConfiguration 监控配置
+type MonitoringConfiguration struct {
+	EnableMetrics     bool          `json:"enable_metrics"`
+	EnableTracing     bool          `json:"enable_tracing"`
+	MetricsInterval   time.Duration `json:"metrics_interval"`
+	AlertingEnabled   bool          `json:"alerting_enabled"`
+	LogLevel          string        `json:"log_level"`
+}
+
+// PerformanceSettings 性能设置
+type PerformanceSettings struct {
+	MaxConcurrency    int           `json:"max_concurrency"`
+	Timeout           time.Duration `json:"timeout"`
+	MemoryLimit       int64         `json:"memory_limit"`
+	CPULimit          float64       `json:"cpu_limit"`
+}
+
 // DatabaseConfig 数据库配置
 type DatabaseConfig struct {
 	Type             string        `json:"type"`
@@ -235,10 +302,10 @@ func getDefaultConfig() *GlobalServiceConfig {
 			MaxInferenceDepth:   5,
 			CacheSize:           1000,
 			PerformanceSettings: &PerformanceSettings{
-				MaxConcurrentRequests: 20,
-				RequestTimeout:        15 * time.Second,
-				CacheExpiration:       1 * time.Hour,
-				BatchSize:             50,
+				MaxConcurrency: 20,
+				Timeout:        15 * time.Second,
+				MemoryLimit:    1024 * 1024 * 1024, // 1GB
+				CPULimit:       0.8,
 			},
 			AlgorithmWeights: map[string]float64{
 				"rule_based": 0.3,
@@ -362,32 +429,23 @@ func getDefaultConfig() *GlobalServiceConfig {
 		},
 		
 		IntegrationConfig: &IntegrationConfig{
-			ServiceConfig: &ServiceConfiguration{
-				EnableCrossModalService:                    true,
-				EnableRelationInferenceEngine:              true,
-				EnableAdaptiveLearningEngine:               true,
-				EnableRealtimeLearningAnalyticsService:     true,
-				EnableAutomatedKnowledgeGraphService:       true,
-				EnableLearningAnalyticsReportingService:    true,
-				EnableIntelligentContentRecommendationService: true,
-				ServiceTimeouts: map[string]time.Duration{
-					"cross_modal":            30 * time.Second,
-					"relation_inference":     15 * time.Second,
-					"adaptive_learning":      20 * time.Second,
-					"realtime_analytics":     10 * time.Second,
-					"knowledge_graph":        25 * time.Second,
-					"analytics_reporting":    60 * time.Second,
-					"content_recommendation": 15 * time.Second,
-				},
-				ServiceRetries: map[string]int{
-					"cross_modal":            3,
-					"relation_inference":     2,
-					"adaptive_learning":      3,
-					"realtime_analytics":     2,
-					"knowledge_graph":        3,
-					"analytics_reporting":    2,
-					"content_recommendation": 3,
-				},
+			ServiceTimeouts: map[string]time.Duration{
+				"cross_modal":            30 * time.Second,
+				"relation_inference":     15 * time.Second,
+				"adaptive_learning":      20 * time.Second,
+				"realtime_analytics":     10 * time.Second,
+				"knowledge_graph":        25 * time.Second,
+				"analytics_reporting":    60 * time.Second,
+				"content_recommendation": 15 * time.Second,
+			},
+			ServiceRetries: map[string]int{
+				"cross_modal":            3,
+				"relation_inference":     2,
+				"adaptive_learning":      3,
+				"realtime_analytics":     2,
+				"knowledge_graph":        3,
+				"analytics_reporting":    2,
+				"content_recommendation": 3,
 			},
 			IntegrationSettings: &LearningIntegrationSettings{
 				EnableServiceOrchestration: true,
@@ -415,29 +473,6 @@ func getDefaultConfig() *GlobalServiceConfig {
 					FailureThreshold: 5,
 					RecoveryTimeout:  30 * time.Second,
 					HalfOpenRequests: 3,
-				},
-			},
-			SecurityConfig: &SecurityConfiguration{
-				EnableAuthentication: true,
-				EnableAuthorization:  true,
-				EnableEncryption:     true,
-				EnableAuditLogging:   true,
-				TokenExpiration:      24 * time.Hour,
-				EncryptionKey:        "default-key-change-in-production",
-				AuditLogRetention:    90 * 24 * time.Hour,
-			},
-			MonitoringConfig: &MonitoringConfiguration{
-				EnableMetrics:  true,
-				EnableTracing:  true,
-				EnableLogging:  true,
-				EnableAlerting: true,
-				MetricsInterval: 30 * time.Second,
-				LogLevel:       "info",
-				AlertThresholds: map[string]float64{
-					"error_rate":      0.05,
-					"response_time":   2.0,
-					"cpu_usage":       0.8,
-					"memory_usage":    0.85,
 				},
 			},
 		},
@@ -541,9 +576,9 @@ func (scm *ServiceConfigManager) ValidateConfig() error {
 		return fmt.Errorf("database connection string is required")
 	}
 	
-	// 验证服务配置
-	if scm.config.IntegrationConfig.ServiceConfig == nil {
-		return fmt.Errorf("service config is required")
+	// 验证集成配置
+	if scm.config.IntegrationConfig == nil {
+		return fmt.Errorf("integration config is required")
 	}
 	
 	return nil

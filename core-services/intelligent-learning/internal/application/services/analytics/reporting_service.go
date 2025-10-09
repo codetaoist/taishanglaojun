@@ -1,4 +1,4 @@
-package services
+package analytics
 
 import (
 	"context"
@@ -9,11 +9,29 @@ import (
 
 	"github.com/google/uuid"
 	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	knowledgeServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
 	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
 )
+
+// LearningAnalyticsReport 学习分析报告
+type LearningAnalyticsReport struct {
+	ReportID          uuid.UUID                      `json:"report_id"`
+	Title             string                         `json:"title"`
+	Description       string                         `json:"description"`
+	GeneratedAt       time.Time                      `json:"generated_at"`
+	TimeRange         *ReportingTimeRange            `json:"time_range"`
+	DataSources       []*DataSource                  `json:"data_sources"`
+	Sections          []*ReportSection               `json:"sections"`
+	Insights          []*Insight                     `json:"insights"`
+	Recommendations   []*Recommendation              `json:"recommendations"`
+	Visualizations    []*Visualization               `json:"visualizations"`
+	Summary           *ReportSummary                 `json:"summary"`
+	Metadata          *ReportMetadata                `json:"metadata"`
+	QualityScore      float64                        `json:"quality_score"`
+	AccessLevel       AccessLevel                    `json:"access_level"`
+	Tags              []string                       `json:"tags"`
+	Version           string                         `json:"version"`
+}
 
 // ReportingTimeRange 报告时间范围
 type ReportingTimeRange struct {
@@ -117,11 +135,10 @@ type PredictionModel struct {
 
 // LearningAnalyticsReportingService 学习分析报告服务
 type LearningAnalyticsReportingService struct {
-	crossModalService    crossmodal.CrossModalServiceInterface
-	inferenceEngine      *knowledge.IntelligentRelationInferenceEngine
-	analyticsService     *RealtimeLearningAnalyticsService
-	adaptiveEngine       *AdaptiveLearningEngine
-	knowledgeGraphService *AutomatedKnowledgeGraphService
+	crossModalService    knowledgeServices.CrossModalServiceInterface
+	inferenceEngine      *knowledgeServices.IntelligentRelationInferenceEngine
+	analyticsService     *realtime.RealtimeLearningAnalyticsService
+	knowledgeGraphService *knowledgeServices.AutomatedKnowledgeGraphService
 	config               *AnalyticsReportingConfig
 	cache                *AnalyticsReportingCache
 	metrics              *AnalyticsReportingMetrics
@@ -221,7 +238,7 @@ type ReportRequest struct {
 	Customizations        *ReportCustomizations          `json:"customizations"`
 	OutputFormat          ExportFormat                   `json:"output_format"`
 	DeliveryOptions       *DeliveryOptions               `json:"delivery_options"`
-	Priority              PriorityLevel                  `json:"priority"`
+	Priority              realtime.PriorityLevel         `json:"priority"`
 	RequestedBy           uuid.UUID                      `json:"requested_by"`
 	RequestedAt           time.Time                      `json:"requested_at"`
 	Metadata              map[string]interface{}         `json:"metadata"`
@@ -338,7 +355,7 @@ type ReportingRecommendation struct {
 	Title                 string                         `json:"title"`
 	Description           string                         `json:"description"`
 	RecommendationType    RecommendationType             `json:"recommendation_type"`
-	Priority              PriorityLevel                  `json:"priority"`
+	Priority              realtime.PriorityLevel         `json:"priority"`
 	ActionItems           []*ActionItem                  `json:"action_items"`
 	ExpectedOutcomes      []*ExpectedOutcome             `json:"expected_outcomes"`
 	ImplementationPlan    *ImplementationPlan            `json:"implementation_plan"`
@@ -525,17 +542,15 @@ type ReportMetadata struct{}
 
 // NewLearningAnalyticsReportingService 创建新的学习分析报告服务
 func NewLearningAnalyticsReportingService(
-	crossModalService crossmodal.CrossModalServiceInterface,
-	inferenceEngine *knowledge.IntelligentRelationInferenceEngine,
+	crossModalService knowledgeServices.CrossModalServiceInterface,
+	inferenceEngine *knowledgeServices.IntelligentRelationInferenceEngine,
 	analyticsService *realtime.RealtimeLearningAnalyticsService,
-	adaptiveEngine *adaptive.AdaptiveLearningEngine,
-	knowledgeGraphService *knowledge.AutomatedKnowledgeGraphService,
+	knowledgeGraphService *knowledgeServices.AutomatedKnowledgeGraphService,
 ) *LearningAnalyticsReportingService {
 	return &LearningAnalyticsReportingService{
 		crossModalService:     crossModalService,
 		inferenceEngine:       inferenceEngine,
 		analyticsService:      analyticsService,
-		adaptiveEngine:        adaptiveEngine,
 		knowledgeGraphService: knowledgeGraphService,
 		config: &AnalyticsReportingConfig{
 			ReportSettings: &ReportSettings{
@@ -1145,12 +1160,11 @@ func (s *LearningAnalyticsReportingService) buildReport(
     request *ReportRequest,
 ) (*LearningAnalyticsReport, error) {
     report := &LearningAnalyticsReport{
-        ID:               uuid.New(),
-        Type:             request.ReportType,
+        ReportID:         uuid.New(),
         Title:            s.generateReportTitle(request),
         Description:      s.generateReportDescription(request),
-        GeneratedFor:     request.Target,
-        ReportingTimeRange: request.TimeRange,
+        GeneratedAt:      time.Now(),
+        TimeRange:        request.TimeRange,
         DataSources:      nil, // SourceData为interface{}，为兼容先置空
         Sections:         s.buildReportSections(data, insights, visualizations),
         Visualizations:   visualizations,
@@ -1159,14 +1173,9 @@ func (s *LearningAnalyticsReportingService) buildReport(
         Summary:          s.generateReportSummary(data, insights, recommendations),
         Metadata:         s.generateReportMetadata(request, data),
         QualityScore:     s.calculateReportQualityScore(data, insights, visualizations),
-        GenerationTime:   0, // 将在外部设置
-        CreatedAt:        time.Now(),
-    ExpiresAt:        time.Now().Add(time.Duration(s.config.SecuritySettings.DataRetentionDays) * 24 * time.Hour),
         Version:          "1.0",
         Tags:             s.generateReportTags(request),
         AccessLevel:      s.determineAccessLevel(request),
-        ExportFormats:    s.config.ExportSettings.SupportedFormats,
-        CustomData:       make(map[string]interface{}),
     }
 
     return report, nil
@@ -1570,4 +1579,105 @@ func (s *LearningAnalyticsReportingService) rankInsightsByImportance(insights []
 	})
 	
 	return ranked
+}
+
+// DataAggregation 数据聚合
+type DataAggregation struct {
+	AggregationType string                 `json:"aggregation_type"`
+	Field           string                 `json:"field"`
+	Value           interface{}            `json:"value"`
+	Count           int64                  `json:"count"`
+	Metadata        map[string]interface{} `json:"metadata"`
+}
+
+// StatisticalSummary 统计摘要
+type StatisticalSummary struct {
+	Mean       float64                `json:"mean"`
+	Median     float64                `json:"median"`
+	Mode       interface{}            `json:"mode"`
+	StdDev     float64                `json:"std_dev"`
+	Min        float64                `json:"min"`
+	Max        float64                `json:"max"`
+	Count      int64                  `json:"count"`
+	Percentiles map[string]float64     `json:"percentiles"`
+	Metadata   map[string]interface{} `json:"metadata"`
+}
+
+// ImplementationPlan 实施计划
+type ImplementationPlan struct {
+	PlanID      uuid.UUID              `json:"plan_id"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Steps       []*ImplementationStep  `json:"steps"`
+	Timeline    string                 `json:"timeline"`
+	Resources   []string               `json:"resources"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// ImplementationStep 实施步骤
+type ImplementationStep struct {
+	StepID      uuid.UUID              `json:"step_id"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Order       int                    `json:"order"`
+	Duration    string                 `json:"duration"`
+	Dependencies []uuid.UUID           `json:"dependencies"`
+	Metadata    map[string]interface{} `json:"metadata"`
+}
+
+// QualityAssessment 质量评估
+type QualityAssessment struct {
+	AssessmentID uuid.UUID              `json:"assessment_id"`
+	QualityScore float64                `json:"quality_score"`
+	Criteria     []string               `json:"criteria"`
+	Issues       []string               `json:"issues"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// VisualizationConfig 可视化配置
+type VisualizationConfig struct {
+	ConfigID     uuid.UUID              `json:"config_id"`
+	ChartType    string                 `json:"chart_type"`
+	DataSources  []string               `json:"data_sources"`
+	Settings     map[string]interface{} `json:"settings"`
+	Metadata     map[string]interface{} `json:"metadata"`
+}
+
+// InsightType 洞察类型
+type InsightType string
+
+const (
+	InsightTypeTrend      InsightType = "trend"
+	InsightTypePattern    InsightType = "pattern"
+	InsightTypeAnomaly    InsightType = "anomaly"
+	InsightTypeCorrelation InsightType = "correlation"
+)
+
+// RecommendationType 推荐类型
+type RecommendationType string
+
+const (
+	RecommendationTypeContent    RecommendationType = "content"
+	RecommendationTypeStrategy   RecommendationType = "strategy"
+	RecommendationTypeImprovement RecommendationType = "improvement"
+)
+
+// SecuritySettings 安全设置
+type SecuritySettings struct {
+	SettingsID          uuid.UUID              `json:"settings_id"`
+	EnableEncryption    bool                   `json:"enable_encryption"`
+	EnableAccessControl bool                   `json:"enable_access_control"`
+	EnableAuditLogging  bool                   `json:"enable_audit_logging"`
+	DataRetentionDays   int                    `json:"data_retention_days"`
+	Metadata           map[string]interface{} `json:"metadata"`
+}
+
+// AnomalyDetector 异常检测器
+type AnomalyDetector struct {
+	DetectorID   uuid.UUID              `json:"detector_id"`
+	Algorithm    string                 `json:"algorithm"`
+	Threshold    float64                `json:"threshold"`
+	Sensitivity  float64                `json:"sensitivity"`
+	Enabled      bool                   `json:"enabled"`
+	Metadata     map[string]interface{} `json:"metadata"`
 }

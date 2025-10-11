@@ -1,0 +1,206 @@
+#!/usr/bin/make -f
+# TaishangLaojun Debian Rules File
+# This file controls the build process for the Debian package
+
+# Uncomment this to turn on verbose mode
+#export DH_VERBOSE=1
+
+# Enable all hardening flags
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# Set compiler flags for security
+export DEB_CFLAGS_MAINT_APPEND = -Wall -Wextra -Wformat-security
+export DEB_CXXFLAGS_MAINT_APPEND = -Wall -Wextra -Wformat-security
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,relro,-z,now
+
+# CMake build configuration
+export CMAKE_BUILD_TYPE = Release
+export CMAKE_INSTALL_PREFIX = /usr
+
+# Build directory
+BUILD_DIR = build
+
+%:
+	dh $@ --buildsystem=cmake --builddirectory=$(BUILD_DIR)
+
+# Override configure step
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-DCMAKE_BUILD_TYPE=$(CMAKE_BUILD_TYPE) \
+		-DCMAKE_INSTALL_PREFIX=$(CMAKE_INSTALL_PREFIX) \
+		-DCMAKE_INSTALL_LIBDIR=lib/$(DEB_HOST_MULTIARCH) \
+		-DBUILD_TESTING=ON \
+		-DENABLE_COVERAGE=OFF \
+		-DPACKAGING_MODE=ON \
+		-DINSTALL_DESKTOP_FILE=ON \
+		-DINSTALL_APPSTREAM_METADATA=ON \
+		-DINSTALL_MAN_PAGE=ON
+
+# Override build step
+override_dh_auto_build:
+	dh_auto_build
+	# Build documentation if needed
+	# cd $(BUILD_DIR) && make doc
+
+# Override test step
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	dh_auto_test
+endif
+
+# Override install step
+override_dh_auto_install:
+	dh_auto_install
+	
+	# Install additional files
+	# Desktop file
+	install -D -m 644 resources/taishang-laojun.desktop \
+		debian/taishang-laojun/usr/share/applications/taishang-laojun.desktop
+	
+	# Icon
+	install -D -m 644 resources/icons/taishang-laojun.svg \
+		debian/taishang-laojun/usr/share/icons/hicolor/scalable/apps/taishang-laojun.svg
+	
+	# AppStream metadata
+	install -D -m 644 resources/appstream/taishang-laojun.appdata.xml \
+		debian/taishang-laojun/usr/share/metainfo/taishang-laojun.appdata.xml
+	
+	# Manual page
+	install -D -m 644 resources/man/taishang-laojun.1 \
+		debian/taishang-laojun/usr/share/man/man1/taishang-laojun.1
+
+# Override clean step
+override_dh_auto_clean:
+	dh_auto_clean
+	# Remove any additional build artifacts
+	rm -rf $(BUILD_DIR)
+	rm -f debian/files
+	rm -f debian/*.debhelper.log
+	rm -f debian/*.substvars
+
+# Install systemd service files if they exist
+override_dh_installsystemd:
+	# Skip systemd installation for desktop application
+	# dh_installsystemd --no-enable --no-start
+
+# Handle shared library dependencies
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
+
+# Strip debug symbols
+override_dh_strip:
+	dh_strip --dbg-package=taishang-laojun-dbg
+
+# Compress documentation
+override_dh_compress:
+	dh_compress -X.pdf -X.html
+
+# Fix permissions
+override_dh_fixperms:
+	dh_fixperms
+	# Ensure binary is executable
+	chmod 755 debian/taishang-laojun/usr/bin/taishang-laojun
+
+# Generate package information
+override_dh_gencontrol:
+	dh_gencontrol
+
+# Build architecture-independent packages
+override_dh_builddeb:
+	dh_builddeb
+
+# Custom targets for development
+
+# Target to build only the binary package
+binary-arch: build
+	dh binary-arch
+
+# Target to build only the source package
+binary-indep: build
+	dh binary-indep
+
+# Target to build both binary and source packages
+binary: binary-arch binary-indep
+
+# Target to prepare the build environment
+build: build-arch build-indep
+
+build-arch:
+	dh build-arch
+
+build-indep:
+	dh build-indep
+
+# Target to clean the build environment
+clean:
+	dh clean
+
+# Target to install files
+install: build
+	dh install
+
+# Phony targets
+.PHONY: binary binary-arch binary-indep build build-arch build-indep clean install
+
+# Additional rules for package validation
+
+# Validate desktop file
+validate-desktop:
+	@echo "Validating desktop file..."
+	@if command -v desktop-file-validate >/dev/null 2>&1; then \
+		desktop-file-validate resources/taishang-laojun.desktop; \
+		echo "Desktop file validation passed"; \
+	else \
+		echo "desktop-file-validate not found, skipping validation"; \
+	fi
+
+# Validate AppStream metadata
+validate-appstream:
+	@echo "Validating AppStream metadata..."
+	@if command -v appstream-util >/dev/null 2>&1; then \
+		appstream-util validate resources/appstream/taishang-laojun.appdata.xml; \
+		echo "AppStream metadata validation passed"; \
+	else \
+		echo "appstream-util not found, skipping validation"; \
+	fi
+
+# Validate manual page
+validate-man:
+	@echo "Validating manual page..."
+	@if command -v man >/dev/null 2>&1; then \
+		man --warnings -E UTF-8 -l resources/man/taishang-laojun.1 >/dev/null; \
+		echo "Manual page validation passed"; \
+	else \
+		echo "man command not found, skipping validation"; \
+	fi
+
+# Run all validations
+validate: validate-desktop validate-appstream validate-man
+	@echo "All validations completed"
+
+# Target to show package information
+info:
+	@echo "Package: taishang-laojun"
+	@echo "Version: $(shell dpkg-parsechangelog -S Version)"
+	@echo "Architecture: $(shell dpkg-architecture -q DEB_HOST_ARCH)"
+	@echo "Build directory: $(BUILD_DIR)"
+	@echo "Install prefix: $(CMAKE_INSTALL_PREFIX)"
+
+# Target to show build dependencies
+deps:
+	@echo "Build dependencies:"
+	@grep "^Build-Depends:" debian/control | sed 's/Build-Depends: //'
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  binary        - Build binary packages"
+	@echo "  binary-arch   - Build architecture-dependent packages"
+	@echo "  binary-indep  - Build architecture-independent packages"
+	@echo "  build         - Build the software"
+	@echo "  clean         - Clean build artifacts"
+	@echo "  install       - Install files"
+	@echo "  validate      - Validate package files"
+	@echo "  info          - Show package information"
+	@echo "  deps          - Show build dependencies"
+	@echo "  help          - Show this help message"

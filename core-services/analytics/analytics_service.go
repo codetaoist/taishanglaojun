@@ -62,7 +62,7 @@ type AnalyticsRepository interface {
 	// 数据清理
 	DeleteDataPoints(ctx context.Context, filter *DataFilter) error
 	
-	// 健康检查
+	// 健康检�?
 	HealthCheck(ctx context.Context) error
 }
 
@@ -91,11 +91,11 @@ type AnalyticsCache interface {
 	DeleteCacheByPattern(ctx context.Context, pattern string) error
 	ClearAllCache(ctx context.Context) error
 	
-	// 健康检查
+	// 健康检�?
 	HealthCheck(ctx context.Context) error
 }
 
-// DataPoint 数据点
+// DataPoint 数据�?
 type DataPoint struct {
 	ID          string                 `json:"id" db:"id"`
 	Source      string                 `json:"source" db:"source"`
@@ -199,7 +199,7 @@ type AggregationConfig struct {
 	TimeWindow  *time.Duration  `json:"time_window,omitempty"`
 }
 
-// VisualizationConfig 可视化配置
+// VisualizationConfig 可视化配�?
 type VisualizationConfig struct {
 	Type       VisualizationType      `json:"type"`
 	Title      string                 `json:"title"`
@@ -452,7 +452,7 @@ type StopRealTimeAnalysisResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-// RealTimeAnalysisStatusRequest 实时分析状态请求
+// RealTimeAnalysisStatusRequest 实时分析状态请�?
 type RealTimeAnalysisStatusRequest struct {
 	ID string `json:"id"`
 }
@@ -529,7 +529,7 @@ type DataExportResponse struct {
 	Message  string `json:"message,omitempty"`
 }
 
-// ExportStatusRequest 导出状态请求
+// ExportStatusRequest 导出状态请�?
 type ExportStatusRequest struct {
 	ExportID string `json:"export_id"`
 }
@@ -567,7 +567,7 @@ type DataCleanupResponse struct {
 	Message       string `json:"message,omitempty"`
 }
 
-// HealthCheckResponse 健康检查响应
+// HealthCheckResponse 健康检查响�?
 type HealthCheckResponse struct {
 	Status    string                 `json:"status"`
 	Timestamp time.Time              `json:"timestamp"`
@@ -589,7 +589,7 @@ type StatisticsResponse struct {
 
 // 过滤器结构体
 
-// DataFilter 数据过滤器
+// DataFilter 数据过滤�?
 type DataFilter struct {
 	Sources    []string               `json:"sources,omitempty"`
 	Types      []DataType             `json:"types,omitempty"`
@@ -601,7 +601,7 @@ type DataFilter struct {
 	Metadata   map[string]interface{} `json:"metadata,omitempty"`
 }
 
-// AggregationFilter 聚合过滤器
+// AggregationFilter 聚合过滤�?
 type AggregationFilter struct {
 	DataFilter
 	Aggregations []AggregationType `json:"aggregations,omitempty"`
@@ -609,7 +609,7 @@ type AggregationFilter struct {
 	TimeWindow   *time.Duration    `json:"time_window,omitempty"`
 }
 
-// ReportFilter 报表过滤器
+// ReportFilter 报表过滤�?
 type ReportFilter struct {
 	Types     []ReportType   `json:"types,omitempty"`
 	Statuses  []ReportStatus `json:"statuses,omitempty"`
@@ -661,7 +661,7 @@ func ValidateAnalysisType(analysisType AnalysisType) bool {
 	}
 }
 
-// CreateCacheKey 创建缓存键
+// CreateCacheKey 创建缓存�?
 func CreateCacheKey(prefix string, parts ...string) string {
 	return createCacheKey(prefix, parts...)
 }

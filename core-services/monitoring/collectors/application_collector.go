@@ -10,11 +10,11 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
-// ApplicationCollector 应用指标收集器
+// ApplicationCollector 应用指标收集�?
 type ApplicationCollector struct {
 	name     string
 	interval time.Duration
@@ -52,7 +52,7 @@ type ApplicationCollector struct {
 	runtimeStats *RuntimeStats
 }
 
-// ApplicationCollectorConfig 应用收集器配置
+// ApplicationCollectorConfig 应用收集器配�?
 type ApplicationCollectorConfig struct {
 	Interval        time.Duration     `yaml:"interval"`
 	Enabled         bool              `yaml:"enabled"`
@@ -80,7 +80,7 @@ type GRPCStats struct {
 	LastReset        time.Time
 }
 
-// DatabaseStats 数据库统计
+// DatabaseStats 数据库统�?
 type DatabaseStats struct {
 	ConnectionsActive int64
 	ConnectionsIdle   int64
@@ -101,7 +101,7 @@ type CacheStats struct {
 	LastReset   time.Time
 }
 
-// RuntimeStats 运行时统计
+// RuntimeStats 运行时统�?
 type RuntimeStats struct {
 	Goroutines   int
 	HeapSize     uint64
@@ -113,14 +113,14 @@ type RuntimeStats struct {
 	LastReset    time.Time
 }
 
-// NewApplicationCollector 创建应用指标收集器
+// NewApplicationCollector 创建应用指标收集�?
 func NewApplicationCollector(config ApplicationCollectorConfig, db *sql.DB, redisClient *redis.Client) *ApplicationCollector {
 	labels := map[string]string{
 		"collector": "application",
 		"service":   "core-services",
 	}
 	
-	// 添加自定义标签
+	// 添加自定义标�?
 	for k, v := range config.Labels {
 		labels[k] = v
 	}
@@ -186,7 +186,7 @@ func (c *ApplicationCollector) initPrometheusMetrics() {
 		[]string{"method"},
 	)
 	
-	// 数据库指标
+	// 数据库指�?
 	c.dbConnectionsActive = prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "database_connections_active",
@@ -235,12 +235,12 @@ func (c *ApplicationCollector) initPrometheusMetrics() {
 	)
 }
 
-// GetName 获取收集器名称
+// GetName 获取收集器名�?
 func (c *ApplicationCollector) GetName() string {
 	return c.name
 }
 
-// GetCategory 获取收集器分类
+// GetCategory 获取收集器分�?
 func (c *ApplicationCollector) GetCategory() models.MetricCategory {
 	return models.CategoryApplication
 }
@@ -250,12 +250,12 @@ func (c *ApplicationCollector) GetInterval() time.Duration {
 	return c.interval
 }
 
-// IsEnabled 检查是否启用
+// IsEnabled 检查是否启�?
 func (c *ApplicationCollector) IsEnabled() bool {
 	return c.enabled
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (c *ApplicationCollector) Start(ctx context.Context) error {
 	if !c.enabled {
 		return nil
@@ -276,13 +276,13 @@ func (c *ApplicationCollector) Start(ctx context.Context) error {
 	}
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (c *ApplicationCollector) Stop() error {
 	c.enabled = false
 	return nil
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (c *ApplicationCollector) Health() error {
 	if !c.enabled {
 		return fmt.Errorf("application collector is disabled")
@@ -332,7 +332,7 @@ func (c *ApplicationCollector) Collect(ctx context.Context) ([]models.Metric, er
 		metrics = append(metrics, grpcMetrics...)
 	}
 	
-	// 收集数据库指标
+	// 收集数据库指�?
 	if c.collectDatabase {
 		dbMetrics, err := c.collectDatabaseMetrics(now)
 		if err != nil {
@@ -350,7 +350,7 @@ func (c *ApplicationCollector) Collect(ctx context.Context) ([]models.Metric, er
 		metrics = append(metrics, cacheMetrics...)
 	}
 	
-	// 收集运行时指标
+	// 收集运行时指�?
 	if c.collectRuntime {
 		runtimeMetrics, err := c.collectRuntimeMetrics(now)
 		if err != nil {
@@ -421,7 +421,7 @@ func (c *ApplicationCollector) collectHTTPMetrics(timestamp time.Time) ([]models
 		metric.Description = "Average HTTP request duration"
 		metrics = append(metrics, *metric)
 		
-		// 最大响应时间
+		// 最大响应时�?
 		var maxDuration time.Duration
 		for _, d := range durations {
 			if d > maxDuration {
@@ -439,7 +439,7 @@ func (c *ApplicationCollector) collectHTTPMetrics(timestamp time.Time) ([]models
 		metrics = append(metrics, *metric)
 	}
 	
-	// 错误率
+	// 错误�?
 	metric = models.NewMetric("application_http_error_rate", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(c.httpStats.ErrorRate).
@@ -449,7 +449,7 @@ func (c *ApplicationCollector) collectHTTPMetrics(timestamp time.Time) ([]models
 	metric.Description = "HTTP error rate"
 	metrics = append(metrics, *metric)
 	
-	// 每秒请求数
+	// 每秒请求�?
 	timeSinceReset := timestamp.Sub(c.httpStats.LastReset).Seconds()
 	if timeSinceReset > 0 {
 		rps := float64(totalRequests) / timeSinceReset
@@ -485,7 +485,7 @@ func (c *ApplicationCollector) collectGRPCMetrics(timestamp time.Time) ([]models
 	metric.Description = "Total gRPC requests"
 	metrics = append(metrics, *metric)
 	
-	// 错误率
+	// 错误�?
 	metric = models.NewMetric("application_grpc_error_rate", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(c.grpcStats.ErrorRate).
@@ -516,7 +516,7 @@ func (c *ApplicationCollector) collectGRPCMetrics(timestamp time.Time) ([]models
 	return metrics, nil
 }
 
-// collectDatabaseMetrics 收集数据库指标
+// collectDatabaseMetrics 收集数据库指�?
 func (c *ApplicationCollector) collectDatabaseMetrics(timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
@@ -524,10 +524,10 @@ func (c *ApplicationCollector) collectDatabaseMetrics(timestamp time.Time) ([]mo
 		return metrics, nil
 	}
 	
-	// 获取数据库统计信息
+	// 获取数据库统计信�?
 	stats := c.db.Stats()
 	
-	// 活跃连接数
+	// 活跃连接�?
 	metric := models.NewMetric("application_database_connections_active", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(float64(stats.InUse)).
@@ -537,7 +537,7 @@ func (c *ApplicationCollector) collectDatabaseMetrics(timestamp time.Time) ([]mo
 	metric.Description = "Active database connections"
 	metrics = append(metrics, *metric)
 	
-	// 空闲连接数
+	// 空闲连接�?
 	metric = models.NewMetric("application_database_connections_idle", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(float64(stats.Idle)).
@@ -557,7 +557,7 @@ func (c *ApplicationCollector) collectDatabaseMetrics(timestamp time.Time) ([]mo
 	metric.Description = "Maximum database connections"
 	metrics = append(metrics, *metric)
 	
-	// 等待连接数
+	// 等待连接�?
 	metric = models.NewMetric("application_database_connections_waiting", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(float64(stats.WaitCount)).
@@ -617,9 +617,9 @@ func (c *ApplicationCollector) collectCacheMetrics(timestamp time.Time) ([]model
 	}
 	
 	// 解析Redis信息（简化实现）
-	// 实际应该解析info字符串获取具体指标
+	// 实际应该解析info字符串获取具体指�?
 	
-	// 命中率
+	// 命中�?
 	totalOps := c.cacheStats.HitCount + c.cacheStats.MissCount
 	var hitRate float64
 	if totalOps > 0 {
@@ -678,7 +678,7 @@ func (c *ApplicationCollector) collectCacheMetrics(timestamp time.Time) ([]model
 	return metrics, nil
 }
 
-// collectRuntimeMetrics 收集运行时指标
+// collectRuntimeMetrics 收集运行时指�?
 func (c *ApplicationCollector) collectRuntimeMetrics(timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
@@ -696,7 +696,7 @@ func (c *ApplicationCollector) collectRuntimeMetrics(timestamp time.Time) ([]mod
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	
-	// 堆大小
+	// 堆大�?
 	metric = models.NewMetric("application_memory_heap_size_bytes", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(float64(memStats.HeapSys)).
@@ -706,7 +706,7 @@ func (c *ApplicationCollector) collectRuntimeMetrics(timestamp time.Time) ([]mod
 	metric.Description = "Heap size in bytes"
 	metrics = append(metrics, *metric)
 	
-	// 堆使用
+	// 堆使�?
 	metric = models.NewMetric("application_memory_heap_used_bytes", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(float64(memStats.HeapInuse)).
@@ -750,7 +750,7 @@ func (c *ApplicationCollector) collectRuntimeMetrics(timestamp time.Time) ([]mod
 		metrics = append(metrics, *metric)
 	}
 	
-	// 下次GC阈值
+	// 下次GC阈�?
 	metric = models.NewMetric("application_memory_next_gc_bytes", models.MetricTypeGauge, models.CategoryApplication).
 		WithLabels(c.labels).
 		WithValue(float64(memStats.NextGC)).
@@ -801,7 +801,7 @@ func (c *ApplicationCollector) RecordGRPCRequest(method, status string, duration
 	}
 }
 
-// RecordDatabaseQuery 记录数据库查询
+// RecordDatabaseQuery 记录数据库查�?
 func (c *ApplicationCollector) RecordDatabaseQuery(operation, table string, duration time.Duration, isSlowQuery bool) {
 	if !c.collectDatabase {
 		return
@@ -844,7 +844,7 @@ func (c *ApplicationCollector) RecordCacheOperation(operation string, hit bool) 
 		c.cacheOperationsTotal.WithLabelValues(operation, result).Inc()
 	}
 	
-	// 更新命中率
+	// 更新命中�?
 	total := c.cacheStats.HitCount + c.cacheStats.MissCount
 	if total > 0 && c.cacheHitRate != nil {
 		hitRate := float64(c.cacheStats.HitCount) / float64(total)
@@ -852,5 +852,5 @@ func (c *ApplicationCollector) RecordCacheOperation(operation string, hit bool) 
 	}
 }
 
-// 确保实现了接口
+// 确保实现了接�?
 var _ interfaces.MetricCollector = (*ApplicationCollector)(nil)

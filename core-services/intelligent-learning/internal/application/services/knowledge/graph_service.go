@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
-	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
+	domainServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // KnowledgeGraphService 知识图谱服务接口
@@ -177,7 +177,7 @@ type LearningPathStepResponse struct {
 	CompletionRate  float64   `json:"completion_rate"`
 }
 
-// LearningMilestoneResponse 学习里程碑响应
+// LearningMilestoneResponse 学习里程碑响�?
 type LearningMilestoneResponse struct {
 	ID          uuid.UUID  `json:"id"`
 	Title       string     `json:"title"`
@@ -188,7 +188,7 @@ type LearningMilestoneResponse struct {
 	Reward      string     `json:"reward"`
 }
 
-// PathMilestone 路径里程碑
+// PathMilestone 路径里程�?
 type PathMilestone struct {
 	ID          uuid.UUID `json:"id"`
 	NodeID      uuid.UUID `json:"node_id"`
@@ -207,7 +207,7 @@ type PathAdaptation struct {
 	Priority   int       `json:"priority"`
 }
 
-// ConceptMapRequest 概念图请求
+// ConceptMapRequest 概念图请�?
 type ConceptMapRequest struct {
 	CenterNodeID uuid.UUID `json:"center_node_id" validate:"required"`
 	Depth        int       `json:"depth"`
@@ -216,7 +216,7 @@ type ConceptMapRequest struct {
 	ExcludeTypes []string  `json:"exclude_types"`
 }
 
-// ConceptMapResponse 概念图响应
+// ConceptMapResponse 概念图响�?
 type ConceptMapResponse struct {
 	CenterNode *NodeResponse       `json:"center_node"`
 	Nodes      []*NodeResponse     `json:"nodes"`
@@ -307,16 +307,16 @@ func (s *KnowledgeGraphAppService) GetNode(ctx context.Context, nodeID uuid.UUID
 
 // UpdateNode 更新知识节点
 func (s *KnowledgeGraphAppService) UpdateNode(ctx context.Context, nodeID uuid.UUID, updates map[string]interface{}) (*NodeResponse, error) {
-	// 首先获取现有节点以进行更新
+	// 首先获取现有节点以进行更�?
 	existingNode, err := s.graphRepo.GetNode(ctx, s.defaultGraphID, nodeID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get existing node: %w", err)
 	}
 
-	// 将 map 转换为 UpdateNodeRequest
+	// �?map 转换�?UpdateNodeRequest
 	updateReq := s.mapToUpdateNodeRequest(updates)
 
-	// 应用更新到节点
+	// 应用更新到节�?
 	updatedNode := s.applyUpdatesToNode(existingNode, updateReq)
 
 	if err := s.graphRepo.UpdateNode(ctx, s.defaultGraphID, updatedNode); err != nil {
@@ -342,7 +342,7 @@ func (s *KnowledgeGraphAppService) DeleteNode(ctx context.Context, nodeID uuid.U
 // CreateRelation 创建知识关系
 func (s *KnowledgeGraphAppService) CreateRelation(ctx context.Context, req *CreateRelationRequest) (*RelationResponse, error) {
 	relation := entities.NewKnowledgeRelation(req.FromNodeID, req.ToNodeID, entities.RelationType(req.Type), req.Weight)
-	// 将 Properties 转换为 Metadata
+	// �?Properties 转换�?Metadata
 	if req.Properties != nil {
 		metadata := make(map[string]interface{})
 		for k, v := range req.Properties {
@@ -406,7 +406,7 @@ func (s *KnowledgeGraphAppService) UpdateRelation(ctx context.Context, relationI
 func (s *KnowledgeGraphAppService) SearchNodes(ctx context.Context, req *GraphSearchRequest) (*GraphSearchResponse, error) {
 	var nodeType *entities.NodeType
 	if len(req.NodeTypes) > 0 {
-		// 取第一个节点类型
+		// 取第一个节点类�?
 		nt := entities.NodeType(req.NodeTypes[0])
 		nodeType = &nt
 	}
@@ -457,7 +457,7 @@ func (s *KnowledgeGraphAppService) GetNodeNeighbors(ctx context.Context, nodeID 
 		nodeResponses[i] = s.buildNodeResponse(node)
 	}
 
-	// 获取节点的关系
+	// 获取节点的关�?
 	relations, err := s.graphRepo.GetNodeRelations(ctx, s.defaultGraphID, nodeID, nil)
 	if err != nil {
 		return nodeResponses, nil, fmt.Errorf("failed to get node relations: %w", err)
@@ -471,7 +471,7 @@ func (s *KnowledgeGraphAppService) GetNodeNeighbors(ctx context.Context, nodeID 
 	return nodeResponses, relationResponses, nil
 }
 
-// FindShortestPath 查找最短路径
+// FindShortestPath 查找最短路�?
 func (s *KnowledgeGraphAppService) FindShortestPath(ctx context.Context, fromNodeID, toNodeID uuid.UUID) ([]*NodeResponse, []*RelationResponse, error) {
 	path, err := s.graphRepo.FindShortestPath(ctx, s.defaultGraphID, fromNodeID, toNodeID)
 	if err != nil {
@@ -488,7 +488,7 @@ func (s *KnowledgeGraphAppService) FindShortestPath(ctx context.Context, fromNod
 	for i := 0; i < len(path)-1; i++ {
 		relations, err := s.graphRepo.GetRelationsBetween(ctx, s.defaultGraphID, path[i].ID, path[i+1].ID)
 		if err != nil {
-			continue // 跳过无法获取的关系
+			continue // 跳过无法获取的关�?
 		}
 		for _, relation := range relations {
 			relationResponses = append(relationResponses, s.buildRelationResponse(relation))
@@ -500,7 +500,7 @@ func (s *KnowledgeGraphAppService) FindShortestPath(ctx context.Context, fromNod
 
 // GenerateLearningPath 生成学习路径
 func (s *KnowledgeGraphAppService) GenerateLearningPath(ctx context.Context, req *LearningPathRequest) (*LearningPathResponse, error) {
-	// 获取学习者信息
+	// 获取学习者信�?
 	learner, err := s.learnerRepo.GetByID(ctx, req.LearnerID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get learner: %w", err)
@@ -511,7 +511,7 @@ func (s *KnowledgeGraphAppService) GenerateLearningPath(ctx context.Context, req
 		LearnerID:    req.LearnerID,
 		GraphID:      s.defaultGraphID,
 		TargetNodeID: req.TargetNodeID,
-		MaxPaths:     5, // 默认生成5条路径
+		MaxPaths:     5, // 默认生成5条路�?
 		Preferences: &domainServices.PathPreferences{
 			MaxPathLength:      req.MaxDepth,
 			PreferShortPaths:   req.PathType == "shortest",
@@ -519,9 +519,9 @@ func (s *KnowledgeGraphAppService) GenerateLearningPath(ctx context.Context, req
 		},
 	}
 
-	// 根据学习者偏好调整路径偏好
+	// 根据学习者偏好调整路径偏�?
 	if learner.Preferences.DifficultyTolerance > 0 {
-		// 根据学习者的难度容忍度调整适应性难度
+		// 根据学习者的难度容忍度调整适应性难�?
 		pathReq.Preferences.AdaptiveDifficulty = learner.Preferences.DifficultyTolerance > 0.5
 	}
 
@@ -535,7 +535,7 @@ func (s *KnowledgeGraphAppService) GenerateLearningPath(ctx context.Context, req
 		return nil, fmt.Errorf("no learning paths generated")
 	}
 
-	// 使用第一个推荐路径
+	// 使用第一个推荐路�?
 	personalizedPath := personalizedPaths[0]
 
 	// 构建响应
@@ -570,13 +570,13 @@ func (s *KnowledgeGraphAppService) GenerateLearningPath(ctx context.Context, req
 	}
 	response.Steps = steps
 
-	// 构建里程碑
+	// 构建里程�?
 	milestones := make([]LearningMilestoneResponse, len(personalizedPath.Milestones))
 	for i, milestone := range personalizedPath.Milestones {
 		milestones[i] = LearningMilestoneResponse{
 			ID:          uuid.New(),
-			Title:       fmt.Sprintf("里程碑 %d", milestone.Position+1),
-			Description: fmt.Sprintf("学习里程碑位置 %d", milestone.Position),
+			Title:       fmt.Sprintf("里程�?%d", milestone.Position+1),
+			Description: fmt.Sprintf("学习里程碑位�?%d", milestone.Position),
 			TargetStep:  milestone.Position,
 			IsAchieved:  false,
 			AchievedAt:  nil,
@@ -588,7 +588,7 @@ func (s *KnowledgeGraphAppService) GenerateLearningPath(ctx context.Context, req
 	return response, nil
 }
 
-// GenerateConceptMap 生成概念图
+// GenerateConceptMap 生成概念�?
 func (s *KnowledgeGraphAppService) GenerateConceptMap(ctx context.Context, req *ConceptMapRequest) (*ConceptMapResponse, error) {
 	// 获取中心节点
 	centerNode, err := s.graphRepo.GetNode(ctx, s.defaultGraphID, req.CenterNodeID)
@@ -596,7 +596,7 @@ func (s *KnowledgeGraphAppService) GenerateConceptMap(ctx context.Context, req *
 		return nil, fmt.Errorf("failed to get center node: %w", err)
 	}
 
-	// 获取概念图数据
+	// 获取概念图数�?
 	conceptMap, err := s.graphRepo.GetConceptMap(ctx, req.CenterNodeID, req.Depth, req.MaxNodes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get concept map: %w", err)
@@ -659,7 +659,7 @@ func (s *KnowledgeGraphAppService) GetGraphStatistics(ctx context.Context) (*rep
 		return nil, fmt.Errorf("failed to get graph statistics: %w", err)
 	}
 	
-	// 转换为 repositories.GraphStatistics 类型
+	// 转换�?repositories.GraphStatistics 类型
 	stats := &repositories.GraphStatistics{
 		NodeCount:       entityStats.NodeCount,
 		RelationCount:   entityStats.RelationCount,
@@ -718,7 +718,7 @@ func (s *KnowledgeGraphAppService) buildNodeResponse(node *entities.KnowledgeNod
 }
 
 func (s *KnowledgeGraphAppService) buildRelationResponse(relation *entities.KnowledgeRelation) *RelationResponse {
-	// 将 Metadata 转换为 Properties
+	// �?Metadata 转换�?Properties
 	properties := make(map[string]string)
 	for k, v := range relation.Metadata {
 		if str, ok := v.(string); ok {
@@ -808,14 +808,14 @@ func (s *KnowledgeGraphAppService) analyzeLearningGaps(ctx context.Context, req 
 		return nil, fmt.Errorf("failed to get knowledge graph: %w", err)
 	}
 
-	// 获取学习者信息
+	// 获取学习者信�?
 	_, err = s.learnerRepo.GetByID(ctx, *req.LearnerID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get learner: %w", err)
 	}
 
 	// 调用领域服务的方法来识别学习缺口
-	// 创建领域服务的分析请求
+	// 创建领域服务的分析请�?
 	domainReq := &domainServices.GraphAnalysisRequest{
 		GraphID:      req.GraphID,
 		AnalysisType: "learning_gaps",
@@ -830,7 +830,7 @@ func (s *KnowledgeGraphAppService) analyzeLearningGaps(ctx context.Context, req 
 	// 转换为应用服务的类型
 	var gaps []*domainServices.LearningGap
 	if domainResult != nil {
-		// 临时实现：创建示例差距
+		// 临时实现：创建示例差�?
 		for i := 0; i < 3; i++ {
 			gap := &domainServices.LearningGap{
 				ID:          uuid.New(),
@@ -857,7 +857,7 @@ func (s *KnowledgeGraphAppService) analyzeOptimization(ctx context.Context, req 
 		return nil, fmt.Errorf("failed to get graph: %w", err)
 	}
 
-	// 临时实现：创建示例优化建议
+	// 临时实现：创建示例优化建�?
 	var suggestions []*domainServices.OptimizationSuggestion
 	for i := 0; i < 3; i++ {
 		suggestion := &domainServices.OptimizationSuggestion{
@@ -881,7 +881,7 @@ func (s *KnowledgeGraphAppService) generateRecommendations(ctx context.Context, 
 		return nil, fmt.Errorf("learner ID is required for recommendations")
 	}
 
-	// 临时实现：创建示例推荐
+	// 临时实现：创建示例推�?
 	var recommendations []*domainServices.ConceptRecommendation
 	for i := 0; i < 5; i++ {
 		recommendation := &domainServices.ConceptRecommendation{
@@ -902,7 +902,7 @@ func (s *KnowledgeGraphAppService) generateRecommendations(ctx context.Context, 
 	return recommendations, nil
 }
 
-// mapToUpdateNodeRequest 将 map[string]interface{} 转换为 UpdateNodeRequest
+// mapToUpdateNodeRequest �?map[string]interface{} 转换�?UpdateNodeRequest
 func (s *KnowledgeGraphAppService) mapToUpdateNodeRequest(updates map[string]interface{}) *UpdateNodeRequest {
 	req := &UpdateNodeRequest{}
 	
@@ -922,7 +922,7 @@ func (s *KnowledgeGraphAppService) mapToUpdateNodeRequest(updates map[string]int
 		req.Tags = tags
 	}
 	if metadata, ok := updates["metadata"].(map[string]interface{}); ok {
-		// 将 map[string]interface{} 转换为 map[string]string
+		// �?map[string]interface{} 转换�?map[string]string
 		stringMetadata := make(map[string]string)
 		for k, v := range metadata {
 			if str, ok := v.(string); ok {
@@ -940,16 +940,16 @@ func (s *KnowledgeGraphAppService) applyUpdatesToNode(existingNode *entities.Kno
 	updatedNode := *existingNode // 创建副本
 
 	if updates.Title != nil {
-		updatedNode.Name = *updates.Title // Title 映射到 Name
+		updatedNode.Name = *updates.Title // Title 映射�?Name
 	}
 	if updates.Content != nil {
-		updatedNode.Description = *updates.Content // Content 映射到 Description
+		updatedNode.Description = *updates.Content // Content 映射�?Description
 	}
 	if updates.Type != nil {
-		updatedNode.Type = entities.NodeType(*updates.Type) // 转换为 NodeType
+		updatedNode.Type = entities.NodeType(*updates.Type) // 转换�?NodeType
 	}
 	if updates.Difficulty != nil {
-		// 将字符串难度转换为 DifficultyLevel
+		// 将字符串难度转换�?DifficultyLevel
 		switch *updates.Difficulty {
 		case "beginner":
 			updatedNode.DifficultyLevel = entities.DifficultyBeginner
@@ -969,7 +969,7 @@ func (s *KnowledgeGraphAppService) applyUpdatesToNode(existingNode *entities.Kno
 		updatedNode.Tags = updates.Tags
 	}
 	if updates.Metadata != nil {
-		// 将 map[string]string 转换为 map[string]interface{}
+		// �?map[string]string 转换�?map[string]interface{}
 		metadata := make(map[string]interface{})
 		for k, v := range updates.Metadata {
 			metadata[k] = v
@@ -995,7 +995,7 @@ func extractNodeIDs(pathNodes []entities.PathNode) []uuid.UUID {
 func (s *KnowledgeGraphAppService) stringToDifficultyLevel(str string) entities.DifficultyLevel {
 	str = strings.ToLower(strings.TrimSpace(str))
 	
-	// 尝试按数字解析
+	// 尝试按数字解�?
 	if num, err := strconv.Atoi(str); err == nil {
 		switch num {
 		case 1:
@@ -1013,7 +1013,7 @@ func (s *KnowledgeGraphAppService) stringToDifficultyLevel(str string) entities.
 	
 	// 按字符串解析
 	switch str {
-	case "beginner", "初学者":
+	case "beginner", "初学�?:
 		return entities.DifficultyBeginner
 	case "elementary", "基础":
 		return entities.DifficultyElementary
@@ -1024,7 +1024,7 @@ func (s *KnowledgeGraphAppService) stringToDifficultyLevel(str string) entities.
 	case "expert", "专家":
 		return entities.DifficultyExpert
 	default:
-		return entities.DifficultyBeginner // 默认为初学者
+		return entities.DifficultyBeginner // 默认为初学�?
 	}
 }
 
@@ -1060,7 +1060,7 @@ func (s *KnowledgeGraphAppService) applyUpdatesToRelation(existingRelation *enti
 		updatedRelation.Description = *updates.Description
 	}
 	if updates.Properties != nil {
-		// 将 map[string]string 转换为 map[string]interface{}
+		// �?map[string]string 转换�?map[string]interface{}
 		metadata := make(map[string]interface{})
 		for k, v := range updates.Properties {
 			metadata[k] = v

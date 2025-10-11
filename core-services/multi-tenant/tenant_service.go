@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// TenantStatus 租户状态
+// TenantStatus 租户状�?
 type TenantStatus string
 
 const (
@@ -72,15 +72,15 @@ type PasswordPolicy struct {
 	RequireLowercase bool `json:"require_lowercase"`
 	RequireNumbers   bool `json:"require_numbers"`
 	RequireSymbols   bool `json:"require_symbols"`
-	MaxAge           int  `json:"max_age"` // 密码最大使用天数
-	HistoryCount     int  `json:"history_count"` // 记住的历史密码数量
+	MaxAge           int  `json:"max_age"` // 密码最大使用天�?
+	HistoryCount     int  `json:"history_count"` // 记住的历史密码数�?
 }
 
 // TenantLimits 租户限制
 type TenantLimits struct {
 	MaxUsers           int           `json:"max_users"`
 	MaxStorage         int64         `json:"max_storage"` // 字节
-	MaxAPIRequests     int           `json:"max_api_requests"` // 每小时
+	MaxAPIRequests     int           `json:"max_api_requests"` // 每小�?
 	MaxDatabases       int           `json:"max_databases"`
 	MaxConnections     int           `json:"max_connections"`
 	MaxFileSize        int64         `json:"max_file_size"` // 字节
@@ -103,11 +103,11 @@ type RateLimits struct {
 
 // FeatureLimits 功能限制
 type FeatureLimits struct {
-	AIRequests        int `json:"ai_requests"` // 每月AI请求数
-	VoiceMinutes      int `json:"voice_minutes"` // 每月语音处理分钟数
-	ImageProcessing   int `json:"image_processing"` // 每月图像处理数
+	AIRequests        int `json:"ai_requests"` // 每月AI请求�?
+	VoiceMinutes      int `json:"voice_minutes"` // 每月语音处理分钟�?
+	ImageProcessing   int `json:"image_processing"` // 每月图像处理�?
 	DataExport        int `json:"data_export"` // 每月数据导出次数
-	CustomReports     int `json:"custom_reports"` // 自定义报告数量
+	CustomReports     int `json:"custom_reports"` // 自定义报告数�?
 	Webhooks          int `json:"webhooks"` // Webhook数量
 	BackupRetention   int `json:"backup_retention"` // 备份保留天数
 }
@@ -128,7 +128,7 @@ type TenantUsage struct {
 	Timestamp       time.Time         `json:"timestamp"`
 }
 
-// TenantContext 租户上下文
+// TenantContext 租户上下�?
 type TenantContext struct {
 	TenantID   string
 	UserID     string
@@ -163,7 +163,7 @@ type UpdateTenantRequest struct {
 	UpdatedBy   string                  `json:"updated_by" validate:"required"`
 }
 
-// TenantFilter 租户过滤器
+// TenantFilter 租户过滤�?
 type TenantFilter struct {
 	Status    []TenantStatus `json:"status,omitempty"`
 	Plan      []TenantPlan   `json:"plan,omitempty"`
@@ -211,7 +211,7 @@ type TenantService interface {
 	DeleteTenant(ctx context.Context, tenantID string) error
 	ListTenants(ctx context.Context, filter TenantFilter, pagination PaginationRequest) (*ListTenantsResponse, error)
 	
-	// 租户状态管理
+	// 租户状态管�?
 	ActivateTenant(ctx context.Context, tenantID string) error
 	SuspendTenant(ctx context.Context, tenantID string, reason string) error
 	DeactivateTenant(ctx context.Context, tenantID string) error
@@ -230,7 +230,7 @@ type TenantService interface {
 	GetUsage(ctx context.Context, tenantID string, period string) (*TenantUsage, error)
 	GetUsageHistory(ctx context.Context, tenantID string, start, end time.Time) ([]TenantUsage, error)
 	
-	// 租户上下文
+	// 租户上下�?
 	GetTenantContext(ctx context.Context, tenantID, userID string) (*TenantContext, error)
 	ValidateTenantAccess(ctx context.Context, tenantID, userID string) (bool, error)
 	
@@ -238,14 +238,14 @@ type TenantService interface {
 	GetTenantDatabase(ctx context.Context, tenantID string) (string, error)
 	GetTenantSchema(ctx context.Context, tenantID string) (string, error)
 	
-	// 租户备份和恢复
+	// 租户备份和恢�?
 	BackupTenant(ctx context.Context, tenantID string) (string, error)
 	RestoreTenant(ctx context.Context, tenantID, backupID string) error
 	
 	// 租户迁移
 	MigrateTenant(ctx context.Context, tenantID, targetRegion string) error
 	
-	// 健康检查
+	// 健康检�?
 	HealthCheck(ctx context.Context) error
 }
 
@@ -283,14 +283,14 @@ type TenantEvent struct {
 	Timestamp time.Time              `json:"timestamp"`
 }
 
-// TenantEventPublisher 租户事件发布器
+// TenantEventPublisher 租户事件发布�?
 type TenantEventPublisher interface {
 	PublishEvent(ctx context.Context, event TenantEvent) error
 }
 
 // 辅助函数
 
-// NewTenant 创建新租户
+// NewTenant 创建新租�?
 func NewTenant(req CreateTenantRequest) *Tenant {
 	now := time.Now()
 	return &Tenant{
@@ -310,12 +310,12 @@ func NewTenant(req CreateTenantRequest) *Tenant {
 	}
 }
 
-// IsActive 检查租户是否活跃
+// IsActive 检查租户是否活�?
 func (t *Tenant) IsActive() bool {
 	return t.Status == TenantStatusActive
 }
 
-// CanAccess 检查是否可以访问功能
+// CanAccess 检查是否可以访问功�?
 func (t *Tenant) CanAccess(feature string) bool {
 	if enabled, exists := t.Settings.Features[feature]; exists {
 		return enabled
@@ -323,17 +323,17 @@ func (t *Tenant) CanAccess(feature string) bool {
 	return false
 }
 
-// GetCacheKey 获取缓存键
+// GetCacheKey 获取缓存�?
 func GetTenantCacheKey(tenantID string) string {
 	return fmt.Sprintf("tenant:%s", tenantID)
 }
 
-// GetDomainCacheKey 获取域名缓存键
+// GetDomainCacheKey 获取域名缓存�?
 func GetDomainCacheKey(domain string) string {
 	return fmt.Sprintf("tenant:domain:%s", domain)
 }
 
-// GetUsageCacheKey 获取使用情况缓存键
+// GetUsageCacheKey 获取使用情况缓存�?
 func GetUsageCacheKey(tenantID, period string) string {
 	return fmt.Sprintf("tenant:usage:%s:%s", tenantID, period)
 }

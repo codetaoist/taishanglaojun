@@ -11,7 +11,7 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	_ "github.com/lib/pq"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/infrastructure/config"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/infrastructure/config"
 )
 
 // DatabaseManager 数据库管理器
@@ -59,7 +59,7 @@ func (dm *DatabaseManager) initPostgreSQL() error {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// 配置连接池
+	// 配置连接�?
 	db.SetMaxOpenConns(dm.config.Database.MaxOpenConns)
 	db.SetMaxIdleConns(dm.config.Database.MaxIdleConns)
 	db.SetConnMaxLifetime(dm.config.Database.ConnMaxLifetime)
@@ -190,7 +190,7 @@ func (dm *DatabaseManager) Close() error {
 	return nil
 }
 
-// Health 检查所有数据库连接健康状态
+// Health 检查所有数据库连接健康状�?
 func (dm *DatabaseManager) Health(ctx context.Context) map[string]error {
 	health := make(map[string]error)
 
@@ -232,12 +232,12 @@ func (dm *DatabaseManager) GetPostgreSQL() *sql.DB {
 	return dm.PostgreSQL
 }
 
-// GetRedis 获取Redis客户端
+// GetRedis 获取Redis客户�?
 func (dm *DatabaseManager) GetRedis() *redis.Client {
 	return dm.Redis
 }
 
-// GetElasticsearch 获取Elasticsearch客户端
+// GetElasticsearch 获取Elasticsearch客户�?
 func (dm *DatabaseManager) GetElasticsearch() *elasticsearch.Client {
 	return dm.Elasticsearch
 }
@@ -275,7 +275,7 @@ func (dm *DatabaseManager) Transaction(ctx context.Context, fn func(*sql.Tx) err
 	return nil
 }
 
-// Neo4jSession 创建Neo4j会话并执行函数
+// Neo4jSession 创建Neo4j会话并执行函�?
 func (dm *DatabaseManager) Neo4jSession(ctx context.Context, fn func(neo4j.SessionWithContext) error) error {
 	session := dm.Neo4j.NewSession(ctx, neo4j.SessionConfig{
 		DatabaseName: dm.config.Neo4j.Database,
@@ -285,7 +285,7 @@ func (dm *DatabaseManager) Neo4jSession(ctx context.Context, fn func(neo4j.Sessi
 	return fn(session)
 }
 
-// Neo4jReadTransaction 执行Neo4j读事务
+// Neo4jReadTransaction 执行Neo4j读事�?
 func (dm *DatabaseManager) Neo4jReadTransaction(ctx context.Context, fn func(neo4j.ManagedTransaction) (interface{}, error)) (interface{}, error) {
 	session := dm.Neo4j.NewSession(ctx, neo4j.SessionConfig{
 		DatabaseName: dm.config.Neo4j.Database,
@@ -295,7 +295,7 @@ func (dm *DatabaseManager) Neo4jReadTransaction(ctx context.Context, fn func(neo
 	return session.ExecuteRead(ctx, fn)
 }
 
-// Neo4jWriteTransaction 执行Neo4j写事务
+// Neo4jWriteTransaction 执行Neo4j写事�?
 func (dm *DatabaseManager) Neo4jWriteTransaction(ctx context.Context, fn func(neo4j.ManagedTransaction) (interface{}, error)) (interface{}, error) {
 	session := dm.Neo4j.NewSession(ctx, neo4j.SessionConfig{
 		DatabaseName: dm.config.Neo4j.Database,

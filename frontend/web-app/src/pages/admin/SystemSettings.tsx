@@ -28,11 +28,10 @@ import {
   ReloadOutlined,
   ExclamationCircleOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  SettingOutlined
 } from '@ant-design/icons';
 import { apiClient } from '../../services/api';
-
-const { TabPane } = Tabs;
 const { TextArea } = Input;
 const { Option } = Select;
 const { confirm } = Modal;
@@ -227,323 +226,123 @@ const SystemSettings: React.FC = () => {
         </p>
       </div>
 
-      <Tabs defaultActiveKey="system" size="large">
-        <TabPane
-          tab={
-            <span>
-              <GlobalOutlined />
-              网站配置
-            </span>
-          }
-          key="system"
-        >
-          <Card>
-            <Form
-              form={systemForm}
-              layout="vertical"
-              onFinish={handleSystemConfigSave}
-            >
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item
-                    label="网站名称"
-                    name="siteName"
-                    rules={[{ required: true, message: '请输入网站名称' }]}
-                  >
-                    <Input placeholder="请输入网站名称" />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label="联系邮箱"
-                    name="contactEmail"
-                    rules={[
-                      { required: true, message: '请输入联系邮箱' },
-                      { type: 'email', message: '请输入有效的邮箱地址' }
-                    ]}
-                  >
-                    <Input placeholder="请输入联系邮箱" />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item
-                label="网站描述"
-                name="siteDescription"
-                rules={[{ required: true, message: '请输入网站描述' }]}
-              >
-                <TextArea rows={3} placeholder="请输入网站描述" />
-              </Form.Item>
-
-              <Form.Item
-                label="网站关键词"
-                name="siteKeywords"
-                help="多个关键词用逗号分隔"
-              >
-                <Input placeholder="请输入网站关键词" />
-              </Form.Item>
-
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item label="网站Logo" name="siteLogo">
-                    <Upload {...uploadProps}>
-                      <Button icon={<UploadOutlined />}>上传Logo</Button>
-                    </Upload>
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="网站图标" name="favicon">
-                    <Upload {...uploadProps}>
-                      <Button icon={<UploadOutlined />}>上传图标</Button>
-                    </Upload>
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item label="ICP备案号" name="icp">
-                    <Input placeholder="请输入ICP备案号" />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="版权信息" name="copyright">
-                    <Input placeholder="请输入版权信息" />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Divider>功能设置</Divider>
-
-              <Row gutter={24}>
-                <Col span={8}>
-                  <Form.Item
-                    label="允许用户注册"
-                    name="enableRegistration"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item
-                    label="启用评论功能"
-                    name="enableComments"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item
-                    label="启用搜索功能"
-                    name="enableSearch"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item
-                    label="最大上传大小(MB)"
-                    name="maxUploadSize"
-                    rules={[{ required: true, message: '请输入最大上传大小' }]}
-                  >
-                    <InputNumber min={1} max={100} style={{ width: '100%' }} />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label="默认语言"
-                    name="defaultLanguage"
-                    rules={[{ required: true, message: '请选择默认语言' }]}
-                  >
-                    <Select placeholder="请选择默认语言">
-                      <Option value="zh-CN">简体中文</Option>
-                      <Option value="zh-TW">繁体中文</Option>
-                      <Option value="en-US">English</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item>
-                <Space>
-                  <Button type="primary" htmlType="submit" loading={loading}>
-                    保存配置
-                  </Button>
-                  <Button onClick={handleTestEmail}>
-                    测试邮件配置
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Form>
-          </Card>
-        </TabPane>
-
-        <TabPane
-          tab={
-            <span>
-              <SecurityScanOutlined />
-              SEO设置
-            </span>
-          }
-          key="seo"
-        >
-          <Card>
-            <Form
-              form={seoForm}
-              layout="vertical"
-              onFinish={handleSEOConfigSave}
-            >
-              <Alert
-                message="SEO优化提示"
-                description="合理的SEO设置可以提高网站在搜索引擎中的排名，建议定期更新和优化。"
-                type="info"
-                showIcon
-                style={{ marginBottom: '24px' }}
-              />
-
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item
-                    label="页面标题"
-                    name="metaTitle"
-                    rules={[{ required: true, message: '请输入页面标题' }]}
-                  >
-                    <Input placeholder="请输入页面标题" />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label="页面关键词"
-                    name="metaKeywords"
-                    help="多个关键词用逗号分隔"
-                  >
-                    <Input placeholder="请输入页面关键词" />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item
-                label="页面描述"
-                name="metaDescription"
-                rules={[{ required: true, message: '请输入页面描述' }]}
-              >
-                <TextArea rows={3} placeholder="请输入页面描述" />
-              </Form.Item>
-
-              <Divider>社交媒体优化</Divider>
-
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item label="OG标题" name="ogTitle">
-                    <Input placeholder="请输入OG标题" />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="Twitter卡片类型" name="twitterCard">
-                    <Select placeholder="请选择Twitter卡片类型">
-                      <Option value="summary">摘要</Option>
-                      <Option value="summary_large_image">大图摘要</Option>
-                      <Option value="app">应用</Option>
-                      <Option value="player">播放器</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item label="OG描述" name="ogDescription">
-                <TextArea rows={2} placeholder="请输入OG描述" />
-              </Form.Item>
-
-              <Form.Item label="OG图片" name="ogImage">
-                <Upload {...uploadProps}>
-                  <Button icon={<UploadOutlined />}>上传OG图片</Button>
-                </Upload>
-              </Form.Item>
-
-              <Divider>高级设置</Divider>
-
-              <Form.Item
-                label="Robots.txt"
-                name="robotsTxt"
-                help="控制搜索引擎爬虫的访问规则"
-              >
-                <TextArea
-                  rows={6}
-                  placeholder="User-agent: *&#10;Disallow: /admin/&#10;Allow: /"
-                />
-              </Form.Item>
-
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item
-                    label="启用站点地图"
-                    name="sitemapEnabled"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="统计代码" name="analyticsCode">
-                    <Input placeholder="请输入Google Analytics等统计代码" />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading}>
-                  保存SEO配置
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </TabPane>
-
-        <TabPane
-          tab={
-            <span>
-              <DatabaseOutlined />
-              缓存管理
-            </span>
-          }
-          key="cache"
-        >
-          <Row gutter={24}>
-            <Col span={16}>
-              <Card title="缓存配置">
+      <Tabs 
+        defaultActiveKey="system" 
+        size="large"
+        items={[
+          {
+            key: 'system',
+            label: (
+              <span>
+                <GlobalOutlined />
+                网站配置
+              </span>
+            ),
+            children: (
+              <Card>
                 <Form
-                  form={cacheForm}
+                  form={systemForm}
                   layout="vertical"
-                  onFinish={handleCacheConfigSave}
+                  onFinish={handleSystemConfigSave}
                 >
                   <Row gutter={24}>
                     <Col span={12}>
                       <Form.Item
-                        label="启用缓存"
-                        name="enabled"
+                        label="网站名称"
+                        name="siteName"
+                        rules={[{ required: true, message: '请输入网站名称' }]}
+                      >
+                        <Input placeholder="请输入网站名称" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label="联系邮箱"
+                        name="contactEmail"
+                        rules={[
+                          { required: true, message: '请输入联系邮箱' },
+                          { type: 'email', message: '请输入有效的邮箱地址' }
+                        ]}
+                      >
+                        <Input placeholder="请输入联系邮箱" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Form.Item
+                    label="网站描述"
+                    name="siteDescription"
+                    rules={[{ required: true, message: '请输入网站描述' }]}
+                  >
+                    <TextArea rows={3} placeholder="请输入网站描述" />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="网站关键词"
+                    name="siteKeywords"
+                    help="多个关键词用逗号分隔"
+                  >
+                    <Input placeholder="请输入网站关键词" />
+                  </Form.Item>
+
+                  <Row gutter={24}>
+                    <Col span={12}>
+                      <Form.Item label="网站Logo" name="siteLogo">
+                        <Upload {...uploadProps}>
+                          <Button icon={<UploadOutlined />}>上传Logo</Button>
+                        </Upload>
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item label="网站图标" name="favicon">
+                        <Upload {...uploadProps}>
+                          <Button icon={<UploadOutlined />}>上传图标</Button>
+                        </Upload>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Row gutter={24}>
+                    <Col span={12}>
+                      <Form.Item label="ICP备案号" name="icp">
+                        <Input placeholder="请输入ICP备案号" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item label="版权信息" name="copyright">
+                        <Input placeholder="请输入版权信息" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Divider>功能设置</Divider>
+
+                  <Row gutter={24}>
+                    <Col span={8}>
+                      <Form.Item
+                        label="允许用户注册"
+                        name="enableRegistration"
                         valuePropName="checked"
                       >
                         <Switch />
                       </Form.Item>
                     </Col>
-                    <Col span={12}>
+                    <Col span={8}>
                       <Form.Item
-                        label="缓存策略"
-                        name="strategy"
-                        rules={[{ required: true, message: '请选择缓存策略' }]}
+                        label="启用评论功能"
+                        name="enableComments"
+                        valuePropName="checked"
                       >
-                        <Select placeholder="请选择缓存策略">
-                          <Option value="lru">LRU (最近最少使用)</Option>
-                          <Option value="lfu">LFU (最少使用频率)</Option>
-                          <Option value="fifo">FIFO (先进先出)</Option>
-                          <Option value="ttl">TTL (生存时间)</Option>
-                        </Select>
+                        <Switch />
+                      </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Form.Item
+                        label="启用搜索功能"
+                        name="enableSearch"
+                        valuePropName="checked"
+                      >
+                        <Switch />
                       </Form.Item>
                     </Col>
                   </Row>
@@ -551,30 +350,24 @@ const SystemSettings: React.FC = () => {
                   <Row gutter={24}>
                     <Col span={12}>
                       <Form.Item
-                        label="缓存时间(秒)"
-                        name="ttl"
-                        rules={[{ required: true, message: '请输入缓存时间' }]}
+                        label="最大上传大小(MB)"
+                        name="maxUploadSize"
+                        rules={[{ required: true, message: '请输入最大上传大小' }]}
                       >
-                        <InputNumber
-                          min={60}
-                          max={86400}
-                          style={{ width: '100%' }}
-                          placeholder="3600"
-                        />
+                        <InputNumber min={1} max={100} style={{ width: '100%' }} />
                       </Form.Item>
                     </Col>
                     <Col span={12}>
                       <Form.Item
-                        label="最大缓存大小(MB)"
-                        name="maxSize"
-                        rules={[{ required: true, message: '请输入最大缓存大小' }]}
+                        label="默认语言"
+                        name="defaultLanguage"
+                        rules={[{ required: true, message: '请选择默认语言' }]}
                       >
-                        <InputNumber
-                          min={10}
-                          max={1024}
-                          style={{ width: '100%' }}
-                          placeholder="256"
-                        />
+                        <Select placeholder="请选择默认语言">
+                          <Option value="zh-CN">简体中文</Option>
+                          <Option value="zh-TW">繁体中文</Option>
+                          <Option value="en-US">English</Option>
+                        </Select>
                       </Form.Item>
                     </Col>
                   </Row>
@@ -584,74 +377,290 @@ const SystemSettings: React.FC = () => {
                       <Button type="primary" htmlType="submit" loading={loading}>
                         保存配置
                       </Button>
-                      <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={handleClearCache}
-                      >
-                        清空缓存
-                      </Button>
-                      <Button
-                        icon={<ReloadOutlined />}
-                        onClick={loadCacheStats}
-                      >
-                        刷新统计
+                      <Button onClick={handleTestEmail}>
+                        测试邮件配置
                       </Button>
                     </Space>
                   </Form.Item>
                 </Form>
               </Card>
-            </Col>
+            )
+          },
+          {
+            key: 'seo',
+            label: (
+              <span>
+                <SecurityScanOutlined />
+                SEO设置
+              </span>
+            ),
+            children: (
+              <Card>
+                <Form
+                  form={seoForm}
+                  layout="vertical"
+                  onFinish={handleSEOConfigSave}
+                >
+                  <Row gutter={24}>
+                    <Col span={12}>
+                      <Form.Item
+                        label="页面标题"
+                        name="metaTitle"
+                        rules={[{ required: true, message: '请输入页面标题' }]}
+                      >
+                        <Input placeholder="请输入页面标题" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label="页面关键词"
+                        name="metaKeywords"
+                        help="多个关键词用逗号分隔"
+                      >
+                        <Input placeholder="请输入页面关键词" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-            <Col span={8}>
-              <Card title="缓存统计">
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  <Statistic
-                    title="缓存命中率"
-                    value={cacheStats.hitRate}
-                    precision={2}
-                    suffix="%"
-                    valueStyle={{
-                      color: cacheStats.hitRate > 80 ? '#3f8600' : '#cf1322'
-                    }}
-                  />
-                  <Progress
-                    percent={cacheStats.hitRate}
-                    status={cacheStats.hitRate > 80 ? 'success' : 'exception'}
-                    showInfo={false}
-                  />
+                  <Form.Item
+                    label="页面描述"
+                    name="metaDescription"
+                    rules={[{ required: true, message: '请输入页面描述' }]}
+                  >
+                    <TextArea rows={3} placeholder="请输入页面描述" />
+                  </Form.Item>
 
-                  <Divider />
+                  <Divider>Open Graph设置</Divider>
 
-                  <Statistic
-                    title="总请求数"
-                    value={cacheStats.totalRequests}
-                    prefix={<ClockCircleOutlined />}
-                  />
+                  <Row gutter={24}>
+                    <Col span={12}>
+                      <Form.Item
+                        label="OG标题"
+                        name="ogTitle"
+                      >
+                        <Input placeholder="请输入OG标题" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label="OG图片"
+                        name="ogImage"
+                      >
+                        <Upload {...uploadProps}>
+                          <Button icon={<UploadOutlined />}>上传OG图片</Button>
+                        </Upload>
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-                  <Statistic
-                    title="缓存大小"
-                    value={cacheStats.cacheSize}
-                    suffix="MB"
-                    prefix={<DatabaseOutlined />}
-                  />
+                  <Form.Item
+                    label="OG描述"
+                    name="ogDescription"
+                  >
+                    <TextArea rows={2} placeholder="请输入OG描述" />
+                  </Form.Item>
 
-                  <Statistic
-                    title="内存使用"
-                    value={cacheStats.memoryUsage}
-                    precision={2}
-                    suffix="%"
-                    prefix={<CheckCircleOutlined />}
-                    valueStyle={{
-                      color: cacheStats.memoryUsage > 80 ? '#cf1322' : '#3f8600'
-                    }}
-                  />
-                </Space>
+                  <Divider>其他设置</Divider>
+
+                  <Row gutter={24}>
+                    <Col span={12}>
+                      <Form.Item
+                        label="Twitter卡片类型"
+                        name="twitterCard"
+                      >
+                        <Select placeholder="请选择Twitter卡片类型">
+                          <Option value="summary">摘要</Option>
+                          <Option value="summary_large_image">大图摘要</Option>
+                          <Option value="app">应用</Option>
+                          <Option value="player">播放器</Option>
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label="启用站点地图"
+                        name="sitemapEnabled"
+                        valuePropName="checked"
+                      >
+                        <Switch />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Form.Item
+                    label="Robots.txt"
+                    name="robotsTxt"
+                    help="搜索引擎爬虫规则"
+                  >
+                    <TextArea rows={4} placeholder="User-agent: *&#10;Disallow:" />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="统计代码"
+                    name="analyticsCode"
+                    help="Google Analytics或其他统计代码"
+                  >
+                    <TextArea rows={3} placeholder="请输入统计代码" />
+                  </Form.Item>
+
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit" loading={loading}>
+                      保存SEO配置
+                    </Button>
+                  </Form.Item>
+                </Form>
               </Card>
-            </Col>
-          </Row>
-        </TabPane>
-      </Tabs>
+            )
+          },
+          {
+            key: 'cache',
+            label: (
+              <span>
+                <DatabaseOutlined />
+                缓存管理
+              </span>
+            ),
+            children: (
+              <Row gutter={24}>
+                <Col span={16}>
+                  <Card title="缓存配置">
+                    <Form
+                      form={cacheForm}
+                      layout="vertical"
+                      onFinish={handleCacheConfigSave}
+                    >
+                      <Row gutter={24}>
+                        <Col span={12}>
+                          <Form.Item
+                            label="启用缓存"
+                            name="enabled"
+                            valuePropName="checked"
+                          >
+                            <Switch />
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                          <Form.Item
+                            label="缓存策略"
+                            name="strategy"
+                            rules={[{ required: true, message: '请选择缓存策略' }]}
+                          >
+                            <Select placeholder="请选择缓存策略">
+                              <Option value="lru">LRU (最近最少使用)</Option>
+                              <Option value="lfu">LFU (最少使用频率)</Option>
+                              <Option value="fifo">FIFO (先进先出)</Option>
+                              <Option value="ttl">TTL (生存时间)</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Row gutter={24}>
+                        <Col span={12}>
+                          <Form.Item
+                            label="缓存时间(秒)"
+                            name="ttl"
+                            rules={[{ required: true, message: '请输入缓存时间' }]}
+                          >
+                            <InputNumber
+                              min={60}
+                              max={86400}
+                              style={{ width: '100%' }}
+                              placeholder="3600"
+                            />
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                          <Form.Item
+                            label="最大缓存大小(MB)"
+                            name="maxSize"
+                            rules={[{ required: true, message: '请输入最大缓存大小' }]}
+                          >
+                            <InputNumber
+                              min={10}
+                              max={1024}
+                              style={{ width: '100%' }}
+                              placeholder="256"
+                            />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Form.Item>
+                        <Space>
+                          <Button type="primary" htmlType="submit" loading={loading}>
+                            保存配置
+                          </Button>
+                          <Button
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={handleClearCache}
+                          >
+                            清空缓存
+                          </Button>
+                          <Button
+                            icon={<ReloadOutlined />}
+                            onClick={loadCacheStats}
+                          >
+                            刷新统计
+                          </Button>
+                        </Space>
+                      </Form.Item>
+                    </Form>
+                  </Card>
+                </Col>
+
+                <Col span={8}>
+                  <Card title="缓存统计">
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                      <Statistic
+                        title="缓存命中率"
+                        value={cacheStats.hitRate}
+                        precision={2}
+                        suffix="%"
+                        valueStyle={{
+                          color: cacheStats.hitRate > 80 ? '#3f8600' : '#cf1322'
+                        }}
+                      />
+                      <Progress
+                        percent={cacheStats.hitRate}
+                        status={cacheStats.hitRate > 80 ? 'success' : 'exception'}
+                        showInfo={false}
+                      />
+
+                      <Divider />
+
+                      <Statistic
+                        title="总请求数"
+                        value={cacheStats.totalRequests}
+                        prefix={<ClockCircleOutlined />}
+                      />
+
+                      <Statistic
+                        title="缓存大小"
+                        value={cacheStats.cacheSize}
+                        suffix="MB"
+                        prefix={<DatabaseOutlined />}
+                      />
+
+                      <Statistic
+                        title="内存使用"
+                        value={cacheStats.memoryUsage}
+                        precision={2}
+                        suffix="%"
+                        prefix={<CheckCircleOutlined />}
+                        valueStyle={{
+                          color: cacheStats.memoryUsage > 80 ? '#cf1322' : '#3f8600'
+                        }}
+                      />
+                    </Space>
+                  </Card>
+                </Col>
+              </Row>
+            )
+          }
+        ]}
+      />
     </div>
   );
 };

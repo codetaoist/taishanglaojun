@@ -120,6 +120,6 @@ type MessageListResponse struct {
 // DeleteSessionRequest 删除会话请求
 type DeleteSessionRequest struct {
 	SessionID string `json:"session_id"`
-	Hard      bool   `json:"hard"` // 是否硬删除
+	Hard      bool   `json:"hard"` // 是否硬删�?
 }
 

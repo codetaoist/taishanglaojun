@@ -41,8 +41,9 @@ if(NOT OPENGL_FOUND)
     message(FATAL_ERROR "OpenGL not found")
 endif()
 
-# GTK3库（用于文件对话框等）
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+# GTK4库（现代化UI框架）
+pkg_check_modules(GTK4 REQUIRED gtk4)
+pkg_check_modules(ADWAITA REQUIRED libadwaita-1)
 
 # 网络库
 find_package(Threads REQUIRED)
@@ -105,7 +106,8 @@ target_link_libraries(${PROJECT_NAME}
     ${WAYLAND_LIBRARIES}
     ${WAYLAND_EGL_LIBRARIES}
     ${OPENGL_LIBRARIES}
-    ${GTK3_LIBRARIES}
+    ${GTK4_LIBRARIES}
+    ${ADWAITA_LIBRARIES}
     ${JSON_C_LIBRARIES}
     ${OPENSSL_LIBRARIES}
     ${ALSA_LIBRARIES}
@@ -131,7 +133,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${X11_INCLUDE_DIRS}
     ${WAYLAND_INCLUDE_DIRS}
-    ${GTK3_INCLUDE_DIRS}
+    ${GTK4_INCLUDE_DIRS}
+    ${ADWAITA_INCLUDE_DIRS}
     ${JSON_C_INCLUDE_DIRS}
     ${OPENSSL_INCLUDE_DIRS}
     ${ALSA_INCLUDE_DIRS}
@@ -141,7 +144,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # 编译选项
 target_compile_options(${PROJECT_NAME} PRIVATE
-    ${GTK3_CFLAGS_OTHER}
+    ${GTK4_CFLAGS_OTHER}
+    ${ADWAITA_CFLAGS_OTHER}
     ${WAYLAND_CFLAGS_OTHER}
     ${JSON_C_CFLAGS_OTHER}
     ${ALSA_CFLAGS_OTHER}
@@ -196,7 +200,7 @@ set(CPACK_PACKAGE_CONTACT "support@taishanglaojun.com")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE")
 
 # DEB包配置
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libx11-6, libwayland-client0, libgtk-3-0, libjson-c5, libssl3, libasound2, libpulse0, libnotify4")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libx11-6, libwayland-client0, libgtk-4-1, libadwaita-1-0, libjson-c5, libssl3, libasound2, libpulse0, libnotify4")
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://taishanglaojun.com")
@@ -205,7 +209,7 @@ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://taishanglaojun.com")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Productivity")
 set(CPACK_RPM_PACKAGE_LICENSE "MIT")
 set(CPACK_RPM_PACKAGE_URL "https://taishanglaojun.com")
-set(CPACK_RPM_PACKAGE_REQUIRES "libX11, wayland, gtk3, json-c, openssl, alsa-lib, pulseaudio-libs, libnotify")
+set(CPACK_RPM_PACKAGE_REQUIRES "libX11, wayland, gtk4, libadwaita, json-c, openssl, alsa-lib, pulseaudio-libs, libnotify")
 
 include(CPack)
 
@@ -268,6 +272,7 @@ message(STATUS "C compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "X11 found: ${X11_FOUND}")
 message(STATUS "Wayland found: ${WAYLAND_FOUND}")
-message(STATUS "GTK3 found: ${GTK3_FOUND}")
+message(STATUS "GTK4 found: ${GTK4_FOUND}")
+message(STATUS "Adwaita found: ${ADWAITA_FOUND}")
 message(STATUS "OpenGL found: ${OPENGL_FOUND}")
 message(STATUS "OpenSSL found: ${OPENSSL_FOUND}")

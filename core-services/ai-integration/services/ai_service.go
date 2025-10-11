@@ -19,11 +19,11 @@ func NewAIService(manager *providers.Manager) *AIService {
 	}
 }
 
-// GetEmbedding 获取文本的向量表示
+// GetEmbedding 获取文本的向量表�?
 func (s *AIService) GetEmbedding(ctx context.Context, text string) ([]float32, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.Embed(ctx, text)
@@ -33,7 +33,7 @@ func (s *AIService) GetEmbedding(ctx context.Context, text string) ([]float32, e
 func (s *AIService) Chat(ctx context.Context, req providers.ChatRequest) (*providers.ChatResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.Chat(ctx, req)
@@ -43,7 +43,7 @@ func (s *AIService) Chat(ctx context.Context, req providers.ChatRequest) (*provi
 func (s *AIService) Generate(ctx context.Context, req providers.GenerateRequest) (*providers.GenerateResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.Generate(ctx, req)
@@ -53,7 +53,7 @@ func (s *AIService) Generate(ctx context.Context, req providers.GenerateRequest)
 func (s *AIService) Analyze(ctx context.Context, req providers.AnalyzeRequest) (*providers.AnalyzeResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.Analyze(ctx, req)
@@ -63,7 +63,7 @@ func (s *AIService) Analyze(ctx context.Context, req providers.AnalyzeRequest) (
 func (s *AIService) IntentRecognition(ctx context.Context, req providers.IntentRequest) (*providers.IntentResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.IntentRecognition(ctx, req)
@@ -73,7 +73,7 @@ func (s *AIService) IntentRecognition(ctx context.Context, req providers.IntentR
 func (s *AIService) SentimentAnalysis(ctx context.Context, req providers.SentimentRequest) (*providers.SentimentResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.SentimentAnalysis(ctx, req)
@@ -83,13 +83,13 @@ func (s *AIService) SentimentAnalysis(ctx context.Context, req providers.Sentime
 func (s *AIService) GenerateSummary(ctx context.Context, req providers.ChatRequest) (*providers.ChatResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
-	// 修改请求以生成摘要
+	// 修改请求以生成摘�?
 	req.Messages = append(req.Messages, providers.Message{
 		Role:    "system",
-		Content: "请为以下内容生成简洁的摘要：",
+		Content: "请为以下内容生成简洁的摘要�?,
 	})
 
 	return provider.Chat(ctx, req)
@@ -99,10 +99,10 @@ func (s *AIService) GenerateSummary(ctx context.Context, req providers.ChatReque
 func (s *AIService) GenerateExplanation(ctx context.Context, req providers.ChatRequest) (*providers.ChatResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
-	// 修改请求以生成解释
+	// 修改请求以生成解�?
 	req.Messages = append(req.Messages, providers.Message{
 		Role:    "system",
 		Content: "请详细解释以下内容：",
@@ -115,10 +115,10 @@ func (s *AIService) GenerateExplanation(ctx context.Context, req providers.ChatR
 func (s *AIService) GenerateTranslation(ctx context.Context, req providers.ChatRequest) (*providers.ChatResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
-	// 修改请求以生成翻译
+	// 修改请求以生成翻�?
 	req.Messages = append(req.Messages, providers.Message{
 		Role:    "system",
 		Content: "请翻译以下内容：",
@@ -127,21 +127,21 @@ func (s *AIService) GenerateTranslation(ctx context.Context, req providers.ChatR
 	return provider.Chat(ctx, req)
 }
 
-// ExtractKeywords 提取关键词
+// ExtractKeywords 提取关键�?
 func (s *AIService) ExtractKeywords(ctx context.Context, req providers.AnalyzeRequest) (*providers.AnalyzeResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.Analyze(ctx, req)
 }
 
-// CalculateSimilarity 计算相似度
+// CalculateSimilarity 计算相似�?
 func (s *AIService) CalculateSimilarity(ctx context.Context, req providers.AnalyzeRequest) (*providers.AnalyzeResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.Analyze(ctx, req)
@@ -151,7 +151,7 @@ func (s *AIService) CalculateSimilarity(ctx context.Context, req providers.Analy
 func (s *AIService) GenerateEmbedding(ctx context.Context, req providers.AnalyzeRequest) (*providers.AnalyzeResponse, error) {
 	provider, err := s.manager.GetDefaultProvider()
 	if err != nil {
-		return nil, fmt.Errorf("没有可用的AI提供商: %w", err)
+		return nil, fmt.Errorf("没有可用的AI提供�? %w", err)
 	}
 
 	return provider.Analyze(ctx, req)

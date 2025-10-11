@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	multitenant "github.com/taishanglaojun/core-services/multi-tenant"
+	multitenant "github.com/codetaoist/taishanglaojun/core-services/multi-tenant"
 	"go.uber.org/zap"
 )
 
@@ -34,7 +34,7 @@ func NewTenantRepository(
 	config TenantRepositoryConfig,
 	logger *zap.Logger,
 ) *TenantRepository {
-	// 设置默认值
+	// 设置默认�?
 	if config.TableName == "" {
 		config.TableName = "tenants"
 	}
@@ -303,7 +303,7 @@ func (r *TenantRepository) Delete(ctx context.Context, id string) error {
 	var args []interface{}
 
 	if r.config.EnableSoftDelete {
-		// 软删除
+		// 软删�?
 		query = fmt.Sprintf(`
 			UPDATE %s SET 
 				deleted_at = $1,
@@ -312,7 +312,7 @@ func (r *TenantRepository) Delete(ctx context.Context, id string) error {
 		`, r.config.TableName)
 		args = []interface{}{time.Now(), id}
 	} else {
-		// 硬删除
+		// 硬删�?
 		query = fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, r.config.TableName)
 		args = []interface{}{id}
 	}
@@ -356,7 +356,7 @@ func (r *TenantRepository) List(ctx context.Context, filter multitenant.TenantFi
 	// 构建排序
 	orderClause := r.buildOrderClause(filter.SortBy, filter.SortOrder)
 	
-	// 计算偏移量
+	// 计算偏移�?
 	offset := (pagination.Page - 1) * pagination.PageSize
 
 	// 查询总数
@@ -403,7 +403,7 @@ func (r *TenantRepository) List(ctx context.Context, filter multitenant.TenantFi
 		return nil, fmt.Errorf("failed to list tenants: %w", err)
 	}
 
-	// 转换为租户对象
+	// 转换为租户对�?
 	tenants := make([]*multitenant.Tenant, len(rows))
 	for i, row := range rows {
 		tenant, err := r.rowToTenant(&row)
@@ -439,7 +439,7 @@ func (r *TenantRepository) RecordUsage(ctx context.Context, tenantID string, usa
 	ctx, cancel := context.WithTimeout(ctx, r.config.QueryTimeout)
 	defer cancel()
 
-	// 序列化详细信息
+	// 序列化详细信�?
 	detailsJSON, err := json.Marshal(usage.Details)
 	if err != nil {
 		return fmt.Errorf("failed to marshal usage details: %w", err)
@@ -537,7 +537,7 @@ func (r *TenantRepository) rowToTenant(row interface{}) (*multitenant.Tenant, er
 		deletedAt                               sql.NullTime
 	)
 
-	// 使用类型断言获取字段值
+	// 使用类型断言获取字段�?
 	switch r := row.(type) {
 	case *struct {
 		ID        string         `db:"id"`
@@ -618,12 +618,12 @@ func (r *TenantRepository) buildWhereClause(filter multitenant.TenantFilter) (st
 	var args []interface{}
 	argIndex := 1
 
-	// 软删除过滤
+	// 软删除过�?
 	if r.config.EnableSoftDelete {
 		conditions = append(conditions, "deleted_at IS NULL")
 	}
 
-	// 状态过滤
+	// 状态过�?
 	if len(filter.Status) > 0 {
 		placeholders := make([]string, len(filter.Status))
 		for i, status := range filter.Status {
@@ -645,7 +645,7 @@ func (r *TenantRepository) buildWhereClause(filter multitenant.TenantFilter) (st
 		conditions = append(conditions, fmt.Sprintf("plan IN (%s)", strings.Join(placeholders, ",")))
 	}
 
-	// 所有者过滤
+	// 所有者过�?
 	if filter.OwnerID != "" {
 		conditions = append(conditions, fmt.Sprintf("owner_id = $%d", argIndex))
 		args = append(args, filter.OwnerID)

@@ -11,8 +11,8 @@ import (
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
 // PrometheusStorage Prometheus存储实现
@@ -87,9 +87,9 @@ func NewPrometheusStorage(config *PrometheusConfig) (*PrometheusStorage, error) 
 	}, nil
 }
 
-// Store 存储指标（Prometheus通常通过推送网关或拉取方式收集指标）
+// Store 存储指标（Prometheus通常通过推送网关或拉取方式收集指标�?
 func (p *PrometheusStorage) Store(ctx context.Context, metrics []models.Metric) error {
-	// Prometheus通常不直接存储指标，而是通过拉取或推送网关
+	// Prometheus通常不直接存储指标，而是通过拉取或推送网�?
 	// 这里可以实现推送到Pushgateway的逻辑
 	return fmt.Errorf("direct storage not supported, use push gateway or pull model")
 }
@@ -204,7 +204,7 @@ func (p *PrometheusStorage) convertResult(value model.Value, query *models.Metri
 				series.Labels[string(k)] = string(v)
 			}
 			
-			// 转换数据点
+			// 转换数据�?
 			for _, pair := range sampleStream.Values {
 				series.Points = append(series.Points, models.MetricPoint{
 					Timestamp: pair.Timestamp.Time(),
@@ -254,7 +254,7 @@ func (p *PrometheusStorage) QueryLabels(ctx context.Context, matchers []string, 
 	return labels, nil
 }
 
-// QueryLabelValues 查询标签值
+// QueryLabelValues 查询标签�?
 func (p *PrometheusStorage) QueryLabelValues(ctx context.Context, label string, matchers []string, start, end time.Time) ([]string, error) {
 	var labelMatchers []string
 	if len(matchers) > 0 {
@@ -303,7 +303,7 @@ func (p *PrometheusStorage) GetMetricNames(ctx context.Context) ([]string, error
 		return nil, err
 	}
 	
-	// 查找__name__标签的值
+	// 查找__name__标签的�?
 	for _, label := range labels {
 		if label == "__name__" {
 			return p.QueryLabelValues(ctx, "__name__", nil, time.Time{}, time.Time{})
@@ -313,9 +313,9 @@ func (p *PrometheusStorage) GetMetricNames(ctx context.Context) ([]string, error
 	return []string{}, nil
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (p *PrometheusStorage) Health(ctx context.Context) error {
-	// 执行简单查询检查连接
+	// 执行简单查询检查连�?
 	_, err := p.queryAPI.Query(ctx, "up", time.Now())
 	if err != nil {
 		return fmt.Errorf("prometheus health check failed: %w", err)
@@ -333,7 +333,7 @@ func (p *PrometheusStorage) GetStats(ctx context.Context) (map[string]interface{
 		stats["config"] = config
 	}
 	
-	// 获取运行时信息
+	// 获取运行时信�?
 	runtimeInfo, err := p.queryAPI.Runtimeinfo(ctx)
 	if err == nil {
 		stats["runtime"] = runtimeInfo
@@ -345,7 +345,7 @@ func (p *PrometheusStorage) GetStats(ctx context.Context) (map[string]interface{
 		stats["build"] = buildInfo
 	}
 	
-	// 获取TSDB状态
+	// 获取TSDB状�?
 	tsdbStatus, err := p.queryAPI.TSDB(ctx)
 	if err == nil {
 		stats["tsdb"] = tsdbStatus
@@ -401,7 +401,7 @@ func (p *PrometheusStorage) QueryExemplars(ctx context.Context, query string, st
 
 // Close 关闭连接
 func (p *PrometheusStorage) Close() error {
-	// Prometheus客户端不需要显式关闭
+	// Prometheus客户端不需要显式关�?
 	return nil
 }
 
@@ -436,7 +436,7 @@ func (rt *BearerTokenRoundTripper) RoundTrip(req *http.Request) (*http.Response,
 	return next.RoundTrip(req)
 }
 
-// BuildQuery 构建查询表达式
+// BuildQuery 构建查询表达�?
 func BuildQuery(metric string, labels map[string]string, aggregation string, duration time.Duration) string {
 	var query strings.Builder
 	
@@ -449,7 +449,7 @@ func BuildQuery(metric string, labels map[string]string, aggregation string, dur
 	// 添加指标名称
 	query.WriteString(metric)
 	
-	// 添加标签选择器
+	// 添加标签选择�?
 	if len(labels) > 0 {
 		query.WriteString("{")
 		first := true
@@ -481,7 +481,7 @@ func BuildQuery(metric string, labels map[string]string, aggregation string, dur
 	return query.String()
 }
 
-// ParseLabels 解析标签字符串
+// ParseLabels 解析标签字符�?
 func ParseLabels(labelStr string) map[string]string {
 	labels := make(map[string]string)
 	if labelStr == "" {
@@ -501,7 +501,7 @@ func ParseLabels(labelStr string) map[string]string {
 	return labels
 }
 
-// FormatLabels 格式化标签为字符串
+// FormatLabels 格式化标签为字符�?
 func FormatLabels(labels map[string]string) string {
 	if len(labels) == 0 {
 		return ""
@@ -515,13 +515,13 @@ func FormatLabels(labels map[string]string) string {
 	return "{" + strings.Join(parts, ",") + "}"
 }
 
-// ValidateQuery 验证查询表达式
+// ValidateQuery 验证查询表达�?
 func ValidateQuery(query string) error {
 	if query == "" {
 		return fmt.Errorf("query expression cannot be empty")
 	}
 	
-	// 基本的语法检查
+	// 基本的语法检�?
 	if strings.Count(query, "(") != strings.Count(query, ")") {
 		return fmt.Errorf("unmatched parentheses in query")
 	}

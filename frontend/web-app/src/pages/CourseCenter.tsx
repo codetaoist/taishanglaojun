@@ -43,7 +43,7 @@ import { useNavigate } from 'react-router-dom';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
-const { TabPane } = Tabs;
+
 const { Search } = Input;
 
 // 模拟课程数据
@@ -359,64 +359,81 @@ const CourseCenter: React.FC = () => {
 
           <Divider />
 
-          <Tabs defaultActiveKey="description">
-            <TabPane tab="课程介绍" key="description">
-              <Paragraph>{selectedCourse.fullDescription}</Paragraph>
-              <Title level={5}>适合人群：</Title>
-              <div style={{ marginBottom: 16 }}>
-                {selectedCourse.targetAudience.map((audience: string) => (
-                  <Tag key={audience} color="blue">{audience}</Tag>
-                ))}
-              </div>
-              <Title level={5}>前置要求：</Title>
-              <List
-                size="small"
-                dataSource={selectedCourse.prerequisites}
-                renderItem={(item: string) => <List.Item>• {item}</List.Item>}
-              />
-            </TabPane>
-            <TabPane tab="课程大纲" key="outline">
-              <Timeline>
-                {selectedCourse.outline.map((chapter: any, index: number) => (
-                  <Timeline.Item key={index} color="blue">
-                    <div>
-                      <Text strong>{chapter.title}</Text>
-                      <div style={{ marginTop: 4 }}>
-                        <Space>
-                          <Tag>{chapter.lessons}课时</Tag>
-                          <Tag>{chapter.duration}</Tag>
-                        </Space>
-                      </div>
+          <Tabs 
+            defaultActiveKey="description"
+            items={[
+              {
+                key: 'description',
+                label: '课程介绍',
+                children: (
+                  <>
+                    <Paragraph>{selectedCourse.fullDescription}</Paragraph>
+                    <Title level={5}>适合人群：</Title>
+                    <div style={{ marginBottom: 16 }}>
+                      {selectedCourse.targetAudience.map((audience: string) => (
+                        <Tag key={audience} color="blue">{audience}</Tag>
+                      ))}
                     </div>
-                  </Timeline.Item>
-                ))}
-              </Timeline>
-            </TabPane>
-            <TabPane tab="学员评价" key="reviews">
-              <List
-                dataSource={selectedCourse.reviews}
-                renderItem={(review: any) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      avatar={<Avatar icon={<UserOutlined />} />}
-                      title={
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Text strong>{review.user}</Text>
-                          <Rate disabled defaultValue={review.rating} style={{ fontSize: 12 }} />
-                        </div>
-                      }
-                      description={
-                        <div>
-                          <Paragraph>{review.comment}</Paragraph>
-                          <Text type="secondary">{review.date}</Text>
-                        </div>
-                      }
+                    <Title level={5}>前置要求：</Title>
+                    <List
+                      size="small"
+                      dataSource={selectedCourse.prerequisites}
+                      renderItem={(item: string) => <List.Item>• {item}</List.Item>}
                     />
-                  </List.Item>
-                )}
-              />
-            </TabPane>
-          </Tabs>
+                  </>
+                )
+              },
+              {
+                key: 'outline',
+                label: '课程大纲',
+                children: (
+                  <Timeline>
+                    {selectedCourse.outline.map((chapter: any, index: number) => (
+                      <Timeline.Item key={index} color="blue">
+                        <div>
+                          <Text strong>{chapter.title}</Text>
+                          <div style={{ marginTop: 4 }}>
+                            <Space>
+                              <Tag>{chapter.lessons}课时</Tag>
+                              <Tag>{chapter.duration}</Tag>
+                            </Space>
+                          </div>
+                        </div>
+                      </Timeline.Item>
+                    ))}
+                  </Timeline>
+                )
+              },
+              {
+                key: 'reviews',
+                label: '学员评价',
+                children: (
+                  <List
+                    dataSource={selectedCourse.reviews}
+                    renderItem={(review: any) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={<Avatar icon={<UserOutlined />} />}
+                          title={
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <Text strong>{review.user}</Text>
+                              <Rate disabled defaultValue={review.rating} style={{ fontSize: 12 }} />
+                            </div>
+                          }
+                          description={
+                            <div>
+                              <Paragraph>{review.comment}</Paragraph>
+                              <Text type="secondary">{review.date}</Text>
+                            </div>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                )
+              }
+            ]}
+          />
         </div>
       )}
     </Modal>

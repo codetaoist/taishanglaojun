@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 
-	domainservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	domainservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // LearningAnalyticsService 学习分析服务接口

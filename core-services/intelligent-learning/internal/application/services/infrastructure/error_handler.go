@@ -58,7 +58,7 @@ func (e *ServiceError) Error() string {
 	return fmt.Sprintf("[%s:%s] %s - %s", e.Service, e.Type, e.Operation, e.Message)
 }
 
-// ErrorHandler 错误处理器
+// ErrorHandler 错误处理�?
 type ErrorHandler struct {
 	config       *ErrorHandlerConfig
 	logger       *Logger
@@ -66,7 +66,7 @@ type ErrorHandler struct {
 	mu           sync.RWMutex
 }
 
-// ErrorHandlerConfig 错误处理器配置
+// ErrorHandlerConfig 错误处理器配�?
 type ErrorHandlerConfig struct {
 	MaxHistorySize    int           `json:"max_history_size"`
 	LogLevel          LogLevel      `json:"log_level"`
@@ -78,7 +78,7 @@ type ErrorHandlerConfig struct {
 	NotificationHooks []string      `json:"notification_hooks"`
 }
 
-// NewErrorHandler 创建错误处理器
+// NewErrorHandler 创建错误处理�?
 func NewErrorHandler(config *ErrorHandlerConfig, logger *Logger) *ErrorHandler {
 	if config == nil {
 		config = &ErrorHandlerConfig{
@@ -119,7 +119,7 @@ func (eh *ErrorHandler) HandleError(ctx context.Context, err error, service, ope
 		RetryCount:  0,
 	}
 	
-	// 添加上下文信息
+	// 添加上下文信�?
 	if ctx != nil {
 		serviceError.Context = eh.extractContext(ctx)
 	}
@@ -135,7 +135,7 @@ func (eh *ErrorHandler) HandleError(ctx context.Context, err error, service, ope
 	// 记录日志
 	eh.logError(serviceError)
 	
-	// 检查是否需要发送警报
+	// 检查是否需要发送警�?
 	eh.checkAlertThresholds(serviceError)
 	
 	return serviceError
@@ -217,7 +217,7 @@ func (eh *ErrorHandler) RetryOperation(ctx context.Context, operation func() err
 		
 		lastError = err
 		
-		// 检查是否为不可重试的错误
+		// 检查是否为不可重试的错�?
 		if serviceErr, ok := err.(*ServiceError); ok {
 			if !serviceErr.Recoverable {
 				eh.logger.Error(fmt.Sprintf("Non-recoverable error in operation %s for service %s: %v", operationName, service, err))
@@ -229,7 +229,7 @@ func (eh *ErrorHandler) RetryOperation(ctx context.Context, operation func() err
 		eh.logger.Warn(fmt.Sprintf("Operation %s for service %s failed (attempt %d/%d): %v", operationName, service, attempt+1, maxRetries+1, err))
 	}
 	
-	// 所有重试都失败了
+	// 所有重试都失败�?
 	finalError := eh.HandleError(ctx, lastError, service, operationName, ErrorTypeService, SeverityHigh)
 	finalError.RetryCount = maxRetries
 	
@@ -337,7 +337,7 @@ func (eh *ErrorHandler) logError(err *ServiceError) {
 	}
 }
 
-// checkAlertThresholds 检查警报阈值
+// checkAlertThresholds 检查警报阈�?
 func (eh *ErrorHandler) checkAlertThresholds(err *ServiceError) {
 	threshold, exists := eh.config.AlertThresholds[err.Severity]
 	if !exists {
@@ -361,7 +361,7 @@ func (eh *ErrorHandler) checkAlertThresholds(err *ServiceError) {
 	}
 }
 
-// sendAlert 发送警报
+// sendAlert 发送警�?
 func (eh *ErrorHandler) sendAlert(err *ServiceError, count, threshold int) {
 	alertData := map[string]interface{}{
 		"error":     err,
@@ -372,7 +372,7 @@ func (eh *ErrorHandler) sendAlert(err *ServiceError, count, threshold int) {
 	
 	eh.logger.Error(fmt.Sprintf("ALERT: Error threshold exceeded for severity %s (count: %d, threshold: %d)", err.Severity, count, threshold), alertData)
 	
-	// 这里可以添加实际的警报发送逻辑，如发送邮件、短信、Slack通知等
+	// 这里可以添加实际的警报发送逻辑，如发送邮件、短信、Slack通知�?
 	for _, hook := range eh.config.NotificationHooks {
 		eh.executeNotificationHook(hook, alertData)
 	}
@@ -396,7 +396,7 @@ func (eh *ErrorHandler) getStackTrace() string {
 	return string(buf[:n])
 }
 
-// isRecoverable 判断错误是否可恢复
+// isRecoverable 判断错误是否可恢�?
 func (eh *ErrorHandler) isRecoverable(errorType ErrorType, severity ErrorSeverity) bool {
 	// 关键错误通常不可恢复
 	if severity == SeverityCritical {
@@ -418,11 +418,11 @@ func (eh *ErrorHandler) isRecoverable(errorType ErrorType, severity ErrorSeverit
 	return true
 }
 
-// extractContext 提取上下文信息
+// extractContext 提取上下文信�?
 func (eh *ErrorHandler) extractContext(ctx context.Context) map[string]interface{} {
 	contextData := make(map[string]interface{})
 	
-	// 提取常见的上下文值
+	// 提取常见的上下文�?
 	if userID := ctx.Value("user_id"); userID != nil {
 		contextData["user_id"] = userID
 	}
@@ -452,14 +452,14 @@ const (
 	LogLevelError LogLevel = "error"
 )
 
-// Logger 日志记录器
+// Logger 日志记录�?
 type Logger struct {
 	level  LogLevel
 	output func(level LogLevel, message string, data map[string]interface{})
 	mu     sync.RWMutex
 }
 
-// NewLogger 创建日志记录器
+// NewLogger 创建日志记录�?
 func NewLogger(level LogLevel) *Logger {
 	return &Logger{
 		level: level,
@@ -531,7 +531,7 @@ func (l *Logger) log(level LogLevel, message string, data ...map[string]interfac
 	output(level, message, logData)
 }
 
-// shouldLog 检查是否应该记录日志
+// shouldLog 检查是否应该记录日�?
 func (l *Logger) shouldLog(level LogLevel) bool {
 	levelOrder := map[LogLevel]int{
 		LogLevelDebug: 0,

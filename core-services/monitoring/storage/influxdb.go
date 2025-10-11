@@ -10,8 +10,8 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/influxdata/influxdb-client-go/v2/api/write"
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
 // InfluxDBStorage InfluxDB存储实现
@@ -89,7 +89,7 @@ func NewInfluxDBStorage(config *InfluxDBConfig) (*InfluxDBStorage, error) {
 		}
 	}
 	
-	// 创建客户端
+	// 创建客户�?
 	client := influxdb2.NewClientWithOptions(config.URL, config.Token, options)
 	
 	// 创建写入API
@@ -127,7 +127,7 @@ func (i *InfluxDBStorage) Store(ctx context.Context, metrics []models.Metric) er
 			return fmt.Errorf("failed to convert metric to point: %w", err)
 		}
 		
-		// 写入数据点
+		// 写入数据�?
 		i.writeAPI.WritePoint(point)
 	}
 	
@@ -137,9 +137,9 @@ func (i *InfluxDBStorage) Store(ctx context.Context, metrics []models.Metric) er
 	return nil
 }
 
-// convertMetricToPoint 转换指标为InfluxDB数据点
+// convertMetricToPoint 转换指标为InfluxDB数据�?
 func (i *InfluxDBStorage) convertMetricToPoint(metric models.Metric) (*write.Point, error) {
-	// 创建数据点
+	// 创建数据�?
 	point := influxdb2.NewPoint(
 		metric.Name,
 		metric.Labels,
@@ -171,7 +171,7 @@ func (i *InfluxDBStorage) convertMetricToPoint(metric models.Metric) (*write.Poi
 				"sum":   histogram.Sum,
 			}
 			
-			// 添加桶数据
+			// 添加桶数�?
 			for i, bucket := range histogram.Buckets {
 				fields[fmt.Sprintf("bucket_%d", i)] = bucket.Count
 				fields[fmt.Sprintf("bucket_%d_le", i)] = bucket.UpperBound
@@ -187,7 +187,7 @@ func (i *InfluxDBStorage) convertMetricToPoint(metric models.Metric) (*write.Poi
 				"sum":   summary.Sum,
 			}
 			
-			// 添加分位数数据
+			// 添加分位数数�?
 			for quantile, value := range summary.Quantiles {
 				fields[fmt.Sprintf("quantile_%s", strings.ReplaceAll(fmt.Sprintf("%.2f", quantile), ".", "_"))] = value
 			}
@@ -242,7 +242,7 @@ func (i *InfluxDBStorage) buildFluxQuery(query *models.MetricQuery) (string, err
 		fluxQuery.WriteString(fmt.Sprintf(`
   |> range(start: %s)`, query.Start.Format(time.RFC3339)))
 	} else {
-		// 默认查询最近1小时
+		// 默认查询最�?小时
 		fluxQuery.WriteString(`
   |> range(start: -1h)`)
 	}
@@ -341,10 +341,10 @@ func (i *InfluxDBStorage) convertQueryResult(result *api.QueryTableResult, query
 	for result.Next() {
 		record := result.Record()
 		
-		// 构建序列键
+		// 构建序列�?
 		seriesKey := i.buildSeriesKey(record)
 		
-		// 获取或创建序列
+		// 获取或创建序�?
 		series, exists := seriesMap[seriesKey]
 		if !exists {
 			series = &models.MetricSeries{
@@ -366,13 +366,13 @@ func (i *InfluxDBStorage) convertQueryResult(result *api.QueryTableResult, query
 			seriesMap[seriesKey] = series
 		}
 		
-		// 添加数据点
+		// 添加数据�?
 		if record.Time() != nil && record.Value() != nil {
 			point := models.MetricPoint{
 				Timestamp: *record.Time(),
 			}
 			
-			// 转换值
+			// 转换�?
 			switch v := record.Value().(type) {
 			case float64:
 				point.Value = v
@@ -388,12 +388,12 @@ func (i *InfluxDBStorage) convertQueryResult(result *api.QueryTableResult, query
 		}
 	}
 	
-	// 检查查询错误
+	// 检查查询错�?
 	if result.Err() != nil {
 		return nil, fmt.Errorf("query result error: %w", result.Err())
 	}
 	
-	// 转换为切片
+	// 转换为切�?
 	for _, series := range seriesMap {
 		queryResult.Series = append(queryResult.Series, *series)
 	}
@@ -401,7 +401,7 @@ func (i *InfluxDBStorage) convertQueryResult(result *api.QueryTableResult, query
 	return queryResult, nil
 }
 
-// buildSeriesKey 构建序列键
+// buildSeriesKey 构建序列�?
 func (i *InfluxDBStorage) buildSeriesKey(record *api.FluxRecord) string {
 	var keyParts []string
 	
@@ -429,9 +429,9 @@ func (i *InfluxDBStorage) buildSeriesKey(record *api.FluxRecord) string {
 	return strings.Join(keyParts, "|")
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (i *InfluxDBStorage) Health(ctx context.Context) error {
-	// 检查连接
+	// 检查连�?
 	health, err := i.client.Health(ctx)
 	if err != nil {
 		return fmt.Errorf("influxdb health check failed: %w", err)
@@ -444,7 +444,7 @@ func (i *InfluxDBStorage) Health(ctx context.Context) error {
 	return nil
 }
 
-// GetBuckets 获取存储桶列表
+// GetBuckets 获取存储桶列�?
 func (i *InfluxDBStorage) GetBuckets(ctx context.Context) ([]string, error) {
 	bucketsAPI := i.client.BucketsAPI()
 	buckets, err := bucketsAPI.GetBuckets(ctx)
@@ -490,7 +490,7 @@ func (i *InfluxDBStorage) GetMeasurements(ctx context.Context) ([]string, error)
 	return measurements, nil
 }
 
-// GetTagKeys 获取标签键
+// GetTagKeys 获取标签�?
 func (i *InfluxDBStorage) GetTagKeys(ctx context.Context, measurement string) ([]string, error) {
 	fluxQuery := fmt.Sprintf(`
 		import "influxdata/influxdb/schema"
@@ -520,7 +520,7 @@ func (i *InfluxDBStorage) GetTagKeys(ctx context.Context, measurement string) ([
 	return tagKeys, nil
 }
 
-// GetTagValues 获取标签值
+// GetTagValues 获取标签�?
 func (i *InfluxDBStorage) GetTagValues(ctx context.Context, measurement, tagKey string) ([]string, error) {
 	fluxQuery := fmt.Sprintf(`
 		import "influxdata/influxdb/schema"
@@ -550,7 +550,7 @@ func (i *InfluxDBStorage) GetTagValues(ctx context.Context, measurement, tagKey 
 	return tagValues, nil
 }
 
-// GetFieldKeys 获取字段键
+// GetFieldKeys 获取字段�?
 func (i *InfluxDBStorage) GetFieldKeys(ctx context.Context, measurement string) ([]string, error) {
 	fluxQuery := fmt.Sprintf(`
 		import "influxdata/influxdb/schema"
@@ -606,7 +606,7 @@ func (i *InfluxDBStorage) GetStats(ctx context.Context) (map[string]interface{},
 		}
 	}
 	
-	// 获取存储桶信息
+	// 获取存储桶信�?
 	bucketsAPI := i.client.BucketsAPI()
 	bucket, err := bucketsAPI.FindBucketByName(ctx, i.config.Bucket)
 	if err == nil && bucket != nil {
@@ -631,13 +631,13 @@ func (i *InfluxDBStorage) Close() error {
 	// 关闭写入API
 	i.writeAPI.Close()
 	
-	// 关闭客户端
+	// 关闭客户�?
 	i.client.Close()
 	
 	return nil
 }
 
-// Flush 强制刷新缓冲区
+// Flush 强制刷新缓冲�?
 func (i *InfluxDBStorage) Flush() {
 	i.writeAPI.Flush()
 }

@@ -5,7 +5,7 @@ import type { ColumnsType } from 'antd/es/table';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
-const { TabPane } = Tabs;
+
 
 interface AuditLog {
   id: string;
@@ -464,83 +464,96 @@ const SecurityAudit: React.FC = () => {
         </Col>
       </Row>
 
-      <Tabs defaultActiveKey="auditLogs">
-        <TabPane tab="审计日志" key="auditLogs">
-          <Card 
-            title="系统审计日志" 
-            extra={
-              <Space>
-                <Button icon={<SearchOutlined />}>高级搜索</Button>
-                <Button icon={<DownloadOutlined />}>导出日志</Button>
-                <Button onClick={loadAuditLogs}>刷新</Button>
-              </Space>
-            }
-          >
-            <Table
-              columns={auditLogColumns}
-              dataSource={auditLogs}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`,
-              }}
-            />
-          </Card>
-        </TabPane>
-
-        <TabPane tab="安全事件" key="securityEvents">
-          <Card 
-            title="安全事件管理" 
-            extra={
-              <Space>
-                <Button type="primary">新建事件</Button>
-                <Button onClick={loadSecurityEvents}>刷新</Button>
-              </Space>
-            }
-          >
-            <Table
-              columns={securityEventColumns}
-              dataSource={securityEvents}
-              rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`,
-              }}
-            />
-          </Card>
-        </TabPane>
-
-        <TabPane tab="合规报告" key="compliance">
-          <Card 
-            title="合规性报告" 
-            extra={
-              <Space>
-                <Button type="primary" icon={<FileTextOutlined />}>
-                  生成报告
-                </Button>
-                <Button onClick={loadComplianceReports}>刷新</Button>
-              </Space>
-            }
-          >
-            <Table
-              columns={complianceColumns}
-              dataSource={complianceReports}
-              rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`,
-              }}
-            />
-          </Card>
-        </TabPane>
-      </Tabs>
+      <Tabs 
+        defaultActiveKey="auditLogs"
+        items={[
+          {
+            key: 'auditLogs',
+            label: '审计日志',
+            children: (
+              <Card 
+                title="系统审计日志" 
+                extra={
+                  <Space>
+                    <Button icon={<SearchOutlined />}>高级搜索</Button>
+                    <Button icon={<DownloadOutlined />}>导出日志</Button>
+                    <Button onClick={loadAuditLogs}>刷新</Button>
+                  </Space>
+                }
+              >
+                <Table
+                  columns={auditLogColumns}
+                  dataSource={auditLogs}
+                  rowKey="id"
+                  loading={loading}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`,
+                  }}
+                />
+              </Card>
+            )
+          },
+          {
+            key: 'securityEvents',
+            label: '安全事件',
+            children: (
+              <Card 
+                title="安全事件管理" 
+                extra={
+                  <Space>
+                    <Button type="primary">新建事件</Button>
+                    <Button onClick={loadSecurityEvents}>刷新</Button>
+                  </Space>
+                }
+              >
+                <Table
+                  columns={securityEventColumns}
+                  dataSource={securityEvents}
+                  rowKey="id"
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`,
+                  }}
+                />
+              </Card>
+            )
+          },
+          {
+            key: 'compliance',
+            label: '合规报告',
+            children: (
+              <Card 
+                title="合规性报告" 
+                extra={
+                  <Space>
+                    <Button type="primary" icon={<FileTextOutlined />}>
+                      生成报告
+                    </Button>
+                    <Button onClick={loadComplianceReports}>刷新</Button>
+                  </Space>
+                }
+              >
+                <Table
+                  columns={complianceColumns}
+                  dataSource={complianceReports}
+                  rowKey="id"
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`,
+                  }}
+                />
+              </Card>
+            )
+          }
+        ]}
+      />
 
       {/* 审计日志详情模态框 */}
       <Modal

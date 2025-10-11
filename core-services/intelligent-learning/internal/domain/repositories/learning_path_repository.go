@@ -31,7 +31,7 @@ type PathNode struct {
 	CompletedAt *time.Time `json:"completed_at,omitempty"`
 }
 
-// PathEdge 路径边
+// PathEdge 路径�?
 type PathEdge struct {
 	ID       uuid.UUID `json:"id"`
 	FromNode uuid.UUID `json:"from_node"`

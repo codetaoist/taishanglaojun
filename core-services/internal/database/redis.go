@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Redis Redis客户端封装
+// Redis Redis客户端封�?
 type Redis struct {
 	client *redis.Client
 	logger *zap.Logger
@@ -29,7 +29,7 @@ type RedisConfig struct {
 	WriteTimeout int    `yaml:"write_timeout" json:"write_timeout"`
 }
 
-// NewRedis 创建Redis客户端
+// NewRedis 创建Redis客户�?
 func NewRedis(config RedisConfig, logger *zap.Logger) (*Redis, error) {
 	if config.Host == "" {
 		config.Host = "localhost"
@@ -87,7 +87,7 @@ func NewRedis(config RedisConfig, logger *zap.Logger) (*Redis, error) {
 	}, nil
 }
 
-// GetClient 获取Redis客户端
+// GetClient 获取Redis客户�?
 func (r *Redis) GetClient() *redis.Client {
 	return r.client
 }
@@ -97,7 +97,7 @@ func (r *Redis) Close() error {
 	return r.client.Close()
 }
 
-// Health 检查Redis健康状态
+// Health 检查Redis健康状�?
 func (r *Redis) Health() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -109,12 +109,12 @@ func (r *Redis) Set(ctx context.Context, key string, value interface{}, expirati
 	return r.client.Set(ctx, key, value, expiration).Err()
 }
 
-// Get 获取值
+// Get 获取�?
 func (r *Redis) Get(ctx context.Context, key string) (string, error) {
 	return r.client.Get(ctx, key).Result()
 }
 
-// Del 删除键
+// Del 删除�?
 func (r *Redis) Del(ctx context.Context, keys ...string) error {
 	return r.client.Del(ctx, keys...).Err()
 }
@@ -139,12 +139,12 @@ func (r *Redis) HSet(ctx context.Context, key string, values ...interface{}) err
 	return r.client.HSet(ctx, key, values...).Err()
 }
 
-// HGet 获取哈希字段值
+// HGet 获取哈希字段�?
 func (r *Redis) HGet(ctx context.Context, key, field string) (string, error) {
 	return r.client.HGet(ctx, key, field).Result()
 }
 
-// HGetAll 获取哈希所有字段
+// HGetAll 获取哈希所有字�?
 func (r *Redis) HGetAll(ctx context.Context, key string) (map[string]string, error) {
 	return r.client.HGetAll(ctx, key).Result()
 }
@@ -154,22 +154,22 @@ func (r *Redis) HDel(ctx context.Context, key string, fields ...string) error {
 	return r.client.HDel(ctx, key, fields...).Err()
 }
 
-// LPush 从列表左侧推入元素
+// LPush 从列表左侧推入元�?
 func (r *Redis) LPush(ctx context.Context, key string, values ...interface{}) error {
 	return r.client.LPush(ctx, key, values...).Err()
 }
 
-// RPush 从列表右侧推入元素
+// RPush 从列表右侧推入元�?
 func (r *Redis) RPush(ctx context.Context, key string, values ...interface{}) error {
 	return r.client.RPush(ctx, key, values...).Err()
 }
 
-// LPop 从列表左侧弹出元素
+// LPop 从列表左侧弹出元�?
 func (r *Redis) LPop(ctx context.Context, key string) (string, error) {
 	return r.client.LPop(ctx, key).Result()
 }
 
-// RPop 从列表右侧弹出元素
+// RPop 从列表右侧弹出元�?
 func (r *Redis) RPop(ctx context.Context, key string) (string, error) {
 	return r.client.RPop(ctx, key).Result()
 }
@@ -179,17 +179,17 @@ func (r *Redis) LLen(ctx context.Context, key string) (int64, error) {
 	return r.client.LLen(ctx, key).Result()
 }
 
-// SAdd 向集合添加成员
+// SAdd 向集合添加成�?
 func (r *Redis) SAdd(ctx context.Context, key string, members ...interface{}) error {
 	return r.client.SAdd(ctx, key, members...).Err()
 }
 
-// SMembers 获取集合所有成员
+// SMembers 获取集合所有成�?
 func (r *Redis) SMembers(ctx context.Context, key string) ([]string, error) {
 	return r.client.SMembers(ctx, key).Result()
 }
 
-// SRem 从集合移除成员
+// SRem 从集合移除成�?
 func (r *Redis) SRem(ctx context.Context, key string, members ...interface{}) error {
 	return r.client.SRem(ctx, key, members...).Err()
 }

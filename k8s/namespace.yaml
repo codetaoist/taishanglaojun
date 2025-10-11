@@ -1,0 +1,59 @@
+# 太上老君AI平台 - Kubernetes命名空间配置
+# Taishang Laojun AI Platform - Kubernetes Namespace Configuration
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taishang-laojun
+  labels:
+    name: taishang-laojun
+    environment: production
+    project: taishang-laojun-ai
+    team: platform
+  annotations:
+    description: "太上老君AI平台生产环境命名空间"
+    contact: "platform-team@taishanglaojun.ai"
+    version: "v1.0.0"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taishang-laojun-staging
+  labels:
+    name: taishang-laojun-staging
+    environment: staging
+    project: taishang-laojun-ai
+    team: platform
+  annotations:
+    description: "太上老君AI平台预发布环境命名空间"
+    contact: "platform-team@taishanglaojun.ai"
+    version: "v1.0.0"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taishang-laojun-dev
+  labels:
+    name: taishang-laojun-dev
+    environment: development
+    project: taishang-laojun-ai
+    team: platform
+  annotations:
+    description: "太上老君AI平台开发环境命名空间"
+    contact: "platform-team@taishanglaojun.ai"
+    version: "v1.0.0"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taishang-laojun-monitoring
+  labels:
+    name: taishang-laojun-monitoring
+    environment: production
+    project: taishang-laojun-ai
+    team: platform
+    component: monitoring
+  annotations:
+    description: "太上老君AI平台监控系统命名空间"
+    contact: "platform-team@taishanglaojun.ai"
+    version: "v1.0.0"

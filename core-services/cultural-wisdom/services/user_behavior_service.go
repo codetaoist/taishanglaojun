@@ -69,7 +69,7 @@ type SchoolScore struct {
 	Count  int     `json:"count"`
 }
 
-// AuthorScore 作者评分
+// AuthorScore 作者评�?
 type AuthorScore struct {
 	Author string  `json:"author"`
 	Score  float64 `json:"score"`
@@ -125,7 +125,7 @@ func (s *UserBehaviorService) RecordBehavior(ctx context.Context, req BehaviorRe
 
 // GetUserProfile 获取用户画像
 func (s *UserBehaviorService) GetUserProfile(ctx context.Context, userID string) (*UserProfile, error) {
-	// 尝试从缓存获取用户画像
+	// 尝试从缓存获取用户画�?
 	cacheKey := fmt.Sprintf("user_profile:%s", userID)
 	var cachedProfile UserProfile
 	if err := s.getCachedData(ctx, cacheKey, &cachedProfile); err == nil {
@@ -150,7 +150,7 @@ func (s *UserBehaviorService) GetUserProfile(ctx context.Context, userID string)
 func (s *UserBehaviorService) GetUserBehaviors(ctx context.Context, userID string) (map[string]float64, error) {
 	var behaviors []models.UserBehavior
 	
-	// 获取最近30天的行为数据
+	// 获取最�?0天的行为数据
 	since := time.Now().AddDate(0, 0, -30)
 	if err := s.db.WithContext(ctx).
 		Where("user_id = ? AND created_at > ?", userID, since).
@@ -179,7 +179,7 @@ func (s *UserBehaviorService) FindSimilarUsers(ctx context.Context, userID strin
 		return []string{}, nil
 	}
 
-	// 获取其他用户的行为数据
+	// 获取其他用户的行为数�?
 	var allUsers []string
 	if err := s.db.WithContext(ctx).
 		Model(&models.UserBehavior{}).
@@ -189,7 +189,7 @@ func (s *UserBehaviorService) FindSimilarUsers(ctx context.Context, userID strin
 		return nil, fmt.Errorf("failed to get all users: %w", err)
 	}
 
-	// 计算相似度
+	// 计算相似�?
 	type userSimilarity struct {
 		UserID     string
 		Similarity float64
@@ -203,7 +203,7 @@ func (s *UserBehaviorService) FindSimilarUsers(ctx context.Context, userID strin
 		}
 
 		similarity := s.calculateCosineSimilarity(userBehaviors, otherBehaviors)
-		if similarity > 0.1 { // 设置最低相似度阈值
+		if similarity > 0.1 { // 设置最低相似度阈�?
 			similarities = append(similarities, userSimilarity{
 				UserID:     otherUserID,
 				Similarity: similarity,
@@ -211,7 +211,7 @@ func (s *UserBehaviorService) FindSimilarUsers(ctx context.Context, userID strin
 		}
 	}
 
-	// 排序并返回最相似的用户
+	// 排序并返回最相似的用�?
 	sort.Slice(similarities, func(i, j int) bool {
 		return similarities[i].Similarity > similarities[j].Similarity
 	})
@@ -246,8 +246,8 @@ func (s *UserBehaviorService) calculateActionScore(actionType string, duration i
 
 	// 根据浏览时长调整评分
 	if actionType == models.ActionTypeView && duration > 0 {
-		// 浏览时长越长，评分越高（但有上限）
-		durationFactor := math.Min(float64(duration)/60.0, 5.0) // 最多5倍
+		// 浏览时长越长，评分越高（但有上限�?
+		durationFactor := math.Min(float64(duration)/60.0, 5.0) // 最�?�?
 		score *= (1.0 + durationFactor*0.2)
 	}
 
@@ -258,7 +258,7 @@ func (s *UserBehaviorService) calculateActionScore(actionType string, duration i
 func (s *UserBehaviorService) buildUserProfile(ctx context.Context, userID string) (*UserProfile, error) {
 	// 获取用户行为数据
 	var behaviors []models.UserBehavior
-	since := time.Now().AddDate(0, 0, -90) // 最近90天
+	since := time.Now().AddDate(0, 0, -90) // 最�?0�?
 	if err := s.db.WithContext(ctx).
 		Where("user_id = ? AND created_at > ?", userID, since).
 		Find(&behaviors).Error; err != nil {
@@ -273,7 +273,7 @@ func (s *UserBehaviorService) buildUserProfile(ctx context.Context, userID strin
 		}, nil
 	}
 
-	// 获取相关的智慧信息
+	// 获取相关的智慧信�?
 	wisdomIDs := make([]string, 0, len(behaviors))
 	for _, behavior := range behaviors {
 		wisdomIDs = append(wisdomIDs, behavior.WisdomID)
@@ -369,7 +369,7 @@ func (s *UserBehaviorService) updateUserPreference(userID, wisdomID, actionType 
 		return
 	}
 
-	// 获取或创建用户偏好记录
+	// 获取或创建用户偏好记�?
 	var preference models.UserPreference
 	err := s.db.WithContext(ctx).Where("user_id = ?", userID).First(&preference).Error
 	if err != nil {
@@ -400,7 +400,7 @@ func (s *UserBehaviorService) updateUserPreference(userID, wisdomID, actionType 
 	}
 }
 
-// calculateCosineSimilarity 计算余弦相似度
+// calculateCosineSimilarity 计算余弦相似�?
 func (s *UserBehaviorService) calculateCosineSimilarity(behaviors1, behaviors2 map[string]float64) float64 {
 	// 找到共同项目
 	commonItems := make(map[string]bool)
@@ -414,7 +414,7 @@ func (s *UserBehaviorService) calculateCosineSimilarity(behaviors1, behaviors2 m
 		return 0.0
 	}
 
-	// 计算余弦相似度
+	// 计算余弦相似�?
 	var dotProduct, norm1, norm2 float64
 	
 	for item := range commonItems {
@@ -522,7 +522,7 @@ func (s *UserBehaviorService) calculateReadingSpeed(behaviors []models.UserBehav
 	}
 	
 	avgDuration := float64(totalDuration) / float64(viewCount)
-	// 假设标准阅读时间为60秒
+	// 假设标准阅读时间�?0�?
 	return 60.0 / avgDuration
 }
 
@@ -554,7 +554,7 @@ func (s *UserBehaviorService) getTopActiveHours(activeHours map[int]int, limit i
 
 func (s *UserBehaviorService) updatePreferenceData(preference *models.UserPreference, wisdom models.CulturalWisdom, score float64) {
 	// 这里可以实现更复杂的偏好更新逻辑
-	// 暂时简化处理
+	// 暂时简化处�?
 	preference.LastActive = time.Now()
 }
 

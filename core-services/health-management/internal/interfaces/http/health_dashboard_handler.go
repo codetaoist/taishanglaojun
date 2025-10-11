@@ -22,15 +22,15 @@ func NewHealthDashboardHandler(dashboardService *application.HealthDashboardServ
 	}
 }
 
-// GetDashboardRequest 获取仪表板请求
+// GetDashboardRequest 获取仪表板请�?
 type GetDashboardRequest struct {
 	Period string `form:"period" json:"period"`
 }
 
-// GetDashboard 获取健康仪表板
-// @Summary 获取健康仪表板
+// GetDashboard 获取健康仪表�?
+// @Summary 获取健康仪表�?
 // @Description 获取用户的健康仪表板数据，包括概览、关键指标、趋势图表等
-// @Tags 健康仪表板
+// @Tags 健康仪表�?
 // @Accept json
 // @Produce json
 // @Param period query string false "时间周期" Enums(day,week,month,year)
@@ -100,10 +100,10 @@ func (h *HealthDashboardHandler) GetDashboard(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetDashboardByUser 根据用户ID获取健康仪表板
-// @Summary 根据用户ID获取健康仪表板
+// GetDashboardByUser 根据用户ID获取健康仪表�?
+// @Summary 根据用户ID获取健康仪表�?
 // @Description 管理员或授权用户获取指定用户的健康仪表板
-// @Tags 健康仪表板
+// @Tags 健康仪表�?
 // @Accept json
 // @Produce json
 // @Param user_id path string true "用户ID"
@@ -165,10 +165,10 @@ func (h *HealthDashboardHandler) GetDashboardByUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetDashboardSummary 获取仪表板摘要
-// @Summary 获取仪表板摘要
-// @Description 获取用户健康仪表板的简要摘要信息
-// @Tags 健康仪表板
+// GetDashboardSummary 获取仪表板摘�?
+// @Summary 获取仪表板摘�?
+// @Description 获取用户健康仪表板的简要摘要信�?
+// @Tags 健康仪表�?
 // @Accept json
 // @Produce json
 // @Success 200 {object} application.GetDashboardSummaryResponse
@@ -212,10 +212,10 @@ func (h *HealthDashboardHandler) GetDashboardSummary(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetDashboardSummaryByUser 根据用户ID获取仪表板摘要
-// @Summary 根据用户ID获取仪表板摘要
+// GetDashboardSummaryByUser 根据用户ID获取仪表板摘�?
+// @Summary 根据用户ID获取仪表板摘�?
 // @Description 管理员或授权用户获取指定用户的健康仪表板摘要
-// @Tags 健康仪表板
+// @Tags 健康仪表�?
 // @Accept json
 // @Produce json
 // @Param user_id path string true "用户ID"
@@ -251,10 +251,10 @@ func (h *HealthDashboardHandler) GetDashboardSummaryByUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// GetDashboardMetrics 获取仪表板关键指标
-// @Summary 获取仪表板关键指标
+// GetDashboardMetrics 获取仪表板关键指�?
+// @Summary 获取仪表板关键指�?
 // @Description 获取用户健康仪表板的关键指标数据
-// @Tags 健康仪表板
+// @Tags 健康仪表�?
 // @Accept json
 // @Produce json
 // @Param period query string false "时间周期" Enums(day,week,month,year)
@@ -306,7 +306,7 @@ func (h *HealthDashboardHandler) GetDashboardMetrics(c *gin.Context) {
 		period = application.DashboardPeriodMonth
 	}
 
-	// 调用服务获取完整仪表板
+	// 调用服务获取完整仪表�?
 	serviceReq := &application.GetDashboardRequest{
 		UserID: userID,
 		Period: period,
@@ -321,7 +321,7 @@ func (h *HealthDashboardHandler) GetDashboardMetrics(c *gin.Context) {
 		return
 	}
 
-	// 只返回关键指标
+	// 只返回关键指�?
 	metricsResponse := GetDashboardMetricsResponse{
 		Metrics:   response.Dashboard.KeyMetrics,
 		Timestamp: response.Timestamp,
@@ -330,10 +330,10 @@ func (h *HealthDashboardHandler) GetDashboardMetrics(c *gin.Context) {
 	c.JSON(http.StatusOK, metricsResponse)
 }
 
-// GetDashboardCharts 获取仪表板图表数据
-// @Summary 获取仪表板图表数据
+// GetDashboardCharts 获取仪表板图表数�?
+// @Summary 获取仪表板图表数�?
 // @Description 获取用户健康仪表板的趋势图表数据
-// @Tags 健康仪表板
+// @Tags 健康仪表�?
 // @Accept json
 // @Produce json
 // @Param period query string false "时间周期" Enums(day,week,month,year)
@@ -385,7 +385,7 @@ func (h *HealthDashboardHandler) GetDashboardCharts(c *gin.Context) {
 		period = application.DashboardPeriodMonth
 	}
 
-	// 调用服务获取完整仪表板
+	// 调用服务获取完整仪表�?
 	serviceReq := &application.GetDashboardRequest{
 		UserID: userID,
 		Period: period,
@@ -400,7 +400,7 @@ func (h *HealthDashboardHandler) GetDashboardCharts(c *gin.Context) {
 		return
 	}
 
-	// 只返回图表数据
+	// 只返回图表数�?
 	chartsResponse := GetDashboardChartsResponse{
 		Charts:    response.Dashboard.TrendCharts,
 		Timestamp: response.Timestamp,
@@ -409,10 +409,10 @@ func (h *HealthDashboardHandler) GetDashboardCharts(c *gin.Context) {
 	c.JSON(http.StatusOK, chartsResponse)
 }
 
-// HealthDashboardHealthCheckHandler 健康仪表板健康检查
-// @Summary 健康仪表板服务健康检查
-// @Description 检查健康仪表板服务的运行状态
-// @Tags 健康检查
+// HealthDashboardHealthCheckHandler 健康仪表板健康检�?
+// @Summary 健康仪表板服务健康检�?
+// @Description 检查健康仪表板服务的运行状�?
+// @Tags 健康检�?
 // @Produce json
 // @Success 200 {object} HealthCheckResponse
 // @Router /health/dashboard [get]
@@ -425,7 +425,7 @@ func (h *HealthDashboardHandler) HealthDashboardHealthCheckHandler(c *gin.Contex
 	})
 }
 
-// 响应结构体
+// 响应结构�?
 type GetDashboardMetricsResponse struct {
 	Metrics   []application.KeyMetric `json:"metrics"`
 	Timestamp time.Time               `json:"timestamp"`

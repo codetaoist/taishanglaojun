@@ -78,7 +78,7 @@ func NewHealthDataUpdatedEvent(healthDataID, userID uuid.UUID, dataType HealthDa
 	}
 }
 
-// AbnormalHealthDataDetectedEvent 异常健康数据检测事件
+// AbnormalHealthDataDetectedEvent 异常健康数据检测事�?
 type AbnormalHealthDataDetectedEvent struct {
 	BaseDomainEvent
 }
@@ -182,7 +182,7 @@ func NewMedicalHistoryRemovedEvent(profileID, userID uuid.UUID, condition string
 	}
 }
 
-// AllergyAddedEvent 过敏史添加事件
+// AllergyAddedEvent 过敏史添加事�?
 type AllergyAddedEvent struct {
 	BaseDomainEvent
 }
@@ -202,7 +202,7 @@ func NewAllergyAddedEvent(profileID, userID uuid.UUID, allergen string) *Allergy
 	}
 }
 
-// AllergyRemovedEvent 过敏史移除事件
+// AllergyRemovedEvent 过敏史移除事�?
 type AllergyRemovedEvent struct {
 	BaseDomainEvent
 }
@@ -222,7 +222,7 @@ func NewAllergyRemovedEvent(profileID, userID uuid.UUID, allergen string) *Aller
 	}
 }
 
-// MedicationAddedEvent 用药史添加事件
+// MedicationAddedEvent 用药史添加事�?
 type MedicationAddedEvent struct {
 	BaseDomainEvent
 }
@@ -242,7 +242,7 @@ func NewMedicationAddedEvent(profileID, userID uuid.UUID, medication string) *Me
 	}
 }
 
-// MedicationRemovedEvent 用药史移除事件
+// MedicationRemovedEvent 用药史移除事�?
 type MedicationRemovedEvent struct {
 	BaseDomainEvent
 }

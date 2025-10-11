@@ -12,8 +12,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
 // DashboardServer 仪表板服务器
@@ -28,7 +28,7 @@ type DashboardServer struct {
 	wsConnMutex     sync.RWMutex
 }
 
-// DashboardConfig 仪表板配置
+// DashboardConfig 仪表板配�?
 type DashboardConfig struct {
 	Host         string        `json:"host" yaml:"host"`
 	Port         int           `json:"port" yaml:"port"`
@@ -36,7 +36,7 @@ type DashboardConfig struct {
 	WriteTimeout time.Duration `json:"write_timeout" yaml:"write_timeout"`
 	IdleTimeout  time.Duration `json:"idle_timeout" yaml:"idle_timeout"`
 	
-	// 静态文件配置
+	// 静态文件配�?
 	StaticDir    string `json:"static_dir" yaml:"static_dir"`
 	TemplateDir  string `json:"template_dir" yaml:"template_dir"`
 	
@@ -109,7 +109,7 @@ func NewDashboardServer(config *DashboardConfig, storageManager interfaces.Stora
 func (ds *DashboardServer) setupRoutes() {
 	ds.router = mux.NewRouter()
 	
-	// 中间件
+	// 中间�?
 	ds.router.Use(ds.loggingMiddleware)
 	if ds.config.EnableCORS {
 		ds.router.Use(ds.corsMiddleware)
@@ -150,7 +150,7 @@ func (ds *DashboardServer) setupRoutes() {
 	// WebSocket
 	ds.router.HandleFunc("/ws", ds.handleWebSocket)
 	
-	// 静态文件
+	// 静态文�?
 	if ds.config.StaticDir != "" {
 		ds.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(ds.config.StaticDir))))
 	}
@@ -162,7 +162,7 @@ func (ds *DashboardServer) setupRoutes() {
 	ds.router.HandleFunc("/metrics", ds.handleMetricsPage).Methods("GET")
 }
 
-// setupServer 设置服务器
+// setupServer 设置服务�?
 func (ds *DashboardServer) setupServer() {
 	addr := fmt.Sprintf("%s:%d", ds.config.Host, ds.config.Port)
 	
@@ -175,7 +175,7 @@ func (ds *DashboardServer) setupServer() {
 	}
 }
 
-// Start 启动服务器
+// Start 启动服务�?
 func (ds *DashboardServer) Start() error {
 	addr := fmt.Sprintf("%s:%d", ds.config.Host, ds.config.Port)
 	
@@ -188,7 +188,7 @@ func (ds *DashboardServer) Start() error {
 	}
 }
 
-// Stop 停止服务器
+// Stop 停止服务�?
 func (ds *DashboardServer) Stop(ctx context.Context) error {
 	// 关闭所有WebSocket连接
 	ds.wsConnMutex.Lock()
@@ -201,9 +201,9 @@ func (ds *DashboardServer) Stop(ctx context.Context) error {
 	return ds.server.Shutdown(ctx)
 }
 
-// 中间件
+// 中间�?
 
-// loggingMiddleware 日志中间件
+// loggingMiddleware 日志中间�?
 func (ds *DashboardServer) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -219,7 +219,7 @@ func (ds *DashboardServer) loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// corsMiddleware CORS中间件
+// corsMiddleware CORS中间�?
 func (ds *DashboardServer) corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
@@ -249,20 +249,20 @@ func (ds *DashboardServer) corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// authMiddleware 认证中间件
+// authMiddleware 认证中间�?
 func (ds *DashboardServer) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 跳过健康检查和静态文件
+		// 跳过健康检查和静态文�?
 		if strings.HasPrefix(r.URL.Path, "/health") || 
 		   strings.HasPrefix(r.URL.Path, "/static/") {
 			next.ServeHTTP(w, r)
 			return
 		}
 		
-		// 检查Authorization头
+		// 检查Authorization�?
 		auth := r.Header.Get("Authorization")
 		if auth == "" {
-			// 检查查询参数
+			// 检查查询参�?
 			token := r.URL.Query().Get("token")
 			if token != "" {
 				auth = "Bearer " + token
@@ -284,7 +284,7 @@ func (ds *DashboardServer) authMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// API处理器
+// API处理�?
 
 // handleMetricsQuery 处理指标查询
 func (ds *DashboardServer) handleMetricsQuery(w http.ResponseWriter, r *http.Request) {
@@ -391,7 +391,7 @@ func (ds *DashboardServer) handleMetricsLabels(w http.ResponseWriter, r *http.Re
 	})
 }
 
-// handleMetricsLabelValues 处理标签值查询
+// handleMetricsLabelValues 处理标签值查�?
 func (ds *DashboardServer) handleMetricsLabelValues(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	labelName := vars["name"]
@@ -451,7 +451,7 @@ func (ds *DashboardServer) handleAlertsGet(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-// handleHealth 处理健康检查
+// handleHealth 处理健康检�?
 func (ds *DashboardServer) handleHealth(w http.ResponseWriter, r *http.Request) {
 	ds.writeJSONResponse(w, map[string]interface{}{
 		"status": "ok",
@@ -459,7 +459,7 @@ func (ds *DashboardServer) handleHealth(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-// handleStatus 处理状态查询
+// handleStatus 处理状态查�?
 func (ds *DashboardServer) handleStatus(w http.ResponseWriter, r *http.Request) {
 	status := map[string]interface{}{
 		"status": "ok",
@@ -468,14 +468,14 @@ func (ds *DashboardServer) handleStatus(w http.ResponseWriter, r *http.Request) 
 		"uptime": time.Since(time.Now()).String(), // 这里应该是实际的启动时间
 	}
 	
-	// 添加存储状态
+	// 添加存储状�?
 	if ds.storageManager != nil {
 		if storageStats, err := ds.storageManager.GetStats(); err == nil {
 			status["storage"] = storageStats
 		}
 	}
 	
-	// 添加告警状态
+	// 添加告警状�?
 	if ds.alertManager != nil {
 		if alertStats, err := ds.alertManager.GetStats(); err == nil {
 			status["alerts"] = alertStats
@@ -485,14 +485,14 @@ func (ds *DashboardServer) handleStatus(w http.ResponseWriter, r *http.Request) 
 	ds.writeJSONResponse(w, status)
 }
 
-// 页面处理器
+// 页面处理�?
 
 // handleIndex 处理首页
 func (ds *DashboardServer) handleIndex(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/dashboard", http.StatusFound)
 }
 
-// handleDashboard 处理仪表板页面
+// handleDashboard 处理仪表板页�?
 func (ds *DashboardServer) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	ds.renderTemplate(w, "dashboard.html", nil)
 }
@@ -507,7 +507,7 @@ func (ds *DashboardServer) handleMetricsPage(w http.ResponseWriter, r *http.Requ
 	ds.renderTemplate(w, "metrics.html", nil)
 }
 
-// WebSocket处理器
+// WebSocket处理�?
 
 // handleWebSocket 处理WebSocket连接
 func (ds *DashboardServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
@@ -525,7 +525,7 @@ func (ds *DashboardServer) handleWebSocket(w http.ResponseWriter, r *http.Reques
 	ds.wsConnections[connID] = conn
 	ds.wsConnMutex.Unlock()
 	
-	// 设置关闭处理器
+	// 设置关闭处理�?
 	conn.SetCloseHandler(func(code int, text string) error {
 		ds.wsConnMutex.Lock()
 		delete(ds.wsConnections, connID)
@@ -652,12 +652,12 @@ func (ds *DashboardServer) parseTime(timeStr string) (time.Time, error) {
 		return t, nil
 	}
 	
-	// 尝试Unix时间戳
+	// 尝试Unix时间�?
 	if timestamp, err := strconv.ParseInt(timeStr, 10, 64); err == nil {
 		return time.Unix(timestamp, 0), nil
 	}
 	
-	// 尝试相对时间（如-1h, -30m）
+	// 尝试相对时间（如-1h, -30m�?
 	if strings.HasPrefix(timeStr, "-") {
 		if duration, err := time.ParseDuration(timeStr[1:]); err == nil {
 			return time.Now().Add(-duration), nil
@@ -689,10 +689,10 @@ func (ds *DashboardServer) renderTemplate(w http.ResponseWriter, templateName st
 </head>
 <body>
     <div class="header">
-        <h1>监控仪表板</h1>
+        <h1>监控仪表�?/h1>
     </div>
     <div class="nav">
-        <a href="/dashboard">仪表板</a>
+        <a href="/dashboard">仪表�?/a>
         <a href="/metrics">指标</a>
         <a href="/alerts">告警</a>
     </div>

@@ -22,15 +22,15 @@ type ConversationContext struct {
 
 // IntentHistory 意图历史记录
 type IntentHistory struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	SessionID string    `json:"session_id" gorm:"index;not null"`
-	UserID    uint      `json:"user_id" gorm:"index;not null"`
-	Intent    string    `json:"intent" gorm:"size:100;not null"`
-	Entities  []string  `json:"entities" gorm:"serializer:json"`
-	Sentiment string    `json:"sentiment" gorm:"size:50"`
-	Message   string    `json:"message" gorm:"type:text"`
-	Confidence float64  `json:"confidence" gorm:"type:decimal(5,4)"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         uint      `json:"id" gorm:"primaryKey"`
+	SessionID  string    `json:"session_id" gorm:"index;not null"`
+	UserID     uint      `json:"user_id" gorm:"index;not null"`
+	Intent     string    `json:"intent" gorm:"size:100;not null"`
+	Entities   []string  `json:"entities" gorm:"serializer:json"`
+	Sentiment  string    `json:"sentiment" gorm:"size:50"`
+	Message    string    `json:"message" gorm:"type:text"`
+	Confidence float64   `json:"confidence" gorm:"type:decimal(5,4)"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 // ContextKeyword 上下文关键词
@@ -44,7 +44,7 @@ type ContextKeyword struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// ContextTopic 上下文话题
+// ContextTopic 上下文话题模型
 type ContextTopic struct {
 	ID        uint      `json:"id" gorm:"primaryKey"`
 	SessionID string    `json:"session_id" gorm:"index;not null"`

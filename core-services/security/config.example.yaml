@@ -1,0 +1,277 @@
+# 安全服务配置示例
+# 复制此文件为 config.yaml 并根据实际环境修改配置
+
+# 服务基础配置
+server:
+  host: "0.0.0.0"
+  port: 8080
+  mode: "release"  # debug, release, test
+
+# 数据库配置
+database:
+  driver: "postgres"
+  host: "localhost"
+  port: 5432
+  username: "security_user"
+  password: "your_password"
+  database: "security_db"
+  ssl_mode: "disable"
+  max_open_conns: 100
+  max_idle_conns: 10
+  conn_max_lifetime: "1h"
+
+# Redis配置
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  database: 0
+  pool_size: 10
+
+# 威胁检测配置
+threat_detection:
+  enabled: true
+  scan_interval: "5m"
+  rule_update_interval: "1h"
+  max_concurrent_scans: 10
+  
+  # 检测规则配置
+  rules:
+    sql_injection:
+      enabled: true
+      sensitivity: "medium"
+    xss:
+      enabled: true
+      sensitivity: "high"
+    brute_force:
+      enabled: true
+      max_attempts: 5
+      time_window: "5m"
+      block_duration: "1h"
+    ddos:
+      enabled: true
+      threshold: 1000
+      time_window: "1m"
+
+# 漏洞扫描配置
+vulnerability_scanning:
+  enabled: true
+  max_concurrent_scans: 5
+  scan_timeout: "30m"
+  
+  # 扫描器配置
+  scanners:
+    web:
+      enabled: true
+      max_depth: 5
+      max_pages: 1000
+      user_agent: "SecurityScanner/1.0"
+    network:
+      enabled: true
+      port_range: "1-65535"
+      timeout: "5s"
+    host:
+      enabled: true
+      check_services: true
+      check_os: true
+
+# 安全监控配置
+monitoring:
+  enabled: true
+  metrics_interval: "1m"
+  alert_check_interval: "30s"
+  data_retention: "30d"
+  
+  # 告警配置
+  alerting:
+    enabled: true
+    channels:
+      email:
+        enabled: true
+        smtp_host: "smtp.example.com"
+        smtp_port: 587
+        username: "alerts@example.com"
+        password: "your_email_password"
+        from: "Security System <alerts@example.com>"
+      webhook:
+        enabled: true
+        url: "https://hooks.example.com/security"
+        timeout: "10s"
+      sms:
+        enabled: false
+        provider: "twilio"
+        account_sid: "your_account_sid"
+        auth_token: "your_auth_token"
+        from_number: "+1234567890"
+
+# 安全审计配置
+audit:
+  enabled: true
+  log_level: "info"
+  retention_days: 90
+  
+  # 审计事件配置
+  events:
+    login_attempts: true
+    permission_changes: true
+    data_access: true
+    configuration_changes: true
+    security_events: true
+
+# 报告生成配置
+reporting:
+  enabled: true
+  output_directory: "./reports"
+  max_report_size: "100MB"
+  
+  # 报告模板配置
+  templates:
+    executive_summary: true
+    technical_details: true
+    compliance_report: true
+    incident_report: true
+  
+  # 定时报告配置
+  scheduled_reports:
+    daily_summary:
+      enabled: true
+      schedule: "0 8 * * *"  # 每天8点
+      format: "html"
+      recipients: ["admin@example.com"]
+    weekly_report:
+      enabled: true
+      schedule: "0 9 * * 1"  # 每周一9点
+      format: "pdf"
+      recipients: ["security@example.com"]
+
+# 安全策略配置
+security_policies:
+  # IP白名单
+  ip_whitelist:
+    enabled: true
+    addresses:
+      - "127.0.0.1"
+      - "192.168.1.0/24"
+      - "10.0.0.0/8"
+  
+  # IP黑名单
+  ip_blacklist:
+    enabled: true
+    auto_block: true
+    block_duration: "24h"
+  
+  # 速率限制
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 100
+    burst_size: 200
+  
+  # CORS配置
+  cors:
+    enabled: true
+    allowed_origins: ["*"]
+    allowed_methods: ["GET", "POST", "PUT", "DELETE"]
+    allowed_headers: ["*"]
+    max_age: "12h"
+  
+  # CSRF保护
+  csrf:
+    enabled: true
+    token_length: 32
+    token_lifetime: "1h"
+  
+  # 会话安全
+  session:
+    enabled: true
+    timeout: "30m"
+    secure_cookie: true
+    http_only: true
+    same_site: "strict"
+
+# 集成配置
+integrations:
+  # 威胁情报源
+  threat_intelligence:
+    enabled: true
+    sources:
+      - name: "VirusTotal"
+        api_key: "your_virustotal_api_key"
+        enabled: true
+      - name: "AlienVault"
+        api_key: "your_alienvault_api_key"
+        enabled: false
+  
+  # SIEM集成
+  siem:
+    enabled: false
+    type: "splunk"  # splunk, elasticsearch, qradar
+    endpoint: "https://siem.example.com"
+    api_key: "your_siem_api_key"
+  
+  # 漏洞数据库
+  vulnerability_db:
+    enabled: true
+    sources:
+      - "NVD"
+      - "CVE"
+      - "OSVDB"
+    update_interval: "24h"
+
+# 性能配置
+performance:
+  # 缓存配置
+  cache:
+    enabled: true
+    ttl: "1h"
+    max_size: "100MB"
+  
+  # 并发配置
+  concurrency:
+    max_workers: 50
+    queue_size: 1000
+    worker_timeout: "5m"
+  
+  # 资源限制
+  limits:
+    max_memory: "2GB"
+    max_cpu: "80%"
+    max_disk_usage: "10GB"
+
+# 日志配置
+logging:
+  level: "info"  # debug, info, warn, error
+  format: "json"  # json, text
+  output: "stdout"  # stdout, file
+  file_path: "./logs/security.log"
+  max_size: "100MB"
+  max_backups: 10
+  max_age: 30
+  compress: true
+
+# 健康检查配置
+health_check:
+  enabled: true
+  interval: "30s"
+  timeout: "10s"
+  endpoints:
+    - "/health"
+    - "/ready"
+
+# 指标收集配置
+metrics:
+  enabled: true
+  endpoint: "/metrics"
+  namespace: "security_service"
+  
+  # Prometheus配置
+  prometheus:
+    enabled: true
+    push_gateway: "http://prometheus-pushgateway:9091"
+    job_name: "security-service"
+
+# 开发配置
+development:
+  debug: false
+  profiling: false
+  mock_data: false
+  test_mode: false

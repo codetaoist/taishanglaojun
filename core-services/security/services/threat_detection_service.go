@@ -13,10 +13,10 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"github.com/taishanglaojun/core-services/security/models"
+	"github.com/codetaoist/taishanglaojun/core-services/security/models"
 )
 
-// ThreatDetectionService 威胁检测服务
+// ThreatDetectionService 威胁检测服�?
 type ThreatDetectionService struct {
 	db     *gorm.DB
 	config *ThreatDetectionConfig
@@ -38,7 +38,7 @@ type ThreatDetectionService struct {
 	running  bool
 }
 
-// ThreatDetectionConfig 威胁检测配置
+// ThreatDetectionConfig 威胁检测配�?
 type ThreatDetectionConfig struct {
 	Enabled           bool     `yaml:"enabled"`
 	ScanInterval      int      `yaml:"scan_interval"`
@@ -70,7 +70,7 @@ type DDoSDetector struct {
 	mutex         sync.RWMutex
 }
 
-// NewThreatDetectionService 创建威胁检测服务
+// NewThreatDetectionService 创建威胁检测服�?
 func NewThreatDetectionService(db *gorm.DB, config *ThreatDetectionConfig) *ThreatDetectionService {
 	service := &ThreatDetectionService{
 		db:            db,
@@ -85,7 +85,7 @@ func NewThreatDetectionService(db *gorm.DB, config *ThreatDetectionConfig) *Thre
 	// 初始化检测器
 	service.initDetectors()
 	
-	// 加载检测规则
+	// 加载检测规�?
 	service.loadRules()
 	
 	return service
@@ -123,7 +123,7 @@ func (tds *ThreatDetectionService) initDetectors() {
 	}
 }
 
-// loadRules 加载检测规则
+// loadRules 加载检测规�?
 func (tds *ThreatDetectionService) loadRules() {
 	var rules []models.DetectionRule
 	if err := tds.db.Where("enabled = ?", true).Find(&rules).Error; err != nil {
@@ -141,7 +141,7 @@ func (tds *ThreatDetectionService) loadRules() {
 	log.Printf("Loaded %d detection rules", len(rules))
 }
 
-// Start 启动威胁检测服务
+// Start 启动威胁检测服�?
 func (tds *ThreatDetectionService) Start() {
 	if tds.running {
 		return
@@ -159,7 +159,7 @@ func (tds *ThreatDetectionService) Start() {
 	log.Println("Threat Detection Service started successfully")
 }
 
-// Stop 停止威胁检测服务
+// Stop 停止威胁检测服�?
 func (tds *ThreatDetectionService) Stop() {
 	if !tds.running {
 		return
@@ -208,7 +208,7 @@ func (tds *ThreatDetectionService) resetStatistics() {
 func (tds *ThreatDetectionService) performScan() {
 	log.Println("Performing threat detection scan...")
 	
-	// 检查未处理的安全事件
+	// 检查未处理的安全事�?
 	var events []models.SecurityEvent
 	if err := tds.db.Where("processed = ?", false).Find(&events).Error; err != nil {
 		log.Printf("Failed to fetch security events: %v", err)
@@ -222,7 +222,7 @@ func (tds *ThreatDetectionService) performScan() {
 
 // analyzeSecurityEvent 分析安全事件
 func (tds *ThreatDetectionService) analyzeSecurityEvent(event *models.SecurityEvent) {
-	// 应用检测规则
+	// 应用检测规�?
 	tds.mutex.RLock()
 	rules := tds.rules
 	tds.mutex.RUnlock()
@@ -238,7 +238,7 @@ func (tds *ThreatDetectionService) analyzeSecurityEvent(event *models.SecurityEv
 	tds.db.Save(event)
 }
 
-// matchRule 匹配检测规则
+// matchRule 匹配检测规�?
 func (tds *ThreatDetectionService) matchRule(event *models.SecurityEvent, rule *models.DetectionRule) bool {
 	// 简化的规则匹配逻辑
 	conditions, ok := rule.Conditions["conditions"].([]interface{})
@@ -308,7 +308,7 @@ func (tds *ThreatDetectionService) evaluateCondition(event *models.SecurityEvent
 // createThreatAlert 创建威胁告警
 func (tds *ThreatDetectionService) createThreatAlert(event *models.SecurityEvent, rule *models.DetectionRule) {
 	alert := &models.ThreatAlert{
-		Title:       fmt.Sprintf("威胁检测: %s", rule.Name),
+		Title:       fmt.Sprintf("威胁检�? %s", rule.Name),
 		Description: fmt.Sprintf("检测到威胁事件: %s", event.Description),
 		Severity:    rule.Severity,
 		Category:    rule.Category,
@@ -371,7 +371,7 @@ func (tds *ThreatDetectionService) blockIP(ip string) {
 	}
 	
 	log.Printf("Blocking IP address: %s", ip)
-	// 这里可以集成防火墙API或其他安全设备
+	// 这里可以集成防火墙API或其他安全设�?
 }
 
 // sendNotification 发送通知
@@ -455,7 +455,7 @@ func (tds *ThreatDetectionService) DetectXSS(req *http.Request) bool {
 	return false
 }
 
-// DetectBruteForce 检测暴力破解
+// DetectBruteForce 检测暴力破�?
 func (tds *ThreatDetectionService) DetectBruteForce(ip string, failed bool) bool {
 	if !failed {
 		return false
@@ -491,13 +491,13 @@ func (tds *ThreatDetectionService) recordSecurityEvent(eventType string, req *ht
 
 // getClientIP 获取客户端IP
 func (tds *ThreatDetectionService) getClientIP(req *http.Request) string {
-	// 检查X-Forwarded-For头
+	// 检查X-Forwarded-For�?
 	if xff := req.Header.Get("X-Forwarded-For"); xff != "" {
 		ips := strings.Split(xff, ",")
 		return strings.TrimSpace(ips[0])
 	}
 	
-	// 检查X-Real-IP头
+	// 检查X-Real-IP�?
 	if xri := req.Header.Get("X-Real-IP"); xri != "" {
 		return xri
 	}
@@ -547,7 +547,7 @@ func (bfd *BruteForceDetector) detect(ip string) bool {
 	validAttempts = append(validAttempts, now)
 	bfd.failedAttempts[ip] = validAttempts
 	
-	// 如果5分钟内失败次数超过5次，认为是暴力破解
+	// 如果5分钟内失败次数超�?次，认为是暴力破�?
 	return len(validAttempts) > 5
 }
 
@@ -571,7 +571,7 @@ func (dd *DDoSDetector) detect(ip string) bool {
 	validRequests = append(validRequests, now)
 	dd.requestCounts[ip] = validRequests
 	
-	// 如果1分钟内请求次数超过100次，认为是DDoS攻击
+	// 如果1分钟内请求次数超�?00次，认为是DDoS攻击
 	return len(validRequests) > 100
 }
 
@@ -587,14 +587,14 @@ func (tds *ThreatDetectionService) GetAlerts(ctx context.Context, limit, offset 
 	return alerts, err
 }
 
-// GetRules 获取检测规则
+// GetRules 获取检测规�?
 func (tds *ThreatDetectionService) GetRules(ctx context.Context) ([]models.DetectionRule, error) {
 	var rules []models.DetectionRule
 	err := tds.db.WithContext(ctx).Find(&rules).Error
 	return rules, err
 }
 
-// CreateRule 创建检测规则
+// CreateRule 创建检测规�?
 func (tds *ThreatDetectionService) CreateRule(ctx context.Context, rule *models.DetectionRule) error {
 	if err := tds.db.WithContext(ctx).Create(rule).Error; err != nil {
 		return err
@@ -605,7 +605,7 @@ func (tds *ThreatDetectionService) CreateRule(ctx context.Context, rule *models.
 	return nil
 }
 
-// UpdateRule 更新检测规则
+// UpdateRule 更新检测规�?
 func (tds *ThreatDetectionService) UpdateRule(ctx context.Context, id string, rule *models.DetectionRule) error {
 	if err := tds.db.WithContext(ctx).Where("id = ?", id).Updates(rule).Error; err != nil {
 		return err
@@ -616,7 +616,7 @@ func (tds *ThreatDetectionService) UpdateRule(ctx context.Context, id string, ru
 	return nil
 }
 
-// DeleteRule 删除检测规则
+// DeleteRule 删除检测规�?
 func (tds *ThreatDetectionService) DeleteRule(ctx context.Context, id string) error {
 	if err := tds.db.WithContext(ctx).Delete(&models.DetectionRule{}, "id = ?", id).Error; err != nil {
 		return err

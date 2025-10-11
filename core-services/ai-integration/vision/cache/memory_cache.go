@@ -13,7 +13,7 @@ type MemoryCache struct {
 	done   chan bool
 }
 
-// cacheItem 缓存项
+// cacheItem 缓存�?
 type cacheItem struct {
 	value      interface{}
 	expiration time.Time
@@ -34,7 +34,7 @@ func NewMemoryCache(cleanupInterval time.Duration) *MemoryCache {
 	return cache
 }
 
-// Get 获取缓存值
+// Get 获取缓存�?
 func (c *MemoryCache) Get(key string) (interface{}, bool) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -44,9 +44,9 @@ func (c *MemoryCache) Get(key string) (interface{}, bool) {
 		return nil, false
 	}
 
-	// 检查是否过期
+	// 检查是否过�?
 	if time.Now().After(item.expiration) {
-		// 异步删除过期项
+		// 异步删除过期�?
 		go func() {
 			c.mutex.Lock()
 			delete(c.data, key)
@@ -58,7 +58,7 @@ func (c *MemoryCache) Get(key string) (interface{}, bool) {
 	return item.value, true
 }
 
-// Set 设置缓存值
+// Set 设置缓存�?
 func (c *MemoryCache) Set(key string, value interface{}, expiry time.Duration) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -70,7 +70,7 @@ func (c *MemoryCache) Set(key string, value interface{}, expiry time.Duration) {
 	}
 }
 
-// Delete 删除缓存值
+// Delete 删除缓存�?
 func (c *MemoryCache) Delete(key string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -111,7 +111,7 @@ func (c *MemoryCache) Close() {
 	close(c.done)
 }
 
-// cleanup 清理过期项
+// cleanup 清理过期�?
 func (c *MemoryCache) cleanup() {
 	for {
 		select {
@@ -123,7 +123,7 @@ func (c *MemoryCache) cleanup() {
 	}
 }
 
-// removeExpired 移除过期项
+// removeExpired 移除过期�?
 func (c *MemoryCache) removeExpired() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()

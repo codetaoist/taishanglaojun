@@ -36,7 +36,7 @@ import type { ColumnType } from 'antd/es/table';
 import { apiClient } from '../../services/api';
 import dayjs from 'dayjs';
 
-const { TabPane } = Tabs;
+
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -470,91 +470,96 @@ const NotificationCenter: React.FC = () => {
         </Col>
       </Row>
 
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane
-          tab={
-            <span>
-              <NotificationOutlined />
-              通知管理
-            </span>
-          }
-          key="notifications"
-        >
-          <Card>
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
-              <Space>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={handleCreate}
-                >
-                  新建通知
-                </Button>
-                {selectedRowKeys.length > 0 && (
-                  <Popconfirm
-                    title={`确定要删除选中的 ${selectedRowKeys.length} 条通知吗？`}
-                    onConfirm={handleBatchDelete}
-                  >
-                    <Button danger icon={<DeleteOutlined />}>
-                      批量删除
+      <Tabs 
+        activeKey={activeTab} 
+        onChange={setActiveTab}
+        items={[
+          {
+            key: 'notifications',
+            label: (
+              <span>
+                <NotificationOutlined />
+                通知管理
+              </span>
+            ),
+            children: (
+              <Card>
+                <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                  <Space>
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      onClick={handleCreate}
+                    >
+                      新建通知
                     </Button>
-                  </Popconfirm>
-                )}
-                <Button icon={<ReloadOutlined />} onClick={loadNotifications}>
-                  刷新
-                </Button>
-              </Space>
-            </div>
+                    {selectedRowKeys.length > 0 && (
+                      <Popconfirm
+                        title={`确定要删除选中的 ${selectedRowKeys.length} 条通知吗？`}
+                        onConfirm={handleBatchDelete}
+                      >
+                        <Button danger icon={<DeleteOutlined />}>
+                          批量删除
+                        </Button>
+                      </Popconfirm>
+                    )}
+                    <Button icon={<ReloadOutlined />} onClick={loadNotifications}>
+                      刷新
+                    </Button>
+                  </Space>
+                </div>
 
-            <Table
-              rowSelection={rowSelection}
-              columns={notificationColumns}
-              dataSource={notifications}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                total: notifications.length,
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`
-              }}
-            />
-          </Card>
-        </TabPane>
+                <Table
+                  rowSelection={rowSelection}
+                  columns={notificationColumns}
+                  dataSource={notifications}
+                  rowKey="id"
+                  loading={loading}
+                  pagination={{
+                    total: notifications.length,
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`
+                  }}
+                />
+              </Card>
+            )
+          },
+          {
+            key: 'userNotifications',
+            label: (
+              <span>
+                <UserOutlined />
+                用户通知
+              </span>
+            ),
+            children: (
+              <Card>
+                <div style={{ marginBottom: '16px' }}>
+                  <Button icon={<ReloadOutlined />} onClick={loadUserNotifications}>
+                    刷新
+                  </Button>
+                </div>
 
-        <TabPane
-          tab={
-            <span>
-              <UserOutlined />
-              用户通知
-            </span>
+                <Table
+                  columns={userNotificationColumns}
+                  dataSource={userNotifications}
+                  rowKey="id"
+                  loading={loading}
+                  pagination={{
+                    total: userNotifications.length,
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`
+                  }}
+                />
+              </Card>
+            )
           }
-          key="userNotifications"
-        >
-          <Card>
-            <div style={{ marginBottom: '16px' }}>
-              <Button icon={<ReloadOutlined />} onClick={loadUserNotifications}>
-                刷新
-              </Button>
-            </div>
-
-            <Table
-              columns={userNotificationColumns}
-              dataSource={userNotifications}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                total: userNotifications.length,
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`
-              }}
-            />
-          </Card>
-        </TabPane>
-      </Tabs>
+        ]}
+      />
 
       {/* 新建/编辑通知模态框 */}
       <Modal

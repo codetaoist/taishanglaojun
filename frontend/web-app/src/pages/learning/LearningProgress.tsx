@@ -61,7 +61,7 @@ import type { ColumnsType } from 'antd/es/table';
 import moment from 'moment';
 
 const { Title, Paragraph, Text } = Typography;
-const { TabPane } = Tabs;
+
 const { RangePicker } = DatePicker;
 
 interface Course {
@@ -806,23 +806,32 @@ const LearningProgress: React.FC = () => {
       </div>
 
       {/* 主要内容 */}
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="学习概览" key="overview">
-          {renderOverview()}
-        </TabPane>
-        
-        <TabPane tab="我的课程" key="courses">
-          {renderCourses()}
-        </TabPane>
-        
-        <TabPane tab="学习目标" key="goals">
-          {renderGoals()}
-        </TabPane>
-        
-        <TabPane tab="成就徽章" key="achievements">
-          {renderAchievements()}
-        </TabPane>
-      </Tabs>
+      <Tabs 
+        activeKey={activeTab} 
+        onChange={setActiveTab}
+        items={[
+          {
+            key: 'overview',
+            label: '学习概览',
+            children: renderOverview()
+          },
+          {
+            key: 'courses',
+            label: '我的课程',
+            children: renderCourses()
+          },
+          {
+            key: 'goals',
+            label: '学习目标',
+            children: renderGoals()
+          },
+          {
+            key: 'achievements',
+            label: '成就徽章',
+            children: renderAchievements()
+          }
+        ]}
+      />
 
       {/* 课程详情抽屉 */}
       <Drawer

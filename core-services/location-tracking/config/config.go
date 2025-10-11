@@ -8,7 +8,7 @@ import (
 
 // LocationConfig 位置跟踪配置
 type LocationConfig struct {
-	// 数据库配置
+	// 数据库配�?
 	Database DatabaseConfig `json:"database"`
 	
 	// 缓存配置
@@ -21,7 +21,7 @@ type LocationConfig struct {
 	Security SecurityConfig `json:"security"`
 }
 
-// DatabaseConfig 数据库配置
+// DatabaseConfig 数据库配�?
 type DatabaseConfig struct {
 	MaxOpenConns    int           `json:"max_open_conns"`
 	MaxIdleConns    int           `json:"max_idle_conns"`

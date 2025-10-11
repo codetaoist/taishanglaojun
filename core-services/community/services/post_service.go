@@ -32,7 +32,7 @@ func NewPostService(db *gorm.DB, logger *zap.Logger) *PostService {
 
 // CreatePost 创建帖子
 func (s *PostService) CreatePost(userID string, req *models.PostCreateRequest) (*models.Post, error) {
-	// 验证用户是否存在且可以发帖
+	// 验证用户是否存在且可以发�?
 	var userProfile models.UserProfile
 	if err := s.db.Where("user_id = ? AND status = ?", userID, models.UserStatusActive).First(&userProfile).Error; err != nil {
 		s.logger.Error("User not found or inactive", zap.String("user_id", userID), zap.Error(err))
@@ -49,17 +49,17 @@ func (s *PostService) CreatePost(userID string, req *models.PostCreateRequest) (
 		return nil, fmt.Errorf("内容验证失败: %s", validationResult.Errors[0])
 	}
 
-	// 根据风险等级决定帖子状态
+	// 根据风险等级决定帖子状�?
 	postStatus := models.PostStatusPublished
 	if validationResult.RiskLevel > 0 {
-		postStatus = models.PostStatusPending // 需要审核
+		postStatus = models.PostStatusPending // 需要审�?
 		s.logger.Info("Post requires review due to risk level", 
 			zap.String("user_id", userID),
 			zap.Int("risk_level", validationResult.RiskLevel),
 			zap.Strings("warnings", validationResult.Warnings))
 	}
 
-	// 转换标签为JSON字符串
+	// 转换标签为JSON字符�?
 	tagsJSON := ""
 	if len(req.Tags) > 0 {
 		tagsBytes, _ := json.Marshal(req.Tags)
@@ -77,7 +77,7 @@ func (s *PostService) CreatePost(userID string, req *models.PostCreateRequest) (
 		Status:   postStatus,
 	}
 
-	// 开启事务
+	// 开启事�?
 	tx := s.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -99,7 +99,7 @@ func (s *PostService) CreatePost(userID string, req *models.PostCreateRequest) (
 		return nil, fmt.Errorf("更新用户统计失败")
 	}
 
-	// 增加用户经验值
+	// 增加用户经验�?
 	userProfile.AddExperience(10) // 发帖奖励10经验
 	if err := tx.Save(&userProfile).Error; err != nil {
 		tx.Rollback()
@@ -109,7 +109,7 @@ func (s *PostService) CreatePost(userID string, req *models.PostCreateRequest) (
 
 	tx.Commit()
 
-	// 加载作者信息
+	// 加载作者信�?
 	post.Author = &userProfile
 
 	s.logger.Info("Post created successfully", zap.String("post_id", post.ID), zap.String("user_id", userID))
@@ -123,13 +123,13 @@ func (s *PostService) GetPost(postID string, userID *string) (*models.Post, erro
 
 	if err := query.First(&post).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("帖子不存在")
+			return nil, fmt.Errorf("帖子不存�?)
 		}
 		s.logger.Error("Failed to get post", zap.String("post_id", postID), zap.Error(err))
 		return nil, fmt.Errorf("获取帖子失败")
 	}
 
-	// 增加浏览量
+	// 增加浏览�?
 	go func() {
 		s.db.Model(&post).UpdateColumn("view_count", gorm.Expr("view_count + ?", 1))
 	}()
@@ -145,7 +145,7 @@ func (s *PostService) GetPosts(req *models.PostListRequest, userID *string) (*mo
 	// 构建查询
 	query := s.db.Model(&models.Post{}).Preload("Author").Where("status = ?", models.PostStatusPublished)
 
-	// 添加筛选条件
+	// 添加筛选条�?
 	if req.Category != "" {
 		query = query.Where("category = ?", req.Category)
 	}
@@ -188,7 +188,7 @@ func (s *PostService) GetPosts(req *models.PostListRequest, userID *string) (*mo
 		return nil, fmt.Errorf("获取帖子列表失败")
 	}
 
-	// 转换为响应格式
+	// 转换为响应格�?
 	postResponses := make([]models.PostResponse, len(posts))
 	for i, post := range posts {
 		postResponses[i] = post.ToResponse()
@@ -210,7 +210,7 @@ func (s *PostService) UpdatePost(postID, userID string, req *models.PostUpdateRe
 	var post models.Post
 	if err := s.db.Where("id = ? AND author_id = ?", postID, userID).First(&post).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("帖子不存在或无权限")
+			return nil, fmt.Errorf("帖子不存在或无权�?)
 		}
 		s.logger.Error("Failed to find post for update", zap.String("post_id", postID), zap.Error(err))
 		return nil, fmt.Errorf("查找帖子失败")
@@ -257,13 +257,13 @@ func (s *PostService) DeletePost(postID, userID string) error {
 	var post models.Post
 	if err := s.db.Where("id = ? AND author_id = ?", postID, userID).First(&post).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("帖子不存在或无权限")
+			return fmt.Errorf("帖子不存在或无权�?)
 		}
 		s.logger.Error("Failed to find post for deletion", zap.String("post_id", postID), zap.Error(err))
 		return fmt.Errorf("查找帖子失败")
 	}
 
-	// 开启事务
+	// 开启事�?
 	tx := s.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -271,7 +271,7 @@ func (s *PostService) DeletePost(postID, userID string) error {
 		}
 	}()
 
-	// 软删除帖子
+	// 软删除帖�?
 	if err := tx.Delete(&post).Error; err != nil {
 		tx.Rollback()
 		s.logger.Error("Failed to delete post", zap.String("post_id", postID), zap.Error(err))
@@ -298,15 +298,15 @@ func (s *PostService) GetPostStats() (*models.PostStatsResponse, error) {
 	// 总帖子数
 	s.db.Model(&models.Post{}).Where("status = ?", models.PostStatusPublished).Count(&stats.TotalPosts)
 
-	// 今日帖子数
+	// 今日帖子�?
 	today := time.Now().Truncate(24 * time.Hour)
 	s.db.Model(&models.Post{}).Where("status = ? AND created_at >= ?", models.PostStatusPublished, today).Count(&stats.TodayPosts)
 
-	// 本周帖子数
+	// 本周帖子�?
 	weekStart := today.AddDate(0, 0, -int(today.Weekday()))
 	s.db.Model(&models.Post{}).Where("status = ? AND created_at >= ?", models.PostStatusPublished, weekStart).Count(&stats.WeeklyPosts)
 
-	// 本月帖子数
+	// 本月帖子�?
 	monthStart := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, today.Location())
 	s.db.Model(&models.Post{}).Where("status = ? AND created_at >= ?", models.PostStatusPublished, monthStart).Count(&stats.MonthlyPosts)
 
@@ -315,7 +315,7 @@ func (s *PostService) GetPostStats() (*models.PostStatsResponse, error) {
 	s.db.Model(&models.Post{}).Where("status = ?", models.PostStatusPublished).Select("COALESCE(SUM(like_count), 0)").Scan(&stats.TotalLikes)
 	s.db.Model(&models.Post{}).Where("status = ?", models.PostStatusPublished).Select("COALESCE(SUM(comment_count), 0)").Scan(&stats.TotalComments)
 
-	// 活跃用户数（本周发过帖的用户）
+	// 活跃用户数（本周发过帖的用户�?
 	s.db.Model(&models.Post{}).Where("status = ? AND created_at >= ?", models.PostStatusPublished, weekStart).Distinct("author_id").Count(&stats.ActiveUsers)
 
 	// 热门标签（简化处理）
@@ -385,7 +385,7 @@ func (s *PostService) SearchPosts(keyword string, page, pageSize int) (*models.P
 		return nil, fmt.Errorf("搜索失败")
 	}
 
-	// 转换为响应格式
+	// 转换为响应格�?
 	postResponses := make([]models.PostResponse, len(posts))
 	for i, post := range posts {
 		postResponses[i] = post.ToResponse()

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"taishanglaojun/core-services/ai-integration/services"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/services"
 )
 
 // CrossModalHandler 跨模态推理处理器
@@ -24,19 +24,19 @@ func NewCrossModalHandler(crossModalService *services.CrossModalService) *CrossM
 		crossModalService: crossModalService,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				return true // 在生产环境中应该进行适当的来源检查
+				return true // 在生产环境中应该进行适当的来源检�?
 			},
 		},
 	}
 }
 
-// ProcessCrossModalInference 处理跨模态推理请求
-// @Summary 处理跨模态推理请求
-// @Description 支持多种模态数据之间的智能推理和关联分析
+// ProcessCrossModalInference 处理跨模态推理请�?
+// @Summary 处理跨模态推理请�?
+// @Description 支持多种模态数据之间的智能推理和关联分�?
 // @Tags crossmodal
 // @Accept json
 // @Produce json
-// @Param request body services.CrossModalRequest true "跨模态推理请求"
+// @Param request body services.CrossModalRequest true "跨模态推理请�?
 // @Success 200 {object} services.CrossModalResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -90,16 +90,16 @@ func (h *CrossModalHandler) ProcessCrossModalInference(c *gin.Context) {
 }
 
 // SemanticSearch 语义搜索
-// @Summary 多模态语义搜索
+// @Summary 多模态语义搜�?
 // @Description 在多种模态数据中进行语义搜索
 // @Tags crossmodal
 // @Accept json
 // @Produce json
 // @Param query query string true "搜索查询"
-// @Param provider query string false "AI提供商" default(openai)
+// @Param provider query string false "AI提供�? default(openai)
 // @Param model query string false "AI模型" default(gpt-4)
 // @Param max_results query int false "最大结果数" default(10)
-// @Param threshold query number false "相似度阈值" default(0.7)
+// @Param threshold query number false "相似度阈�? default(0.7)
 // @Param request body []services.CrossModalInput true "输入数据"
 // @Success 200 {object} services.CrossModalResponse
 // @Failure 400 {object} ErrorResponse
@@ -174,14 +174,14 @@ func (h *CrossModalHandler) SemanticSearch(c *gin.Context) {
 }
 
 // ContentMatching 内容匹配
-// @Summary 多模态内容匹配
-// @Description 在多种模态数据之间进行内容匹配
+// @Summary 多模态内容匹�?
+// @Description 在多种模态数据之间进行内容匹�?
 // @Tags crossmodal
 // @Accept json
 // @Produce json
-// @Param provider query string false "AI提供商" default(openai)
+// @Param provider query string false "AI提供�? default(openai)
 // @Param model query string false "AI模型" default(gpt-4)
-// @Param threshold query number false "相似度阈值" default(0.7)
+// @Param threshold query number false "相似度阈�? default(0.7)
 // @Param request body []services.CrossModalInput true "输入数据"
 // @Success 200 {object} services.CrossModalResponse
 // @Failure 400 {object} ErrorResponse
@@ -251,17 +251,17 @@ func (h *CrossModalHandler) ContentMatching(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// MultiModalQA 多模态问答
-// @Summary 多模态问答
-// @Description 基于多种模态数据进行智能问答
+// MultiModalQA 多模态问�?
+// @Summary 多模态问�?
+// @Description 基于多种模态数据进行智能问�?
 // @Tags crossmodal
 // @Accept json
 // @Produce json
 // @Param query query string true "问题"
-// @Param provider query string false "AI提供商" default(openai)
+// @Param provider query string false "AI提供�? default(openai)
 // @Param model query string false "AI模型" default(gpt-4-vision-preview)
 // @Param temperature query number false "温度参数" default(0.7)
-// @Param request body []services.CrossModalInput true "上下文数据"
+// @Param request body []services.CrossModalInput true "上下文数�?
 // @Success 200 {object} services.CrossModalResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -333,12 +333,12 @@ func (h *CrossModalHandler) MultiModalQA(c *gin.Context) {
 }
 
 // SceneUnderstanding 场景理解
-// @Summary 多模态场景理解
+// @Summary 多模态场景理�?
 // @Description 基于多种模态数据进行场景理解和分析
 // @Tags crossmodal
 // @Accept json
 // @Produce json
-// @Param provider query string false "AI提供商" default(openai)
+// @Param provider query string false "AI提供�? default(openai)
 // @Param model query string false "AI模型" default(gpt-4-vision-preview)
 // @Param request body []services.CrossModalInput true "场景数据"
 // @Success 200 {object} services.CrossModalResponse
@@ -400,12 +400,12 @@ func (h *CrossModalHandler) SceneUnderstanding(c *gin.Context) {
 }
 
 // EmotionAnalysis 情感分析
-// @Summary 多模态情感分析
-// @Description 基于多种模态数据进行情感分析
+// @Summary 多模态情感分�?
+// @Description 基于多种模态数据进行情感分�?
 // @Tags crossmodal
 // @Accept json
 // @Produce json
-// @Param provider query string false "AI提供商" default(openai)
+// @Param provider query string false "AI提供�? default(openai)
 // @Param model query string false "AI模型" default(gpt-4)
 // @Param request body []services.CrossModalInput true "情感数据"
 // @Success 200 {object} services.CrossModalResponse
@@ -466,9 +466,9 @@ func (h *CrossModalHandler) EmotionAnalysis(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// StreamCrossModalInference 流式跨模态推理
-// @Summary 流式跨模态推理
-// @Description 通过WebSocket进行流式跨模态推理
+// StreamCrossModalInference 流式跨模态推�?
+// @Summary 流式跨模态推�?
+// @Description 通过WebSocket进行流式跨模态推�?
 // @Tags crossmodal
 // @Accept json
 // @Produce json
@@ -527,7 +527,7 @@ func (h *CrossModalHandler) StreamCrossModalInference(c *gin.Context) {
 			continue
 		}
 
-		// 发送响应
+		// 发送响�?
 		if err := conn.WriteJSON(response); err != nil {
 			break
 		}
@@ -535,8 +535,8 @@ func (h *CrossModalHandler) StreamCrossModalInference(c *gin.Context) {
 }
 
 // GetInferenceHistory 获取推理历史
-// @Summary 获取跨模态推理历史
-// @Description 获取用户的跨模态推理历史记录
+// @Summary 获取跨模态推理历�?
+// @Description 获取用户的跨模态推理历史记�?
 // @Tags crossmodal
 // @Accept json
 // @Produce json
@@ -544,7 +544,7 @@ func (h *CrossModalHandler) StreamCrossModalInference(c *gin.Context) {
 // @Param session_id query string false "会话ID"
 // @Param type query string false "推理类型"
 // @Param limit query int false "限制数量" default(20)
-// @Param offset query int false "偏移量" default(0)
+// @Param offset query int false "偏移�? default(0)
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
@@ -586,8 +586,8 @@ func (h *CrossModalHandler) GetInferenceHistory(c *gin.Context) {
 }
 
 // GetInferenceStats 获取推理统计
-// @Summary 获取跨模态推理统计信息
-// @Description 获取用户的跨模态推理统计信息
+// @Summary 获取跨模态推理统计信�?
+// @Description 获取用户的跨模态推理统计信�?
 // @Tags crossmodal
 // @Accept json
 // @Produce json

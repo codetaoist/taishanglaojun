@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
 // Tracer 分布式追踪器
@@ -25,7 +25,7 @@ type Tracer struct {
 	stopCh       chan struct{}
 }
 
-// TracerConfig 追踪器配置
+// TracerConfig 追踪器配�?
 type TracerConfig struct {
 	ServiceName     string        `json:"service_name" yaml:"service_name"`
 	ServiceVersion  string        `json:"service_version" yaml:"service_version"`
@@ -35,7 +35,7 @@ type TracerConfig struct {
 	SamplingRate    float64       `json:"sampling_rate" yaml:"sampling_rate"`
 	SamplingType    string        `json:"sampling_type" yaml:"sampling_type"` // always, never, probabilistic, rate_limiting
 	
-	// 批处理配置
+	// 批处理配�?
 	BatchTimeout    time.Duration `json:"batch_timeout" yaml:"batch_timeout"`
 	BatchSize       int           `json:"batch_size" yaml:"batch_size"`
 	MaxQueueSize    int           `json:"max_queue_size" yaml:"max_queue_size"`
@@ -44,11 +44,11 @@ type TracerConfig struct {
 	MaxSpansPerTrace int          `json:"max_spans_per_trace" yaml:"max_spans_per_trace"`
 	MaxTraceAge      time.Duration `json:"max_trace_age" yaml:"max_trace_age"`
 	
-	// 导出器配置
+	// 导出器配�?
 	Exporters       []ExporterConfig `json:"exporters" yaml:"exporters"`
 }
 
-// ExporterConfig 导出器配置
+// ExporterConfig 导出器配�?
 type ExporterConfig struct {
 	Type     string                 `json:"type" yaml:"type"` // jaeger, zipkin, otlp, console
 	Endpoint string                 `json:"endpoint" yaml:"endpoint"`
@@ -57,7 +57,7 @@ type ExporterConfig struct {
 	Options  map[string]interface{} `json:"options" yaml:"options"`
 }
 
-// NewTracer 创建追踪器
+// NewTracer 创建追踪�?
 func NewTracer(config *TracerConfig) *Tracer {
 	if config == nil {
 		config = &TracerConfig{
@@ -94,7 +94,7 @@ func NewTracer(config *TracerConfig) *Tracer {
 	return tracer
 }
 
-// createSampler 创建采样器
+// createSampler 创建采样�?
 func (t *Tracer) createSampler() Sampler {
 	switch t.config.SamplingType {
 	case "always":
@@ -122,7 +122,7 @@ func (t *Tracer) initializeExporters() {
 	}
 }
 
-// createExporter 创建导出器
+// createExporter 创建导出�?
 func (t *Tracer) createExporter(config ExporterConfig) (SpanExporter, error) {
 	switch config.Type {
 	case "jaeger":
@@ -138,18 +138,18 @@ func (t *Tracer) createExporter(config ExporterConfig) (SpanExporter, error) {
 	}
 }
 
-// Start 启动追踪器
+// Start 启动追踪�?
 func (t *Tracer) Start() error {
 	if t.running {
 		return fmt.Errorf("tracer is already running")
 	}
 	
-	// 启动处理器
+	// 启动处理�?
 	if err := t.processor.Start(); err != nil {
 		return fmt.Errorf("failed to start span processor: %w", err)
 	}
 	
-	// 启动导出器
+	// 启动导出�?
 	for _, exporter := range t.exporters {
 		if err := exporter.Start(); err != nil {
 			fmt.Printf("Failed to start exporter: %v\n", err)
@@ -164,7 +164,7 @@ func (t *Tracer) Start() error {
 	return nil
 }
 
-// Stop 停止追踪器
+// Stop 停止追踪�?
 func (t *Tracer) Stop() error {
 	if !t.running {
 		return nil
@@ -173,12 +173,12 @@ func (t *Tracer) Stop() error {
 	t.running = false
 	close(t.stopCh)
 	
-	// 停止处理器
+	// 停止处理�?
 	if err := t.processor.Stop(); err != nil {
 		fmt.Printf("Failed to stop span processor: %v\n", err)
 	}
 	
-	// 停止导出器
+	// 停止导出�?
 	for _, exporter := range t.exporters {
 		if err := exporter.Stop(); err != nil {
 			fmt.Printf("Failed to stop exporter: %v\n", err)
@@ -190,7 +190,7 @@ func (t *Tracer) Stop() error {
 
 // StartSpan 开始一个新的span
 func (t *Tracer) StartSpan(ctx context.Context, operationName string, opts ...SpanOption) (*Span, context.Context) {
-	// 检查采样
+	// 检查采�?
 	if !t.sampler.ShouldSample(ctx, operationName) {
 		// 返回一个no-op span
 		return NewNoOpSpan(), ctx
@@ -266,12 +266,12 @@ func (t *Tracer) FinishSpan(span *Span) {
 	span.EndTime = time.Now()
 	span.Duration = span.EndTime.Sub(span.StartTime)
 	
-	// 从活跃spans中移除
+	// 从活跃spans中移�?
 	t.spansMutex.Lock()
 	delete(t.spans, span.SpanID)
 	t.spansMutex.Unlock()
 	
-	// 发送到处理器
+	// 发送到处理�?
 	t.processor.OnEnd(span)
 }
 
@@ -333,16 +333,16 @@ func (t *Tracer) cleanupOldSpans() {
 			span.Duration = span.EndTime.Sub(span.StartTime)
 			span.SetTag("timeout", true)
 			
-			// 发送到处理器
+			// 发送到处理�?
 			t.processor.OnEnd(span)
 			
-			// 从活跃spans中移除
+			// 从活跃spans中移�?
 			delete(t.spans, spanID)
 		}
 	}
 }
 
-// TracerStats 追踪器统计信息
+// TracerStats 追踪器统计信�?
 type TracerStats struct {
 	ActiveSpans   int     `json:"active_spans"`
 	SamplingRate  float64 `json:"sampling_rate"`
@@ -368,7 +368,7 @@ type Span struct {
 	mutex         sync.RWMutex
 }
 
-// SpanStatus span状态
+// SpanStatus span状�?
 type SpanStatus int
 
 const (
@@ -396,7 +396,7 @@ func (s *Span) SetTag(key string, value interface{}) {
 	s.Tags[key] = value
 }
 
-// SetStatus 设置状态
+// SetStatus 设置状�?
 func (s *Span) SetStatus(status SpanStatus) {
 	if s.IsNoOp() {
 		return
@@ -486,19 +486,19 @@ func SpanFromContext(ctx context.Context) *Span {
 	return nil
 }
 
-// IDGenerator ID生成器接口
+// IDGenerator ID生成器接�?
 type IDGenerator interface {
 	GenerateTraceID() string
 	GenerateSpanID() string
 }
 
-// RandomIDGenerator 随机ID生成器
+// RandomIDGenerator 随机ID生成�?
 type RandomIDGenerator struct {
 	rand *rand.Rand
 	mutex sync.Mutex
 }
 
-// NewRandomIDGenerator 创建随机ID生成器
+// NewRandomIDGenerator 创建随机ID生成�?
 func NewRandomIDGenerator() *RandomIDGenerator {
 	return &RandomIDGenerator{
 		rand: rand.New(rand.NewSource(time.Now().UnixNano())),
@@ -528,7 +528,7 @@ func (g *RandomIDGenerator) GenerateSpanID() string {
 	return fmt.Sprintf("%016x", id)
 }
 
-// Sampler 采样器接口
+// Sampler 采样器接�?
 type Sampler interface {
 	ShouldSample(ctx context.Context, operationName string) bool
 }
@@ -536,7 +536,7 @@ type Sampler interface {
 // AlwaysSampler 总是采样
 type AlwaysSampler struct{}
 
-// NewAlwaysSampler 创建总是采样器
+// NewAlwaysSampler 创建总是采样�?
 func NewAlwaysSampler() *AlwaysSampler {
 	return &AlwaysSampler{}
 }
@@ -549,7 +549,7 @@ func (s *AlwaysSampler) ShouldSample(ctx context.Context, operationName string) 
 // NeverSampler 从不采样
 type NeverSampler struct{}
 
-// NewNeverSampler 创建从不采样器
+// NewNeverSampler 创建从不采样�?
 func NewNeverSampler() *NeverSampler {
 	return &NeverSampler{}
 }
@@ -559,14 +559,14 @@ func (s *NeverSampler) ShouldSample(ctx context.Context, operationName string) b
 	return false
 }
 
-// ProbabilisticSampler 概率采样器
+// ProbabilisticSampler 概率采样�?
 type ProbabilisticSampler struct {
 	rate  float64
 	rand  *rand.Rand
 	mutex sync.Mutex
 }
 
-// NewProbabilisticSampler 创建概率采样器
+// NewProbabilisticSampler 创建概率采样�?
 func NewProbabilisticSampler(rate float64) *ProbabilisticSampler {
 	if rate < 0 {
 		rate = 0
@@ -588,7 +588,7 @@ func (s *ProbabilisticSampler) ShouldSample(ctx context.Context, operationName s
 	return s.rand.Float64() < s.rate
 }
 
-// RateLimitingSampler 限流采样器
+// RateLimitingSampler 限流采样�?
 type RateLimitingSampler struct {
 	maxTracesPerSecond int
 	tokens             int
@@ -596,7 +596,7 @@ type RateLimitingSampler struct {
 	mutex              sync.Mutex
 }
 
-// NewRateLimitingSampler 创建限流采样器
+// NewRateLimitingSampler 创建限流采样�?
 func NewRateLimitingSampler(maxTracesPerSecond int) *RateLimitingSampler {
 	return &RateLimitingSampler{
 		maxTracesPerSecond: maxTracesPerSecond,

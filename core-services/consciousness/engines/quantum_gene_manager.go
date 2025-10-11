@@ -10,7 +10,7 @@ import (
 	"github.com/codetaoist/taishanglaojun/core-services/consciousness/models"
 )
 
-// QuantumGeneManager 量子基因管理器
+// QuantumGeneManager 量子基因管理�?
 type QuantumGeneManager struct {
 	mu                   sync.RWMutex
 	config               *QuantumGeneManagerConfig
@@ -26,7 +26,7 @@ type QuantumGeneManager struct {
 	logger               Logger
 }
 
-// QuantumGeneManagerConfig 量子基因管理器配置
+// QuantumGeneManagerConfig 量子基因管理器配�?
 type QuantumGeneManagerConfig struct {
 	MaxGenePools                int                     `json:"max_gene_pools"`
 	MaxGenesPerPool             int                     `json:"max_genes_per_pool"`
@@ -51,7 +51,7 @@ type MutationEngine interface {
 	ReverseMutation(ctx context.Context, mutation *models.GeneMutation) error
 }
 
-// ExpressionController 表达控制器接口
+// ExpressionController 表达控制器接�?
 type ExpressionController interface {
 	InitiateExpression(ctx context.Context, geneID string, entityID string) (*models.GeneExpression, error)
 	ModulateExpression(ctx context.Context, expressionID string, level float64) error
@@ -61,7 +61,7 @@ type ExpressionController interface {
 	MonitorExpression(ctx context.Context, entityID string) ([]models.GeneExpression, error)
 }
 
-// InteractionAnalyzer 相互作用分析器接口
+// InteractionAnalyzer 相互作用分析器接�?
 type InteractionAnalyzer interface {
 	AnalyzeGeneInteractions(ctx context.Context, genePool *models.GenePool) ([]models.GeneInteraction, error)
 	PredictInteractionOutcome(ctx context.Context, geneA, geneB string) (*models.GeneInteraction, error)
@@ -70,7 +70,7 @@ type InteractionAnalyzer interface {
 	OptimizeGeneCompatibility(ctx context.Context, genePool *models.GenePool) (*OptimizationResult, error)
 }
 
-// EvolutionSimulator 进化模拟器接口
+// EvolutionSimulator 进化模拟器接�?
 type EvolutionSimulator interface {
 	SimulateEvolution(ctx context.Context, genePool *models.GenePool, generations int) (*EvolutionSimulationResult, error)
 	PredictEvolutionaryPath(ctx context.Context, genePool *models.GenePool) (*EvolutionaryPath, error)
@@ -156,7 +156,7 @@ type EvolutionaryPressure struct {
 	Description string  `json:"description"`
 }
 
-// NewQuantumGeneManager 创建新的量子基因管理器
+// NewQuantumGeneManager 创建新的量子基因管理�?
 func NewQuantumGeneManager(config *QuantumGeneManagerConfig, logger Logger) *QuantumGeneManager {
 	if config == nil {
 		config = &QuantumGeneManagerConfig{
@@ -202,7 +202,7 @@ func (qgm *QuantumGeneManager) SetDependencies(
 	qgm.geneRepository = geneRepository
 }
 
-// Start 启动量子基因管理器
+// Start 启动量子基因管理�?
 func (qgm *QuantumGeneManager) Start(ctx context.Context) error {
 	qgm.mu.Lock()
 	defer qgm.mu.Unlock()
@@ -225,7 +225,7 @@ func (qgm *QuantumGeneManager) Start(ctx context.Context) error {
 	return nil
 }
 
-// Stop 停止量子基因管理器
+// Stop 停止量子基因管理�?
 func (qgm *QuantumGeneManager) Stop() error {
 	qgm.mu.Lock()
 	defer qgm.mu.Unlock()
@@ -241,7 +241,7 @@ func (qgm *QuantumGeneManager) Stop() error {
 	return nil
 }
 
-// CreateGenePool 创建基因池
+// CreateGenePool 创建基因�?
 func (qgm *QuantumGeneManager) CreateGenePool(ctx context.Context, ownerID, name, description string) (*models.GenePool, error) {
 	qgm.mu.Lock()
 	defer qgm.mu.Unlock()
@@ -280,7 +280,7 @@ func (qgm *QuantumGeneManager) CreateGenePool(ctx context.Context, ownerID, name
 
 	qgm.genePools[poolID] = pool
 
-	// 保存到仓库
+	// 保存到仓�?
 	if qgm.geneRepository != nil {
 		if err := qgm.geneRepository.SaveGenePool(ctx, pool); err != nil {
 			qgm.logger.Error("Failed to save gene pool to repository", err, "pool_id", poolID)
@@ -305,7 +305,7 @@ func (qgm *QuantumGeneManager) AddGeneToPool(ctx context.Context, poolID string,
 		return fmt.Errorf("maximum number of genes per pool reached: %d", qgm.config.MaxGenesPerPool)
 	}
 
-	// 检查基因兼容性
+	// 检查基因兼容�?
 	if err := qgm.checkGeneCompatibility(pool, gene); err != nil {
 		return fmt.Errorf("gene compatibility check failed: %w", err)
 	}
@@ -317,7 +317,7 @@ func (qgm *QuantumGeneManager) AddGeneToPool(ctx context.Context, poolID string,
 	// 添加基因到池
 	pool.Genes = append(pool.Genes, *gene)
 
-	// 更新基因池统计信息
+	// 更新基因池统计信�?
 	qgm.updatePoolStats(pool)
 
 	// 如果基因是活跃的，添加到活跃基因列表
@@ -360,7 +360,7 @@ func (qgm *QuantumGeneManager) ExpressGene(ctx context.Context, geneID, entityID
 	endTime := time.Now().Add(duration)
 	expression.EndTime = &endTime
 
-	// 添加到表达列表
+	// 添加到表达列�?
 	qgm.mu.Lock()
 	qgm.geneExpressions[entityID] = append(qgm.geneExpressions[entityID], *expression)
 	qgm.mu.Unlock()
@@ -388,7 +388,7 @@ func (qgm *QuantumGeneManager) MutateGene(ctx context.Context, geneID string) (*
 		return nil, fmt.Errorf("gene %s not found", geneID)
 	}
 
-	// 检查基因是否可以突变
+	// 检查基因是否可以突�?
 	if !gene.CanMutate() {
 		return nil, fmt.Errorf("gene %s cannot mutate (mutability: %.2f, stability: %.2f)",
 			geneID, gene.Mutability, gene.Stability)
@@ -400,7 +400,7 @@ func (qgm *QuantumGeneManager) MutateGene(ctx context.Context, geneID string) (*
 		return nil, fmt.Errorf("failed to generate mutation: %w", err)
 	}
 
-	// 检查突变严重性是否超过限制
+	// 检查突变严重性是否超过限�?
 	if qgm.exceedsSeverityLimit(mutation.Severity) {
 		return nil, fmt.Errorf("mutation severity %s exceeds limit %s",
 			mutation.Severity, qgm.config.MutationSeverityLimit)
@@ -411,7 +411,7 @@ func (qgm *QuantumGeneManager) MutateGene(ctx context.Context, geneID string) (*
 		return nil, fmt.Errorf("failed to apply mutation: %w", err)
 	}
 
-	// 更新基因的最后突变时间
+	// 更新基因的最后突变时�?
 	now := time.Now()
 	gene.LastMutation = &now
 	gene.UpdatedAt = now
@@ -495,7 +495,7 @@ func (qgm *QuantumGeneManager) SimulateEvolution(ctx context.Context, poolID str
 	return result, nil
 }
 
-// GetGenePool 获取基因池
+// GetGenePool 获取基因�?
 func (qgm *QuantumGeneManager) GetGenePool(poolID string) (*models.GenePool, error) {
 	qgm.mu.RLock()
 	defer qgm.mu.RUnlock()
@@ -510,7 +510,7 @@ func (qgm *QuantumGeneManager) GetGenePool(poolID string) (*models.GenePool, err
 	return &poolCopy, nil
 }
 
-// GetActiveExpressions 获取活跃的基因表达
+// GetActiveExpressions 获取活跃的基因表�?
 func (qgm *QuantumGeneManager) GetActiveExpressions(entityID string) ([]models.GeneExpression, error) {
 	qgm.mu.RLock()
 	defer qgm.mu.RUnlock()
@@ -520,7 +520,7 @@ func (qgm *QuantumGeneManager) GetActiveExpressions(entityID string) ([]models.G
 		return []models.GeneExpression{}, nil
 	}
 
-	// 过滤活跃的基因表达
+	// 过滤活跃的基因表�?
 	activeExpressions := []models.GeneExpression{}
 	for _, expr := range expressions {
 		if expr.IsExpressed() {
@@ -531,7 +531,7 @@ func (qgm *QuantumGeneManager) GetActiveExpressions(entityID string) ([]models.G
 	return activeExpressions, nil
 }
 
-// IsRunning 检查是否正在运行
+// IsRunning 检查是否正在运�?
 func (qgm *QuantumGeneManager) IsRunning() bool {
 	qgm.mu.RLock()
 	defer qgm.mu.RUnlock()
@@ -653,7 +653,7 @@ func (qgm *QuantumGeneManager) updatePoolStats(pool *models.GenePool) {
 		pool.PoolStats.ExpressionLevel = totalExpression / float64(len(pool.Genes))
 	}
 
-	// 计算稳定性指标
+	// 计算稳定性指�?
 	totalStability := 0.0
 	for _, gene := range pool.Genes {
 		totalStability += gene.Stability

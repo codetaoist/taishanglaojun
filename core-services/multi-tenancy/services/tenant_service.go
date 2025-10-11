@@ -48,7 +48,7 @@ type TenantService interface {
 	GetTenantStats(ctx context.Context, tenantID uuid.UUID) (*models.TenantStatsResponse, error)
 	GetTenantHealth(ctx context.Context, tenantID uuid.UUID) (*models.TenantHealthResponse, error)
 	
-	// 租户状态管理
+	// 租户状态管�?
 	ActivateTenant(ctx context.Context, tenantID uuid.UUID) error
 	SuspendTenant(ctx context.Context, tenantID uuid.UUID, reason string) error
 	DeactivateTenant(ctx context.Context, tenantID uuid.UUID) error
@@ -89,12 +89,12 @@ func NewTenantService(
 
 // CreateTenant 创建租户
 func (s *tenantService) CreateTenant(ctx context.Context, req *models.CreateTenantRequest) (*models.TenantResponse, error) {
-	// 验证子域名唯一性
+	// 验证子域名唯一�?
 	if err := s.validateSubdomain(ctx, req.Subdomain); err != nil {
 		return nil, err
 	}
 	
-	// 验证域名唯一性（如果提供）
+	// 验证域名唯一性（如果提供�?
 	if req.Domain != "" {
 		if err := s.validateDomain(ctx, req.Domain); err != nil {
 			return nil, err
@@ -127,7 +127,7 @@ func (s *tenantService) CreateTenant(ctx context.Context, req *models.CreateTena
 		tenant.Quota = *req.Quota
 	}
 	
-	// 开始事务
+	// 开始事�?
 	tx := s.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -142,7 +142,7 @@ func (s *tenantService) CreateTenant(ctx context.Context, req *models.CreateTena
 		return nil, fmt.Errorf("failed to create tenant: %w", err)
 	}
 	
-	// 创建管理员用户（如果提供）
+	// 创建管理员用户（如果提供�?
 	if req.AdminUser != nil {
 		if err := s.createAdminUser(ctx, tx, tenant.ID, req.AdminUser); err != nil {
 			tx.Rollback()
@@ -151,7 +151,7 @@ func (s *tenantService) CreateTenant(ctx context.Context, req *models.CreateTena
 		}
 	}
 	
-	// 初始化租户数据隔离
+	// 初始化租户数据隔�?
 	if err := s.initializeTenantIsolation(ctx, tx, tenant); err != nil {
 		tx.Rollback()
 		s.logger.Error("Failed to initialize tenant isolation", "error", err, "tenant_id", tenant.ID)
@@ -174,7 +174,7 @@ func (s *tenantService) CreateTenant(ctx context.Context, req *models.CreateTena
 
 // GetTenant 获取租户
 func (s *tenantService) GetTenant(ctx context.Context, tenantID uuid.UUID) (*models.TenantResponse, error) {
-	// 尝试从缓存获取
+	// 尝试从缓存获�?
 	cacheKey := fmt.Sprintf("tenant:%s", tenantID.String())
 	if cached, err := s.cache.Get(ctx, cacheKey); err == nil && cached != nil {
 		if tenant, ok := cached.(*models.Tenant); ok {
@@ -198,9 +198,9 @@ func (s *tenantService) GetTenant(ctx context.Context, tenantID uuid.UUID) (*mod
 	return s.tenantToResponse(tenant), nil
 }
 
-// GetTenantBySubdomain 通过子域名获取租户
+// GetTenantBySubdomain 通过子域名获取租�?
 func (s *tenantService) GetTenantBySubdomain(ctx context.Context, subdomain string) (*models.TenantResponse, error) {
-	// 尝试从缓存获取
+	// 尝试从缓存获�?
 	cacheKey := fmt.Sprintf("tenant:subdomain:%s", subdomain)
 	if cached, err := s.cache.Get(ctx, cacheKey); err == nil && cached != nil {
 		if tenant, ok := cached.(*models.Tenant); ok {
@@ -226,7 +226,7 @@ func (s *tenantService) GetTenantBySubdomain(ctx context.Context, subdomain stri
 
 // GetTenantByDomain 通过域名获取租户
 func (s *tenantService) GetTenantByDomain(ctx context.Context, domain string) (*models.TenantResponse, error) {
-	// 尝试从缓存获取
+	// 尝试从缓存获�?
 	cacheKey := fmt.Sprintf("tenant:domain:%s", domain)
 	if cached, err := s.cache.Get(ctx, cacheKey); err == nil && cached != nil {
 		if tenant, ok := cached.(*models.Tenant); ok {
@@ -272,7 +272,7 @@ func (s *tenantService) UpdateTenant(ctx context.Context, tenantID uuid.UUID, re
 		tenant.Description = *req.Description
 	}
 	if req.Domain != nil {
-		// 验证域名唯一性
+		// 验证域名唯一�?
 		if *req.Domain != tenant.Domain {
 			if err := s.validateDomain(ctx, *req.Domain); err != nil {
 				return nil, err
@@ -305,7 +305,7 @@ func (s *tenantService) UpdateTenant(ctx context.Context, tenantID uuid.UUID, re
 
 // DeleteTenant 删除租户
 func (s *tenantService) DeleteTenant(ctx context.Context, tenantID uuid.UUID) error {
-	// 检查租户是否存在
+	// 检查租户是否存�?
 	tenant, err := s.tenantRepo.GetByID(ctx, s.db, tenantID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -314,7 +314,7 @@ func (s *tenantService) DeleteTenant(ctx context.Context, tenantID uuid.UUID) er
 		return fmt.Errorf("failed to get tenant: %w", err)
 	}
 	
-	// 开始事务
+	// 开始事�?
 	tx := s.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -359,7 +359,7 @@ func (s *tenantService) DeleteTenant(ctx context.Context, tenantID uuid.UUID) er
 
 // ListTenants 列出租户
 func (s *tenantService) ListTenants(ctx context.Context, query *models.TenantQuery) (*models.TenantListResponse, error) {
-	// 设置默认值
+	// 设置默认�?
 	if query.Page <= 0 {
 		query.Page = 1
 	}
@@ -380,7 +380,7 @@ func (s *tenantService) ListTenants(ctx context.Context, query *models.TenantQue
 		return nil, fmt.Errorf("failed to list tenants: %w", err)
 	}
 	
-	// 转换为响应格式
+	// 转换为响应格�?
 	responses := make([]models.TenantResponse, len(tenants))
 	for i, tenant := range tenants {
 		responses[i] = *s.tenantToResponse(&tenant)
@@ -394,7 +394,7 @@ func (s *tenantService) ListTenants(ctx context.Context, query *models.TenantQue
 	}, nil
 }
 
-// CheckQuota 检查配额
+// CheckQuota 检查配�?
 func (s *tenantService) CheckQuota(ctx context.Context, tenantID uuid.UUID, resource string, amount int) error {
 	tenant, err := s.tenantRepo.GetByID(ctx, s.db, tenantID)
 	if err != nil {
@@ -404,7 +404,7 @@ func (s *tenantService) CheckQuota(ctx context.Context, tenantID uuid.UUID, reso
 	return tenant.CheckQuota(resource, amount)
 }
 
-// UpdateUsage 更新使用量
+// UpdateUsage 更新使用�?
 func (s *tenantService) UpdateUsage(ctx context.Context, tenantID uuid.UUID, resource string, amount int) error {
 	tenant, err := s.tenantRepo.GetByID(ctx, s.db, tenantID)
 	if err != nil {
@@ -442,21 +442,21 @@ func (s *tenantService) ValidateTenantAccess(ctx context.Context, tenantID uuid.
 
 // 辅助方法
 
-// validateSubdomain 验证子域名唯一性
+// validateSubdomain 验证子域名唯一�?
 func (s *tenantService) validateSubdomain(ctx context.Context, subdomain string) error {
-	// 检查格式
+	// 检查格�?
 	if len(subdomain) < 2 || len(subdomain) > 100 {
 		return fmt.Errorf("subdomain must be between 2 and 100 characters")
 	}
 	
-	// 检查字符
+	// 检查字�?
 	for _, char := range subdomain {
 		if !((char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '-') {
 			return fmt.Errorf("subdomain can only contain lowercase letters, numbers, and hyphens")
 		}
 	}
 	
-	// 检查唯一性
+	// 检查唯一�?
 	existing, err := s.tenantRepo.GetBySubdomain(ctx, s.db, subdomain)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return fmt.Errorf("failed to check subdomain uniqueness: %w", err)
@@ -468,13 +468,13 @@ func (s *tenantService) validateSubdomain(ctx context.Context, subdomain string)
 	return nil
 }
 
-// validateDomain 验证域名唯一性
+// validateDomain 验证域名唯一�?
 func (s *tenantService) validateDomain(ctx context.Context, domain string) error {
 	if domain == "" {
 		return nil
 	}
 	
-	// 检查唯一性
+	// 检查唯一�?
 	existing, err := s.tenantRepo.GetByDomain(ctx, s.db, domain)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return fmt.Errorf("failed to check domain uniqueness: %w", err)
@@ -486,19 +486,19 @@ func (s *tenantService) validateDomain(ctx context.Context, domain string) error
 	return nil
 }
 
-// createAdminUser 创建管理员用户
+// createAdminUser 创建管理员用�?
 func (s *tenantService) createAdminUser(ctx context.Context, tx *gorm.DB, tenantID uuid.UUID, req *models.CreateAdminUserRequest) error {
 	// TODO: 集成用户服务创建用户
 	// 这里需要调用用户服务来创建用户，然后添加到租户
 	
-	// 临时实现：直接创建租户用户关联
+	// 临时实现：直接创建租户用户关�?
 	tenantUser := &models.TenantUser{
 		ID:          uuid.New(),
 		TenantID:    tenantID,
 		UserID:      uuid.New(), // 这里应该是实际创建的用户ID
 		Role:        "admin",
 		Status:      "active",
-		Permissions: []string{"*"}, // 管理员拥有所有权限
+		Permissions: []string{"*"}, // 管理员拥有所有权�?
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -506,7 +506,7 @@ func (s *tenantService) createAdminUser(ctx context.Context, tx *gorm.DB, tenant
 	return s.tenantUserRepo.Create(ctx, tx, tenantUser)
 }
 
-// initializeTenantIsolation 初始化租户数据隔离
+// initializeTenantIsolation 初始化租户数据隔�?
 func (s *tenantService) initializeTenantIsolation(ctx context.Context, tx *gorm.DB, tenant *models.Tenant) error {
 	switch tenant.IsolationStrategy {
 	case models.IsolationStrategySchema:
@@ -514,7 +514,7 @@ func (s *tenantService) initializeTenantIsolation(ctx context.Context, tx *gorm.
 	case models.IsolationStrategyDatabase:
 		return s.createTenantDatabase(ctx, tx, tenant)
 	case models.IsolationStrategyRowLevel:
-		// Row Level Security 不需要额外的初始化
+		// Row Level Security 不需要额外的初始�?
 		return nil
 	default:
 		return fmt.Errorf("unsupported isolation strategy: %s", tenant.IsolationStrategy)
@@ -530,16 +530,16 @@ func (s *tenantService) createTenantSchema(ctx context.Context, tx *gorm.DB, ten
 		return fmt.Errorf("failed to create tenant schema: %w", err)
 	}
 	
-	// TODO: 在新模式中创建必要的表
+	// TODO: 在新模式中创建必要的�?
 	
 	return nil
 }
 
-// createTenantDatabase 创建租户数据库
+// createTenantDatabase 创建租户数据�?
 func (s *tenantService) createTenantDatabase(ctx context.Context, tx *gorm.DB, tenant *models.Tenant) error {
 	dbName := fmt.Sprintf("tenant_%s", strings.ReplaceAll(tenant.ID.String(), "-", "_"))
 	
-	// 创建数据库
+	// 创建数据�?
 	if err := tx.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName)).Error; err != nil {
 		return fmt.Errorf("failed to create tenant database: %w", err)
 	}
@@ -575,7 +575,7 @@ func (s *tenantService) dropTenantSchema(ctx context.Context, tx *gorm.DB, tenan
 	return nil
 }
 
-// dropTenantDatabase 删除租户数据库
+// dropTenantDatabase 删除租户数据�?
 func (s *tenantService) dropTenantDatabase(ctx context.Context, tx *gorm.DB, tenant *models.Tenant) error {
 	dbName := fmt.Sprintf("tenant_%s", strings.ReplaceAll(tenant.ID.String(), "-", "_"))
 	
@@ -590,7 +590,7 @@ func (s *tenantService) dropTenantDatabase(ctx context.Context, tx *gorm.DB, ten
 func (s *tenantService) clearTenantCache(tenantID uuid.UUID) {
 	ctx := context.Background()
 	
-	// 清除各种缓存键
+	// 清除各种缓存�?
 	cacheKeys := []string{
 		fmt.Sprintf("tenant:%s", tenantID.String()),
 		fmt.Sprintf("tenant:stats:%s", tenantID.String()),
@@ -603,7 +603,7 @@ func (s *tenantService) clearTenantCache(tenantID uuid.UUID) {
 	}
 }
 
-// tenantToResponse 转换租户为响应格式
+// tenantToResponse 转换租户为响应格�?
 func (s *tenantService) tenantToResponse(tenant *models.Tenant) *models.TenantResponse {
 	return &models.TenantResponse{
 		ID:                tenant.ID,

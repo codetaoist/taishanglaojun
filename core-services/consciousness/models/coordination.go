@@ -37,7 +37,32 @@ type CoordinationResult struct {
 	Metadata         map[string]interface{} `json:"metadata"`
 }
 
-// AxisInteraction 轴交互
+// ResolutionMethod 解决方法
+type ResolutionMethod struct {
+	Strategy    string   `json:"strategy"`
+	Description string   `json:"description"`
+	Steps       []string `json:"steps"`
+	Priority    float64  `json:"priority"`
+}
+
+// OptimizationGoal 优化目标
+type OptimizationGoal struct {
+	ID          string  `json:"id"`
+	Description string  `json:"description"`
+	Priority    float64 `json:"priority"`
+	Target      float64 `json:"target"`
+	Current     float64 `json:"current"`
+}
+
+// OptimizationRisk 优化风险
+type OptimizationRisk struct {
+	ID          string  `json:"id"`
+	Description string  `json:"description"`
+	Probability float64 `json:"probability"`
+	Impact      float64 `json:"impact"`
+}
+
+// AxisInteraction 轴交�?
 type AxisInteraction struct {
 	InteractionID    string                 `json:"interaction_id"`
 	SourceAxis       string                 `json:"source_axis"`
@@ -70,7 +95,7 @@ type InteractionAnalysis struct {
 	Metadata           map[string]interface{} `json:"metadata"`
 }
 
-// AxisConflict 轴冲突
+// AxisConflict 轴冲�?
 type AxisConflict struct {
 	ConflictID       string                 `json:"conflict_id"`
 	SourceAxis       string                 `json:"source_axis"`
@@ -100,7 +125,7 @@ type ConflictResolution struct {
 	Metadata         map[string]interface{} `json:"metadata"`
 }
 
-// CoordinationState 协调状态
+// CoordinationState 协调状�?
 type CoordinationState struct {
 	StateID          string                 `json:"state_id"`
 	SessionID        string                 `json:"session_id"`
@@ -117,22 +142,27 @@ type CoordinationState struct {
 
 // CoordinationOptimization 协调优化
 type CoordinationOptimization struct {
-	OptimizationID   string                 `json:"optimization_id"`
-	Type             string                 `json:"type"`
-	TargetAxes       []string               `json:"target_axes"`
-	CurrentState     map[string]interface{} `json:"current_state"`
-	TargetState      map[string]interface{} `json:"target_state"`
-	Strategy         string                 `json:"strategy"`
-	Steps            []string               `json:"steps"`
-	ExpectedBenefit  float64                `json:"expected_benefit"`
-	Progress         float64                `json:"progress"`
-	Status           string                 `json:"status"`
-	StartedAt        time.Time              `json:"started_at"`
-	CompletedAt      *time.Time             `json:"completed_at"`
-	Metadata         map[string]interface{} `json:"metadata"`
+	OptimizationID      string                 `json:"optimization_id"`
+	Type                string                 `json:"type"`
+	TargetAxes          []string               `json:"target_axes"`
+	CurrentState        map[string]interface{} `json:"current_state"`
+	TargetState         map[string]interface{} `json:"target_state"`
+	Strategy            string                 `json:"strategy"`
+	Steps               []string               `json:"steps"`
+	ExpectedBenefit     float64                `json:"expected_benefit"`
+	Progress            float64                `json:"progress"`
+	Status              string                 `json:"status"`
+	StartedAt           time.Time              `json:"started_at"`
+	CompletedAt         *time.Time             `json:"completed_at"`
+	OptimizationGoals   []OptimizationGoal     `json:"optimization_goals"`
+	OptimizationPlan    []string               `json:"optimization_plan"`
+	ExpectedImprovement float64                `json:"expected_improvement"`
+	OptimizationRisks   []OptimizationRisk     `json:"optimization_risks"`
+	Timestamp           time.Time              `json:"timestamp"`
+	Metadata            map[string]interface{} `json:"metadata"`
 }
 
-// AxisBalance 轴平衡
+// AxisBalance 轴平�?
 type AxisBalance struct {
 	AxisName         string                 `json:"axis_name"`
 	CurrentValue     float64                `json:"current_value"`
@@ -205,7 +235,7 @@ type WeightAdjustment struct {
 	Metadata         map[string]interface{} `json:"metadata"`
 }
 
-// CoordinationContext 协调上下文
+// CoordinationContext 协调上下�?
 type CoordinationContext struct {
 	ContextID        string                 `json:"context_id"`
 	SessionID        string                 `json:"session_id"`
@@ -221,7 +251,7 @@ type CoordinationContext struct {
 	Metadata         map[string]interface{} `json:"metadata"`
 }
 
-// AxisRelationship 轴关系
+// AxisRelationship 轴关�?
 type AxisRelationship struct {
 	RelationshipID   string                 `json:"relationship_id"`
 	SourceAxis       string                 `json:"source_axis"`
@@ -240,7 +270,7 @@ type AxisRelationship struct {
 	Metadata         map[string]interface{} `json:"metadata"`
 }
 
-// CoordinationStatus 协调状态
+// CoordinationStatus 协调状�?
 type CoordinationStatus struct {
 	Phase            string                 `json:"phase"`
 	Progress         float64                `json:"progress"`
@@ -415,7 +445,7 @@ type BalanceRecommendation struct {
 	Metadata         map[string]interface{} `json:"metadata"`
 }
 
-// StabilityValidation 稳定性验证
+// StabilityValidation 稳定性验�?
 type StabilityValidation struct {
 	ID               string                 `json:"id" gorm:"primaryKey"`
 	SessionID        string                 `json:"session_id" gorm:"index"`
@@ -429,7 +459,7 @@ type StabilityValidation struct {
 	ValidatedAt      time.Time              `json:"validated_at"`
 }
 
-// StabilityFactor 稳定性因子
+// StabilityFactor 稳定性因�?
 type StabilityFactor struct {
 	FactorName       string                 `json:"factor_name"`
 	Type             string                 `json:"type"`
@@ -443,7 +473,7 @@ type StabilityFactor struct {
 	Metadata         map[string]interface{} `json:"metadata"`
 }
 
-// StabilityRisk 稳定性风险
+// StabilityRisk 稳定性风�?
 type StabilityRisk struct {
 	RiskID           string                 `json:"risk_id"`
 	Type             string                 `json:"type"`

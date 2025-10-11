@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# DEB package post-removal script for TaishangLaojun Desktop
+
+set -e
+
+case "$1" in
+    remove|purge)
+        # Update desktop database
+        if command -v update-desktop-database >/dev/null 2>&1; then
+            update-desktop-database -q /usr/share/applications || true
+        fi
+
+        # Update icon cache
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache -q /usr/share/icons/hicolor || true
+        fi
+
+        # Update MIME database
+        if command -v update-mime-database >/dev/null 2>&1; then
+            update-mime-database /usr/share/mime || true
+        fi
+
+        # Compile GLib schemas
+        if command -v glib-compile-schemas >/dev/null 2>&1; then
+            glib-compile-schemas /usr/share/glib-2.0/schemas || true
+        fi
+
+        # Remove symlink
+        rm -f /usr/local/bin/taishang-laojun 2>/dev/null || true
+
+        # Remove systemd user service
+        if [ -f /etc/systemd/user/taishang-laojun.service ]; then
+            rm -f /etc/systemd/user/taishang-laojun.service
+            if command -v systemctl >/dev/null 2>&1; then
+                systemctl --global daemon-reload 2>/dev/null || true
+            fi
+        fi
+
+        # Remove file associations
+        if command -v xdg-mime >/dev/null 2>&1; then
+            xdg-mime uninstall /usr/share/applications/taishang-laojun.desktop 2>/dev/null || true
+        fi
+        ;;
+
+    purge)
+        # Remove user configuration and data directories
+        echo "Removing user data directories..."
+        
+        for user_home in /home/*; do
+            if [ -d "$user_home" ]; then
+                user=$(basename "$user_home")
+                echo "Cleaning up data for user: $user"
+                
+                # Remove configuration
+                rm -rf "$user_home/.config/taishang-laojun" 2>/dev/null || true
+                
+                # Remove local data
+                rm -rf "$user_home/.local/share/taishang-laojun" 2>/dev/null || true
+                
+                # Remove cache
+                rm -rf "$user_home/.cache/taishang-laojun" 2>/dev/null || true
+                
+                # Remove autostart entries
+                rm -f "$user_home/.config/autostart/taishang-laojun.desktop" 2>/dev/null || true
+            fi
+        done
+
+        # Remove system-wide configuration
+        rm -rf /etc/taishang-laojun 2>/dev/null || true
+        
+        # Remove logs
+        rm -rf /var/log/taishang-laojun 2>/dev/null || true
+        
+        # Remove temporary files
+        rm -rf /tmp/taishang-laojun-* 2>/dev/null || true
+        rm -rf /var/tmp/taishang-laojun-* 2>/dev/null || true
+        
+        echo "All TaishangLaojun data has been removed."
+        ;;
+
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        # Do nothing for these cases
+        ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+# Final cleanup message
+if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
+    echo "TaishangLaojun Desktop has been successfully removed."
+    
+    if [ "$1" = "purge" ]; then
+        echo "All user data and configuration files have been deleted."
+    else
+        echo "User data and configuration files have been preserved."
+        echo "To completely remove all data, run: sudo apt purge taishang-laojun"
+    fi
+fi
+
+exit 0

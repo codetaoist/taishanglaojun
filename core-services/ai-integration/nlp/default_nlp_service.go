@@ -38,7 +38,7 @@ func NewDefaultNLPService(config NLPConfig, cache NLPCache, logger *zap.Logger) 
 	}
 }
 
-// RegisterProvider 注册NLP提供商
+// RegisterProvider 注册NLP提供�?
 func (s *DefaultNLPService) RegisterProvider(name string, provider NLPProvider) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -47,7 +47,7 @@ func (s *DefaultNLPService) RegisterProvider(name string, provider NLPProvider) 
 
 // TokenizeText 分词
 func (s *DefaultNLPService) TokenizeText(ctx context.Context, input TextInput) (*TokenizationResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("tokenize:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -92,7 +92,7 @@ func (s *DefaultNLPService) TokenizeText(ctx context.Context, input TextInput) (
 
 // AnalyzeSentiment 情感分析
 func (s *DefaultNLPService) AnalyzeSentiment(ctx context.Context, input TextInput) (*SentimentAnalysisResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("sentiment:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -138,7 +138,7 @@ func (s *DefaultNLPService) AnalyzeSentiment(ctx context.Context, input TextInpu
 
 // ExtractEntities 实体提取
 func (s *DefaultNLPService) ExtractEntities(ctx context.Context, input TextInput) (*EntityExtractionResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("entities:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -183,7 +183,7 @@ func (s *DefaultNLPService) ExtractEntities(ctx context.Context, input TextInput
 
 // ClassifyText 文本分类
 func (s *DefaultNLPService) ClassifyText(ctx context.Context, input TextInput) (*TextClassificationResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("classify:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -229,7 +229,7 @@ func (s *DefaultNLPService) ClassifyText(ctx context.Context, input TextInput) (
 
 // AnalyzeSemantics 语义分析
 func (s *DefaultNLPService) AnalyzeSemantics(ctx context.Context, input TextInput) (*SemanticAnalysisResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("semantics:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -273,9 +273,9 @@ func (s *DefaultNLPService) AnalyzeSemantics(ctx context.Context, input TextInpu
 	return result, nil
 }
 
-// ExtractKeywords 关键词提取
+// ExtractKeywords 关键词提�?
 func (s *DefaultNLPService) ExtractKeywords(ctx context.Context, input TextInput) (*KeywordExtractionResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("keywords:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -320,7 +320,7 @@ func (s *DefaultNLPService) ExtractKeywords(ctx context.Context, input TextInput
 
 // SummarizeText 文本摘要
 func (s *DefaultNLPService) SummarizeText(ctx context.Context, input TextInput) (*TextSummarizationResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("summary:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -366,7 +366,7 @@ func (s *DefaultNLPService) SummarizeText(ctx context.Context, input TextInput) 
 
 // AnalyzeIntent 意图分析
 func (s *DefaultNLPService) AnalyzeIntent(ctx context.Context, input TextInput) (*IntentAnalysisResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("intent:%s:%s", input.Language, s.generateTextHash(input.Text))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -568,7 +568,7 @@ func (s *DefaultNLPService) BatchProcess(ctx context.Context, inputs []TextInput
 		Metadata:    make(map[string]interface{}),
 	}
 
-	// 按操作类型分组处理
+	// 按操作类型分组处�?
 	for _, operation := range operations {
 		for _, input := range inputs {
 			res, err := s.processOperation(ctx, input, operation)
@@ -622,7 +622,7 @@ func (s *DefaultNLPService) GetSupportedLanguages() []Language {
 	return result
 }
 
-// GetSupportedOperations 获取支持的操作
+// GetSupportedOperations 获取支持的操�?
 func (s *DefaultNLPService) GetSupportedOperations() []OperationType {
 	operations := make(map[OperationType]bool)
 	
@@ -657,7 +657,7 @@ func (s *DefaultNLPService) getBestProvider(operation OperationType, language La
 	candidates := make([]providerScore, 0)
 
 	for name, provider := range s.providers {
-		// 检查是否支持操作
+		// 检查是否支持操�?
 		supportedOps := provider.GetSupportedOperations()
 		supportsOp := false
 		for _, op := range supportedOps {
@@ -685,7 +685,7 @@ func (s *DefaultNLPService) getBestProvider(operation OperationType, language La
 			continue
 		}
 
-		// 计算分数（基于配置中的优先级）
+		// 计算分数（基于配置中的优先级�?
 		score := 0
 		if config, exists := s.config.Providers[name]; exists && config.Enabled {
 			score = config.Priority

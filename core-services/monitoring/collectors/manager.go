@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
 // CollectorManager 收集器管理器
@@ -17,20 +17,20 @@ type CollectorManager struct {
 	collectors map[string]interfaces.MetricCollector
 	config     *CollectorManagerConfig
 	
-	// 数据库连接
+	// 数据库连�?
 	db *sql.DB
 	
-	// Redis客户端
+	// Redis客户�?
 	redisClient redis.UniversalClient
 	
 	// 上下文和取消函数
 	ctx    context.Context
 	cancel context.CancelFunc
 	
-	// 同步锁
+	// 同步�?
 	mutex sync.RWMutex
 	
-	// 运行状态
+	// 运行状�?
 	running bool
 	
 	// 指标通道
@@ -46,7 +46,7 @@ type CollectorManagerConfig struct {
 	GlobalInterval time.Duration     `yaml:"global_interval"`
 	GlobalLabels   map[string]string `yaml:"global_labels"`
 	
-	// 收集器配置
+	// 收集器配�?
 	System      SystemCollectorConfig      `yaml:"system"`
 	Application ApplicationCollectorConfig `yaml:"application"`
 	Database    DatabaseCollectorConfig    `yaml:"database"`
@@ -59,7 +59,7 @@ type CollectorManagerConfig struct {
 	FlushInterval     time.Duration `yaml:"flush_interval"`
 }
 
-// CollectorStats 收集器统计信息
+// CollectorStats 收集器统计信�?
 type CollectorStats struct {
 	Name            string        `json:"name"`
 	Category        string        `json:"category"`
@@ -73,7 +73,7 @@ type CollectorStats struct {
 	MetricsCount    uint64        `json:"metrics_count"`
 }
 
-// ManagerStats 管理器统计信息
+// ManagerStats 管理器统计信�?
 type ManagerStats struct {
 	Running          bool                       `json:"running"`
 	CollectorCount   int                        `json:"collector_count"`
@@ -121,7 +121,7 @@ func (m *CollectorManager) Initialize() error {
 		m.collectors["application"] = appCollector
 	}
 	
-	// 初始化数据库收集器
+	// 初始化数据库收集�?
 	if m.config.Database.Enabled && m.db != nil {
 		dbCollector := NewDatabaseCollector(m.config.Database, m.db)
 		m.collectors["database"] = dbCollector
@@ -133,7 +133,7 @@ func (m *CollectorManager) Initialize() error {
 		m.collectors["business"] = businessCollector
 	}
 	
-	// 初始化Redis收集器
+	// 初始化Redis收集�?
 	if m.config.Redis.Enabled && m.redisClient != nil {
 		redisCollector := NewRedisCollector(m.config.Redis, m.redisClient)
 		m.collectors["redis"] = redisCollector
@@ -168,7 +168,7 @@ func (m *CollectorManager) mergeGlobalLabels() {
 		}
 	}
 	
-	// 合并到数据库收集器
+	// 合并到数据库收集�?
 	if m.config.Database.Labels == nil {
 		m.config.Database.Labels = make(map[string]string)
 	}
@@ -188,7 +188,7 @@ func (m *CollectorManager) mergeGlobalLabels() {
 		}
 	}
 	
-	// 合并到Redis收集器
+	// 合并到Redis收集�?
 	if m.config.Redis.Labels == nil {
 		m.config.Redis.Labels = make(map[string]string)
 	}
@@ -216,7 +216,7 @@ func (m *CollectorManager) Start() error {
 					select {
 					case m.errorChan <- fmt.Errorf("collector %s error: %w", name, err):
 					default:
-						// 错误通道已满，丢弃错误
+						// 错误通道已满，丢弃错�?
 					}
 				}
 			}(name, collector)
@@ -294,7 +294,7 @@ func (m *CollectorManager) flushMetrics() {
 			select {
 			case m.errorChan <- fmt.Errorf("collector %s collect error: %w", name, err):
 			default:
-				// 错误通道已满，丢弃错误
+				// 错误通道已满，丢弃错�?
 			}
 			continue
 		}
@@ -303,7 +303,7 @@ func (m *CollectorManager) flushMetrics() {
 			select {
 			case m.metricsChan <- metrics:
 			default:
-				// 指标通道已满，丢弃指标
+				// 指标通道已满，丢弃指�?
 				fmt.Printf("Metrics channel full, dropping %d metrics from %s\n", len(metrics), name)
 			}
 		}
@@ -335,7 +335,7 @@ func (m *CollectorManager) GetErrorChannel() <-chan error {
 	return m.errorChan
 }
 
-// AddCollector 添加收集器
+// AddCollector 添加收集�?
 func (m *CollectorManager) AddCollector(name string, collector interfaces.MetricCollector) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -353,7 +353,7 @@ func (m *CollectorManager) AddCollector(name string, collector interfaces.Metric
 				select {
 				case m.errorChan <- fmt.Errorf("collector %s error: %w", name, err):
 				default:
-					// 错误通道已满，丢弃错误
+					// 错误通道已满，丢弃错�?
 				}
 			}
 		}()
@@ -362,7 +362,7 @@ func (m *CollectorManager) AddCollector(name string, collector interfaces.Metric
 	return nil
 }
 
-// RemoveCollector 移除收集器
+// RemoveCollector 移除收集�?
 func (m *CollectorManager) RemoveCollector(name string) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -372,7 +372,7 @@ func (m *CollectorManager) RemoveCollector(name string) error {
 		return fmt.Errorf("collector %s not found", name)
 	}
 	
-	// 停止收集器
+	// 停止收集�?
 	if err := collector.Stop(); err != nil {
 		return fmt.Errorf("failed to stop collector %s: %w", name, err)
 	}
@@ -381,7 +381,7 @@ func (m *CollectorManager) RemoveCollector(name string) error {
 	return nil
 }
 
-// GetCollector 获取收集器
+// GetCollector 获取收集�?
 func (m *CollectorManager) GetCollector(name string) (interfaces.MetricCollector, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
@@ -407,7 +407,7 @@ func (m *CollectorManager) ListCollectors() map[string]interfaces.MetricCollecto
 	return result
 }
 
-// EnableCollector 启用收集器
+// EnableCollector 启用收集�?
 func (m *CollectorManager) EnableCollector(name string) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -418,17 +418,17 @@ func (m *CollectorManager) EnableCollector(name string) error {
 	}
 	
 	// 这里需要根据具体的收集器实现来启用
-	// 由于接口中没有Enable方法，这里只是示例
+	// 由于接口中没有Enable方法，这里只是示�?
 	fmt.Printf("Enabling collector %s\n", name)
 	
-	// 如果管理器正在运行，启动收集器
+	// 如果管理器正在运行，启动收集�?
 	if m.running {
 		go func() {
 			if err := collector.Start(m.ctx); err != nil {
 				select {
 				case m.errorChan <- fmt.Errorf("collector %s error: %w", name, err):
 				default:
-					// 错误通道已满，丢弃错误
+					// 错误通道已满，丢弃错�?
 				}
 			}
 		}()
@@ -437,7 +437,7 @@ func (m *CollectorManager) EnableCollector(name string) error {
 	return nil
 }
 
-// DisableCollector 禁用收集器
+// DisableCollector 禁用收集�?
 func (m *CollectorManager) DisableCollector(name string) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
@@ -447,7 +447,7 @@ func (m *CollectorManager) DisableCollector(name string) error {
 		return fmt.Errorf("collector %s not found", name)
 	}
 	
-	// 停止收集器
+	// 停止收集�?
 	if err := collector.Stop(); err != nil {
 		return fmt.Errorf("failed to stop collector %s: %w", name, err)
 	}
@@ -455,7 +455,7 @@ func (m *CollectorManager) DisableCollector(name string) error {
 	return nil
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (m *CollectorManager) Health() error {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
@@ -504,7 +504,7 @@ func (m *CollectorManager) GetStats() *ManagerStats {
 		if collector.IsEnabled() {
 			stats.EnabledCount++
 			
-			// 检查健康状态
+			// 检查健康状�?
 			if err := collector.Health(); err != nil {
 				collectorStats.HealthStatus = "unhealthy"
 				collectorStats.LastError = err.Error()
@@ -521,7 +521,7 @@ func (m *CollectorManager) GetStats() *ManagerStats {
 	return stats
 }
 
-// GetCollectorStats 获取特定收集器统计信息
+// GetCollectorStats 获取特定收集器统计信�?
 func (m *CollectorManager) GetCollectorStats(name string) (*CollectorStats, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
@@ -540,7 +540,7 @@ func (m *CollectorManager) GetCollectorStats(name string) (*CollectorStats, erro
 	}
 	
 	if collector.IsEnabled() {
-		// 检查健康状态
+		// 检查健康状�?
 		if err := collector.Health(); err != nil {
 			stats.HealthStatus = "unhealthy"
 			stats.LastError = err.Error()
@@ -579,13 +579,13 @@ func (m *CollectorManager) UpdateConfig(config *CollectorManagerConfig) error {
 	return nil
 }
 
-// Restart 重启管理器
+// Restart 重启管理�?
 func (m *CollectorManager) Restart() error {
 	if err := m.Stop(); err != nil {
 		return fmt.Errorf("failed to stop: %w", err)
 	}
 	
-	// 重新初始化
+	// 重新初始�?
 	if err := m.Initialize(); err != nil {
 		return fmt.Errorf("failed to initialize: %w", err)
 	}
@@ -597,7 +597,7 @@ func (m *CollectorManager) Restart() error {
 	return nil
 }
 
-// CollectOnce 执行一次收集
+// CollectOnce 执行一次收�?
 func (m *CollectorManager) CollectOnce() (map[string][]models.Metric, error) {
 	m.mutex.RLock()
 	collectors := make(map[string]interfaces.MetricCollector)

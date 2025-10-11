@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	configServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure/config"
+	configServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure/config"
 )
 
 // RealtimeLearningAnalyticsServiceImpl 实时学习分析服务实现
@@ -37,7 +37,7 @@ type ValidationRule struct {
 	Parameters  map[string]interface{} `json:"parameters"`
 }
 
-// Analyzer 分析器
+// Analyzer 分析�?
 type Analyzer struct {
 	AnalyzerID   string                 `json:"analyzer_id"`
 	Type         string                 `json:"type"`
@@ -47,7 +47,7 @@ type Analyzer struct {
 	LastUpdated  time.Time              `json:"last_updated"`
 }
 
-// Predictor 预测器
+// Predictor 预测�?
 type Predictor struct {
 	PredictorID  string                 `json:"predictor_id"`
 	ModelType    string                 `json:"model_type"`
@@ -58,7 +58,7 @@ type Predictor struct {
 	LastTrained  time.Time              `json:"last_trained"`
 }
 
-// RealTimeDataCollector 实时数据收集器
+// RealTimeDataCollector 实时数据收集�?
 type RealTimeDataCollector struct {
 	collectors      map[string]*DataCollector
 	eventStreams    map[string]*EventStream
@@ -67,7 +67,7 @@ type RealTimeDataCollector struct {
 	mu             sync.RWMutex
 }
 
-// DataCollector 数据收集器
+// DataCollector 数据收集�?
 type DataCollector struct {
 	CollectorID   string                 `json:"collector_id"`
 	Type          string                 `json:"type"`
@@ -79,7 +79,7 @@ type DataCollector struct {
 	Config        map[string]interface{} `json:"config"`
 }
 
-// EventStream 事件流
+// EventStream 事件�?
 type EventStream struct {
 	StreamID     string                 `json:"stream_id"`
 	Name         string                 `json:"name"`
@@ -105,7 +105,7 @@ type LearningEvent struct {
 	Priority    int                    `json:"priority"`
 }
 
-// DataValidator 数据验证器
+// DataValidator 数据验证�?
 type DataValidator struct {
 	ValidatorID string                 `json:"validator_id"`
 	Type        string                 `json:"type"`
@@ -122,7 +122,7 @@ type BufferManager struct {
 	mu          sync.RWMutex
 }
 
-// DataBuffer 数据缓冲区
+// DataBuffer 数据缓冲�?
 type DataBuffer struct {
 	BufferID    string                   `json:"buffer_id"`
 	Type        string                   `json:"type"`
@@ -142,7 +142,7 @@ type StreamProcessor struct {
 	mu             sync.RWMutex
 }
 
-// Processor 处理器
+// Processor 处理�?
 type Processor struct {
 	ProcessorID string                 `json:"processor_id"`
 	Type        string                 `json:"type"`
@@ -200,7 +200,7 @@ type StageMetrics struct {
 	OutputCount  int64         `json:"output_count"`
 }
 
-// DataTransformer 数据转换器
+// DataTransformer 数据转换�?
 type DataTransformer struct {
 	TransformerID string                 `json:"transformer_id"`
 	Type          string                 `json:"type"`
@@ -221,7 +221,7 @@ type TransformationRule struct {
 	IsEnabled   bool                   `json:"is_enabled"`
 }
 
-// RealtimeDataAggregator 实时数据聚合器
+// RealtimeDataAggregator 实时数据聚合�?
 type RealtimeDataAggregator struct {
 	AggregatorID string                 `json:"aggregator_id"`
 	Type         string                 `json:"type"`
@@ -273,7 +273,7 @@ type ModelPerformance struct {
 	LastUpdated time.Time `json:"last_updated"`
 }
 
-// InsightGenerator 洞察生成器
+// InsightGenerator 洞察生成�?
 type InsightGenerator struct {
 	GeneratorID string                 `json:"generator_id"`
 	Type        string                 `json:"type"`
@@ -312,7 +312,7 @@ type Detector struct {
 	Config      map[string]interface{} `json:"config"`
 }
 
-// DetectionAlgorithm 检测算法
+// DetectionAlgorithm 检测算�?
 type DetectionAlgorithm struct {
 	AlgorithmID string                 `json:"algorithm_id"`
 	Name        string                 `json:"name"`
@@ -330,7 +330,7 @@ type AlgorithmPerformance struct {
 	LastEvaluated     time.Time `json:"last_evaluated"`
 }
 
-// Threshold 阈值
+// Threshold 阈�?
 type Threshold struct {
 	ThresholdID string                 `json:"threshold_id"`
 	Type        string                 `json:"type"`
@@ -340,7 +340,7 @@ type Threshold struct {
 	Config      map[string]interface{} `json:"config"`
 }
 
-// AlertManager 告警管理器
+// AlertManager 告警管理�?
 type AlertManager struct {
 	alerts      map[string]*Alert
 	rules       map[string]*AlertRule
@@ -399,7 +399,7 @@ type AlertChannel struct {
 	LastUsed    *time.Time             `json:"last_used,omitempty"`
 }
 
-// EscalationManager 升级管理器
+// EscalationManager 升级管理�?
 type EscalationManager struct {
 	policies    map[string]*EscalationPolicy
 	escalations map[string]*Escalation
@@ -441,7 +441,7 @@ type DashboardManager struct {
 	mu         sync.RWMutex
 }
 
-// Dashboard 仪表板
+// Dashboard 仪表�?
 type Dashboard struct {
 	DashboardID string                 `json:"dashboard_id"`
 	Name        string                 `json:"name"`
@@ -455,7 +455,7 @@ type Dashboard struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
-// Widget 小部件
+// Widget 小部�?
 type Widget struct {
 	WidgetID    string                 `json:"widget_id"`
 	Type        string                 `json:"type"`
@@ -468,7 +468,7 @@ type Widget struct {
 	RefreshRate time.Duration          `json:"refresh_rate"`
 }
 
-// WidgetPosition 小部件位置
+// WidgetPosition 小部件位�?
 type WidgetPosition struct {
 	X      int `json:"x"`
 	Y      int `json:"y"`
@@ -511,7 +511,7 @@ type TimeRange struct {
 	End   time.Time `json:"end"`
 }
 
-// DataIndexer 数据索引器
+// DataIndexer 数据索引�?
 type DataIndexer struct {
 	indexes     map[string]*Index
 	builders    map[string]*IndexBuilder
@@ -529,7 +529,7 @@ type Index struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
-// IndexBuilder 索引构建器
+// IndexBuilder 索引构建�?
 type IndexBuilder struct {
 	BuilderID   string                 `json:"builder_id"`
 	Type        string                 `json:"type"`
@@ -538,14 +538,14 @@ type IndexBuilder struct {
 	Progress    float64                `json:"progress"`
 }
 
-// DataCompressor 数据压缩器
+// DataCompressor 数据压缩�?
 type DataCompressor struct {
 	compressors map[string]*Compressor
 	algorithms  map[string]*CompressionAlgorithm
 	mu         sync.RWMutex
 }
 
-// Compressor 压缩器
+// Compressor 压缩�?
 type Compressor struct {
 	CompressorID string                 `json:"compressor_id"`
 	Type         string                 `json:"type"`
@@ -565,14 +565,14 @@ type CompressionAlgorithm struct {
 	Parameters  map[string]interface{} `json:"parameters"`
 }
 
-// DataArchiver 数据归档器
+// DataArchiver 数据归档�?
 type DataArchiver struct {
 	archivers   map[string]*Archiver
 	policies    map[string]*ArchivePolicy
 	mu         sync.RWMutex
 }
 
-// Archiver 归档器
+// Archiver 归档�?
 type Archiver struct {
 	ArchiverID  string                 `json:"archiver_id"`
 	Type        string                 `json:"type"`
@@ -690,7 +690,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) CollectLearningData(ctx contex
 		return fmt.Errorf("failed to buffer event: %w", err)
 	}
 
-	// 发送到事件流
+	// 发送到事件�?
 	if err := rlas.dataCollector.publishToStream(event); err != nil {
 		return fmt.Errorf("failed to publish to stream: %w", err)
 	}
@@ -707,13 +707,13 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) ProcessRealTimeData(ctx contex
 	rlas.mu.Lock()
 	defer rlas.mu.Unlock()
 
-	// 获取事件流
+	// 获取事件�?
 	stream, err := rlas.dataCollector.getEventStream(streamID)
 	if err != nil {
 		return fmt.Errorf("failed to get event stream: %w", err)
 	}
 
-	// 处理流中的事件
+	// 处理流中的事�?
 	for {
 		select {
 		case event := <-stream.Events:
@@ -732,7 +732,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) GenerateInsights(ctx context.C
 	rlas.mu.RLock()
 	defer rlas.mu.RUnlock()
 
-	// 检查缓存
+	// 检查缓�?
 	if cached := rlas.cache.getCachedInsight(query); cached != nil {
 		return cached.Data, nil
 	}
@@ -755,7 +755,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) GenerateInsights(ctx context.C
 	return generatedInsights, nil
 }
 
-// DetectAnomalies 检测异常
+// DetectAnomalies 检测异�?
 func (rlas *RealtimeLearningAnalyticsServiceImpl) DetectAnomalies(ctx context.Context, data map[string]interface{}) ([]*Anomaly, error) {
 	rlas.mu.RLock()
 	defer rlas.mu.RUnlock()
@@ -765,10 +765,10 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) DetectAnomalies(ctx context.Co
 		return nil, fmt.Errorf("anomaly detection failed: %w", err)
 	}
 
-	// 处理检测到的异常
+	// 处理检测到的异�?
 	for _, anomaly := range anomalies {
 		if err := rlas.handleAnomaly(anomaly); err != nil {
-			continue // 记录错误但继续处理其他异常
+			continue // 记录错误但继续处理其他异�?
 		}
 	}
 
@@ -785,7 +785,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) CreateAlert(ctx context.Contex
 		return fmt.Errorf("alert validation failed: %w", err)
 	}
 
-	// 检查重复告警
+	// 检查重复告�?
 	if rlas.alertManager.isDuplicateAlert(alert) {
 		return fmt.Errorf("duplicate alert detected")
 	}
@@ -831,7 +831,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) GetRealTimeMetrics(ctx context
 	return metrics, nil
 }
 
-// CreateDashboard 创建仪表板
+// CreateDashboard 创建仪表�?
 func (rlas *RealtimeLearningAnalyticsServiceImpl) CreateDashboard(ctx context.Context, dashboard *Dashboard) error {
 	rlas.mu.Lock()
 	defer rlas.mu.Unlock()
@@ -839,7 +839,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) CreateDashboard(ctx context.Co
 	return rlas.dashboardManager.createDashboard(dashboard)
 }
 
-// UpdateDashboard 更新仪表板
+// UpdateDashboard 更新仪表�?
 func (rlas *RealtimeLearningAnalyticsServiceImpl) UpdateDashboard(ctx context.Context, dashboardID string, updates map[string]interface{}) error {
 	rlas.mu.Lock()
 	defer rlas.mu.Unlock()
@@ -847,7 +847,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) UpdateDashboard(ctx context.Co
 	return rlas.dashboardManager.updateDashboard(dashboardID, updates)
 }
 
-// GetDashboardData 获取仪表板数据
+// GetDashboardData 获取仪表板数�?
 func (rlas *RealtimeLearningAnalyticsServiceImpl) GetDashboardData(ctx context.Context, dashboardID string) (map[string]interface{}, error) {
 	rlas.mu.RLock()
 	defer rlas.mu.RUnlock()
@@ -865,7 +865,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) Shutdown(ctx context.Context) 
 		return fmt.Errorf("failed to stop data collector: %w", err)
 	}
 
-	// 停止流处理
+	// 停止流处�?
 	if err := rlas.streamProcessor.stop(); err != nil {
 		return fmt.Errorf("failed to stop stream processor: %w", err)
 	}
@@ -1060,7 +1060,7 @@ func (bm *BufferManager) addEvent(event *LearningEvent) error {
 	}
 
 	if buffer.CurrentSize >= buffer.MaxSize {
-		// 刷新缓冲区
+		// 刷新缓冲�?
 		if err := bm.flushBuffer(bufferID); err != nil {
 			return err
 		}
@@ -1072,7 +1072,7 @@ func (bm *BufferManager) addEvent(event *LearningEvent) error {
 }
 
 func (bm *BufferManager) flushBuffer(bufferID string) error {
-	// 简化的缓冲区刷新
+	// 简化的缓冲区刷�?
 	if buffer, exists := bm.buffers[bufferID]; exists {
 		buffer.Data = make([]*LearningEvent, 0)
 		buffer.CurrentSize = 0
@@ -1123,7 +1123,7 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) processEvent(event *LearningEv
 }
 
 func (sp *StreamProcessor) processEvent(event *LearningEvent) error {
-	// 简化的流处理
+	// 简化的流处�?
 	return nil
 }
 
@@ -1140,12 +1140,12 @@ func (ae *AnalyticsEngine) generateInsights(data map[string]interface{}) (map[st
 	// 简化的洞察生成
 	insights := map[string]interface{}{
 		"key_findings": []string{
-			"学习者参与度提高了15%",
-			"平均完成时间减少了10%",
-			"困难内容识别准确率达到85%",
+			"学习者参与度提高�?5%",
+			"平均完成时间减少�?0%",
+			"困难内容识别准确率达�?5%",
 		},
 		"recommendations": []string{
-			"增加互动性内容",
+			"增加互动性内�?,
 			"优化学习路径",
 			"提供个性化反馈",
 		},
@@ -1159,10 +1159,10 @@ func (ae *AnalyticsEngine) generateInsights(data map[string]interface{}) (map[st
 }
 
 func (ad *AnomalyDetector) detectAnomalies(data map[string]interface{}) ([]*Anomaly, error) {
-	// 简化的异常检测
+	// 简化的异常检�?
 	anomalies := make([]*Anomaly, 0)
 	
-	// 模拟检测到一个异常
+	// 模拟检测到一个异�?
 	anomaly := &Anomaly{
 		AnomalyID:   uuid.New(),
 		Type:        "performance_drop",
@@ -1213,7 +1213,7 @@ func (am *AlertManager) validateAlert(alert *Alert) error {
 }
 
 func (am *AlertManager) isDuplicateAlert(alert *Alert) bool {
-	// 简化的重复检测
+	// 简化的重复检�?
 	return false
 }
 
@@ -1369,6 +1369,6 @@ func (rlas *RealtimeLearningAnalyticsServiceImpl) saveMetrics() error {
 	if err != nil {
 		return err
 	}
-	_ = metricsData // 这里可以保存到文件或数据库
+	_ = metricsData // 这里可以保存到文件或数据�?
 	return nil
 }

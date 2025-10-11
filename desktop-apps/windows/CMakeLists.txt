@@ -40,23 +40,28 @@ set(COMMON_SOURCES
 set(WINDOWS_SOURCES
     src/main.cpp
     src/application.cpp
-    src/window_manager.cpp
     src/desktop_pet.cpp
     src/file_transfer.cpp
     src/data_sync.cpp
-    src/project_manager.cpp
-    src/ui/main_window.cpp
-    src/ui/pet_window.cpp
-    src/ui/settings_dialog.cpp
-    src/ui/file_transfer_dialog.cpp
-    src/ui/project_view.cpp
-    src/network/client.cpp
-    src/network/server.cpp
-    src/storage/database.cpp
-    src/storage/cache.cpp
-    src/crypto/encryption.cpp
-    src/utils/registry.cpp
-    src/utils/system_tray.cpp
+    src/auth_manager.cpp
+    src/chat_manager.cpp
+    src/project_management.cpp
+    src/friend_manager.cpp
+    src/http_client.cpp
+)
+
+# 头文件
+set(WINDOWS_HEADERS
+    src/pch.h
+    src/application.h
+    src/desktop_pet.h
+    src/file_transfer.h
+    src/data_sync.h
+    src/auth_manager.h
+    src/chat_manager.h
+    src/project_management.h
+    src/friend_manager.h
+    src/http_client.h
 )
 
 set(RESOURCE_FILES
@@ -69,6 +74,7 @@ set(RESOURCE_FILES
 add_executable(${PROJECT_NAME} WIN32
     ${COMMON_SOURCES}
     ${WINDOWS_SOURCES}
+    ${WINDOWS_HEADERS}
     ${RESOURCE_FILES}
 )
 
@@ -95,7 +101,7 @@ target_link_libraries(${PROJECT_NAME}
 
 # 预编译头
 target_precompile_headers(${PROJECT_NAME} PRIVATE
-    include/pch.h
+    src/pch.h
 )
 
 # 编译定义

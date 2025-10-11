@@ -81,7 +81,7 @@ type UpdateTeamMemberRequest struct {
 	UpdatedBy uuid.UUID `json:"updated_by" validate:"required"`
 }
 
-// AddTeamSkillRequest 添加团队技能请求
+// AddTeamSkillRequest 添加团队技能请�?
 type AddTeamSkillRequest struct {
 	SkillName   string    `json:"skill_name" validate:"required,min=1,max=100"`
 	Level       int       `json:"level" validate:"min=1,max=5"`
@@ -89,14 +89,14 @@ type AddTeamSkillRequest struct {
 	AddedBy     uuid.UUID `json:"added_by" validate:"required"`
 }
 
-// UpdateTeamSkillRequest 更新团队技能请求
+// UpdateTeamSkillRequest 更新团队技能请�?
 type UpdateTeamSkillRequest struct {
 	Level       *int      `json:"level,omitempty"`
 	Description *string   `json:"description,omitempty"`
 	UpdatedBy   uuid.UUID `json:"updated_by" validate:"required"`
 }
 
-// RemoveTeamSkillRequest 移除团队技能请求
+// RemoveTeamSkillRequest 移除团队技能请�?
 type RemoveTeamSkillRequest struct {
 	RemovedBy uuid.UUID `json:"removed_by" validate:"required"`
 }
@@ -134,7 +134,7 @@ type TeamMemberResponse struct {
 	JoinedAt time.Time `json:"joined_at"`
 }
 
-// TeamSkillResponse 团队技能响应
+// TeamSkillResponse 团队技能响�?
 type TeamSkillResponse struct {
 	ID          uuid.UUID `json:"id"`
 	TeamID      uuid.UUID `json:"team_id"`

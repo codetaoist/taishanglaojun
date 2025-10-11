@@ -7,7 +7,7 @@ import (
 
 // PermissionService 权限服务接口
 type PermissionService interface {
-	// 权限检查
+	// 权限检�?
 	CheckPermission(ctx context.Context, request *PermissionCheckRequest) (*PermissionCheckResponse, error)
 	CheckPermissions(ctx context.Context, requests []*PermissionCheckRequest) ([]*PermissionCheckResponse, error)
 	
@@ -61,7 +61,7 @@ type PermissionService interface {
 	// 权限审计
 	GetPermissionAuditLog(ctx context.Context, filter *PermissionAuditFilter) (*PermissionAuditResponse, error)
 	
-	// 健康检查
+	// 健康检�?
 	HealthCheck(ctx context.Context) *HealthStatus
 }
 
@@ -202,9 +202,9 @@ const (
 	PolicyTypeACL  PolicyType = "acl"
 )
 
-// 请求和响应结构
+// 请求和响应结�?
 
-// PermissionCheckRequest 权限检查请求
+// PermissionCheckRequest 权限检查请�?
 type PermissionCheckRequest struct {
 	UserID       string                 `json:"user_id"`
 	TenantID     string                 `json:"tenant_id"`
@@ -215,7 +215,7 @@ type PermissionCheckRequest struct {
 	CheckMode    CheckMode              `json:"check_mode,omitempty"`
 }
 
-// PermissionCheckResponse 权限检查响应
+// PermissionCheckResponse 权限检查响�?
 type PermissionCheckResponse struct {
 	Allowed     bool                   `json:"allowed"`
 	Reason      string                 `json:"reason"`
@@ -225,7 +225,7 @@ type PermissionCheckResponse struct {
 	Context     map[string]interface{} `json:"context,omitempty"`
 }
 
-// CheckMode 检查模式
+// CheckMode 检查模�?
 type CheckMode string
 
 const (
@@ -362,7 +362,7 @@ type PolicyEvaluationResponse struct {
 
 // 过滤器和分页
 
-// RoleFilter 角色过滤器
+// RoleFilter 角色过滤�?
 type RoleFilter struct {
 	Name       string    `json:"name"`
 	Type       *RoleType `json:"type"`
@@ -374,7 +374,7 @@ type RoleFilter struct {
 	Pagination PaginationRequest `json:"pagination"`
 }
 
-// PermissionFilter 权限过滤器
+// PermissionFilter 权限过滤�?
 type PermissionFilter struct {
 	Name       string            `json:"name"`
 	Category   string            `json:"category"`
@@ -385,7 +385,7 @@ type PermissionFilter struct {
 	Pagination PaginationRequest `json:"pagination"`
 }
 
-// PolicyFilter 策略过滤器
+// PolicyFilter 策略过滤�?
 type PolicyFilter struct {
 	Name       string            `json:"name"`
 	Type       *PolicyType       `json:"type"`
@@ -395,7 +395,7 @@ type PolicyFilter struct {
 	Pagination PaginationRequest `json:"pagination"`
 }
 
-// PermissionAuditFilter 权限审计过滤器
+// PermissionAuditFilter 权限审计过滤�?
 type PermissionAuditFilter struct {
 	UserID       string    `json:"user_id"`
 	TenantID     string    `json:"tenant_id"`
@@ -464,7 +464,7 @@ type PermissionAuditLog struct {
 	CreatedAt    time.Time              `json:"created_at" db:"created_at"`
 }
 
-// HealthStatus 健康状态
+// HealthStatus 健康状�?
 type HealthStatus struct {
 	Healthy   bool              `json:"healthy"`
 	Status    string            `json:"status"`
@@ -523,7 +523,7 @@ type PermissionRepository interface {
 	CreatePermissionAuditLog(ctx context.Context, auditLog *PermissionAuditLog) error
 	GetPermissionAuditLogs(ctx context.Context, filter *PermissionAuditFilter) ([]*PermissionAuditLog, int64, error)
 	
-	// 健康检查
+	// 健康检�?
 	HealthCheck(ctx context.Context) error
 }
 
@@ -539,7 +539,7 @@ type PermissionCache interface {
 	GetUserRoles(ctx context.Context, userID, tenantID string) ([]*Role, error)
 	DeleteUserRoles(ctx context.Context, userID, tenantID string) error
 	
-	// 权限检查结果缓存
+	// 权限检查结果缓�?
 	SetPermissionCheck(ctx context.Context, key string, result *PermissionCheckResponse, ttl time.Duration) error
 	GetPermissionCheck(ctx context.Context, key string) (*PermissionCheckResponse, error)
 	DeletePermissionCheck(ctx context.Context, key string) error
@@ -548,7 +548,7 @@ type PermissionCache interface {
 	Clear(ctx context.Context) error
 	ClearUserCache(ctx context.Context, userID, tenantID string) error
 	
-	// 健康检查
+	// 健康检�?
 	HealthCheck(ctx context.Context) error
 }
 
@@ -586,8 +586,8 @@ func GenerateAuditLogID() string {
 
 // generateUUID 生成UUID（简化实现）
 func generateUUID() string {
-	// 这里应该使用真正的UUID生成库
-	// 为了简化，使用时间戳
+	// 这里应该使用真正的UUID生成�?
+	// 为了简化，使用时间�?
 	return fmt.Sprintf("%d", time.Now().UnixNano())
 }
 

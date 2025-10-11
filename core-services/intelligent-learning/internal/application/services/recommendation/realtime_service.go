@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	domainServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // RealtimeRecommendationService 实时推荐服务
@@ -46,7 +46,7 @@ type RealtimeUserSession struct {
 	Preferences   *domainServices.UserPreferences       `json:"preferences"`
 }
 
-// LearningState 学习状态
+// LearningState 学习状�?
 type LearningState struct {
 	CurrentContent    string                 `json:"current_content"`
 	Progress          float64                `json:"progress"`
@@ -72,7 +72,7 @@ type RealtimeEvent struct {
 	Context     *EventContext          `json:"context"`
 }
 
-// EventContext 事件上下文
+// EventContext 事件上下�?
 type EventContext struct {
 	DeviceType    string                 `json:"device_type"`
 	Platform      string                 `json:"platform"`
@@ -81,7 +81,7 @@ type EventContext struct {
 	Environment   map[string]interface{} `json:"environment"`
 }
 
-// CachedRecommendations 缓存的推荐
+// CachedRecommendations 缓存的推�?
 type CachedRecommendations struct {
 	UserID        string                      `json:"user_id"`
 	Recommendations []*domainServices.PersonalizedRecommendation `json:"recommendations"`
@@ -143,10 +143,10 @@ func NewRealtimeRecommendationService(
 		config:                config,
 	}
 
-	// 启动事件处理器
+	// 启动事件处理�?
 	go service.processEvents()
 	
-	// 启动会话清理器
+	// 启动会话清理�?
 	go service.cleanupSessions()
 
 	return service
@@ -178,7 +178,7 @@ func (s *RealtimeRecommendationService) ProcessEvent(ctx context.Context, event 
 
 // GetRealtimeRecommendations 获取实时推荐
 func (s *RealtimeRecommendationService) GetRealtimeRecommendations(ctx context.Context, userID string) ([]*domainServices.PersonalizedRecommendation, error) {
-	// 检查缓存
+	// 检查缓�?
 	s.cacheMutex.RLock()
 	cached, exists := s.recommendationCache[userID]
 	s.cacheMutex.RUnlock()
@@ -271,7 +271,7 @@ func (s *RealtimeRecommendationService) handleEvent(event *RealtimeEvent) {
 		s.userBehaviorTracker.TrackBehaviorEvent(ctx, behaviorEvent)
 	}()
 
-	// 检查是否需要更新推荐
+	// 检查是否需要更新推�?
 	if s.shouldUpdateRecommendations(event) {
 		go s.updateRecommendations(event.UserID, event)
 	}
@@ -305,11 +305,11 @@ func (s *RealtimeRecommendationService) updateUserSession(event *RealtimeEvent) 
 		session.Events = session.Events[len(session.Events)-100:]
 	}
 
-	// 更新学习状态
+	// 更新学习状�?
 	s.updateLearningState(session, event)
 }
 
-// updateLearningState 更新学习状态
+// updateLearningState 更新学习状�?
 func (s *RealtimeRecommendationService) updateLearningState(session *RealtimeUserSession, event *RealtimeEvent) {
 	state := session.CurrentState
 
@@ -344,9 +344,9 @@ func (s *RealtimeRecommendationService) updateLearningState(session *RealtimeUse
 	}
 }
 
-// shouldUpdateRecommendations 检查是否应该更新推荐
+// shouldUpdateRecommendations 检查是否应该更新推�?
 func (s *RealtimeRecommendationService) shouldUpdateRecommendations(event *RealtimeEvent) bool {
-	// 检查缓存
+	// 检查缓�?
 	s.cacheMutex.RLock()
 	cached, exists := s.recommendationCache[event.UserID]
 	s.cacheMutex.RUnlock()
@@ -355,7 +355,7 @@ func (s *RealtimeRecommendationService) shouldUpdateRecommendations(event *Realt
 		return true
 	}
 
-	// 检查最小更新间隔
+	// 检查最小更新间�?
 	if time.Since(cached.GeneratedAt) < s.config.MinUpdateInterval {
 		return false
 	}
@@ -365,7 +365,7 @@ func (s *RealtimeRecommendationService) shouldUpdateRecommendations(event *Realt
 	case "content_complete", "quiz_complete", "skill_mastery":
 		return true
 	case "content_view":
-		// 检查观看时长
+		// 检查观看时�?
 		if duration, ok := event.Properties["duration"].(int64); ok {
 			return duration > 300000 // 5分钟以上
 		}
@@ -384,7 +384,7 @@ func (s *RealtimeRecommendationService) updateRecommendations(userID string, tri
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// 生成新推荐
+	// 生成新推�?
 	recommendations, err := s.generateRealtimeRecommendations(ctx, userID)
 	if err != nil {
 		return
@@ -402,7 +402,7 @@ func (s *RealtimeRecommendationService) updateRecommendations(userID string, tri
 	}
 	s.cacheMutex.Unlock()
 
-	// 通知订阅者
+	// 通知订阅�?
 	s.notifySubscribers(userID, recommendations, triggerEvent)
 }
 
@@ -411,7 +411,7 @@ func (s *RealtimeRecommendationService) generateRealtimeRecommendations(ctx cont
 	// 获取用户会话
 	session, err := s.GetUserSession(userID)
 	if err != nil {
-		// 如果没有会话，使用标准推荐
+		// 如果没有会话，使用标准推�?
 		req := &domainServices.PersonalizationRequest{
 			LearnerID:          uuid.MustParse(userID),
 			MaxRecommendations: s.config.MaxRecommendations,
@@ -420,7 +420,7 @@ func (s *RealtimeRecommendationService) generateRealtimeRecommendations(ctx cont
 		if err != nil {
 			return nil, err
 		}
-		// 转换为指针切片
+		// 转换为指针切�?
 		result := make([]*domainServices.PersonalizedRecommendation, len(response.Recommendations))
 		for i := range response.Recommendations {
 			result[i] = &response.Recommendations[i]
@@ -428,7 +428,7 @@ func (s *RealtimeRecommendationService) generateRealtimeRecommendations(ctx cont
 		return result, nil
 	}
 
-	// 构建实时上下文
+	// 构建实时上下�?
 	realtimeContext := s.buildRealtimeContext(session)
 
 	// 生成个性化推荐
@@ -443,7 +443,7 @@ func (s *RealtimeRecommendationService) generateRealtimeRecommendations(ctx cont
 		return nil, err
 	}
 
-	// 转换为指针切片
+	// 转换为指针切�?
 	recommendationPtrs := make([]*domainServices.PersonalizedRecommendation, len(response.Recommendations))
 	for i := range response.Recommendations {
 		recommendationPtrs[i] = &response.Recommendations[i]
@@ -455,7 +455,7 @@ func (s *RealtimeRecommendationService) generateRealtimeRecommendations(ctx cont
 	return adjustedRecommendations, nil
 }
 
-// buildRealtimeContext 构建实时上下文
+// buildRealtimeContext 构建实时上下�?
 func (s *RealtimeRecommendationService) buildRealtimeContext(session *RealtimeUserSession) *domainServices.PersonalizationContext {
 	metadata := make(map[string]interface{})
 
@@ -464,7 +464,7 @@ func (s *RealtimeRecommendationService) buildRealtimeContext(session *RealtimeUs
 	metadata["activity_count"] = len(session.Events)
 	metadata["last_activity"] = session.LastActivity
 
-	// 学习状态
+	// 学习状�?
 	currentContent := ""
 	if session.CurrentState != nil {
 		currentContent = session.CurrentState.CurrentContent
@@ -476,16 +476,16 @@ func (s *RealtimeRecommendationService) buildRealtimeContext(session *RealtimeUs
 		metadata["learning_style"] = session.CurrentState.LearningStyle
 	}
 
-	// 最近事件分析
+	// 最近事件分�?
 	recentEvents := s.getRecentEvents(session, 10)
 	recentActivity := s.analyzeRecentEvents(recentEvents)
 
 	return &domainServices.PersonalizationContext{
 		SessionID:      session.SessionID,
-		Device:         "unknown", // 可以从session中获取
-		Location:       "unknown", // 可以从session中获取
+		Device:         "unknown", // 可以从session中获�?
+		Location:       "unknown", // 可以从session中获�?
 		TimeOfDay:      time.Now().Format("15:04"),
-		AvailableTime:  30, // 默认30分钟，可以根据实际情况调整
+		AvailableTime:  30, // 默认30分钟，可以根据实际情况调�?
 		EnergyLevel:    0.8, // 默认值，可以根据用户行为分析
 		Goals:          []string{}, // 可以从用户配置中获取
 		CurrentContent: currentContent,
@@ -496,10 +496,10 @@ func (s *RealtimeRecommendationService) buildRealtimeContext(session *RealtimeUs
 
 	return &domainServices.PersonalizationContext{
 		SessionID:      session.SessionID,
-		Device:         "unknown", // 可以从session中获取
-		Location:       "unknown", // 可以从session中获取
+		Device:         "unknown", // 可以从session中获�?
+		Location:       "unknown", // 可以从session中获�?
 		TimeOfDay:      time.Now().Format("15:04"),
-		AvailableTime:  30, // 默认30分钟，可以根据实际情况调整
+		AvailableTime:  30, // 默认30分钟，可以根据实际情况调�?
 		EnergyLevel:    0.8, // 默认值，可以根据用户行为分析
 		Goals:          []string{}, // 可以从用户配置中获取
 		CurrentContent: currentContent,
@@ -520,9 +520,9 @@ func (s *RealtimeRecommendationService) applyRealtimeAdjustments(recommendations
 	copy(adjusted, recommendations)
 
 	for _, rec := range adjusted {
-		// 基于参与度调整
+		// 基于参与度调�?
 		if state.Engagement < 0.3 {
-			// 低参与度，推荐更有趣的内容
+			// 低参与度，推荐更有趣的内�?
 			if rec.Type == "interactive" || rec.Type == "game" {
 				rec.Score *= 1.3
 			}
@@ -533,7 +533,7 @@ func (s *RealtimeRecommendationService) applyRealtimeAdjustments(recommendations
 			}
 		}
 
-		// 基于理解率调整
+		// 基于理解率调�?
 		if state.ComprehensionRate < 0.5 {
 			// 理解率低，推荐基础内容
 			if rec.Difficulty == "beginner" || rec.Difficulty == "intermediate" {
@@ -541,7 +541,7 @@ func (s *RealtimeRecommendationService) applyRealtimeAdjustments(recommendations
 			}
 		}
 
-		// 基于专注度调整
+		// 基于专注度调�?
 		if state.FocusLevel < 0.4 {
 			// 专注度低，推荐短时间内容
 			if rec.EstimatedTime <= 15 {
@@ -606,7 +606,7 @@ func (s *RealtimeRecommendationService) notifySubscribers(userID string, recomme
 		select {
 		case channel <- update:
 		default:
-			// 通道已满，跳过此次更新
+			// 通道已满，跳过此次更�?
 		}
 	}
 }

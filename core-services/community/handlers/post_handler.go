@@ -10,13 +10,13 @@ import (
 	"go.uber.org/zap"
 )
 
-// PostHandler 帖子处理器
+// PostHandler 帖子处理�?
 type PostHandler struct {
 	postService *services.PostService
 	logger      *zap.Logger
 }
 
-// NewPostHandler 创建帖子处理器实例
+// NewPostHandler 创建帖子处理器实�?
 func NewPostHandler(postService *services.PostService, logger *zap.Logger) *PostHandler {
 	return &PostHandler{
 		postService: postService,
@@ -33,14 +33,14 @@ func NewPostHandler(postService *services.PostService, logger *zap.Logger) *Post
 // @Param request body models.CreatePostRequest true "创建帖子请求"
 // @Success 201 {object} models.PostResponse "创建成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未授权"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 401 {object} map[string]interface{} "未授�?
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	// 获取用户ID
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访问"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访�?})
 		return
 	}
 
@@ -79,8 +79,8 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 // @Produce json
 // @Param id path string true "帖子ID"
 // @Success 200 {object} models.PostResponse "获取成功"
-// @Failure 404 {object} map[string]interface{} "帖子不存在"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 404 {object} map[string]interface{} "帖子不存�?
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts/{id} [get]
 func (h *PostHandler) GetPost(c *gin.Context) {
 	postID := c.Param("id")
@@ -89,7 +89,7 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 		return
 	}
 
-	// 获取当前用户ID（如果已登录）
+	// 获取当前用户ID（如果已登录�?
 	var userID *string
 	if uid, exists := c.Get("user_id"); exists {
 		if uidStr, ok := uid.(string); ok {
@@ -101,7 +101,7 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 	post, err := h.postService.GetPost(postID, userID)
 	if err != nil {
 		h.logger.Error("Failed to get post", zap.String("post_id", postID), zap.Error(err))
-		c.JSON(http.StatusNotFound, gin.H{"error": "帖子不存在"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "帖子不存�?})
 		return
 	}
 
@@ -110,18 +110,18 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 
 // GetPosts 获取帖子列表
 // @Summary 获取帖子列表
-// @Description 分页获取帖子列表，支持按分类、标签、状态筛选
+// @Description 分页获取帖子列表，支持按分类、标签、状态筛�?
 // @Tags 帖子管理
 // @Produce json
 // @Param page query int false "页码" default(1)
 // @Param page_size query int false "每页数量" default(20)
 // @Param category query string false "分类"
 // @Param tag query string false "标签"
-// @Param status query string false "状态"
+// @Param status query string false "状�?
 // @Param sort query string false "排序方式" Enums(latest,hot,top)
 // @Success 200 {object} map[string]interface{} "获取成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts [get]
 func (h *PostHandler) GetPosts(c *gin.Context) {
 	// 解析查询参数
@@ -154,7 +154,7 @@ func (h *PostHandler) GetPosts(c *gin.Context) {
 		Keyword:  keyword,
 	}
 
-	// 获取当前用户ID（如果已登录）
+	// 获取当前用户ID（如果已登录�?
 	var userID *string
 	if uid, exists := c.Get("user_id"); exists {
 		if uidStr, ok := uid.(string); ok {
@@ -183,7 +183,7 @@ func (h *PostHandler) GetPosts(c *gin.Context) {
 
 // UpdatePost 更新帖子
 // @Summary 更新帖子
-// @Description 更新帖子信息（仅作者可操作）
+// @Description 更新帖子信息（仅作者可操作�?
 // @Tags 帖子管理
 // @Accept json
 // @Produce json
@@ -191,16 +191,16 @@ func (h *PostHandler) GetPosts(c *gin.Context) {
 // @Param request body models.UpdatePostRequest true "更新帖子请求"
 // @Success 200 {object} models.PostResponse "更新成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未授权"
-// @Failure 403 {object} map[string]interface{} "无权限"
-// @Failure 404 {object} map[string]interface{} "帖子不存在"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 401 {object} map[string]interface{} "未授�?
+// @Failure 403 {object} map[string]interface{} "无权�?
+// @Failure 404 {object} map[string]interface{} "帖子不存�?
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts/{id} [put]
 func (h *PostHandler) UpdatePost(c *gin.Context) {
 	// 获取用户ID
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访问"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访�?})
 		return
 	}
 
@@ -221,9 +221,9 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 	post, err := h.postService.UpdatePost(postID, userID.(string), &req)
 	if err != nil {
 		h.logger.Error("Failed to update post", zap.String("post_id", postID), zap.Error(err))
-		if err.Error() == "帖子不存在" {
+		if err.Error() == "帖子不存�? {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		} else if err.Error() == "无权限操作" {
+		} else if err.Error() == "无权限操�? {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "更新帖子失败"})
@@ -236,21 +236,21 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 
 // DeletePost 删除帖子
 // @Summary 删除帖子
-// @Description 删除帖子（仅作者可操作）
+// @Description 删除帖子（仅作者可操作�?
 // @Tags 帖子管理
 // @Produce json
 // @Param id path string true "帖子ID"
 // @Success 200 {object} map[string]interface{} "删除成功"
-// @Failure 401 {object} map[string]interface{} "未授权"
-// @Failure 403 {object} map[string]interface{} "无权限"
-// @Failure 404 {object} map[string]interface{} "帖子不存在"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 401 {object} map[string]interface{} "未授�?
+// @Failure 403 {object} map[string]interface{} "无权�?
+// @Failure 404 {object} map[string]interface{} "帖子不存�?
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts/{id} [delete]
 func (h *PostHandler) DeletePost(c *gin.Context) {
 	// 获取用户ID
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访问"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权访�?})
 		return
 	}
 
@@ -264,9 +264,9 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 	err := h.postService.DeletePost(postID, userID.(string))
 	if err != nil {
 		h.logger.Error("Failed to delete post", zap.String("post_id", postID), zap.Error(err))
-		if err.Error() == "帖子不存在" {
+		if err.Error() == "帖子不存�? {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		} else if err.Error() == "无权限操作" {
+		} else if err.Error() == "无权限操�? {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "删除帖子失败"})
@@ -283,7 +283,7 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 // @Tags 帖子管理
 // @Produce json
 // @Success 200 {object} models.PostStatsResponse "获取成功"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts/stats [get]
 func (h *PostHandler) GetPostStats(c *gin.Context) {
 	stats, err := h.postService.GetPostStats()
@@ -303,12 +303,12 @@ func (h *PostHandler) GetPostStats(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "帖子ID"
-// @Param request body map[string]bool true "置顶状态" example({"sticky": true})
+// @Param request body map[string]bool true "置顶状�? example({"sticky": true})
 // @Success 200 {object} map[string]interface{} "设置成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未授权"
-// @Failure 404 {object} map[string]interface{} "帖子不存在"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 401 {object} map[string]interface{} "未授�?
+// @Failure 404 {object} map[string]interface{} "帖子不存�?
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts/{id}/sticky [patch]
 func (h *PostHandler) SetPostSticky(c *gin.Context) {
 	postID := c.Param("id")
@@ -329,7 +329,7 @@ func (h *PostHandler) SetPostSticky(c *gin.Context) {
 	err := h.postService.SetPostSticky(postID, req.Sticky)
 	if err != nil {
 		h.logger.Error("Failed to set post sticky", zap.String("post_id", postID), zap.Error(err))
-		if err.Error() == "帖子不存在" {
+		if err.Error() == "帖子不存�? {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "设置置顶失败"})
@@ -351,12 +351,12 @@ func (h *PostHandler) SetPostSticky(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "帖子ID"
-// @Param request body map[string]bool true "热门状态" example({"hot": true})
+// @Param request body map[string]bool true "热门状�? example({"hot": true})
 // @Success 200 {object} map[string]interface{} "设置成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 401 {object} map[string]interface{} "未授权"
-// @Failure 404 {object} map[string]interface{} "帖子不存在"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 401 {object} map[string]interface{} "未授�?
+// @Failure 404 {object} map[string]interface{} "帖子不存�?
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts/{id}/hot [patch]
 func (h *PostHandler) SetPostHot(c *gin.Context) {
 	postID := c.Param("id")
@@ -377,7 +377,7 @@ func (h *PostHandler) SetPostHot(c *gin.Context) {
 	err := h.postService.SetPostHot(postID, req.Hot)
 	if err != nil {
 		h.logger.Error("Failed to set post hot", zap.String("post_id", postID), zap.Error(err))
-		if err.Error() == "帖子不存在" {
+		if err.Error() == "帖子不存�? {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "设置热门失败"})
@@ -394,20 +394,20 @@ func (h *PostHandler) SetPostHot(c *gin.Context) {
 
 // SearchPosts 搜索帖子
 // @Summary 搜索帖子
-// @Description 根据关键词搜索帖子
+// @Description 根据关键词搜索帖�?
 // @Tags 帖子管理
 // @Produce json
-// @Param q query string true "搜索关键词"
+// @Param q query string true "搜索关键�?
 // @Param page query int false "页码" default(1)
 // @Param page_size query int false "每页数量" default(20)
 // @Success 200 {object} map[string]interface{} "搜索成功"
 // @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 500 {object} map[string]interface{} "服务器错误"
+// @Failure 500 {object} map[string]interface{} "服务器错�?
 // @Router /community/posts/search [get]
 func (h *PostHandler) SearchPosts(c *gin.Context) {
 	keyword := c.Query("q")
 	if keyword == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "搜索关键词不能为空"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "搜索关键词不能为�?})
 		return
 	}
 

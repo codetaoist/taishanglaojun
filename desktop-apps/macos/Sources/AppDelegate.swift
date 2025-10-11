@@ -14,6 +14,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var projectManager: ProjectManager?
     var networkManager: NetworkManager?
     var statusBarController: StatusBarController?
+    var menuManager: MenuManager?
+    var desktopPetManager: DesktopPetManager?
     
     private var isFirstLaunch = true
     private var applicationSupportURL: URL?
@@ -39,6 +41,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // 开始数据同步
         startDataSync()
         
+        // 设置通知观察者
+        setupNotificationObservers()
+        
+        // 启动桌面宠物（可选）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.desktopPetManager?.showPet()
+        }
+        
         NSLog("太上老君AI平台桌面版启动完成")
     }
     
@@ -48,6 +58,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // 停止所有服务
         stopAllServices()
+        
+        // 清理通知观察者
+        NotificationCenter.default.removeObserver(self)
         
         NSLog("太上老君AI平台桌面版正在退出")
     }
@@ -86,6 +99,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func setupManagers() {
+        // 菜单管理器
+        menuManager = MenuManager.shared
+        
+        // 桌面宠物管理器
+        desktopPetManager = DesktopPetManager.shared
+        
         // 网络管理器
         networkManager = NetworkManager()
         
@@ -382,6 +401,55 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         fileTransferManager?.cancelAllTransfers()
         desktopPetController?.stopPet()
         networkManager?.disconnect()
+    }
+    
+    // MARK: - Notification Observers
+    private func setupNotificationObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(showMainWindowFromNotification),
+            name: .showMainWindow,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(showSettingsFromNotification),
+            name: .showSettings,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(showChatFromNotification),
+            name: .showChat,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(showFileTransferFromNotification),
+            name: .showFileTransfer,
+            object: nil
+        )
+    }
+    
+    @objc private func showMainWindowFromNotification() {
+        showMainWindow()
+        NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+    
+    @objc private func showSettingsFromNotification() {
+        showPreferences()
+    }
+    
+    @objc private func showChatFromNotification() {
+        showMainWindow()
+        // 可以在这里添加切换到聊天界面的逻辑
+    }
+    
+    @objc private func showFileTransferFromNotification() {
+        showFileTransfer()
     }
 }
 

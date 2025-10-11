@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/handlers"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/handlers"
 )
 
 // MockProgressService 模拟进度追踪服务

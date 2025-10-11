@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	knowledgeServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
-	learnerServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
-	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	knowledgeServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	learnerServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
+	domainServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // RealtimeLearningAnalyticsService 实时学习分析服务
@@ -27,12 +27,12 @@ type RealtimeLearningAnalyticsService struct {
 type AnalyticsConfig struct {
 	RealTimeEnabled           bool    `json:"realtime_enabled"`           // 启用实时分析
 	PredictionEnabled         bool    `json:"prediction_enabled"`         // 启用预测
-	MinDataPoints            int     `json:"min_data_points"`            // 最小数据点数
+	MinDataPoints            int     `json:"min_data_points"`            // 最小数据点�?
 	AnalysisWindowMinutes    int     `json:"analysis_window_minutes"`    // 分析窗口（分钟）
-	PredictionHorizonDays    int     `json:"prediction_horizon_days"`    // 预测时间范围（天）
-	ConfidenceThreshold      float64 `json:"confidence_threshold"`       // 置信度阈值
-	AlertThreshold           float64 `json:"alert_threshold"`            // 警报阈值
-	UpdateIntervalSeconds    int     `json:"update_interval_seconds"`    // 更新间隔（秒）
+	PredictionHorizonDays    int     `json:"prediction_horizon_days"`    // 预测时间范围（天�?
+	ConfidenceThreshold      float64 `json:"confidence_threshold"`       // 置信度阈�?
+	AlertThreshold           float64 `json:"alert_threshold"`            // 警报阈�?
+	UpdateIntervalSeconds    int     `json:"update_interval_seconds"`    // 更新间隔（秒�?
 	EnablePersonalization    bool    `json:"enable_personalization"`     // 启用个性化
 	EnableEmotionalAnalysis  bool    `json:"enable_emotional_analysis"`  // 启用情感分析
 }
@@ -53,7 +53,7 @@ type CachedInsight struct {
 
 // AnalyticsCache 分析缓存
 type AnalyticsCache struct {
-	LearningStates      map[uuid.UUID]*RealtimeLearningState `json:"learning_states"`      // 学习状态
+	LearningStates      map[uuid.UUID]*RealtimeLearningState `json:"learning_states"`      // 学习状�?
 	PredictionResults   map[uuid.UUID]*PredictionResult      `json:"prediction_results"`   // 预测结果
 	AnalysisResults     map[uuid.UUID]*AnalysisResult        `json:"analysis_results"`     // 分析结果
 	EmotionalProfiles   map[uuid.UUID]*EmotionalProfile      `json:"emotional_profiles"`   // 情感档案
@@ -61,21 +61,21 @@ type AnalyticsCache struct {
 	insights            map[string]*CachedInsight            `json:"insights"`             // 洞察缓存
 	results             map[string]interface{}               `json:"results"`              // 结果缓存
 	queries             map[string]interface{}               `json:"queries"`              // 查询缓存
-	maxSize             int                                  `json:"max_size"`             // 最大缓存大小
+	maxSize             int                                  `json:"max_size"`             // 最大缓存大�?
 	ttl                 time.Duration                        `json:"ttl"`                  // 生存时间
-	mu                  sync.RWMutex                         `json:"-"`                    // 读写锁
-	LastUpdated         time.Time                            `json:"last_updated"`         // 最后更新时间
+	mu                  sync.RWMutex                         `json:"-"`                    // 读写�?
+	LastUpdated         time.Time                            `json:"last_updated"`         // 最后更新时�?
 }
 
 // AnalyticsMetrics 分析指标
 type AnalyticsMetrics struct {
-	TotalAnalyses         int64     `json:"total_analyses"`         // 总分析次数
+	TotalAnalyses         int64     `json:"total_analyses"`         // 总分析次�?
 	SuccessfulPredictions int64     `json:"successful_predictions"` // 成功预测次数
 	FailedPredictions     int64     `json:"failed_predictions"`     // 失败预测次数
-	AverageAccuracy       float64   `json:"average_accuracy"`       // 平均准确率
+	AverageAccuracy       float64   `json:"average_accuracy"`       // 平均准确�?
 	AverageProcessingTime int64     `json:"average_processing_time"` // 平均处理时间
 	AlertsGenerated       int64     `json:"alerts_generated"`       // 生成的警报数
-	LastAnalysisTime      time.Time `json:"last_analysis_time"`     // 最后分析时间
+	LastAnalysisTime      time.Time `json:"last_analysis_time"`     // 最后分析时�?
 }
 
 // PredictiveModel 预测模型
@@ -84,8 +84,8 @@ type PredictiveModel struct {
 	Parameters       map[string]interface{}     `json:"parameters"`        // 模型参数
 	TrainingData     []*TrainingDataPoint       `json:"training_data"`     // 训练数据
 	ValidationData   []*ValidationDataPoint     `json:"validation_data"`   // 验证数据
-	Accuracy         float64                   `json:"accuracy"`          // 准确率
-	LastTrainingTime time.Time                 `json:"last_training_time"` // 最后训练时间
+	Accuracy         float64                   `json:"accuracy"`          // 准确�?
+	LastTrainingTime time.Time                 `json:"last_training_time"` // 最后训练时�?
 	Version          string                    `json:"version"`           // 版本
 }
 
@@ -93,7 +93,7 @@ type PredictiveModel struct {
 type ModelType string
 
 const (
-	ModelTypeLinearRegression    ModelType = "linear_regression"    // 线性回归
+	ModelTypeLinearRegression    ModelType = "linear_regression"    // 线性回�?
 	ModelTypeLogisticRegression  ModelType = "logistic_regression"  // 逻辑回归
 	ModelTypeRandomForest        ModelType = "random_forest"        // 随机森林
 	ModelTypeNeuralNetwork       ModelType = "neural_network"       // 神经网络
@@ -108,12 +108,12 @@ type PredictionResult struct {
 	Type            PredictionType             `json:"type"`             // 预测类型
 	Horizon         time.Duration              `json:"horizon"`          // 预测范围
 	Predictions     map[string]interface{}     `json:"predictions"`      // 预测结果
-	Confidence      float64                   `json:"confidence"`       // 置信度
+	Confidence      float64                   `json:"confidence"`       // 置信�?
 	Recommendations []*PredictionRecommendation `json:"recommendations"` // 建议
 	Validation      *PredictionValidation      `json:"validation"`       // 验证
-	Timestamp       time.Time                  `json:"timestamp"`        // 时间戳
+	Timestamp       time.Time                  `json:"timestamp"`        // 时间�?
 	Duration        time.Duration              `json:"duration"`         // 处理时间
-	Metadata        map[string]interface{}     `json:"metadata"`         // 元数据
+	Metadata        map[string]interface{}     `json:"metadata"`         // 元数�?
 }
 
 // AnalysisResult 分析结果
@@ -125,35 +125,35 @@ type AnalysisResult struct {
 	Insights        []*LearningInsight         `json:"insights"`         // 洞察
 	Recommendations []*AnalysisRecommendation  `json:"recommendations"`  // 建议
 	Quality         *AnalysisQuality           `json:"quality"`          // 质量
-	Timestamp       time.Time                  `json:"timestamp"`        // 时间戳
+	Timestamp       time.Time                  `json:"timestamp"`        // 时间�?
 	Duration        time.Duration              `json:"duration"`         // 处理时间
-	Metadata        map[string]interface{}     `json:"metadata"`         // 元数据
+	Metadata        map[string]interface{}     `json:"metadata"`         // 元数�?
 }
 
-// TrainingDataPoint 训练数据点
+// TrainingDataPoint 训练数据�?
 type TrainingDataPoint struct {
 	DataID      uuid.UUID                  `json:"data_id"`      // 数据ID
 	LearnerID   uuid.UUID                  `json:"learner_id"`   // 学习者ID
 	Features    map[string]interface{}     `json:"features"`     // 特征
-	Target      interface{}                `json:"target"`       // 目标值
+	Target      interface{}                `json:"target"`       // 目标�?
 	Weight      float64                   `json:"weight"`       // 权重
-	Timestamp   time.Time                  `json:"timestamp"`    // 时间戳
-	Source      string                    `json:"source"`       // 数据源
+	Timestamp   time.Time                  `json:"timestamp"`    // 时间�?
+	Source      string                    `json:"source"`       // 数据�?
 	Quality     float64                   `json:"quality"`      // 质量分数
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
-// ValidationDataPoint 验证数据点
+// ValidationDataPoint 验证数据�?
 type ValidationDataPoint struct {
 	DataID      uuid.UUID                  `json:"data_id"`      // 数据ID
 	LearnerID   uuid.UUID                  `json:"learner_id"`   // 学习者ID
 	Features    map[string]interface{}     `json:"features"`     // 特征
-	Target      interface{}                `json:"target"`       // 目标值
-	Predicted   interface{}                `json:"predicted"`    // 预测值
+	Target      interface{}                `json:"target"`       // 目标�?
+	Predicted   interface{}                `json:"predicted"`    // 预测�?
 	Error       float64                   `json:"error"`        // 误差
-	Timestamp   time.Time                  `json:"timestamp"`    // 时间戳
-	Source      string                    `json:"source"`       // 数据源
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Timestamp   time.Time                  `json:"timestamp"`    // 时间�?
+	Source      string                    `json:"source"`       // 数据�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
 // RealtimeResolutionType 实时解决方案类型
@@ -172,7 +172,7 @@ type PredictionType string
 const (
 	PredictionTypeOutcome     PredictionType = "outcome"     // 结果预测
 	PredictionTypePerformance PredictionType = "performance" // 性能预测
-	PredictionTypeEngagement  PredictionType = "engagement"  // 参与度预测
+	PredictionTypeEngagement  PredictionType = "engagement"  // 参与度预�?
 	PredictionTypeRisk        PredictionType = "risk"        // 风险预测
 )
 
@@ -182,7 +182,7 @@ type AnalysisType string
 const (
 	AnalysisTypeBehavior     AnalysisType = "behavior"     // 行为分析
 	AnalysisTypePerformance  AnalysisType = "performance"  // 性能分析
-	AnalysisTypeEngagement   AnalysisType = "engagement"   // 参与度分析
+	AnalysisTypeEngagement   AnalysisType = "engagement"   // 参与度分�?
 	AnalysisTypeLearning     AnalysisType = "learning"     // 学习分析
 )
 
@@ -196,39 +196,39 @@ type AnalysisRecommendation struct {
 	Title            string                     `json:"title"`             // 标题
 	Description      string                     `json:"description"`       // 描述
 	Action           string                     `json:"action"`            // 行动
-	Priority         int                       `json:"priority"`          // 优先级
-	Confidence       float64                   `json:"confidence"`        // 置信度
+	Priority         int                       `json:"priority"`          // 优先�?
+	Confidence       float64                   `json:"confidence"`        // 置信�?
 	ExpectedImpact   float64                   `json:"expected_impact"`   // 预期影响
-	Timeline         time.Duration             `json:"timeline"`          // 时间线
-	Status           RecommendationStatus      `json:"status"`            // 状态
+	Timeline         time.Duration             `json:"timeline"`          // 时间�?
+	Status           RecommendationStatus      `json:"status"`            // 状�?
 	Feedback         *RecommendationFeedback   `json:"feedback"`          // 反馈
-	Metadata         map[string]interface{}     `json:"metadata"`          // 元数据
+	Metadata         map[string]interface{}     `json:"metadata"`          // 元数�?
 }
 
 // AnalysisQuality 分析质量
 type AnalysisQuality struct {
 	QualityID    uuid.UUID                  `json:"quality_id"`    // 质量ID
 	Score        float64                   `json:"score"`         // 质量分数
-	Reliability  float64                   `json:"reliability"`   // 可靠性
-	Validity     float64                   `json:"validity"`      // 有效性
-	Completeness float64                   `json:"completeness"`  // 完整性
-	Accuracy     float64                   `json:"accuracy"`      // 准确性
-	Confidence   float64                   `json:"confidence"`    // 置信度
-	Timeliness   float64                   `json:"timeliness"`    // 及时性
+	Reliability  float64                   `json:"reliability"`   // 可靠�?
+	Validity     float64                   `json:"validity"`      // 有效�?
+	Completeness float64                   `json:"completeness"`  // 完整�?
+	Accuracy     float64                   `json:"accuracy"`      // 准确�?
+	Confidence   float64                   `json:"confidence"`    // 置信�?
+	Timeliness   float64                   `json:"timeliness"`    // 及时�?
 	Issues       []string                  `json:"issues"`        // 问题
 	Suggestions  []string                  `json:"suggestions"`   // 建议
-	Timestamp    time.Time                  `json:"timestamp"`     // 时间戳
-	Metadata     map[string]interface{}     `json:"metadata"`      // 元数据
+	Timestamp    time.Time                  `json:"timestamp"`     // 时间�?
+	Metadata     map[string]interface{}     `json:"metadata"`      // 元数�?
 }
 
-// RecommendationStatus 建议状态
+// RecommendationStatus 建议状�?
 type RecommendationStatus string
 
 const (
-	RecommendationStatusPending    RecommendationStatus = "pending"    // 待处理
-	RecommendationStatusAccepted   RecommendationStatus = "accepted"   // 已接受
-	RecommendationStatusRejected   RecommendationStatus = "rejected"   // 已拒绝
-	RecommendationStatusImplemented RecommendationStatus = "implemented" // 已实施
+	RecommendationStatusPending    RecommendationStatus = "pending"    // 待处�?
+	RecommendationStatusAccepted   RecommendationStatus = "accepted"   // 已接�?
+	RecommendationStatusRejected   RecommendationStatus = "rejected"   // 已拒�?
+	RecommendationStatusImplemented RecommendationStatus = "implemented" // 已实�?
 )
 
 // RecommendationFeedback 建议反馈
@@ -236,16 +236,16 @@ type RecommendationFeedback struct {
 	FeedbackID  uuid.UUID                  `json:"feedback_id"`  // 反馈ID
 	Rating      int                       `json:"rating"`       // 评分
 	Comments    string                    `json:"comments"`     // 评论
-	Usefulness  float64                   `json:"usefulness"`   // 有用性
-	Clarity     float64                   `json:"clarity"`      // 清晰度
-	Actionability float64                 `json:"actionability"` // 可操作性
-	Timestamp   time.Time                  `json:"timestamp"`    // 时间戳
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Usefulness  float64                   `json:"usefulness"`   // 有用�?
+	Clarity     float64                   `json:"clarity"`      // 清晰�?
+	Actionability float64                 `json:"actionability"` // 可操作�?
+	Timestamp   time.Time                  `json:"timestamp"`    // 时间�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
 
 
-// SessionStatus 会话状态
+// SessionStatus 会话状�?
 type SessionStatus string
 
 const (
@@ -260,7 +260,7 @@ type ContentAccess struct {
 	ContentID    uuid.UUID     `json:"content_id"`    // 内容ID
 	AccessTime   time.Time     `json:"access_time"`   // 访问时间
 	Duration     time.Duration `json:"duration"`      // 持续时间
-	Completion   float64       `json:"completion"`    // 完成度
+	Completion   float64       `json:"completion"`    // 完成�?
 	Interactions int           `json:"interactions"`  // 交互次数
 	Rating       *float64      `json:"rating"`        // 评分
 }
@@ -269,14 +269,14 @@ type ContentAccess struct {
 type LearningActivity struct {
 	ActivityID   uuid.UUID                  `json:"activity_id"`   // 活动ID
 	Type         ActivityType               `json:"type"`          // 活动类型
-	StartTime    time.Time                  `json:"start_time"`    // 开始时间
+	StartTime    time.Time                  `json:"start_time"`    // 开始时�?
 	EndTime      *time.Time                 `json:"end_time"`      // 结束时间
 	Duration     time.Duration              `json:"duration"`      // 持续时间
 	Success      bool                       `json:"success"`       // 是否成功
 	Score        *float64                   `json:"score"`         // 分数
 	Attempts     int                        `json:"attempts"`      // 尝试次数
 	Hints        int                        `json:"hints"`         // 提示次数
-	Metadata     map[string]interface{}     `json:"metadata"`      // 元数据
+	Metadata     map[string]interface{}     `json:"metadata"`      // 元数�?
 }
 
 // ActivityType 活动类型
@@ -289,7 +289,7 @@ const (
 	ActivityTypePracticing  ActivityType = "practicing"  // 练习
 	ActivityTypeQuiz        ActivityType = "quiz"        // 测验
 	ActivityTypeDiscussion  ActivityType = "discussion"  // 讨论
-	ActivityTypeReflection  ActivityType = "reflection"  // 反思
+	ActivityTypeReflection  ActivityType = "reflection"  // 反�?
 	ActivityTypeCreation    ActivityType = "creation"    // 创作
 )
 
@@ -297,12 +297,12 @@ const (
 type UserInteraction struct {
 	InteractionID   uuid.UUID                  `json:"interaction_id"`   // 交互ID
 	Type            InteractionType            `json:"type"`             // 交互类型
-	Timestamp       time.Time                  `json:"timestamp"`        // 时间戳
+	Timestamp       time.Time                  `json:"timestamp"`        // 时间�?
 	Duration        time.Duration              `json:"duration"`         // 持续时间
-	Context         *InteractionContext        `json:"context"`          // 交互上下文
+	Context         *InteractionContext        `json:"context"`          // 交互上下�?
 	Response        interface{}                `json:"response"`         // 响应
-	Effectiveness   float64                   `json:"effectiveness"`    // 有效性
-	Metadata        map[string]interface{}     `json:"metadata"`         // 元数据
+	Effectiveness   float64                   `json:"effectiveness"`    // 有效�?
+	Metadata        map[string]interface{}     `json:"metadata"`         // 元数�?
 }
 
 // InteractionType 交互类型
@@ -321,7 +321,7 @@ const (
 	InteractionTypeShare       InteractionType = "share"       // 分享
 )
 
-// InteractionContext 交互上下文
+// InteractionContext 交互上下�?
 type InteractionContext struct {
 	PageURL       string                     `json:"page_url"`       // 页面URL
 	ElementID     string                     `json:"element_id"`     // 元素ID
@@ -330,7 +330,7 @@ type InteractionContext struct {
 	ViewportSize  *ViewportSize              `json:"viewport_size"`  // 视口大小
 	DeviceInfo    *DeviceInfo                `json:"device_info"`    // 设备信息
 	SessionInfo   *SessionInfo               `json:"session_info"`   // 会话信息
-	Metadata      map[string]interface{}     `json:"metadata"`       // 元数据
+	Metadata      map[string]interface{}     `json:"metadata"`       // 元数�?
 }
 
 // Position 位置
@@ -349,7 +349,7 @@ type ViewportSize struct {
 type DeviceInfo struct {
 	Type        string `json:"type"`         // 设备类型
 	OS          string `json:"os"`           // 操作系统
-	Browser     string `json:"browser"`      // 浏览器
+	Browser     string `json:"browser"`      // 浏览�?
 	ScreenSize  string `json:"screen_size"`  // 屏幕大小
 	UserAgent   string `json:"user_agent"`   // 用户代理
 }
@@ -357,9 +357,9 @@ type DeviceInfo struct {
 // SessionInfo 会话信息
 type SessionInfo struct {
 	SessionID     uuid.UUID `json:"session_id"`     // 会话ID
-	StartTime     time.Time `json:"start_time"`     // 开始时间
+	StartTime     time.Time `json:"start_time"`     // 开始时�?
 	Duration      int64     `json:"duration"`       // 持续时间
-	PageViews     int       `json:"page_views"`     // 页面浏览数
+	PageViews     int       `json:"page_views"`     // 页面浏览�?
 	Interactions  int       `json:"interactions"`   // 交互次数
 	ReferrerURL   string    `json:"referrer_url"`   // 来源URL
 }
@@ -369,36 +369,36 @@ type SessionGoal struct {
 	GoalID      uuid.UUID                  `json:"goal_id"`      // 目标ID
 	Type        GoalType                   `json:"type"`         // 目标类型
 	Description string                     `json:"description"`  // 描述
-	Target      interface{}                `json:"target"`       // 目标值
-	Current     interface{}                `json:"current"`      // 当前值
+	Target      interface{}                `json:"target"`       // 目标�?
+	Current     interface{}                `json:"current"`      // 当前�?
 	Progress    float64                   `json:"progress"`     // 进度
 	Deadline    *time.Time                `json:"deadline"`     // 截止时间
-	Priority    int                       `json:"priority"`     // 优先级
-	Status      GoalStatus                `json:"status"`       // 状态
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Priority    int                       `json:"priority"`     // 优先�?
+	Status      GoalStatus                `json:"status"`       // 状�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
 // GoalType 目标类型
 type GoalType string
 
 const (
-	GoalTypeCompletion    GoalType = "completion"    // 完成度
-	GoalTypeAccuracy      GoalType = "accuracy"      // 准确率
+	GoalTypeCompletion    GoalType = "completion"    // 完成�?
+	GoalTypeAccuracy      GoalType = "accuracy"      // 准确�?
 	GoalTypeSpeed         GoalType = "speed"         // 速度
-	GoalTypeEngagement    GoalType = "engagement"    // 参与度
-	GoalTypeRetention     GoalType = "retention"     // 保持率
-	GoalTypeMastery       GoalType = "mastery"       // 掌握度
+	GoalTypeEngagement    GoalType = "engagement"    // 参与�?
+	GoalTypeRetention     GoalType = "retention"     // 保持�?
+	GoalTypeMastery       GoalType = "mastery"       // 掌握�?
 )
 
-// GoalStatus 目标状态
+// GoalStatus 目标状�?
 type GoalStatus string
 
 const (
-	GoalStatusPending    GoalStatus = "pending"    // 待处理
-	GoalStatusInProgress GoalStatus = "in_progress" // 进行中
-	GoalStatusCompleted  GoalStatus = "completed"  // 已完成
+	GoalStatusPending    GoalStatus = "pending"    // 待处�?
+	GoalStatusInProgress GoalStatus = "in_progress" // 进行�?
+	GoalStatusCompleted  GoalStatus = "completed"  // 已完�?
 	GoalStatusFailed     GoalStatus = "failed"     // 失败
-	GoalStatusCancelled  GoalStatus = "cancelled"  // 已取消
+	GoalStatusCancelled  GoalStatus = "cancelled"  // 已取�?
 )
 
 // Achievement 成就
@@ -411,7 +411,7 @@ type RealtimeAchievement struct {
 	Badge         string                     `json:"badge"`          // 徽章
 	UnlockedAt    time.Time                  `json:"unlocked_at"`    // 解锁时间
 	Criteria      map[string]interface{}     `json:"criteria"`       // 标准
-	Metadata      map[string]interface{}     `json:"metadata"`       // 元数据
+	Metadata      map[string]interface{}     `json:"metadata"`       // 元数�?
 }
 
 
@@ -425,78 +425,78 @@ type InteractionPattern struct {
 	Frequency     float64                   `json:"frequency"`      // 频率
 	Duration      time.Duration             `json:"duration"`       // 持续时间
 	Intensity     float64                   `json:"intensity"`      // 强度
-	Consistency   float64                   `json:"consistency"`    // 一致性
+	Consistency   float64                   `json:"consistency"`    // 一致�?
 	Trend         domainServices.TrendDirection            `json:"trend"`          // 趋势
-	Seasonality   *SeasonalityInfo          `json:"seasonality"`    // 季节性
+	Seasonality   *SeasonalityInfo          `json:"seasonality"`    // 季节�?
 	Anomalies     []*Anomaly                `json:"anomalies"`      // 异常
 	Predictions   []*PatternPrediction      `json:"predictions"`    // 预测
-	Confidence    float64                   `json:"confidence"`     // 置信度
-	LastUpdated   time.Time                 `json:"last_updated"`   // 最后更新
-	Metadata      map[string]interface{}     `json:"metadata"`       // 元数据
+	Confidence    float64                   `json:"confidence"`     // 置信�?
+	LastUpdated   time.Time                 `json:"last_updated"`   // 最后更�?
+	Metadata      map[string]interface{}     `json:"metadata"`       // 元数�?
 }
 
 // PatternType 模式类型
 type PatternType string
 
 const (
-	PatternTypeEngagement    PatternType = "engagement"    // 参与度
+	PatternTypeEngagement    PatternType = "engagement"    // 参与�?
 	PatternTypePerformance   PatternType = "performance"   // 性能
 	PatternTypeBehavior      PatternType = "behavior"      // 行为
 	PatternTypeLearning      PatternType = "learning"      // 学习
-	PatternTypeAttention     PatternType = "attention"     // 注意力
+	PatternTypeAttention     PatternType = "attention"     // 注意�?
 	PatternTypeMotivation    PatternType = "motivation"    // 动机
 )
 
 
 
-// SeasonalityInfo 季节性信息
+// SeasonalityInfo 季节性信�?
 type SeasonalityInfo struct {
 	Period      time.Duration `json:"period"`      // 周期
 	Amplitude   float64       `json:"amplitude"`   // 振幅
 	Phase       float64       `json:"phase"`       // 相位
 	Strength    float64       `json:"strength"`    // 强度
-	Confidence  float64       `json:"confidence"`  // 置信度
+	Confidence  float64       `json:"confidence"`  // 置信�?
 }
 
 // Anomaly 异常
 type Anomaly struct {
 	AnomalyID   uuid.UUID                  `json:"anomaly_id"`   // 异常ID
 	Type        AnomalyType                `json:"type"`         // 异常类型
-	Timestamp   time.Time                  `json:"timestamp"`    // 时间戳
+	Timestamp   time.Time                  `json:"timestamp"`    // 时间�?
 	Severity    float64                   `json:"severity"`     // 严重程度
 	Description string                     `json:"description"`  // 描述
 	Cause       *AnomalyCause             `json:"cause"`        // 原因
 	Impact      *AnomalyImpact            `json:"impact"`       // 影响
 	Resolution  *AnomalyResolution        `json:"resolution"`   // 解决方案
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
 // AnomalyType 异常类型
 type AnomalyType string
 
 const (
-	AnomalyTypeOutlier      AnomalyType = "outlier"      // 离群值
+	AnomalyTypeOutlier      AnomalyType = "outlier"      // 离群�?
 	AnomalyTypeSpike        AnomalyType = "spike"        // 尖峰
 	AnomalyTypeDrop         AnomalyType = "drop"         // 下降
 	AnomalyTypeShift        AnomalyType = "shift"        // 偏移
 	AnomalyTypeTrend        AnomalyType = "trend"        // 趋势
-	AnomalyTypeSeasonality  AnomalyType = "seasonality"  // 季节性
+	AnomalyTypeSeasonality  AnomalyType = "seasonality"  // 季节�?
 )
 
 // AnomalyCause 异常原因
 type AnomalyCause struct {
 	Type        CauseType                  `json:"type"`        // 原因类型
 	Description string                     `json:"description"` // 描述
-	Confidence  float64                   `json:"confidence"`  // 置信度
+	Confidence  float64                   `json:"confidence"`  // 置信�?
 	Evidence    []string                  `json:"evidence"`    // 证据
-	Metadata    map[string]interface{}     `json:"metadata"`    // 元数据
+	Metadata    map[string]interface{}     `json:"metadata"`    // 元数�?
 }
 
 // CauseType 原因类型
 type CauseType string
 
 const (
-	CauseTypeSystematic CauseType = "systematic" // 系统性
+	CauseTypeSystematic CauseType = "systematic" // 系统�?
 	CauseTypeRandom     CauseType = "random"     // 随机
 	CauseTypeExternal   CauseType = "external"   // 外部
 	CauseTypeInternal   CauseType = "internal"   // 内部
@@ -518,7 +518,7 @@ type AnomalyImpact struct {
 type ImpactScope string
 
 const (
-	ImpactScopeLocal  ImpactScope = "local"  // 局部
+	ImpactScopeLocal  ImpactScope = "local"  // 局�?
 	ImpactScopeGlobal ImpactScope = "global" // 全局
 	ImpactScopeUser   ImpactScope = "user"   // 用户
 	ImpactScopeSystem ImpactScope = "system" // 系统
@@ -528,19 +528,19 @@ const (
 type AnomalyResolution struct {
 	Type        RealtimeResolutionType     `json:"type"`        // 解决类型
 	Action      string                     `json:"action"`      // 行动
-	Priority    int                       `json:"priority"`    // 优先级
+	Priority    int                       `json:"priority"`    // 优先�?
 	Estimated   time.Duration             `json:"estimated"`   // 预计时间
-	Status      ResolutionStatus          `json:"status"`      // 状态
+	Status      ResolutionStatus          `json:"status"`      // 状�?
 	Description string                     `json:"description"` // 描述
-	Metadata    map[string]interface{}     `json:"metadata"`    // 元数据
+	Metadata    map[string]interface{}     `json:"metadata"`    // 元数�?
 }
 
-// ResolutionStatus 解决状态
+// ResolutionStatus 解决状�?
 type ResolutionStatus string
 
 const (
-	ResolutionStatusPending    ResolutionStatus = "pending"    // 待处理
-	ResolutionStatusInProgress ResolutionStatus = "in_progress" // 进行中
+	ResolutionStatusPending    ResolutionStatus = "pending"    // 待处�?
+	ResolutionStatusInProgress ResolutionStatus = "in_progress" // 进行�?
 	ResolutionStatusCompleted  ResolutionStatus = "completed"  // 完成
 	ResolutionStatusFailed     ResolutionStatus = "failed"     // 失败
 )
@@ -553,7 +553,7 @@ const (
 type PredictionMethod string
 
 const (
-	PredictionMethodLinear      PredictionMethod = "linear"      // 线性
+	PredictionMethodLinear      PredictionMethod = "linear"      // 线�?
 	PredictionMethodExponential PredictionMethod = "exponential" // 指数
 	PredictionMethodARIMA       PredictionMethod = "arima"       // ARIMA
 	PredictionMethodLSTM        PredictionMethod = "lstm"        // LSTM
@@ -562,38 +562,38 @@ const (
 
 // PerformanceMetrics 性能指标
 type RealtimePerformanceMetrics struct {
-	Accuracy         float64                   `json:"accuracy"`          // 准确率
+	Accuracy         float64                   `json:"accuracy"`          // 准确�?
 	Speed            float64                   `json:"speed"`             // 速度
 	Efficiency       float64                   `json:"efficiency"`        // 效率
-	Retention        float64                   `json:"retention"`         // 保持率
-	Engagement       float64                   `json:"engagement"`        // 参与度
-	Satisfaction     float64                   `json:"satisfaction"`      // 满意度
+	Retention        float64                   `json:"retention"`         // 保持�?
+	Engagement       float64                   `json:"engagement"`        // 参与�?
+	Satisfaction     float64                   `json:"satisfaction"`      // 满意�?
 	Progress         float64                   `json:"progress"`          // 进度
-	Mastery          float64                   `json:"mastery"`           // 掌握度
-	Consistency      float64                   `json:"consistency"`       // 一致性
+	Mastery          float64                   `json:"mastery"`           // 掌握�?
+	Consistency      float64                   `json:"consistency"`       // 一致�?
 	Improvement      float64                   `json:"improvement"`       // 改进
 	Trends           map[string]domainServices.TrendDirection `json:"trends"`            // 趋势
 	Benchmarks       map[string]float64        `json:"benchmarks"`        // 基准
-	LastUpdated      time.Time                 `json:"last_updated"`      // 最后更新
+	LastUpdated      time.Time                 `json:"last_updated"`      // 最后更�?
 }
 
-// EmotionalState 情感状态
+// EmotionalState 情感状�?
 type RealtimeEmotionalState struct {
 	Valence      float64                   `json:"valence"`       // 效价（正负情感）
-	Arousal      float64                   `json:"arousal"`       // 唤醒度
-	Dominance    float64                   `json:"dominance"`     // 支配度
-	Confidence   float64                   `json:"confidence"`    // 自信度
-	Frustration  float64                   `json:"frustration"`   // 挫折感
-	Curiosity    float64                   `json:"curiosity"`     // 好奇心
+	Arousal      float64                   `json:"arousal"`       // 唤醒�?
+	Dominance    float64                   `json:"dominance"`     // 支配�?
+	Confidence   float64                   `json:"confidence"`    // 自信�?
+	Frustration  float64                   `json:"frustration"`   // 挫折�?
+	Curiosity    float64                   `json:"curiosity"`     // 好奇�?
 	Boredom      float64                   `json:"boredom"`       // 无聊
 	Anxiety      float64                   `json:"anxiety"`       // 焦虑
 	Joy          float64                   `json:"joy"`           // 喜悦
 	Surprise     float64                   `json:"surprise"`      // 惊讶
 	Emotions     map[string]float64        `json:"emotions"`      // 其他情感
-	Timestamp    time.Time                 `json:"timestamp"`     // 时间戳
+	Timestamp    time.Time                 `json:"timestamp"`     // 时间�?
 	Source       EmotionalSource           `json:"source"`        // 来源
-	Reliability  float64                   `json:"reliability"`   // 可靠性
-	Metadata     map[string]interface{}     `json:"metadata"`      // 元数据
+	Reliability  float64                   `json:"reliability"`   // 可靠�?
+	Metadata     map[string]interface{}     `json:"metadata"`      // 元数�?
 }
 
 // EmotionalSource 情感来源
@@ -627,14 +627,14 @@ type PatternCharacteristics struct {
 	PreferredTime      []entities.TimeSlot                 `json:"preferred_time"`      // 偏好时间
 	PreferredDuration  time.Duration              `json:"preferred_duration"`  // 偏好持续时间
 	PreferredDifficulty float64                   `json:"preferred_difficulty"` // 偏好难度
-	PreferredModality  []domainServices.ModalityType             `json:"preferred_modality"`  // 偏好模态
+	PreferredModality  []domainServices.ModalityType             `json:"preferred_modality"`  // 偏好模�?
 	LearningStyle      LearningStyleType          `json:"learning_style"`      // 学习风格
-	AttentionSpan      time.Duration              `json:"attention_span"`      // 注意力持续时间
+	AttentionSpan      time.Duration              `json:"attention_span"`      // 注意力持续时�?
 	BreakFrequency     time.Duration              `json:"break_frequency"`     // 休息频率
 	RetryBehavior      RetryBehaviorType          `json:"retry_behavior"`      // 重试行为
 	HelpSeeking        HelpSeekingType            `json:"help_seeking"`        // 求助行为
 	SocialPreference   SocialPreferenceType       `json:"social_preference"`   // 社交偏好
-	Metadata           map[string]interface{}     `json:"metadata"`            // 元数据
+	Metadata           map[string]interface{}     `json:"metadata"`            // 元数�?
 }
 
 
@@ -645,10 +645,10 @@ type PatternCharacteristics struct {
 type LearningStyleType string
 
 const (
-	LearningStyleTypeActivist   LearningStyleType = "activist"   // 活动家
-	LearningStyleTypeReflector  LearningStyleType = "reflector"  // 反思者
-	LearningStyleTypeTheorist   LearningStyleType = "theorist"   // 理论家
-	LearningStyleTypePragmatist LearningStyleType = "pragmatist" // 实用主义者
+	LearningStyleTypeActivist   LearningStyleType = "activist"   // 活动�?
+	LearningStyleTypeReflector  LearningStyleType = "reflector"  // 反思�?
+	LearningStyleTypeTheorist   LearningStyleType = "theorist"   // 理论�?
+	LearningStyleTypePragmatist LearningStyleType = "pragmatist" // 实用主义�?
 )
 
 // RetryBehaviorType 重试行为类型
@@ -668,7 +668,7 @@ const (
 	HelpSeekingTypeProactive  HelpSeekingType = "proactive"  // 主动
 	HelpSeekingTypeReactive   HelpSeekingType = "reactive"   // 被动
 	HelpSeekingTypeAvoidant   HelpSeekingType = "avoidant"   // 回避
-	HelpSeekingTypeStrategic  HelpSeekingType = "strategic"  // 策略性
+	HelpSeekingTypeStrategic  HelpSeekingType = "strategic"  // 策略�?
 )
 
 // SocialPreferenceType 社交偏好类型
@@ -683,7 +683,7 @@ const (
 
 
 
-// TriggerType 触发器类型
+// TriggerType 触发器类�?
 type TriggerType string
 
 const (
@@ -764,7 +764,7 @@ func NewRealtimeLearningAnalyticsService(
 	}
 }
 
-// AnalyzeLearningState 分析学习状态
+// AnalyzeLearningState 分析学习状�?
 func (s *RealtimeLearningAnalyticsService) AnalyzeLearningState(
 	ctx context.Context,
 	learnerID uuid.UUID,
@@ -772,16 +772,16 @@ func (s *RealtimeLearningAnalyticsService) AnalyzeLearningState(
 ) (*AnalysisResult, error) {
 	startTime := time.Now()
 	
-	// 获取或创建学习状态
+	// 获取或创建学习状�?
 	learningState, err := s.getOrCreateLearningState(ctx, learnerID, sessionData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get learning state: %w", err)
 	}
 	
-	// 更新学习状态
+	// 更新学习状�?
 	s.updateLearningState(learningState, sessionData)
 	
-	// 执行多维度分析
+	// 执行多维度分�?
 	insights, err := s.generateLearningInsights(ctx, learningState)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate insights: %w", err)
@@ -807,7 +807,7 @@ func (s *RealtimeLearningAnalyticsService) AnalyzeLearningState(
 		return nil, fmt.Errorf("failed to generate recommendations: %w", err)
 	}
 	
-	// 计算整体置信度
+	// 计算整体置信�?
 	confidence := s.calculateOverallConfidence(insights, patterns, anomalies, trends)
 	
 	// 评估分析质量
@@ -854,7 +854,7 @@ func (s *RealtimeLearningAnalyticsService) PredictLearningOutcomes(
 ) (*PredictionResult, error) {
 	startTime := time.Now()
 	
-	// 获取学习状态
+	// 获取学习状�?
 	learningState, exists := s.cache.LearningStates[learnerID]
 	if !exists {
 		return nil, fmt.Errorf("learning state not found for learner %s", learnerID)
@@ -958,7 +958,7 @@ func (s *RealtimeLearningAnalyticsService) GeneratePersonalizedInsights(
 		return nil, fmt.Errorf("failed to process cross-modal inference: %w", err)
 	}
 	
-	// 解析AI生成的洞察
+	// 解析AI生成的洞�?
 	insights, err := s.parseAIInsights(crossModalResponse.Result)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse AI insights: %w", err)
@@ -969,7 +969,7 @@ func (s *RealtimeLearningAnalyticsService) GeneratePersonalizedInsights(
 	for _, insight := range insights {
 		enhanced, err := s.enhanceInsight(ctx, insight, learningState, emotionalProfile)
 		if err != nil {
-			continue // 跳过无法增强的洞察
+			continue // 跳过无法增强的洞�?
 		}
 		enhancedInsights = append(enhancedInsights, enhanced)
 	}
@@ -982,7 +982,7 @@ func (s *RealtimeLearningAnalyticsService) MonitorLearningProgress(
 	ctx context.Context,
 	learnerID uuid.UUID,
 ) (*LearningPattern, error) {
-	// 获取学习状态
+	// 获取学习状�?
 	learningState, exists := s.cache.LearningStates[learnerID]
 	if !exists {
 		return nil, fmt.Errorf("learning state not found for learner %s", learnerID)
@@ -994,7 +994,7 @@ func (s *RealtimeLearningAnalyticsService) MonitorLearningProgress(
 		return nil, fmt.Errorf("failed to analyze learning pattern: %w", err)
 	}
 	
-	// 检测模式变化
+	// 检测模式变�?
 	previousPattern, exists := s.cache.LearningPatterns[learnerID]
 	if exists {
 		evolution, err := s.detectPatternEvolution(ctx, previousPattern)
@@ -1041,7 +1041,7 @@ func (s *RealtimeLearningAnalyticsService) ClearCache() {
 
 // 私有辅助方法
 
-// getOrCreateLearningState 获取或创建学习状态
+// getOrCreateLearningState 获取或创建学习状�?
 func (s *RealtimeLearningAnalyticsService) getOrCreateLearningState(
 	ctx context.Context,
 	learnerID uuid.UUID,
@@ -1051,7 +1051,7 @@ func (s *RealtimeLearningAnalyticsService) getOrCreateLearningState(
 		return state, nil
 	}
 	
-	// 创建新的学习状态
+	// 创建新的学习状�?
 	state := &RealtimeLearningState{
 		LearnerID:           learnerID,
 		CurrentSession: &LearningSession{
@@ -1094,7 +1094,7 @@ func (s *RealtimeLearningAnalyticsService) getOrCreateLearningState(
 	return state, nil
 }
 
-// updateLearningState 更新学习状态
+// updateLearningState 更新学习状�?
 func (s *RealtimeLearningAnalyticsService) updateLearningState(
 	state *RealtimeLearningState,
 	sessionData map[string]interface{},
@@ -1116,7 +1116,7 @@ func (s *RealtimeLearningAnalyticsService) updateLearningState(
 		s.updateRealtimePerformanceMetrics(state.PerformanceMetrics, metricsData)
 	}
 	
-	// 更新情感状态
+	// 更新情感状�?
 	if emotionalData, ok := sessionData["emotional_state"].(string); ok {
 		state.EmotionalState = emotionalData
 	}
@@ -1133,7 +1133,7 @@ func (s *RealtimeLearningAnalyticsService) generateLearningInsights(
 	performanceInsights := s.generatePerformanceInsights(state)
 	insights = append(insights, performanceInsights...)
 	
-	// 参与度洞察
+	// 参与度洞�?
 	engagementInsights := s.generateEngagementInsights(state)
 	insights = append(insights, engagementInsights...)
 	
@@ -1182,7 +1182,7 @@ func (s *RealtimeLearningAnalyticsService) identifyLearningPatterns(
 	return patterns, nil
 }
 
-// detectAnomalies 检测异常
+// detectAnomalies 检测异�?
 func (s *RealtimeLearningAnalyticsService) detectAnomalies(
 	ctx context.Context,
 	state *RealtimeLearningState,
@@ -1197,7 +1197,7 @@ func (s *RealtimeLearningAnalyticsService) detectAnomalies(
 	behaviorAnomalies := s.detectBehaviorAnomalies(state)
 	anomalies = append(anomalies, behaviorAnomalies...)
 	
-	// 参与度异常
+	// 参与度异�?
 	engagementAnomalies := s.detectEngagementAnomalies(state)
 	anomalies = append(anomalies, engagementAnomalies...)
 	
@@ -1217,7 +1217,7 @@ func (s *RealtimeLearningAnalyticsService) analyzeTrends(
 		trends = append(trends, performanceTrend)
 	}
 	
-	// 参与度趋势
+	// 参与度趋�?
 	engagementTrend := s.analyzeEngagementTrend(state)
 	if engagementTrend != nil {
 		trends = append(trends, engagementTrend)
@@ -1241,7 +1241,7 @@ func (s *RealtimeLearningAnalyticsService) generateRecommendations(
 ) ([]*AnalysisRecommendation, error) {
 	recommendations := make([]*AnalysisRecommendation, 0)
 	
-	// 基于洞察的建议
+	// 基于洞察的建�?
 	for _, insight := range insights {
 		if actionable, ok := insight.Metadata["actionable"].(bool); ok && actionable {
 			rec := s.generateInsightBasedRecommendation(insight, state)
@@ -1251,7 +1251,7 @@ func (s *RealtimeLearningAnalyticsService) generateRecommendations(
 		}
 	}
 	
-	// 基于模式的建议
+	// 基于模式的建�?
 	for _, pattern := range patterns {
 		if pattern.Recommendations != nil {
 			for _, patternRec := range pattern.Recommendations {
@@ -1263,7 +1263,7 @@ func (s *RealtimeLearningAnalyticsService) generateRecommendations(
 		}
 	}
 	
-	// 排序和过滤建议
+	// 排序和过滤建�?
 	recommendations = s.prioritizeRecommendations(recommendations)
 	
 	return recommendations, nil
@@ -1347,7 +1347,7 @@ func (s *RealtimeLearningAnalyticsService) validatePrediction(ctx context.Contex
 	return validation, nil
 }
 
-// calculatePredictionConfidence 计算预测置信度
+// calculatePredictionConfidence 计算预测置信�?
 func (s *RealtimeLearningAnalyticsService) calculatePredictionConfidence(predictions []*PredictionResult) float64 {
 	if len(predictions) == 0 {
 		return 0.0
@@ -1392,7 +1392,7 @@ func (s *RealtimeLearningAnalyticsService) parseAIInsights(result map[string]int
 			InsightID:   uuid.New(),
 			Type:        "learning_pattern",
 			Title:       "学习模式分析",
-			Description: "基于AI分析的学习模式洞察",
+			Description: "基于AI分析的学习模式洞�?,
 			Confidence:  0.8,
 			Impact:      ImpactLevelHigh,
 			Evidence:    []string{"AI分析结果", "学习行为数据"},
@@ -1437,7 +1437,7 @@ func (s *RealtimeLearningAnalyticsService) analyzeLearningPattern(ctx context.Co
 		LastUpdated:   time.Now(),
 		Metadata: map[string]interface{}{
 			"name":               "学习参与模式",
-			"description":        "基于实时数据分析的学习参与模式",
+			"description":        "基于实时数据分析的学习参与模�?,
 			"engagement_level":   state.EngagementLevel,
 			"learning_velocity":  state.LearningVelocity,
 		},
@@ -1445,7 +1445,7 @@ func (s *RealtimeLearningAnalyticsService) analyzeLearningPattern(ctx context.Co
 	return pattern, nil
 }
 
-// detectPatternEvolution 检测模式演化
+// detectPatternEvolution 检测模式演�?
 func (s *RealtimeLearningAnalyticsService) detectPatternEvolution(ctx context.Context, pattern *LearningPattern) (*PatternEvolution, error) {
 	evolution := &PatternEvolution{
 		Timestamp:   time.Now(),
@@ -1470,7 +1470,7 @@ func (s *RealtimeLearningAnalyticsService) generatePatternRecommendations(ctx co
 			RecommendationID: uuid.New(),
 			Type:             RecommendationTypeOptimization,
 			Priority:         PriorityLevelHigh,
-			Description:      "基于学习模式的优化建议",
+			Description:      "基于学习模式的优化建�?,
 			Actions:          []string{"优化学习路径", "调整学习节奏"},
 			Confidence:       0.8,
 			Metadata: map[string]interface{}{

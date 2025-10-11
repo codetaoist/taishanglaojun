@@ -61,7 +61,7 @@ type SynergyImprovement struct {
 	Evidence    []string `json:"evidence"`
 }
 
-// SynergySideEffect 协同副作用
+// SynergySideEffect 协同副作�?
 type SynergySideEffect struct {
 	Type        string  `json:"type"`
 	Description string  `json:"description"`
@@ -174,7 +174,7 @@ type SynergyPrediction struct {
 	PredictedAt     time.Time              `json:"predicted_at"`
 }
 
-// PredictionUncertainty 预测不确定性
+// PredictionUncertainty 预测不确定�?
 type PredictionUncertainty struct {
 	Factor      string  `json:"factor"`
 	Impact      float64 `json:"impact"`
@@ -214,7 +214,7 @@ type SynergyPotentialAnalysis struct {
 	AnalyzedAt       time.Time              `json:"analyzed_at"`
 }
 
-// SynergyContext 协同上下文
+// SynergyContext 协同上下�?
 type SynergyContext struct {
 	ContextID        string                 `json:"context_id"`
 	SessionID        string                 `json:"session_id"`
@@ -231,7 +231,7 @@ type SynergyContext struct {
 	CreatedAt        time.Time              `json:"created_at"`
 }
 
-// CatalystOptimization 催化剂优化
+// CatalystOptimization 催化剂优�?
 type CatalystOptimization struct {
 	OptimizationID   string                 `json:"optimization_id"`
 	SynergyContextID string                 `json:"synergy_context_id"`
@@ -247,7 +247,7 @@ type CatalystOptimization struct {
 	OptimizedAt      time.Time              `json:"optimized_at"`
 }
 
-// Catalyst 催化剂
+// Catalyst 催化�?
 type Catalyst struct {
 	CatalystID       string                 `json:"catalyst_id"`
 	Type             string                 `json:"type"`
@@ -269,7 +269,7 @@ type Catalyst struct {
 	DeactivatedAt    *time.Time             `json:"deactivated_at"`
 }
 
-// CatalystEffectivenessReport 催化剂效果报告
+// CatalystEffectivenessReport 催化剂效果报�?
 type CatalystEffectivenessReport struct {
 	ReportID         string                 `json:"report_id"`
 	SessionID        string                 `json:"session_id"`
@@ -285,7 +285,7 @@ type CatalystEffectivenessReport struct {
 	GeneratedAt      time.Time              `json:"generated_at"`
 }
 
-// CatalystInteraction 催化剂交互
+// CatalystInteraction 催化剂交�?
 type CatalystInteraction struct {
 	InteractionID    string                 `json:"interaction_id"`
 	CatalystA        string                 `json:"catalyst_a"`
@@ -317,4 +317,22 @@ type AlternativePrediction struct {
 	Probability float64        `json:"probability"`
 	Conditions  []string       `json:"conditions"`
 	Description string         `json:"description"`
+}
+
+// CatalystRecommendation 催化剂推�?
+type CatalystRecommendation struct {
+	RecommendationID   string                 `json:"recommendation_id"`
+	CatalystID         string                 `json:"catalyst_id"`
+	RecommendationType string                 `json:"recommendation_type"`
+	Title              string                 `json:"title"`
+	Description        string                 `json:"description"`
+	Priority           string                 `json:"priority"`
+	ExpectedImpact     float64                `json:"expected_impact"`
+	ImplementationSteps []string              `json:"implementation_steps"`
+	Confidence         float64                `json:"confidence"`
+	RiskLevel          string                 `json:"risk_level"`
+	Timeline           time.Duration          `json:"timeline"`
+	Resources          []string               `json:"resources"`
+	Metadata           map[string]interface{} `json:"metadata"`
+	CreatedAt          time.Time              `json:"created_at"`
 }

@@ -6,12 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/alerting"
-	"github.com/taishanglaojun/core-services/monitoring/automation"
-	"github.com/taishanglaojun/core-services/monitoring/dashboard"
-	"github.com/taishanglaojun/core-services/monitoring/logging"
-	"github.com/taishanglaojun/core-services/monitoring/performance"
-	"github.com/taishanglaojun/core-services/monitoring/tracing"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/alerting"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/automation"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/dashboard"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/logging"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/performance"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/tracing"
 )
 
 // MonitoringSystem 监控系统集成
@@ -83,14 +83,14 @@ type IntegrationStats struct {
 func NewMonitoringSystem(config MonitoringConfig) (*MonitoringSystem, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	
-	// 创建追踪器
+	// 创建追踪�?
 	tracer, err := tracing.NewTracer(config.Tracing)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to create tracer: %w", err)
 	}
 	
-	// 创建日志管理器
+	// 创建日志管理�?
 	logManager, err := logging.NewLogManager(config.Logging)
 	if err != nil {
 		cancel()
@@ -104,7 +104,7 @@ func NewMonitoringSystem(config MonitoringConfig) (*MonitoringSystem, error) {
 		return nil, fmt.Errorf("failed to create log pipeline: %w", err)
 	}
 	
-	// 创建告警管理器
+	// 创建告警管理�?
 	alertManager, err := alerting.NewAlertManager(config.Alerting)
 	if err != nil {
 		cancel()
@@ -118,7 +118,7 @@ func NewMonitoringSystem(config MonitoringConfig) (*MonitoringSystem, error) {
 		return nil, fmt.Errorf("failed to create dashboard manager: %w", err)
 	}
 	
-	// 创建性能分析器
+	// 创建性能分析�?
 	perfAnalyzer, err := performance.NewPerformanceAnalyzer(config.Performance)
 	if err != nil {
 		cancel()
@@ -161,12 +161,12 @@ func NewMonitoringSystem(config MonitoringConfig) (*MonitoringSystem, error) {
 
 // Start 启动监控系统
 func (ms *MonitoringSystem) Start() error {
-	// 启动追踪器
+	// 启动追踪�?
 	if err := ms.tracer.Start(); err != nil {
 		return fmt.Errorf("failed to start tracer: %w", err)
 	}
 	
-	// 启动日志管理器
+	// 启动日志管理�?
 	if err := ms.logManager.Start(); err != nil {
 		return fmt.Errorf("failed to start log manager: %w", err)
 	}
@@ -176,7 +176,7 @@ func (ms *MonitoringSystem) Start() error {
 		return fmt.Errorf("failed to start log pipeline: %w", err)
 	}
 	
-	// 启动告警管理器
+	// 启动告警管理�?
 	if err := ms.alertManager.Start(); err != nil {
 		return fmt.Errorf("failed to start alert manager: %w", err)
 	}
@@ -186,7 +186,7 @@ func (ms *MonitoringSystem) Start() error {
 		return fmt.Errorf("failed to start dashboard manager: %w", err)
 	}
 	
-	// 启动性能分析器
+	// 启动性能分析�?
 	if err := ms.perfAnalyzer.Start(); err != nil {
 		return fmt.Errorf("failed to start performance analyzer: %w", err)
 	}
@@ -250,7 +250,7 @@ func (ms *MonitoringSystem) GetStats() *MonitoringStats {
 	// 更新运行时间
 	ms.stats.Uptime = time.Since(ms.stats.StartTime)
 	
-	// 获取各组件统计信息
+	// 获取各组件统计信�?
 	ms.stats.TracingStats = ms.tracer.GetStats()
 	ms.stats.LoggingStats = ms.logManager.GetStats()
 	ms.stats.AlertingStats = ms.alertManager.GetStats()
@@ -266,9 +266,9 @@ func (ms *MonitoringSystem) GetStats() *MonitoringStats {
 	return &stats
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (ms *MonitoringSystem) HealthCheck() error {
-	// 检查各个组件
+	// 检查各个组�?
 	if err := ms.tracer.HealthCheck(); err != nil {
 		return fmt.Errorf("tracer health check failed: %w", err)
 	}
@@ -373,7 +373,7 @@ func (ms *MonitoringSystem) syncLoop() {
 
 // syncComponents 同步组件
 func (ms *MonitoringSystem) syncComponents() {
-	// 同步性能指标到告警系统
+	// 同步性能指标到告警系�?
 	if ms.config.Integration.EnableMetricAlerting {
 		metrics := ms.perfAnalyzer.GetSystemMetrics()
 		ms.checkMetricAlerts(metrics)
@@ -390,9 +390,9 @@ func (ms *MonitoringSystem) syncComponents() {
 	ms.mutex.Unlock()
 }
 
-// checkMetricAlerts 检查指标告警
+// checkMetricAlerts 检查指标告�?
 func (ms *MonitoringSystem) checkMetricAlerts(metrics *performance.SystemMetrics) {
-	// CPU使用率告警
+	// CPU使用率告�?
 	if metrics.CPU.Usage > 80.0 {
 		alert := &alerting.Alert{
 			ID:          fmt.Sprintf("cpu-high-%d", time.Now().Unix()),
@@ -411,7 +411,7 @@ func (ms *MonitoringSystem) checkMetricAlerts(metrics *performance.SystemMetrics
 		ms.alertManager.CreateAlert(alert)
 	}
 	
-	// 内存使用率告警
+	// 内存使用率告�?
 	if metrics.Memory.Usage > 85.0 {
 		alert := &alerting.Alert{
 			ID:          fmt.Sprintf("memory-high-%d", time.Now().Unix()),
@@ -435,7 +435,7 @@ func (ms *MonitoringSystem) checkMetricAlerts(metrics *performance.SystemMetrics
 func (ms *MonitoringSystem) triggerAutoRemediation(alerts []*alerting.Alert) {
 	for _, alert := range alerts {
 		if alert.Severity == alerting.SeverityCritical {
-			// 创建自动修复工作流
+			// 创建自动修复工作�?
 			workflow := ms.createRemediationWorkflow(alert)
 			if workflow != nil {
 				ms.orchestrator.CreateWorkflow(workflow)
@@ -448,7 +448,7 @@ func (ms *MonitoringSystem) triggerAutoRemediation(alerts []*alerting.Alert) {
 	}
 }
 
-// createRemediationWorkflow 创建修复工作流
+// createRemediationWorkflow 创建修复工作�?
 func (ms *MonitoringSystem) createRemediationWorkflow(alert *alerting.Alert) *automation.Workflow {
 	// 根据告警类型创建不同的修复工作流
 	switch alert.Labels["metric"] {
@@ -461,7 +461,7 @@ func (ms *MonitoringSystem) createRemediationWorkflow(alert *alerting.Alert) *au
 	}
 }
 
-// createCPURemediationWorkflow 创建CPU修复工作流
+// createCPURemediationWorkflow 创建CPU修复工作�?
 func (ms *MonitoringSystem) createCPURemediationWorkflow(alert *alerting.Alert) *automation.Workflow {
 	workflow := &automation.Workflow{
 		ID:          fmt.Sprintf("cpu-remediation-%s", alert.ID),
@@ -491,7 +491,7 @@ func (ms *MonitoringSystem) createCPURemediationWorkflow(alert *alerting.Alert) 
 	return workflow
 }
 
-// createMemoryRemediationWorkflow 创建内存修复工作流
+// createMemoryRemediationWorkflow 创建内存修复工作�?
 func (ms *MonitoringSystem) createMemoryRemediationWorkflow(alert *alerting.Alert) *automation.Workflow {
 	workflow := &automation.Workflow{
 		ID:          fmt.Sprintf("memory-remediation-%s", alert.ID),
@@ -521,7 +521,7 @@ func (ms *MonitoringSystem) createMemoryRemediationWorkflow(alert *alerting.Aler
 	return workflow
 }
 
-// healthCheckLoop 健康检查循环
+// healthCheckLoop 健康检查循�?
 func (ms *MonitoringSystem) healthCheckLoop() {
 	defer ms.wg.Done()
 	
@@ -538,7 +538,7 @@ func (ms *MonitoringSystem) healthCheckLoop() {
 	}
 }
 
-// performHealthCheck 执行健康检查
+// performHealthCheck 执行健康检�?
 func (ms *MonitoringSystem) performHealthCheck() {
 	ms.mutex.Lock()
 	ms.stats.IntegrationStats.HealthChecks++
@@ -550,7 +550,7 @@ func (ms *MonitoringSystem) performHealthCheck() {
 		ms.stats.IntegrationStats.FailedHealthChecks++
 		ms.mutex.Unlock()
 		
-		// 创建健康检查失败告警
+		// 创建健康检查失败告�?
 		alert := &alerting.Alert{
 			ID:          fmt.Sprintf("health-check-failed-%d", time.Now().Unix()),
 			Name:        "Health Check Failed",
@@ -569,17 +569,17 @@ func (ms *MonitoringSystem) performHealthCheck() {
 	}
 }
 
-// GetTracer 获取追踪器
+// GetTracer 获取追踪�?
 func (ms *MonitoringSystem) GetTracer() *tracing.Tracer {
 	return ms.tracer
 }
 
-// GetLogManager 获取日志管理器
+// GetLogManager 获取日志管理�?
 func (ms *MonitoringSystem) GetLogManager() *logging.LogManager {
 	return ms.logManager
 }
 
-// GetAlertManager 获取告警管理器
+// GetAlertManager 获取告警管理�?
 func (ms *MonitoringSystem) GetAlertManager() *alerting.AlertManager {
 	return ms.alertManager
 }
@@ -589,7 +589,7 @@ func (ms *MonitoringSystem) GetDashboardManager() *dashboard.DashboardManager {
 	return ms.dashboardManager
 }
 
-// GetPerformanceAnalyzer 获取性能分析器
+// GetPerformanceAnalyzer 获取性能分析�?
 func (ms *MonitoringSystem) GetPerformanceAnalyzer() *performance.PerformanceAnalyzer {
 	return ms.perfAnalyzer
 }

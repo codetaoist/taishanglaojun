@@ -2,7 +2,7 @@ package handlers
 
 import "github.com/gin-gonic/gin"
 
-// LocationHandlerInterface 位置处理器接口
+// LocationHandlerInterface 位置处理器接�?
 type LocationHandlerInterface interface {
 	CreateTrajectory(c *gin.Context)
 	GetTrajectories(c *gin.Context)

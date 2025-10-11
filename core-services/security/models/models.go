@@ -47,7 +47,7 @@ type ThreatAlert struct {
 	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-// DetectionRule 威胁检测规则模型
+// DetectionRule 威胁检测规则模�?
 type DetectionRule struct {
 	ID          string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	Name        string    `json:"name" gorm:"not null"`
@@ -97,7 +97,7 @@ type ScanJob struct {
 	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-// PentestProject 渗透测试项目模型
+// PentestProject 渗透测试项目模�?
 type PentestProject struct {
 	ID            string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	Name          string    `json:"name" gorm:"not null"`
@@ -113,7 +113,7 @@ type PentestProject struct {
 	UpdatedAt     time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-// PentestResult 渗透测试结果模型
+// PentestResult 渗透测试结果模�?
 type PentestResult struct {
 	ID          string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	ProjectID   string    `json:"project_id" gorm:"type:uuid;not null"`

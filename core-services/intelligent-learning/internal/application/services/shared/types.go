@@ -32,7 +32,7 @@ type OptimizationSettings struct {
 	Metadata           map[string]interface{} `json:"metadata"`
 }
 
-// AdaptiveCachedLearnerProfile 自适应缓存的学习者档案
+// AdaptiveCachedLearnerProfile 自适应缓存的学习者档�?
 type AdaptiveCachedLearnerProfile struct {
 	LearnerID     uuid.UUID              `json:"learner_id"`
 	Profile       *LearnerProfile        `json:"profile"`
@@ -45,7 +45,7 @@ type AdaptiveCachedLearnerProfile struct {
 	Metadata      map[string]interface{} `json:"metadata"`
 }
 
-// CachedLearningStrategy 缓存的学习策略
+// CachedLearningStrategy 缓存的学习策�?
 type CachedLearningStrategy struct {
 	StrategyID   string                 `json:"strategy_id"`
 	Strategy     *LearningStrategy      `json:"strategy"`
@@ -77,7 +77,7 @@ type CachedPersonalizationData struct {
 	Metadata     map[string]interface{} `json:"metadata"`
 }
 
-// CachedLearningPath 缓存的学习路径
+// CachedLearningPath 缓存的学习路�?
 type CachedLearningPath struct {
 	PathID       uuid.UUID              `json:"path_id"`
 	Path         *LearningPath          `json:"path"`
@@ -86,7 +86,7 @@ type CachedLearningPath struct {
 	Metadata     map[string]interface{} `json:"metadata"`
 }
 
-// CachedAssessmentResult 缓存的评估结果
+// CachedAssessmentResult 缓存的评估结�?
 type CachedAssessmentResult struct {
 	AssessmentID uuid.UUID              `json:"assessment_id"`
 	Result       *AssessmentResult      `json:"result"`
@@ -95,7 +95,7 @@ type CachedAssessmentResult struct {
 	Metadata     map[string]interface{} `json:"metadata"`
 }
 
-// CachedRecommendationResult 缓存的推荐结果
+// CachedRecommendationResult 缓存的推荐结�?
 type CachedRecommendationResult struct {
 	RequestID    uuid.UUID              `json:"request_id"`
 	Result       *RecommendationResult  `json:"result"`

@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/infrastructure"
 )
 
 func main() {
@@ -106,7 +106,7 @@ func startHTTPServer(sm *infrastructure.ServiceManager) {
 	// 获取错误历史端点
 	mux.HandleFunc("/api/v1/errors", func(w http.ResponseWriter, r *http.Request) {
 		errorHandler := sm.GetErrorHandler()
-		errors := errorHandler.GetErrorHistory(50) // 获取最近50个错误
+		errors := errorHandler.GetErrorHistory(50) // 获取最�?0个错�?
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -115,7 +115,7 @@ func startHTTPServer(sm *infrastructure.ServiceManager) {
 		})
 	})
 
-	// 根路径重定向到健康检查
+	// 根路径重定向到健康检�?
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/health", http.StatusFound)
 	})

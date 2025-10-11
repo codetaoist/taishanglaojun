@@ -4,33 +4,33 @@ import (
 	"context"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
-// MetricCollector 指标收集器接口
+// MetricCollector 指标收集器接�?
 type MetricCollector interface {
 	// Collect 收集指标
 	Collect(ctx context.Context) ([]models.Metric, error)
 	
-	// GetName 获取收集器名称
+	// GetName 获取收集器名�?
 	GetName() string
 	
-	// GetCategory 获取收集器分类
+	// GetCategory 获取收集器分�?
 	GetCategory() models.MetricCategory
 	
 	// GetInterval 获取收集间隔
 	GetInterval() time.Duration
 	
-	// IsEnabled 检查是否启用
+	// IsEnabled 检查是否启�?
 	IsEnabled() bool
 	
-	// Start 启动收集器
+	// Start 启动收集�?
 	Start(ctx context.Context) error
 	
-	// Stop 停止收集器
+	// Stop 停止收集�?
 	Stop() error
 	
-	// Health 健康检查
+	// Health 健康检�?
 	Health() error
 }
 
@@ -48,7 +48,7 @@ type MetricStorage interface {
 	// GetMetricNames 获取指标名称列表
 	GetMetricNames(ctx context.Context) ([]string, error)
 	
-	// GetLabelValues 获取标签值列表
+	// GetLabelValues 获取标签值列�?
 	GetLabelValues(ctx context.Context, labelName string) ([]string, error)
 	
 	// GetSeries 获取时间序列
@@ -60,14 +60,14 @@ type MetricStorage interface {
 	// Cleanup 清理过期数据
 	Cleanup(ctx context.Context, retention time.Duration) error
 	
-	// Health 健康检查
+	// Health 健康检�?
 	Health() error
 	
 	// Close 关闭存储
 	Close() error
 }
 
-// MetricProcessor 指标处理器接口
+// MetricProcessor 指标处理器接�?
 type MetricProcessor interface {
 	// Process 处理指标
 	Process(ctx context.Context, metrics []models.Metric) ([]models.Metric, error)
@@ -99,7 +99,7 @@ type FilterRule struct {
 	Condition string            `json:"condition"` // and, or
 }
 
-// AlertManager 告警管理器接口
+// AlertManager 告警管理器接�?
 type AlertManager interface {
 	// EvaluateRules 评估告警规则
 	EvaluateRules(ctx context.Context) error
@@ -144,7 +144,7 @@ type AlertManager interface {
 	ListSilences(ctx context.Context) ([]*models.Silence, error)
 }
 
-// NotificationManager 通知管理器接口
+// NotificationManager 通知管理器接�?
 type NotificationManager interface {
 	// SendNotification 发送通知
 	SendNotification(ctx context.Context, notification *models.Notification) error
@@ -176,32 +176,32 @@ type NotificationManager interface {
 
 // DashboardManager 仪表板管理器接口
 type DashboardManager interface {
-	// CreateDashboard 创建仪表板
+	// CreateDashboard 创建仪表�?
 	CreateDashboard(ctx context.Context, dashboard *Dashboard) error
 	
-	// UpdateDashboard 更新仪表板
+	// UpdateDashboard 更新仪表�?
 	UpdateDashboard(ctx context.Context, dashboard *Dashboard) error
 	
-	// DeleteDashboard 删除仪表板
+	// DeleteDashboard 删除仪表�?
 	DeleteDashboard(ctx context.Context, dashboardID string) error
 	
-	// GetDashboard 获取仪表板
+	// GetDashboard 获取仪表�?
 	GetDashboard(ctx context.Context, dashboardID string) (*Dashboard, error)
 	
-	// ListDashboards 列出仪表板
+	// ListDashboards 列出仪表�?
 	ListDashboards(ctx context.Context, filters map[string]interface{}) ([]*Dashboard, error)
 	
-	// RenderDashboard 渲染仪表板
+	// RenderDashboard 渲染仪表�?
 	RenderDashboard(ctx context.Context, dashboardID string, timeRange TimeRange) (*DashboardData, error)
 	
-	// ExportDashboard 导出仪表板
+	// ExportDashboard 导出仪表�?
 	ExportDashboard(ctx context.Context, dashboardID string, format string) ([]byte, error)
 	
-	// ImportDashboard 导入仪表板
+	// ImportDashboard 导入仪表�?
 	ImportDashboard(ctx context.Context, data []byte, format string) (*Dashboard, error)
 }
 
-// Dashboard 仪表板
+// Dashboard 仪表�?
 type Dashboard struct {
 	ID          string      `json:"id"`
 	Title       string      `json:"title"`
@@ -250,7 +250,7 @@ type FieldConfig struct {
 	Overrides []Override    `json:"overrides"`
 }
 
-// FieldDefaults 字段默认值
+// FieldDefaults 字段默认�?
 type FieldDefaults struct {
 	Unit        string      `json:"unit"`
 	Min         *float64    `json:"min,omitempty"`
@@ -272,7 +272,7 @@ type Override struct {
 	Properties map[string]interface{} `json:"properties"`
 }
 
-// Matcher 匹配器
+// Matcher 匹配�?
 type Matcher struct {
 	ID      string `json:"id"`
 	Options string `json:"options"`
@@ -305,7 +305,7 @@ type TimeRange struct {
 	To   string `json:"to"`
 }
 
-// DashboardData 仪表板数据
+// DashboardData 仪表板数�?
 type DashboardData struct {
 	Dashboard *Dashboard  `json:"dashboard"`
 	Panels    []PanelData `json:"panels"`
@@ -410,7 +410,7 @@ type Dependency struct {
 	CallCount int64  `json:"call_count"`
 }
 
-// LogManager 日志管理器接口
+// LogManager 日志管理器接�?
 type LogManager interface {
 	// IngestLogs 摄取日志
 	IngestLogs(ctx context.Context, logs []LogEntry) error
@@ -418,7 +418,7 @@ type LogManager interface {
 	// SearchLogs 搜索日志
 	SearchLogs(ctx context.Context, query LogQuery) (*LogSearchResult, error)
 	
-	// GetLogStream 获取日志流
+	// GetLogStream 获取日志�?
 	GetLogStream(ctx context.Context, query LogQuery) (<-chan LogEntry, error)
 	
 	// CreateIndex 创建索引
@@ -471,29 +471,29 @@ type LogIndex struct {
 
 // AutomationManager 自动化管理器接口
 type AutomationManager interface {
-	// CreateRule 创建自动化规则
+	// CreateRule 创建自动化规�?
 	CreateRule(ctx context.Context, rule *AutomationRule) error
 	
-	// UpdateRule 更新自动化规则
+	// UpdateRule 更新自动化规�?
 	UpdateRule(ctx context.Context, rule *AutomationRule) error
 	
-	// DeleteRule 删除自动化规则
+	// DeleteRule 删除自动化规�?
 	DeleteRule(ctx context.Context, ruleID string) error
 	
-	// GetRule 获取自动化规则
+	// GetRule 获取自动化规�?
 	GetRule(ctx context.Context, ruleID string) (*AutomationRule, error)
 	
-	// ListRules 列出自动化规则
+	// ListRules 列出自动化规�?
 	ListRules(ctx context.Context) ([]*AutomationRule, error)
 	
-	// ExecuteRule 执行自动化规则
+	// ExecuteRule 执行自动化规�?
 	ExecuteRule(ctx context.Context, ruleID string, context map[string]interface{}) error
 	
 	// GetExecutionHistory 获取执行历史
 	GetExecutionHistory(ctx context.Context, ruleID string) ([]*AutomationExecution, error)
 }
 
-// AutomationRule 自动化规则
+// AutomationRule 自动化规�?
 type AutomationRule struct {
 	ID          string                 `json:"id"`
 	Name        string                 `json:"name"`
@@ -512,7 +512,7 @@ type AutomationTrigger struct {
 	Config map[string]interface{} `json:"config"`
 }
 
-// AutomationCondition 自动化条件
+// AutomationCondition 自动化条�?
 type AutomationCondition struct {
 	Type     string                 `json:"type"` // metric, time, service_status
 	Operator string                 `json:"operator"`
@@ -520,14 +520,14 @@ type AutomationCondition struct {
 	Config   map[string]interface{} `json:"config"`
 }
 
-// AutomationAction 自动化动作
+// AutomationAction 自动化动�?
 type AutomationAction struct {
 	Type   string                 `json:"type"` // scale, restart, notify, webhook
 	Config map[string]interface{} `json:"config"`
 	Retry  RetryConfig            `json:"retry"`
 }
 
-// AutomationExecution 自动化执行记录
+// AutomationExecution 自动化执行记�?
 type AutomationExecution struct {
 	ID        string                 `json:"id"`
 	RuleID    string                 `json:"rule_id"`
@@ -548,19 +548,19 @@ type ActionResult struct {
 	Duration   time.Duration          `json:"duration"`
 }
 
-// HealthChecker 健康检查接口
+// HealthChecker 健康检查接�?
 type HealthChecker interface {
-	// Check 执行健康检查
+	// Check 执行健康检�?
 	Check(ctx context.Context) HealthStatus
 	
 	// GetName 获取检查器名称
 	GetName() string
 	
-	// GetDependencies 获取依赖项
+	// GetDependencies 获取依赖�?
 	GetDependencies() []string
 }
 
-// HealthStatus 健康状态
+// HealthStatus 健康状�?
 type HealthStatus struct {
 	Name         string            `json:"name"`
 	Status       string            `json:"status"` // healthy, unhealthy, degraded
@@ -571,7 +571,7 @@ type HealthStatus struct {
 	Dependencies []HealthStatus    `json:"dependencies"`
 }
 
-// ConfigManager 配置管理器接口
+// ConfigManager 配置管理器接�?
 type ConfigManager interface {
 	// GetConfig 获取配置
 	GetConfig(key string) (interface{}, error)

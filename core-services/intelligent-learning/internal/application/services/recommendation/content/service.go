@@ -7,13 +7,13 @@ import (
 
 	"github.com/google/uuid"
 	
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
 )
 
-// ContentAnalyzer 内容分析器
+// ContentAnalyzer 内容分析�?
 type ContentAnalyzer struct {
 	AnalyzerID   string                    `json:"analyzer_id"`
 	Config       *ContentAnalysisSettings  `json:"config"`
@@ -79,7 +79,7 @@ type InterestProfile struct {
 	InterestTrends    map[string][]float64      `json:"interest_trends"`
 }
 
-// KnowledgeState 知识状态 (本地定义以替代domainServices.KnowledgeState)
+// KnowledgeState 知识状�?(本地定义以替代domainServices.KnowledgeState)
 type KnowledgeState struct {
 	StateID           string                 `json:"state_id"`
 	LearnerID         string                 `json:"learner_id"`
@@ -166,7 +166,7 @@ type ContentRecommendationConfig struct {
 	// 内容分析设置
 	ContentAnalysisSettings *ContentAnalysisSettings `json:"content_analysis_settings"`
 	
-	// 学习者画像设置
+	// 学习者画像设�?
 	LearnerProfilingSettings *LearnerProfilingSettings `json:"learner_profiling_settings"`
 	
 	// 算法设置
@@ -204,7 +204,7 @@ type ContentAnalysisSettings struct {
 	LanguageModels        []string                   `json:"language_models"`
 }
 
-// LearnerProfilingSettings 学习者画像设置
+// LearnerProfilingSettings 学习者画像设�?
 type LearnerProfilingSettings struct {
 	EnableBehaviorAnalysis bool                      `json:"enable_behavior_analysis"`
 	EnablePreferenceAnalysis bool                    `json:"enable_preference_analysis"`
@@ -234,7 +234,7 @@ type ContentCollaborativeFilteringConfig struct {
 	Weight                float64                    `json:"weight"`
 }
 
-// ContentBasedFilteringConfig 基于内容的过滤配置
+// ContentBasedFilteringConfig 基于内容的过滤配�?
 type ContentBasedFilteringConfig struct {
 	Enabled               bool                       `json:"enabled"`
 	FeatureWeights        map[string]float64         `json:"feature_weights"`
@@ -290,7 +290,7 @@ type ContentRecommendationCache struct {
 	HitRate               float64                    `json:"hit_rate"`
 }
 
-// CachedRecommendation 缓存的推荐
+// CachedRecommendation 缓存的推�?
 type CachedContentRecommendation struct {
 	LearnerID             string                     `json:"learner_id"`
 	Recommendations       []*ContentRecommendation   `json:"recommendations"`
@@ -299,7 +299,7 @@ type CachedContentRecommendation struct {
 	Context               map[string]interface{}     `json:"context"`
 }
 
-// CachedContentAnalysis 缓存的内容分析
+// CachedContentAnalysis 缓存的内容分�?
 type CachedContentAnalysis struct {
 	ContentID             string                     `json:"content_id"`
 	Analysis              *ContentAnalysis           `json:"analysis"`
@@ -307,7 +307,7 @@ type CachedContentAnalysis struct {
 	ExpiresAt             time.Time                  `json:"expires_at"`
 }
 
-// CachedLearnerProfile 缓存的学习者画像
+// CachedLearnerProfile 缓存的学习者画�?
 type ContentCachedLearnerProfile struct {
 	LearnerID             string                     `json:"learner_id"`
 	Profile               *LearnerProfile            `json:"profile"`
@@ -331,7 +331,7 @@ type ContentRecommendationMetrics struct {
 	// 算法性能指标
 	AlgorithmMetrics      *AlgorithmMetrics          `json:"algorithm_metrics"`
 	
-	// 用户满意度指标
+	// 用户满意度指�?
 	SatisfactionMetrics   *SatisfactionMetrics       `json:"satisfaction_metrics"`
 	
 	// 系统性能指标
@@ -364,7 +364,7 @@ type AlgorithmMetrics struct {
 	AUC                   float64                    `json:"auc"`
 }
 
-// SatisfactionMetrics 满意度指标
+// SatisfactionMetrics 满意度指�?
 type SatisfactionMetrics struct {
 	AverageRating         float64                    `json:"average_rating"`
 	UserSatisfactionScore float64                    `json:"user_satisfaction_score"`
@@ -412,7 +412,7 @@ type ContentRecommendation struct {
 	NoveltyScore          float64                    `json:"novelty_score"`
 	DiversityScore        float64                    `json:"diversity_score"`
 	
-	// 推荐原因和解释
+	// 推荐原因和解�?
 	RecommendationReason  *RecommendationReason      `json:"recommendation_reason"`
 	Reasons               []*RecommendationReason    `json:"reasons"`
 	Explanation           string                     `json:"explanation"`
@@ -422,7 +422,7 @@ type ContentRecommendation struct {
 	LearningObjectives    []string                   `json:"learning_objectives"`
 	Prerequisites         []string                   `json:"prerequisites"`
 	
-	// 元数据
+	// 元数�?
 	GeneratedAt           time.Time                  `json:"generated_at"`
 	ExpiresAt             time.Time                  `json:"expires_at"`
 	Strategy              RecommendationStrategy     `json:"strategy"`
@@ -507,7 +507,7 @@ type ContentQualityAssessment struct {
 	Freshness             float64                    `json:"freshness"`
 }
 
-// LearnerProfile 学习者画像
+// LearnerProfile 学习者画�?
 type ContentLearnerProfile struct {
 	LearnerID             string                     `json:"learner_id"`
 	LearningPreferences   *LearningPreferences       `json:"learning_preferences"`
@@ -519,7 +519,7 @@ type ContentLearnerProfile struct {
 	UpdatedAt             time.Time                  `json:"updated_at"`
 }
 
-// LearnerProfile 类型别名，用于向后兼容
+// LearnerProfile 类型别名，用于向后兼�?
 type LearnerProfile = ContentLearnerProfile
 
 // 类型别名，用于解决类型不匹配问题
@@ -604,7 +604,7 @@ type InterestProfileDetails struct {
 	InterestTrends        map[string][]float64       `json:"interest_trends"`
 }
 
-// KnowledgeStateDetails 知识状态详情
+// KnowledgeStateDetails 知识状态详�?
 type KnowledgeStateDetails struct {
 	MasteredConcepts      []string                   `json:"mastered_concepts"`
 	LearningConcepts      []string                   `json:"learning_concepts"`
@@ -653,7 +653,7 @@ const (
 	ExpertLevel       DifficultyLevel = "expert"
 )
 
-// DifficultyLevelToFloat64 将难度级别转换为数值
+// DifficultyLevelToFloat64 将难度级别转换为数�?
 func DifficultyLevelToFloat64(level DifficultyLevel) float64 {
 	switch level {
 	case BeginnerLevel:
@@ -686,7 +686,7 @@ func NewIntelligentContentRecommendationService(
 		adaptiveEngine:        adaptiveEngine,
 	}
 	
-	// 初始化配置
+	// 初始化配�?
 	service.config = &ContentRecommendationConfig{
 		RecommendationSettings: &ContentRecommendationSettings{
 			MaxRecommendations:  10,
@@ -770,7 +770,7 @@ func NewIntelligentContentRecommendationService(
 		},
 	}
 	
-	// 初始化缓存
+	// 初始化缓�?
 	service.cache = &ContentRecommendationCache{
 		RecommendationCache:  make(map[string]*CachedContentRecommendation),
 		ContentAnalysisCache: make(map[string]*CachedContentAnalysis),
@@ -780,7 +780,7 @@ func NewIntelligentContentRecommendationService(
 		LastCleanup:          time.Now(),
 	}
 	
-	// 初始化指标
+	// 初始化指�?
 	service.metrics = &ContentRecommendationMetrics{
 		RecommendationMetrics: &DetailedRecommendationMetrics{},
 		AlgorithmMetrics:      &AlgorithmMetrics{},
@@ -791,7 +791,7 @@ func NewIntelligentContentRecommendationService(
 		QualityMetrics:        &ContentQualityMetrics{},
 	}
 	
-	// 初始化组件
+	// 初始化组�?
 	service.contentAnalyzer = NewContentAnalyzer(service.config.ContentAnalysisSettings)
 	service.learnerProfiler = NewLearnerProfiler(service.config.LearnerProfilingSettings)
 	service.recommendationEngine = NewContentRecommendationEngine(service.config.AlgorithmSettings)
@@ -809,7 +809,7 @@ func (s *IntelligentContentRecommendationService) RecommendContent(ctx context.C
 		return s.createErrorResponse(request.RequestID, fmt.Sprintf("Invalid request: %v", err)), nil
 	}
 	
-	// 检查缓存
+	// 检查缓�?
 	if cachedRecommendations := s.getCachedRecommendations(request.LearnerID, request.Context); cachedRecommendations != nil {
 		s.updateCacheMetrics(true)
 		return &ContentRecommendationResponse{
@@ -823,13 +823,13 @@ func (s *IntelligentContentRecommendationService) RecommendContent(ctx context.C
 	}
 	s.updateCacheMetrics(false)
 	
-	// 获取学习者画像
+	// 获取学习者画�?
 	learnerProfile, err := s.getLearnerProfile(ctx, request.LearnerID)
 	if err != nil {
 		return s.createErrorResponse(request.RequestID, fmt.Sprintf("Failed to get learner profile: %v", err)), nil
 	}
 	
-	// 获取候选内容
+	// 获取候选内�?
 	candidateContents, err := s.getCandidateContents(ctx, request)
 	if err != nil {
 		return s.createErrorResponse(request.RequestID, fmt.Sprintf("Failed to get candidate contents: %v", err)), nil
@@ -856,7 +856,7 @@ func (s *IntelligentContentRecommendationService) RecommendContent(ctx context.C
 	// 质量控制
 	qualityFilteredRecommendations := s.applyQualityControl(personalizedRecommendations)
 	
-	// 排序和限制数量
+	// 排序和限制数�?
 	finalRecommendations := s.rankAndLimitRecommendations(qualityFilteredRecommendations, request)
 	
 	// 缓存结果

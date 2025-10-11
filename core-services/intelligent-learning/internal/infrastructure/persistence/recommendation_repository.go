@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	domainServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
-// RecommendationRepository 推荐系统数据访问层
+// RecommendationRepository 推荐系统数据访问�?
 type RecommendationRepository struct {
 	db *sql.DB
 }
@@ -49,7 +49,7 @@ func (r *RecommendationRepository) GetUserPreferences(ctx context.Context, userI
 	
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // 用户偏好不存在
+			return nil, nil // 用户偏好不存�?
 		}
 		return nil, fmt.Errorf("获取用户偏好失败: %w", err)
 	}
@@ -230,7 +230,7 @@ func (r *RecommendationRepository) SearchContent(ctx context.Context, criteria *
 	args := []interface{}{}
 	argIndex := 1
 	
-	// 构建动态查询条件
+	// 构建动态查询条�?
 	if criteria.Category != "" {
 		query += fmt.Sprintf(" AND category = $%d", argIndex)
 		args = append(args, criteria.Category)
@@ -261,7 +261,7 @@ func (r *RecommendationRepository) SearchContent(ctx context.Context, criteria *
 		argIndex++
 	}
 	
-	// 添加排序和限制
+	// 添加排序和限�?
 	query += " ORDER BY created_at DESC"
 	if criteria.Limit > 0 {
 		query += fmt.Sprintf(" LIMIT $%d", argIndex)
@@ -425,7 +425,7 @@ func (r *RecommendationRepository) GetEnvironmentData(ctx context.Context, userI
 	
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // 环境数据不存在
+			return nil, nil // 环境数据不存�?
 		}
 		return nil, fmt.Errorf("获取环境数据失败: %w", err)
 	}
@@ -491,7 +491,7 @@ func (r *RecommendationRepository) GetContextRecords(ctx context.Context, userID
 	
 	rows, err := r.db.QueryContext(ctx, query, userID, limit)
 	if err != nil {
-		return nil, fmt.Errorf("获取上下文记录失败: %w", err)
+		return nil, fmt.Errorf("获取上下文记录失�? %w", err)
 	}
 	defer rows.Close()
 	
@@ -506,7 +506,7 @@ func (r *RecommendationRepository) GetContextRecords(ctx context.Context, userID
 			&contextDataJSON,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("扫描上下文记录失败: %w", err)
+			return nil, fmt.Errorf("扫描上下文记录失�? %w", err)
 		}
 		
 		// 解析JSON字段

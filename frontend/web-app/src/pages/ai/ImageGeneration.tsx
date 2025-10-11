@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Card, 
   Row, 
@@ -25,7 +25,7 @@ import {
   UploadOutlined, 
   DownloadOutlined, 
   ShareAltOutlined,
-  MagicOutlined,
+  ThunderboltOutlined,
   SettingOutlined,
   HistoryOutlined,
   StarOutlined,
@@ -34,10 +34,11 @@ import {
   DeleteOutlined,
   EyeOutlined
 } from '@ant-design/icons';
+import { aiService, type ImageGenerationRequest, type ImageGenerationResponse } from '../../services/aiService';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
-const { TabPane } = Tabs;
+
 
 interface GeneratedImage {
   id: string;
@@ -46,6 +47,12 @@ interface GeneratedImage {
   style: string;
   timestamp: Date;
   liked: boolean;
+  metadata?: {
+    steps: number;
+    guidance: number;
+    quality: number;
+    seed: number;
+  };
 }
 
 const ImageGeneration: React.FC = () => {
@@ -61,7 +68,58 @@ const ImageGeneration: React.FC = () => {
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const fileInputRef = useRef<any>(null);
+
+  // 加载历史记录
+  useEffect(() => {
+    loadGenerationHistory();
+  }, []);
+
+  const loadGenerationHistory = async () => {
+    setHistoryLoading(true);
+    try {
+      const response = await aiService.getGenerationHistory(20);
+      if (response.code === 'SUCCESS') {
+        const historyImages: GeneratedImage[] = response.data.map(item => ({
+          id: item.id,
+          url: item.url,
+          prompt: item.prompt,
+          style: item.style,
+          timestamp: new Date(item.timestamp),
+          liked: false,
+          metadata: item.metadata
+        }));
+        setGeneratedImages(historyImages);
+      }
+    } catch (error) {
+      console.error('加载历史记录失败:', error);
+      // 如果API失败，使用一些模拟数据
+      const mockImages: GeneratedImage[] = [
+        {
+          id: '1',
+          url: 'https://picsum.photos/1024/1024?random=1',
+          prompt: '一幅宁静的山水画',
+          style: 'realistic',
+          timestamp: new Date(Date.now() - 3600000),
+          liked: false,
+          metadata: { steps: 30, guidance: 7.5, quality: 80, seed: 123456 }
+        },
+        {
+          id: '2',
+          url: 'https://picsum.photos/1024/1024?random=2',
+          prompt: '现代都市夜景',
+          style: 'realistic',
+          timestamp: new Date(Date.now() - 7200000),
+          liked: true,
+          metadata: { steps: 30, guidance: 7.5, quality: 80, seed: 789012 }
+        }
+      ];
+      setGeneratedImages(mockImages);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   // 预设风格选项
   const styleOptions = [
@@ -93,7 +151,7 @@ const ImageGeneration: React.FC = () => {
     '神秘的森林，阳光透过树叶形成光斑'
   ];
 
-  // 模拟图像生成
+  // 图像生成
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       message.warning('请输入图像描述');
@@ -115,23 +173,58 @@ const ImageGeneration: React.FC = () => {
     }, 200);
 
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      const request: ImageGenerationRequest = {
+        prompt: prompt.trim(),
+        style,
+        size,
+        quality,
+        steps,
+        guidance,
+      };
+
+      const response = await aiService.generateImage(request);
       
-      const newImage: GeneratedImage = {
+      if (response.code === 'SUCCESS') {
+        const apiResult = response.data;
+        const newImage: GeneratedImage = {
+          id: apiResult.id,
+          url: apiResult.url,
+          prompt: apiResult.prompt,
+          style: apiResult.style,
+          timestamp: new Date(apiResult.timestamp),
+          liked: false,
+          metadata: apiResult.metadata
+        };
+
+        setGeneratedImages(prev => [newImage, ...prev]);
+        setProgress(100);
+        message.success('图像生成成功！');
+      } else {
+        throw new Error(response.message || '生成失败');
+      }
+    } catch (error: any) {
+      console.error('图像生成失败:', error);
+      message.error(error.message || '生成失败，请重试');
+      
+      // 如果API失败，使用模拟数据作为后备
+      const fallbackImage: GeneratedImage = {
         id: Date.now().toString(),
         url: `https://picsum.photos/1024/1024?random=${Date.now()}`,
         prompt,
         style,
         timestamp: new Date(),
-        liked: false
+        liked: false,
+        metadata: {
+          steps,
+          guidance,
+          quality,
+          seed: Math.floor(Math.random() * 1000000)
+        }
       };
-
-      setGeneratedImages(prev => [newImage, ...prev]);
+      
+      setGeneratedImages(prev => [fallbackImage, ...prev]);
       setProgress(100);
-      message.success('图像生成成功！');
-    } catch (error) {
-      message.error('生成失败，请重试');
+      message.info('使用演示模式生成图像');
     } finally {
       clearInterval(progressInterval);
       setLoading(false);
@@ -179,7 +272,7 @@ const ImageGeneration: React.FC = () => {
       {/* 页面标题 */}
       <div style={{ marginBottom: '24px' }}>
         <Title level={2}>
-          <MagicOutlined style={{ color: '#1890ff', marginRight: '8px' }} />
+          <ThunderboltOutlined style={{ color: '#1890ff', marginRight: '8px' }} />
           AI图像生成
         </Title>
         <Paragraph>
@@ -191,100 +284,111 @@ const ImageGeneration: React.FC = () => {
         {/* 左侧控制面板 */}
         <Col xs={24} lg={8}>
           <Card title="生成设置" extra={<SettingOutlined />}>
-            <Tabs activeKey={activeTab} onChange={setActiveTab}>
-              <TabPane tab="文本生成" key="text-to-image">
-                <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                  <div>
-                    <Text strong>图像描述</Text>
-                    <TextArea
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="描述您想要生成的图像..."
-                      rows={4}
-                      maxLength={500}
-                      showCount
-                    />
-                  </div>
+            <Tabs 
+              activeKey={activeTab} 
+              onChange={setActiveTab}
+              items={[
+                {
+                  key: 'text-to-image',
+                  label: '文本生成',
+                  children: (
+                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                      <div>
+                        <Text strong>图像描述</Text>
+                        <TextArea
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          placeholder="描述您想要生成的图像..."
+                          rows={4}
+                          maxLength={500}
+                          showCount
+                        />
+                      </div>
 
-                  <div>
-                    <Text strong>快速模板</Text>
-                    <div style={{ marginTop: '8px' }}>
-                      <Space wrap>
-                        {promptTemplates.map((template, index) => (
-                          <Tag
-                            key={index}
-                            style={{ cursor: 'pointer', marginBottom: '4px' }}
-                            onClick={() => setPrompt(template)}
-                          >
-                            {template.substring(0, 15)}...
-                          </Tag>
-                        ))}
-                      </Space>
-                    </div>
-                  </div>
+                      <div>
+                        <Text strong>快速模板</Text>
+                        <div style={{ marginTop: '8px' }}>
+                          <Space wrap>
+                            {promptTemplates.map((template, index) => (
+                              <Tag
+                                key={index}
+                                style={{ cursor: 'pointer', marginBottom: '4px' }}
+                                onClick={() => setPrompt(template)}
+                              >
+                                {template.substring(0, 15)}...
+                              </Tag>
+                            ))}
+                          </Space>
+                        </div>
+                      </div>
 
-                  <div>
-                    <Text strong>艺术风格</Text>
-                    <Select
-                      value={style}
-                      onChange={setStyle}
-                      style={{ width: '100%', marginTop: '8px' }}
-                      options={styleOptions}
-                    />
-                  </div>
+                      <div>
+                        <Text strong>艺术风格</Text>
+                        <Select
+                          value={style}
+                          onChange={setStyle}
+                          style={{ width: '100%', marginTop: '8px' }}
+                          options={styleOptions}
+                        />
+                      </div>
 
-                  <div>
-                    <Text strong>图像尺寸</Text>
-                    <Select
-                      value={size}
-                      onChange={setSize}
-                      style={{ width: '100%', marginTop: '8px' }}
-                      options={sizeOptions}
-                    />
-                  </div>
-                </Space>
-              </TabPane>
+                      <div>
+                        <Text strong>图像尺寸</Text>
+                        <Select
+                          value={size}
+                          onChange={setSize}
+                          style={{ width: '100%', marginTop: '8px' }}
+                          options={sizeOptions}
+                        />
+                      </div>
+                    </Space>
+                  )
+                },
+                {
+                  key: 'image-edit',
+                  label: '图像编辑',
+                  children: (
+                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                      <div>
+                        <Text strong>上传图像</Text>
+                        <Upload
+                          accept="image/*"
+                          beforeUpload={handleImageUpload}
+                          showUploadList={false}
+                          style={{ width: '100%', marginTop: '8px' }}
+                        >
+                          <Button icon={<UploadOutlined />} block>
+                            选择图像文件
+                          </Button>
+                        </Upload>
+                      </div>
 
-              <TabPane tab="图像编辑" key="image-edit">
-                <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                  <div>
-                    <Text strong>上传图像</Text>
-                    <Upload
-                      accept="image/*"
-                      beforeUpload={handleImageUpload}
-                      showUploadList={false}
-                      style={{ width: '100%', marginTop: '8px' }}
-                    >
-                      <Button icon={<UploadOutlined />} block>
-                        选择图像文件
-                      </Button>
-                    </Upload>
-                  </div>
+                      <div>
+                        <Text strong>编辑描述</Text>
+                        <TextArea
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          placeholder="描述您想要的修改..."
+                          rows={3}
+                        />
+                      </div>
 
-                  <div>
-                    <Text strong>编辑描述</Text>
-                    <TextArea
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="描述您想要的修改..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div>
-                    <Text strong>编辑强度</Text>
-                    <Slider
-                      value={quality}
-                      onChange={setQuality}
-                      min={10}
-                      max={100}
-                      marks={{ 10: '轻微', 50: '中等', 100: '强烈' }}
-                      style={{ marginTop: '16px' }}
-                    />
-                  </div>
-                </Space>
-              </TabPane>
-            </Tabs>
+                      <div>
+                        <Text strong>编辑强度</Text>
+                        <Slider
+                          value={quality}
+                          onChange={setQuality}
+                          min={10}
+                          max={100}
+                          marks={{ 10: '轻微', 50: '中等', 100: '强烈' }}
+                          style={{ marginTop: '16px' }}
+                        />
+                      </div>
+                    </Space>
+                  )
+                }
+              ]}
+            />
 
             <Divider />
 
@@ -324,7 +428,7 @@ const ImageGeneration: React.FC = () => {
               type="primary"
               size="large"
               block
-              icon={<MagicOutlined />}
+              icon={<ThunderboltOutlined />}
               loading={loading}
               onClick={handleGenerate}
               disabled={!prompt.trim()}

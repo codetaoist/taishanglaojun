@@ -10,13 +10,13 @@ import (
 	"github.com/codetaoist/taishanglaojun/core-services/community/services"
 )
 
-// ContentReviewHandler 内容审核处理器
+// ContentReviewHandler 内容审核处理�?
 type ContentReviewHandler struct {
 	reviewService *services.ContentReviewService
 	logger        *zap.Logger
 }
 
-// NewContentReviewHandler 创建内容审核处理器实例
+// NewContentReviewHandler 创建内容审核处理器实�?
 func NewContentReviewHandler(reviewService *services.ContentReviewService, logger *zap.Logger) *ContentReviewHandler {
 	return &ContentReviewHandler{
 		reviewService: reviewService,
@@ -29,7 +29,7 @@ func (h *ContentReviewHandler) ReviewPost(c *gin.Context) {
 	// 从JWT中获取用户ID作为审核员ID
 	reviewerID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授�?})
 		return
 	}
 
@@ -57,7 +57,7 @@ func (h *ContentReviewHandler) ReviewComment(c *gin.Context) {
 	// 从JWT中获取用户ID作为审核员ID
 	reviewerID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授�?})
 		return
 	}
 
@@ -80,7 +80,7 @@ func (h *ContentReviewHandler) ReviewComment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "审核完成"})
 }
 
-// GetPendingPosts 获取待审核帖子列表
+// GetPendingPosts 获取待审核帖子列�?
 func (h *ContentReviewHandler) GetPendingPosts(c *gin.Context) {
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -111,7 +111,7 @@ func (h *ContentReviewHandler) GetPendingPosts(c *gin.Context) {
 	})
 }
 
-// GetPendingComments 获取待审核评论列表
+// GetPendingComments 获取待审核评论列�?
 func (h *ContentReviewHandler) GetPendingComments(c *gin.Context) {
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -147,7 +147,7 @@ func (h *ContentReviewHandler) BatchReviewPosts(c *gin.Context) {
 	// 从JWT中获取用户ID作为审核员ID
 	reviewerID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授�?})
 		return
 	}
 
@@ -179,7 +179,7 @@ func (h *ContentReviewHandler) BatchReviewComments(c *gin.Context) {
 	// 从JWT中获取用户ID作为审核员ID
 	reviewerID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授�?})
 		return
 	}
 

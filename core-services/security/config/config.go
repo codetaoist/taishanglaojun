@@ -23,7 +23,7 @@ type SecurityConfig struct {
 	Monitoring       MonitoringConfig       `yaml:"monitoring" json:"monitoring"`
 }
 
-// ServerConfig 服务器配置
+// ServerConfig 服务器配�?
 type ServerConfig struct {
 	Port         int `yaml:"port" json:"port"`
 	ReadTimeout  int `yaml:"read_timeout" json:"read_timeout"`
@@ -31,7 +31,7 @@ type ServerConfig struct {
 	IdleTimeout  int `yaml:"idle_timeout" json:"idle_timeout"`
 }
 
-// DatabaseConfig 数据库配置
+// DatabaseConfig 数据库配�?
 type DatabaseConfig struct {
 	Host         string `yaml:"host" json:"host"`
 	Port         int    `yaml:"port" json:"port"`
@@ -44,7 +44,7 @@ type DatabaseConfig struct {
 	MaxLifetime  string `yaml:"max_lifetime" json:"max_lifetime"`
 }
 
-// ThreatDetectionConfig 威胁检测配置
+// ThreatDetectionConfig 威胁检测配�?
 type ThreatDetectionConfig struct {
 	Enabled              bool          `yaml:"enabled" json:"enabled"`
 	ScanInterval         time.Duration `yaml:"scan_interval" json:"scan_interval"`
@@ -61,7 +61,7 @@ type ThreatDetectionConfig struct {
 	NotificationChannels []string      `yaml:"notification_channels" json:"notification_channels"`
 }
 
-// DetectionRule 检测规则配置
+// DetectionRule 检测规则配�?
 type DetectionRule struct {
 	Enabled     bool     `yaml:"enabled" json:"enabled"`
 	Severity    string   `yaml:"severity" json:"severity"`
@@ -107,7 +107,7 @@ type NetworkScanConfig struct {
 	ExcludeHosts   []string `yaml:"exclude_hosts" json:"exclude_hosts"`
 }
 
-// PentestConfig 渗透测试配置
+// PentestConfig 渗透测试配�?
 type PentestConfig struct {
 	Enabled           bool          `yaml:"enabled" json:"enabled"`
 	MaxConcurrentJobs int           `yaml:"max_concurrent_jobs" json:"max_concurrent_jobs"`
@@ -185,7 +185,7 @@ type ComplianceConfig struct {
 	AutoRemediation bool `yaml:"auto_remediation" json:"auto_remediation"`
 }
 
-// MiddlewareConfig 中间件配置
+// MiddlewareConfig 中间件配�?
 type MiddlewareConfig struct {
 	RateLimit    RateLimitConfig    `yaml:"rate_limit" json:"rate_limit"`
 	CORS         CORSConfig         `yaml:"cors" json:"cors"`
@@ -211,7 +211,7 @@ type CORSConfig struct {
 	AllowCredentials bool   `yaml:"allow_credentials" json:"allow_credentials"`
 }
 
-// SecurityHeadersConfig 安全头配置
+// SecurityHeadersConfig 安全头配�?
 type SecurityHeadersConfig struct {
 	Enabled                bool   `yaml:"enabled" json:"enabled"`
 	ContentTypeOptions     string `yaml:"content_type_options" json:"content_type_options"`
@@ -268,7 +268,7 @@ type MonitoringConfig struct {
 	HealthCheck HealthCheckConfig `yaml:"health_check" json:"health_check"`
 }
 
-// HealthCheckConfig 健康检查配置
+// HealthCheckConfig 健康检查配�?
 type HealthCheckConfig struct {
 	Enabled  bool   `yaml:"enabled" json:"enabled"`
 	Port     int    `yaml:"port" json:"port"`
@@ -311,7 +311,7 @@ func GetDefaultConfig() *SecurityConfig {
 				Threshold:   3,
 				TimeWindow:  "5m",
 				Action:      "block",
-				Description: "SQL注入攻击检测",
+				Description: "SQL注入攻击检�?,
 			},
 			XSSAttack: DetectionRule{
 				Enabled:     true,
@@ -320,7 +320,7 @@ func GetDefaultConfig() *SecurityConfig {
 				Threshold:   3,
 				TimeWindow:  "5m",
 				Action:      "alert",
-				Description: "XSS攻击检测",
+				Description: "XSS攻击检�?,
 			},
 			BruteForce: DetectionRule{
 				Enabled:     true,
@@ -329,7 +329,7 @@ func GetDefaultConfig() *SecurityConfig {
 				Threshold:   10,
 				TimeWindow:  "1m",
 				Action:      "block",
-				Description: "暴力破解攻击检测",
+				Description: "暴力破解攻击检�?,
 			},
 			DDoSAttack: DetectionRule{
 				Enabled:     true,
@@ -338,7 +338,7 @@ func GetDefaultConfig() *SecurityConfig {
 				Threshold:   100,
 				TimeWindow:  "1m",
 				Action:      "block",
-				Description: "DDoS攻击检测",
+				Description: "DDoS攻击检�?,
 			},
 			NotificationChannels: []string{"email", "webhook"},
 		},
@@ -499,15 +499,15 @@ func GetDefaultConfig() *SecurityConfig {
 func LoadConfig() (*SecurityConfig, error) {
 	config := GetDefaultConfig()
 	
-	// 从环境变量加载配置
+	// 从环境变量加载配�?
 	loadFromEnv(config)
 	
 	return config, nil
 }
 
-// loadFromEnv 从环境变量加载配置
+// loadFromEnv 从环境变量加载配�?
 func loadFromEnv(config *SecurityConfig) {
-	// 数据库配置
+	// 数据库配�?
 	if host := os.Getenv("DB_HOST"); host != "" {
 		config.Database.Host = host
 	}
@@ -529,7 +529,7 @@ func loadFromEnv(config *SecurityConfig) {
 		config.Database.SSLMode = sslMode
 	}
 
-	// 威胁检测配置
+	// 威胁检测配�?
 	if enabled := os.Getenv("THREAT_DETECTION_ENABLED"); enabled != "" {
 		if e, err := strconv.ParseBool(enabled); err == nil {
 			config.ThreatDetection.Enabled = e
@@ -548,7 +548,7 @@ func loadFromEnv(config *SecurityConfig) {
 		}
 	}
 
-	// 渗透测试配置
+	// 渗透测试配�?
 	if enabled := os.Getenv("PENTEST_ENABLED"); enabled != "" {
 		if e, err := strconv.ParseBool(enabled); err == nil {
 			config.Pentest.Enabled = e
@@ -572,7 +572,7 @@ func loadFromEnv(config *SecurityConfig) {
 		}
 	}
 
-	// 中间件配置
+	// 中间件配�?
 	if enabled := os.Getenv("RATE_LIMIT_ENABLED"); enabled != "" {
 		if e, err := strconv.ParseBool(enabled); err == nil {
 			config.Middleware.RateLimit.Enabled = e
@@ -594,7 +594,7 @@ func loadFromEnv(config *SecurityConfig) {
 		config.Middleware.CORS.AllowedOrigins = strings.Split(allowedOrigins, ",")
 	}
 
-	// 安全头配置
+	// 安全头配�?
 	if enabled := os.Getenv("SECURITY_HEADERS_ENABLED"); enabled != "" {
 		if e, err := strconv.ParseBool(enabled); err == nil {
 			config.Middleware.Security.Enabled = e

@@ -25,7 +25,7 @@ func NewUserService(db *gorm.DB, logger *zap.Logger) *UserService {
 	}
 }
 
-// CreateOrUpdateUserProfile 创建或更新用户资料
+// CreateOrUpdateUserProfile 创建或更新用户资�?
 func (s *UserService) CreateOrUpdateUserProfile(userID, username, nickname string) (*models.UserProfile, error) {
 	var userProfile models.UserProfile
 	
@@ -37,7 +37,7 @@ func (s *UserService) CreateOrUpdateUserProfile(userID, username, nickname strin
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		// 创建新用户资料
+		// 创建新用户资�?
 		userProfile = models.UserProfile{
 			UserID:   userID,
 			Username: username,
@@ -76,7 +76,7 @@ func (s *UserService) GetUserProfile(userID string, viewerID *string) (*models.U
 	var userProfile models.UserProfile
 	if err := s.db.Where("user_id = ?", userID).First(&userProfile).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("用户不存在")
+			return nil, fmt.Errorf("用户不存�?)
 		}
 		s.logger.Error("Failed to get user profile", zap.String("user_id", userID), zap.Error(err))
 		return nil, fmt.Errorf("获取用户资料失败")
@@ -90,7 +90,7 @@ func (s *UserService) UpdateUserProfile(userID string, req *models.UserProfileUp
 	var userProfile models.UserProfile
 	if err := s.db.Where("user_id = ?", userID).First(&userProfile).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("用户不存在")
+			return nil, fmt.Errorf("用户不存�?)
 		}
 		s.logger.Error("Failed to find user profile for update", zap.String("user_id", userID), zap.Error(err))
 		return nil, fmt.Errorf("查找用户资料失败")
@@ -114,7 +114,7 @@ func (s *UserService) UpdateUserProfile(userID string, req *models.UserProfileUp
 		updates["website"] = *req.Website
 	}
 
-	// 更新最后活跃时间
+	// 更新最后活跃时�?
 	userProfile.UpdateLastActive()
 	updates["last_active_at"] = userProfile.LastActiveAt
 
@@ -143,7 +143,7 @@ func (s *UserService) GetUsers(req *models.UserListRequest, viewerID *string) (*
 	// 构建查询
 	query := s.db.Model(&models.UserProfile{}).Where("status != ?", models.UserStatusDeleted)
 
-	// 添加筛选条件
+	// 添加筛选条�?
 	if req.Keyword != "" {
 		keyword := "%" + strings.ToLower(req.Keyword) + "%"
 		query = query.Where("LOWER(username) LIKE ? OR LOWER(nickname) LIKE ?", keyword, keyword)
@@ -178,7 +178,7 @@ func (s *UserService) GetUsers(req *models.UserListRequest, viewerID *string) (*
 		return nil, fmt.Errorf("获取用户列表失败")
 	}
 
-	// 转换为响应格式
+	// 转换为响应格�?
 	userResponses := make([]models.UserProfileResponse, len(users))
 	for i, user := range users {
 		userResponses[i] = user.ToResponse()
@@ -202,22 +202,22 @@ func (s *UserService) GetUserStats() (*models.UserStatsResponse, error) {
 	// 总用户数
 	s.db.Model(&models.UserProfile{}).Where("status != ?", models.UserStatusDeleted).Count(&stats.TotalUsers)
 
-	// 活跃用户数
+	// 活跃用户�?
 	s.db.Model(&models.UserProfile{}).Where("status = ?", models.UserStatusActive).Count(&stats.ActiveUsers)
 
-	// 今日新用户
+	// 今日新用�?
 	today := time.Now().Truncate(24 * time.Hour)
 	s.db.Model(&models.UserProfile{}).Where("created_at >= ?", today).Count(&stats.NewUsers)
 
-	// 本周新用户
+	// 本周新用�?
 	weekStart := today.AddDate(0, 0, -int(today.Weekday()))
 	s.db.Model(&models.UserProfile{}).Where("created_at >= ?", weekStart).Count(&stats.WeeklyUsers)
 
-	// 本月新用户
+	// 本月新用�?
 	monthStart := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, today.Location())
 	s.db.Model(&models.UserProfile{}).Where("created_at >= ?", monthStart).Count(&stats.MonthlyUsers)
 
-	// 在线用户（最近1小时活跃）
+	// 在线用户（最�?小时活跃�?
 	oneHourAgo := time.Now().Add(-1 * time.Hour)
 	s.db.Model(&models.UserProfile{}).Where("last_active_at >= ?", oneHourAgo).Count(&stats.OnlineUsers)
 
@@ -259,7 +259,7 @@ func (s *UserService) SearchUsers(keyword string, page, pageSize int) (*models.U
 		return nil, fmt.Errorf("搜索失败")
 	}
 
-	// 转换为响应格式
+	// 转换为响应格�?
 	userResponses := make([]models.UserProfileResponse, len(users))
 	for i, user := range users {
 		userResponses[i] = user.ToResponse()
@@ -276,14 +276,14 @@ func (s *UserService) SearchUsers(keyword string, page, pageSize int) (*models.U
 	}, nil
 }
 
-// UpdateUserActivity 更新用户活跃状态
+// UpdateUserActivity 更新用户活跃状�?
 func (s *UserService) UpdateUserActivity(userID string) error {
 	now := time.Now()
 	if err := s.db.Model(&models.UserProfile{}).
 		Where("user_id = ?", userID).
 		UpdateColumn("last_active_at", now).Error; err != nil {
 		s.logger.Error("Failed to update user activity", zap.String("user_id", userID), zap.Error(err))
-		return fmt.Errorf("更新用户活跃状态失败")
+		return fmt.Errorf("更新用户活跃状态失�?)
 	}
 
 	return nil
@@ -315,7 +315,7 @@ func (s *UserService) UnbanUser(userID string, adminID string) error {
 	return nil
 }
 
-// GetUserPosts 获取用户的帖子列表
+// GetUserPosts 获取用户的帖子列�?
 func (s *UserService) GetUserPosts(userID string, page, pageSize int, viewerID *string) (*models.PostListResponse, error) {
 	var posts []models.Post
 	var total int64
@@ -338,7 +338,7 @@ func (s *UserService) GetUserPosts(userID string, page, pageSize int, viewerID *
 		return nil, fmt.Errorf("获取用户帖子列表失败")
 	}
 
-	// 转换为响应格式
+	// 转换为响应格�?
 	postResponses := make([]models.PostResponse, len(posts))
 	for i, post := range posts {
 		postResponses[i] = post.ToResponse()
@@ -355,14 +355,14 @@ func (s *UserService) GetUserPosts(userID string, page, pageSize int, viewerID *
 	}, nil
 }
 
-// IsUserActive 检查用户是否活跃
+// IsUserActive 检查用户是否活�?
 func (s *UserService) IsUserActive(userID string) (bool, error) {
 	var count int64
 	if err := s.db.Model(&models.UserProfile{}).
 		Where("user_id = ? AND status = ?", userID, models.UserStatusActive).
 		Count(&count).Error; err != nil {
 		s.logger.Error("Failed to check user status", zap.String("user_id", userID), zap.Error(err))
-		return false, fmt.Errorf("检查用户状态失败")
+		return false, fmt.Errorf("检查用户状态失�?)
 	}
 
 	return count > 0, nil

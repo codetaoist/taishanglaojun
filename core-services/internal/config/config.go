@@ -21,7 +21,7 @@ type Config struct {
 	AI       AIConfig       `mapstructure:"ai"`
 }
 
-// ServerConfig 服务器配置
+// ServerConfig 服务器配�?
 type ServerConfig struct {
 	Name           string   `mapstructure:"name"`
 	Version        string   `mapstructure:"version"`
@@ -34,7 +34,7 @@ type ServerConfig struct {
 	TrustedProxies []string `mapstructure:"trusted_proxies"`
 }
 
-// DatabaseConfig 数据库配置
+// DatabaseConfig 数据库配�?
 type DatabaseConfig struct {
 	Type         string `mapstructure:"type"`
 	Host         string `mapstructure:"host"`
@@ -95,7 +95,7 @@ type AIConfig struct {
 	Providers map[string]ProviderConfig `mapstructure:"providers"`
 }
 
-// ProviderConfig AI提供商配置
+// ProviderConfig AI提供商配�?
 type ProviderConfig struct {
 	Name    string `mapstructure:"name"`
 	Enabled bool   `mapstructure:"enabled"`
@@ -121,7 +121,7 @@ func Load(configPath string) (*Config, error) {
 	viper.SetEnvPrefix("TAISHANG")
 	viper.AutomaticEnv()
 
-	// 设置默认值
+	// 设置默认�?
 	setDefaults()
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -152,7 +152,7 @@ func Get() *Config {
 
 // setDefaults 设置默认配置
 func setDefaults() {
-	// 服务器默认配置
+	// 服务器默认配�?
 	viper.SetDefault("server.name", "taishang-core-services")
 	viper.SetDefault("server.version", "1.0.0")
 	viper.SetDefault("server.host", "0.0.0.0")
@@ -162,7 +162,7 @@ func setDefaults() {
 	viper.SetDefault("server.write_timeout", 60)
 	viper.SetDefault("server.max_header_bytes", 1048576)
 
-	// 数据库默认配置
+	// 数据库默认配�?
 	viper.SetDefault("database.type", "postgres")
 	viper.SetDefault("database.host", "localhost")
 	viper.SetDefault("database.port", 5432)
@@ -234,7 +234,7 @@ func (c *Config) Validate() error {
 	}
 	
 	if c.Database.Type == "" {
-		return fmt.Errorf("数据库类型不能为空")
+		return fmt.Errorf("数据库类型不能为�?)
 	}
 	
 	if c.JWT.Secret == "" {

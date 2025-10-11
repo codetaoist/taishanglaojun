@@ -4,7 +4,7 @@ import { BookOutlined, PlayCircleOutlined, TrophyOutlined, UserOutlined, EyeOutl
 import type { ColumnsType } from 'antd/es/table';
 
 const { Option } = Select;
-const { TabPane } = Tabs;
+
 
 interface SecurityCourse {
   id: string;
@@ -434,115 +434,128 @@ const SecurityEducation: React.FC = () => {
         </Col>
       </Row>
 
-      <Tabs defaultActiveKey="courses">
-        <TabPane tab="在线课程" key="courses">
-          <Card 
-            title="安全课程管理" 
-            extra={
-              <Space>
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />}
-                  onClick={() => setCourseModalVisible(true)}
-                >
-                  新建课程
-                </Button>
-                <Button onClick={loadCourses}>刷新</Button>
-              </Space>
-            }
-          >
-            <Table
-              columns={courseColumns}
-              dataSource={courses}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`,
-              }}
-            />
-          </Card>
-        </TabPane>
-
-        <TabPane tab="实验环境" key="labs">
-          <Card 
-            title="实验环境管理" 
-            extra={
-              <Space>
-                <Button type="primary" icon={<PlusOutlined />}>
-                  新建实验
-                </Button>
-                <Button onClick={loadLabs}>刷新</Button>
-              </Space>
-            }
-          >
-            <Table
-              columns={labColumns}
-              dataSource={labs}
-              rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`,
-              }}
-            />
-          </Card>
-        </TabPane>
-
-        <TabPane tab="认证管理" key="certifications">
-          <Card 
-            title="安全认证管理" 
-            extra={
-              <Space>
-                <Button type="primary" icon={<PlusOutlined />}>
-                  新建认证
-                </Button>
-                <Button>刷新</Button>
-              </Space>
-            }
-          >
-            <List
-              grid={{ gutter: 16, column: 2 }}
-              dataSource={certifications}
-              renderItem={(cert) => (
-                <List.Item>
-                  <Card
-                    title={cert.name}
-                    extra={
-                      <Tag color={getStatusColor(cert.status)}>
-                        {cert.status === 'active' ? '活跃' : '停用'}
-                      </Tag>
-                    }
-                    actions={[
-                      <Button type="link" icon={<EyeOutlined />}>查看</Button>,
-                      <Button type="link" icon={<EditOutlined />}>编辑</Button>,
-                    ]}
-                  >
-                    <p>{cert.description}</p>
-                    <Row gutter={[16, 8]}>
-                      <Col span={12}>
-                        <strong>通过分数:</strong> {cert.passScore}%
-                      </Col>
-                      <Col span={12}>
-                        <strong>题目数量:</strong> {cert.totalQuestions}
-                      </Col>
-                      <Col span={12}>
-                        <strong>考试时长:</strong> {cert.timeLimit}分钟
-                      </Col>
-                      <Col span={12}>
-                        <strong>已颁发:</strong> {cert.issuedCount}份
-                      </Col>
-                    </Row>
-                  </Card>
-                </List.Item>
-              )}
-            />
-          </Card>
-        </TabPane>
-      </Tabs>
+      <Tabs 
+        defaultActiveKey="courses"
+        items={[
+          {
+            key: 'courses',
+            label: '在线课程',
+            children: (
+              <Card 
+                title="安全课程管理" 
+                extra={
+                  <Space>
+                    <Button 
+                      type="primary" 
+                      icon={<PlusOutlined />}
+                      onClick={() => setCourseModalVisible(true)}
+                    >
+                      新建课程
+                    </Button>
+                    <Button onClick={loadCourses}>刷新</Button>
+                  </Space>
+                }
+              >
+                <Table
+                  columns={courseColumns}
+                  dataSource={courses}
+                  rowKey="id"
+                  loading={loading}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`,
+                  }}
+                />
+              </Card>
+            )
+          },
+          {
+            key: 'labs',
+            label: '实验环境',
+            children: (
+              <Card 
+                title="实验环境管理" 
+                extra={
+                  <Space>
+                    <Button type="primary" icon={<PlusOutlined />}>
+                      新建实验
+                    </Button>
+                    <Button onClick={loadLabs}>刷新</Button>
+                  </Space>
+                }
+              >
+                <Table
+                  columns={labColumns}
+                  dataSource={labs}
+                  rowKey="id"
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 条记录`,
+                  }}
+                />
+              </Card>
+            )
+          },
+          {
+            key: 'certifications',
+            label: '认证管理',
+            children: (
+              <Card 
+                title="安全认证管理" 
+                extra={
+                  <Space>
+                    <Button type="primary" icon={<PlusOutlined />}>
+                      新建认证
+                    </Button>
+                    <Button>刷新</Button>
+                  </Space>
+                }
+              >
+                <List
+                  grid={{ gutter: 16, column: 2 }}
+                  dataSource={certifications}
+                  renderItem={(cert) => (
+                    <List.Item>
+                      <Card
+                        title={cert.name}
+                        extra={
+                          <Tag color={getStatusColor(cert.status)}>
+                            {cert.status === 'active' ? '活跃' : '停用'}
+                          </Tag>
+                        }
+                        actions={[
+                          <Button type="link" icon={<EyeOutlined />}>查看</Button>,
+                          <Button type="link" icon={<EditOutlined />}>编辑</Button>,
+                        ]}
+                      >
+                        <p>{cert.description}</p>
+                        <Row gutter={[16, 8]}>
+                          <Col span={12}>
+                            <strong>通过分数:</strong> {cert.passScore}%
+                          </Col>
+                          <Col span={12}>
+                            <strong>题目数量:</strong> {cert.totalQuestions}
+                          </Col>
+                          <Col span={12}>
+                            <strong>考试时长:</strong> {cert.timeLimit}分钟
+                          </Col>
+                          <Col span={12}>
+                            <strong>已颁发:</strong> {cert.issuedCount}份
+                          </Col>
+                        </Row>
+                      </Card>
+                    </List.Item>
+                  )}
+                />
+              </Card>
+            )
+          }
+        ]}
+      />
 
       {/* 课程详情模态框 */}
       <Modal

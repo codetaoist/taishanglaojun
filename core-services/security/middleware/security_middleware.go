@@ -8,17 +8,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/taishanglaojun/core-services/security/services"
-	"github.com/taishanglaojun/core-services/security/models"
+	"github.com/codetaoist/taishanglaojun/core-services/security/services"
+	"github.com/codetaoist/taishanglaojun/core-services/security/models"
 )
 
-// SecurityMiddleware 安全中间件
+// SecurityMiddleware 安全中间�?
 type SecurityMiddleware struct {
 	threatService *services.ThreatDetectionService
 	auditService  *services.SecurityAuditService
 }
 
-// NewSecurityMiddleware 创建安全中间件
+// NewSecurityMiddleware 创建安全中间�?
 func NewSecurityMiddleware(threatService *services.ThreatDetectionService, auditService *services.SecurityAuditService) *SecurityMiddleware {
 	return &SecurityMiddleware{
 		threatService: threatService,
@@ -85,7 +85,7 @@ func (m *SecurityMiddleware) ThreatDetection() gin.HandlerFunc {
 	}
 }
 
-// RateLimiting 速率限制中间件
+// RateLimiting 速率限制中间�?
 func (m *SecurityMiddleware) RateLimiting(maxRequests int, window time.Duration) gin.HandlerFunc {
 	// 简单的内存存储，生产环境应该使用Redis
 	requestCounts := make(map[string][]time.Time)
@@ -94,7 +94,7 @@ func (m *SecurityMiddleware) RateLimiting(maxRequests int, window time.Duration)
 		clientIP := getClientIP(c)
 		now := time.Now()
 
-		// 清理过期的请求记录
+		// 清理过期的请求记�?
 		if requests, exists := requestCounts[clientIP]; exists {
 			var validRequests []time.Time
 			for _, reqTime := range requests {
@@ -105,7 +105,7 @@ func (m *SecurityMiddleware) RateLimiting(maxRequests int, window time.Duration)
 			requestCounts[clientIP] = validRequests
 		}
 
-		// 检查是否超过限制
+		// 检查是否超过限�?
 		if len(requestCounts[clientIP]) >= maxRequests {
 			// 记录审计日志
 			if m.auditService != nil {
@@ -142,7 +142,7 @@ func (m *SecurityMiddleware) RateLimiting(maxRequests int, window time.Duration)
 	}
 }
 
-// AuditLogging 审计日志中间件
+// AuditLogging 审计日志中间�?
 func (m *SecurityMiddleware) AuditLogging() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -185,7 +185,7 @@ func (m *SecurityMiddleware) AuditLogging() gin.HandlerFunc {
 // SecurityHeaders 安全头中间件
 func (m *SecurityMiddleware) SecurityHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 设置安全头
+		// 设置安全�?
 		c.Header("X-Content-Type-Options", "nosniff")
 		c.Header("X-Frame-Options", "DENY")
 		c.Header("X-XSS-Protection", "1; mode=block")
@@ -198,7 +198,7 @@ func (m *SecurityMiddleware) SecurityHeaders() gin.HandlerFunc {
 	}
 }
 
-// CORS 跨域资源共享中间件
+// CORS 跨域资源共享中间�?
 func (m *SecurityMiddleware) CORS(allowedOrigins []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
@@ -229,7 +229,7 @@ func (m *SecurityMiddleware) CORS(allowedOrigins []string) gin.HandlerFunc {
 	}
 }
 
-// InputValidation 输入验证中间件
+// InputValidation 输入验证中间�?
 func (m *SecurityMiddleware) InputValidation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 检查常见的恶意输入模式
@@ -294,7 +294,7 @@ func (m *SecurityMiddleware) IPWhitelist(allowedIPs []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientIP := getClientIP(c)
 		
-		// 检查IP是否在白名单中
+		// 检查IP是否在白名单�?
 		allowed := false
 		for _, allowedIP := range allowedIPs {
 			if allowedIP == clientIP {
@@ -340,7 +340,7 @@ func (m *SecurityMiddleware) IPBlacklist(blockedIPs []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientIP := getClientIP(c)
 		
-		// 检查IP是否在黑名单中
+		// 检查IP是否在黑名单�?
 		for _, blockedIP := range blockedIPs {
 			if blockedIP == clientIP {
 				// 记录审计日志
@@ -379,13 +379,13 @@ func (m *SecurityMiddleware) IPBlacklist(blockedIPs []string) gin.HandlerFunc {
 
 // getClientIP 获取客户端IP地址
 func getClientIP(c *gin.Context) string {
-	// 检查X-Forwarded-For头
+	// 检查X-Forwarded-For�?
 	if xff := c.Request.Header.Get("X-Forwarded-For"); xff != "" {
 		ips := strings.Split(xff, ",")
 		return strings.TrimSpace(ips[0])
 	}
 
-	// 检查X-Real-IP头
+	// 检查X-Real-IP�?
 	if xri := c.Request.Header.Get("X-Real-IP"); xri != "" {
 		return xri
 	}

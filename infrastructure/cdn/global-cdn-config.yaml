@@ -1,0 +1,395 @@
+# 太上老君AI平台全球CDN配置
+
+# Cloudflare配置
+cloudflare:
+  zone_id: "your-zone-id"
+  api_token: "${CLOUDFLARE_API_TOKEN}"
+  
+  # 域名配置
+  domains:
+    - name: "taishanglaojun.com"
+      type: "primary"
+      ssl_mode: "full_strict"
+      
+    - name: "api.taishanglaojun.com"
+      type: "api"
+      ssl_mode: "full_strict"
+      
+    - name: "cdn.taishanglaojun.com"
+      type: "static"
+      ssl_mode: "full_strict"
+
+  # 全局设置
+  global_settings:
+    security_level: "medium"
+    cache_level: "aggressive"
+    browser_cache_ttl: 31536000  # 1年
+    edge_cache_ttl: 2592000      # 30天
+    always_online: true
+    ipv6: true
+    http2: true
+    http3: true
+    brotli: true
+    minify:
+      css: true
+      html: true
+      js: true
+
+  # 页面规则
+  page_rules:
+    # 静态资源缓存
+    - pattern: "cdn.taishanglaojun.com/static/*"
+      settings:
+        cache_level: "cache_everything"
+        edge_cache_ttl: 86400
+        browser_cache_ttl: 86400
+        
+    # API请求不缓存
+    - pattern: "api.taishanglaojun.com/api/*"
+      settings:
+        cache_level: "bypass"
+        
+    # 前端应用缓存
+    - pattern: "taishanglaojun.com/*"
+      settings:
+        cache_level: "standard"
+        edge_cache_ttl: 3600
+        browser_cache_ttl: 3600
+
+  # 防火墙规则
+  firewall_rules:
+    # 阻止恶意请求
+    - expression: '(cf.threat_score gt 14)'
+      action: "challenge"
+      
+    # 限制API请求频率
+    - expression: '(http.request.uri.path contains "/api/" and rate(1m) gt 100)'
+      action: "block"
+      
+    # 地理位置限制
+    - expression: '(ip.geoip.country in {"CN" "US" "EU" "JP" "SG" "HK"})'
+      action: "allow"
+      
+    # 阻止已知恶意IP
+    - expression: '(ip.src in $malicious_ips)'
+      action: "block"
+
+  # 负载均衡配置
+  load_balancers:
+    - name: "api-global-lb"
+      description: "全球API负载均衡器"
+      ttl: 30
+      proxied: true
+      
+      # 健康检查
+      health_check:
+        enabled: true
+        path: "/health"
+        method: "GET"
+        timeout: 5
+        interval: 60
+        retries: 2
+        expected_codes: "200"
+        
+      # 区域池配置
+      pools:
+        - name: "ap-east-1-pool"
+          description: "亚太东部池"
+          enabled: true
+          minimum_origins: 1
+          monitor: "api-health-check"
+          notification_email: "ops@taishanglaojun.com"
+          
+          origins:
+            - name: "ap-east-1-origin"
+              address: "api-ap-east-1.internal.taishanglaojun.com"
+              enabled: true
+              weight: 1
+              
+        - name: "eu-west-1-pool"
+          description: "欧洲西部池"
+          enabled: true
+          minimum_origins: 1
+          monitor: "api-health-check"
+          
+          origins:
+            - name: "eu-west-1-origin"
+              address: "api-eu-west-1.internal.taishanglaojun.com"
+              enabled: true
+              weight: 1
+              
+        - name: "us-east-1-pool"
+          description: "美国东部池"
+          enabled: true
+          minimum_origins: 1
+          monitor: "api-health-check"
+          
+          origins:
+            - name: "us-east-1-origin"
+              address: "api-us-east-1.internal.taishanglaojun.com"
+              enabled: true
+              weight: 1
+
+      # 地理路由规则
+      geo_steering:
+        - country: ["CN", "HK", "MO", "TW"]
+          pool: "ap-east-1-pool"
+          
+        - country: ["JP", "KR", "SG", "MY", "TH", "ID", "PH", "VN"]
+          pool: "ap-east-1-pool"
+          
+        - country: ["US", "CA", "MX"]
+          pool: "us-east-1-pool"
+          
+        - country: ["GB", "IE", "FR", "DE", "IT", "ES", "NL", "BE"]
+          pool: "eu-west-1-pool"
+          
+        # 默认路由
+        - default: true
+          pool: "us-east-1-pool"
+
+# AWS CloudFront配置
+aws_cloudfront:
+  distributions:
+    - id: "static-content-distribution"
+      comment: "静态内容分发"
+      enabled: true
+      
+      # 源配置
+      origins:
+        - id: "s3-static-origin"
+          domain_name: "static.taishanglaojun.com.s3.amazonaws.com"
+          s3_origin_config:
+            origin_access_identity: "origin-access-identity/cloudfront/ABCDEFG1234567"
+            
+        - id: "api-origin"
+          domain_name: "api.taishanglaojun.com"
+          custom_origin_config:
+            http_port: 80
+            https_port: 443
+            origin_protocol_policy: "https-only"
+            origin_ssl_protocols: ["TLSv1.2"]
+
+      # 缓存行为
+      default_cache_behavior:
+        target_origin_id: "s3-static-origin"
+        viewer_protocol_policy: "redirect-to-https"
+        allowed_methods: ["GET", "HEAD", "OPTIONS"]
+        cached_methods: ["GET", "HEAD"]
+        compress: true
+        
+        # 缓存策略
+        cache_policy_id: "managed-caching-optimized"
+        origin_request_policy_id: "managed-cors-s3origin"
+        
+        # TTL设置
+        min_ttl: 0
+        default_ttl: 86400
+        max_ttl: 31536000
+
+      # 额外缓存行为
+      ordered_cache_behaviors:
+        - path_pattern: "/api/*"
+          target_origin_id: "api-origin"
+          viewer_protocol_policy: "https-only"
+          allowed_methods: ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+          cached_methods: ["GET", "HEAD"]
+          cache_policy_id: "managed-caching-disabled"
+          origin_request_policy_id: "managed-allviewer"
+          
+        - path_pattern: "/static/*"
+          target_origin_id: "s3-static-origin"
+          viewer_protocol_policy: "redirect-to-https"
+          allowed_methods: ["GET", "HEAD"]
+          cached_methods: ["GET", "HEAD"]
+          cache_policy_id: "managed-caching-optimized"
+          compress: true
+
+      # 地理限制
+      geo_restriction:
+        restriction_type: "whitelist"
+        locations: ["US", "CA", "GB", "DE", "FR", "JP", "CN", "SG", "HK"]
+
+      # SSL配置
+      viewer_certificate:
+        acm_certificate_arn: "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+        ssl_support_method: "sni-only"
+        minimum_protocol_version: "TLSv1.2_2021"
+
+      # 日志配置
+      logging_config:
+        bucket: "taishanglaojun-cloudfront-logs.s3.amazonaws.com"
+        include_cookies: false
+        prefix: "cloudfront-logs/"
+
+# 智能DNS配置
+intelligent_dns:
+  provider: "route53"
+  
+  # 健康检查
+  health_checks:
+    - name: "ap-east-1-health"
+      type: "HTTPS"
+      resource_path: "/health"
+      fqdn: "api-ap-east-1.taishanglaojun.com"
+      port: 443
+      request_interval: 30
+      failure_threshold: 3
+      
+    - name: "eu-west-1-health"
+      type: "HTTPS"
+      resource_path: "/health"
+      fqdn: "api-eu-west-1.taishanglaojun.com"
+      port: 443
+      request_interval: 30
+      failure_threshold: 3
+      
+    - name: "us-east-1-health"
+      type: "HTTPS"
+      resource_path: "/health"
+      fqdn: "api-us-east-1.taishanglaojun.com"
+      port: 443
+      request_interval: 30
+      failure_threshold: 3
+
+  # DNS记录
+  records:
+    - name: "api.taishanglaojun.com"
+      type: "A"
+      routing_policy: "geolocation"
+      
+      # 地理位置路由
+      geo_locations:
+        - continent_code: "AS"
+          country_code: "CN"
+          value: "1.2.3.4"  # ap-east-1 IP
+          health_check: "ap-east-1-health"
+          
+        - continent_code: "EU"
+          value: "5.6.7.8"  # eu-west-1 IP
+          health_check: "eu-west-1-health"
+          
+        - continent_code: "NA"
+          value: "9.10.11.12"  # us-east-1 IP
+          health_check: "us-east-1-health"
+          
+        # 默认记录
+        - default: true
+          value: "9.10.11.12"  # us-east-1 IP
+          health_check: "us-east-1-health"
+
+# 边缘计算配置
+edge_computing:
+  # Cloudflare Workers
+  workers:
+    - name: "request-router"
+      script: |
+        addEventListener('fetch', event => {
+          event.respondWith(handleRequest(event.request))
+        })
+
+        async function handleRequest(request) {
+          const url = new URL(request.url)
+          const country = request.cf.country
+          const region = getOptimalRegion(country)
+          
+          // 重写URL到最优区域
+          url.hostname = `api-${region}.taishanglaojun.com`
+          
+          // 添加区域头
+          const modifiedRequest = new Request(url, {
+            method: request.method,
+            headers: {
+              ...request.headers,
+              'X-Original-Country': country,
+              'X-Routed-Region': region
+            },
+            body: request.body
+          })
+          
+          return fetch(modifiedRequest)
+        }
+
+        function getOptimalRegion(country) {
+          const regionMap = {
+            'CN': 'ap-east-1',
+            'HK': 'ap-east-1',
+            'JP': 'ap-east-1',
+            'SG': 'ap-east-1',
+            'US': 'us-east-1',
+            'CA': 'us-east-1',
+            'GB': 'eu-west-1',
+            'DE': 'eu-west-1',
+            'FR': 'eu-west-1'
+          }
+          
+          return regionMap[country] || 'us-east-1'
+        }
+      
+      routes:
+        - pattern: "api.taishanglaojun.com/*"
+          
+    - name: "security-filter"
+      script: |
+        addEventListener('fetch', event => {
+          event.respondWith(securityFilter(event.request))
+        })
+
+        async function securityFilter(request) {
+          // 检查请求频率
+          const clientIP = request.headers.get('CF-Connecting-IP')
+          const rateLimitKey = `rate_limit:${clientIP}`
+          
+          // 检查恶意请求模式
+          if (await isBlocked(clientIP)) {
+            return new Response('Blocked', { status: 403 })
+          }
+          
+          // 添加安全头
+          const response = await fetch(request)
+          const newResponse = new Response(response.body, response)
+          
+          newResponse.headers.set('X-Content-Type-Options', 'nosniff')
+          newResponse.headers.set('X-Frame-Options', 'DENY')
+          newResponse.headers.set('X-XSS-Protection', '1; mode=block')
+          
+          return newResponse
+        }
+
+# 监控和告警配置
+monitoring:
+  # CDN性能监控
+  metrics:
+    - name: "cache_hit_ratio"
+      threshold: 0.85
+      alert_condition: "below"
+      
+    - name: "origin_response_time"
+      threshold: 500
+      alert_condition: "above"
+      
+    - name: "error_rate"
+      threshold: 0.01
+      alert_condition: "above"
+
+  # 告警通知
+  alerts:
+    - name: "cdn_performance_degradation"
+      conditions:
+        - metric: "cache_hit_ratio"
+          operator: "<"
+          value: 0.8
+      actions:
+        - type: "email"
+          recipients: ["ops@taishanglaojun.com"]
+        - type: "slack"
+          webhook: "${SLACK_WEBHOOK_URL}"
+          
+    - name: "high_error_rate"
+      conditions:
+        - metric: "error_rate"
+          operator: ">"
+          value: 0.05
+      actions:
+        - type: "pagerduty"
+          service_key: "${PAGERDUTY_SERVICE_KEY}"

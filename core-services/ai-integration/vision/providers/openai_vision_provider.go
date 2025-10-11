@@ -7,17 +7,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
-	"../vision"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/vision"
 )
 
-// OpenAIVisionProvider OpenAI视觉服务提供商
+// OpenAIVisionProvider OpenAI视觉服务提供�?
 type OpenAIVisionProvider struct {
 	config     OpenAIVisionConfig
 	httpClient *http.Client
@@ -86,7 +85,7 @@ type OpenAIVisionUsage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-// NewOpenAIVisionProvider 创建OpenAI视觉提供商
+// NewOpenAIVisionProvider 创建OpenAI视觉提供�?
 func NewOpenAIVisionProvider(config OpenAIVisionConfig, logger *zap.Logger) *OpenAIVisionProvider {
 	if config.BaseURL == "" {
 		config.BaseURL = "https://api.openai.com/v1"
@@ -125,7 +124,7 @@ func (p *OpenAIVisionProvider) RecognizeObjects(ctx context.Context, input visio
 		return nil, err
 	}
 
-	// 解析响应并构建结果
+	// 解析响应并构建结�?
 	result := &vision.ObjectRecognitionResult{
 		ID:           uuid.New().String(),
 		RequestID:    input.ID,
@@ -144,7 +143,7 @@ func (p *OpenAIVisionProvider) RecognizeObjects(ctx context.Context, input visio
 		objects = []vision.DetectedObject{
 			{
 				ID:         uuid.New().String(),
-				Name:       "detected_content",
+				Label:      "detected_content",
 				Confidence: 0.8,
 				BoundingBox: vision.BoundingBox{
 					X:      0,
@@ -162,7 +161,7 @@ func (p *OpenAIVisionProvider) RecognizeObjects(ctx context.Context, input visio
 	result.Objects = objects
 	result.TotalObjects = len(objects)
 	
-	// 计算平均置信度
+	// 计算平均置信�?
 	if len(objects) > 0 {
 		totalConfidence := 0.0
 		for _, obj := range objects {
@@ -220,7 +219,7 @@ func (p *OpenAIVisionProvider) RecognizeText(ctx context.Context, input vision.I
 		ID:         uuid.New().String(),
 		RequestID:  input.ID,
 		Text:       response,
-		Confidence: 0.9, // OpenAI通常有较高的准确性
+		Confidence: 0.9, // OpenAI通常有较高的准确�?
 		Language:   "auto",
 		Timestamp:  time.Now(),
 		Metadata:   make(map[string]interface{}),
@@ -273,43 +272,65 @@ func (p *OpenAIVisionProvider) AnalyzeImage(ctx context.Context, input vision.Im
 	result := &vision.ImageAnalysisResult{
 		ID:        uuid.New().String(),
 		RequestID: input.ID,
-		Quality: vision.QualityAnalysis{
+		Quality: vision.ImageQuality{
 			Overall:    0.8,
 			Sharpness:  0.8,
 			Brightness: 0.8,
 			Contrast:   0.8,
+			Saturation: 0.7,
 			Noise:      0.2,
+			Blur:       0.1,
+			Exposure:   0.6,
 		},
-		Color: vision.ColorAnalysis{
-			Dominant:   []string{"#000000", "#FFFFFF"},
-			Palette:    []string{"#000000", "#FFFFFF", "#808080"},
-			Saturation: 0.5,
-			Brightness: 0.5,
-			Contrast:   0.5,
+		Colors: vision.ColorAnalysis{
+			DominantColors: []vision.Color{
+				{RGB: [3]int{0, 0, 0}, Hex: "#000000", Name: "Black", Percentage: 0.4},
+				{RGB: [3]int{255, 255, 255}, Hex: "#FFFFFF", Name: "White", Percentage: 0.3},
+			},
+			ColorScheme: "monochrome",
+			Temperature: "neutral",
+			Harmony:     0.7,
+			Vibrance:    0.5,
 		},
 		Composition: vision.CompositionAnalysis{
 			RuleOfThirds: 0.7,
 			Symmetry:     0.5,
 			Balance:      0.6,
-			Leading:      0.4,
+			LeadingLines: []vision.Line2D{},
+			FocalPoints:  []vision.Point2D{},
+			DepthOfField: 0.4,
 		},
 		Content: vision.ContentAnalysis{
-			Category:    "general",
-			Tags:        p.extractContentTags(response),
-			Description: response,
-			Complexity:  0.5,
+			Objects:   p.extractContentTags(response),
+			People:    0,
+			Animals:   0,
+			Vehicles:  0,
+			Buildings: 0,
+			Nature:    0.5,
+			Indoor:    true,
+			Outdoor:   false,
+			TimeOfDay: "unknown",
+			Weather:   "unknown",
 		},
 		Technical: vision.TechnicalAnalysis{
-			Resolution: fmt.Sprintf("%dx%d", input.Width, input.Height),
-			Format:     string(input.Format),
-			FileSize:   input.Size,
-			AspectRatio: float64(input.Width) / float64(input.Height),
+			Resolution: vision.Resolution{
+				Width:  input.Width,
+				Height: input.Height,
+				DPI:    72,
+			},
+			AspectRatio: fmt.Sprintf("%.2f:1", float64(input.Width)/float64(input.Height)),
+			FileSize:    input.Size,
+			Compression: 0.8,
+			ColorDepth:  24,
+			HasAlpha:    false,
 		},
 		Aesthetic: vision.AestheticAnalysis{
-			Beauty:      0.7,
-			Interesting: 0.6,
-			Happy:       0.5,
-			Sad:         0.2,
+			Beauty:   0.7,
+			Interest: 0.6,
+			Emotion:  "neutral",
+			Mood:     "calm",
+			Style:    "modern",
+			Artistic: 0.5,
 		},
 		Timestamp: time.Now(),
 		Metadata:  make(map[string]interface{}),
@@ -325,34 +346,41 @@ func (p *OpenAIVisionProvider) ProcessImage(ctx context.Context, input vision.Im
 	// OpenAI Vision API主要用于分析，不支持图像处理
 	// 这里返回一个模拟的结果
 	return &vision.ImageProcessingResult{
-		ID:               uuid.New().String(),
-		RequestID:        input.ID,
-		ProcessedImage:   input, // 返回原图像
-		AppliedOperations: operations,
-		Success:          false,
-		Message:          "Image processing not supported by OpenAI Vision API",
-		Timestamp:        time.Now(),
-		Metadata:         make(map[string]interface{}),
+		ID:             uuid.New().String(),
+		RequestID:      input.ID,
+		ProcessedImage: vision.ImageOutput{
+			ID:       input.ID,
+			Data:     input.Data,
+			Format:   input.Format,
+			Width:    input.Width,
+			Height:   input.Height,
+			Size:     input.Size,
+			Metadata: input.Metadata,
+		},
+		Operations:     operations,
+		ProcessingTime: time.Since(time.Now()),
+		Timestamp:      time.Now(),
+		Metadata:       make(map[string]interface{}),
 	}, nil
 }
 
-// GetSupportedFormats 获取支持的格式
+// GetSupportedFormats 获取支持的格�?
 func (p *OpenAIVisionProvider) GetSupportedFormats() []vision.ImageFormat {
 	return []vision.ImageFormat{
 		vision.FormatJPEG,
 		vision.FormatPNG,
-		vision.FormatWebP,
+		vision.FormatWEBP,
 		vision.FormatGIF,
 	}
 }
 
-// GetSupportedOperations 获取支持的操作
+// GetSupportedOperations 获取支持的操�?
 func (p *OpenAIVisionProvider) GetSupportedOperations() []vision.OperationType {
 	// OpenAI Vision API主要用于分析，不支持图像处理操作
 	return []vision.OperationType{}
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (p *OpenAIVisionProvider) HealthCheck(ctx context.Context) error {
 	// 创建一个简单的测试请求
 	req := OpenAIVisionRequest{
@@ -422,7 +450,7 @@ func (p *OpenAIVisionProvider) analyzeImage(ctx context.Context, input vision.Im
 	return response.Choices[0].Message.Content[0].Text, nil
 }
 
-// makeRequest 发送请求
+// makeRequest 发送请�?
 func (p *OpenAIVisionProvider) makeRequest(ctx context.Context, req OpenAIVisionRequest) (*OpenAIVisionResponse, error) {
 	jsonData, err := json.Marshal(req)
 	if err != nil {
@@ -458,7 +486,7 @@ func (p *OpenAIVisionProvider) makeRequest(ctx context.Context, req OpenAIVision
 
 // parseObjectsFromResponse 从响应中解析物体
 func (p *OpenAIVisionProvider) parseObjectsFromResponse(response string) ([]vision.DetectedObject, error) {
-	// 尝试解析JSON格式的响应
+	// 尝试解析JSON格式的响�?
 	var jsonResponse struct {
 		Objects []struct {
 			Name       string  `json:"name"`
@@ -475,7 +503,7 @@ func (p *OpenAIVisionProvider) parseObjectsFromResponse(response string) ([]visi
 		for i, obj := range jsonResponse.Objects {
 			objects[i] = vision.DetectedObject{
 				ID:         uuid.New().String(),
-				Name:       obj.Name,
+				Label:      obj.Name,
 				Confidence: obj.Confidence,
 				BoundingBox: vision.BoundingBox{
 					X:      obj.X,
@@ -489,7 +517,7 @@ func (p *OpenAIVisionProvider) parseObjectsFromResponse(response string) ([]visi
 		return objects, nil
 	}
 
-	// 如果JSON解析失败，尝试从文本中提取物体名称
+	// 如果JSON解析失败，尝试从文本中提取物体名�?
 	return p.extractObjectsFromText(response), nil
 }
 
@@ -498,7 +526,7 @@ func (p *OpenAIVisionProvider) parseFacesFromResponse(response string) ([]vision
 	// 简单的人脸信息提取
 	faces := make([]vision.DetectedFace, 0)
 
-	// 如果响应中包含人脸相关信息，创建一个通用的人脸对象
+	// 如果响应中包含人脸相关信息，创建一个通用的人脸对�?
 	if p.containsFaceKeywords(response) {
 		face := vision.DetectedFace{
 			ID:         uuid.New().String(),
@@ -510,8 +538,11 @@ func (p *OpenAIVisionProvider) parseFacesFromResponse(response string) ([]vision
 				Height: 100,
 			},
 			Landmarks:  make([]vision.FaceLandmark, 0),
-			Attributes: map[string]interface{}{
-				"description": response,
+			Attributes: vision.FaceAttributes{
+				Gender:    "unknown",
+				EyesOpen:  true,
+				MouthOpen: false,
+				Smiling:   false,
 			},
 		}
 		faces = append(faces, face)
@@ -522,17 +553,17 @@ func (p *OpenAIVisionProvider) parseFacesFromResponse(response string) ([]vision
 
 // extractObjectsFromText 从文本中提取物体
 func (p *OpenAIVisionProvider) extractObjectsFromText(text string) []vision.DetectedObject {
-	// 简单的文本解析，实际实现中可以使用更复杂的NLP技术
+	// 简单的文本解析，实际实现中可以使用更复杂的NLP技�?
 	objects := make([]vision.DetectedObject, 0)
 
-	// 常见物体关键词
+	// 常见物体关键�?
 	keywords := []string{"person", "car", "tree", "building", "animal", "furniture", "food", "device", "tool", "clothing"}
 
 	for _, keyword := range keywords {
 		if p.containsKeyword(text, keyword) {
 			objects = append(objects, vision.DetectedObject{
 				ID:         uuid.New().String(),
-				Name:       keyword,
+				Label:      keyword,
 				Confidence: 0.7,
 				BoundingBox: vision.BoundingBox{
 					X:      0,
@@ -550,7 +581,7 @@ func (p *OpenAIVisionProvider) extractObjectsFromText(text string) []vision.Dete
 
 // detectLanguage 检测语言
 func (p *OpenAIVisionProvider) detectLanguage(text string) string {
-	// 简单的语言检测
+	// 简单的语言检�?
 	if p.containsChinese(text) {
 		return "zh"
 	}
@@ -629,7 +660,7 @@ func (p *OpenAIVisionProvider) containsFaceKeywords(text string) bool {
 	return false
 }
 
-// containsChinese 检查是否包含中文
+// containsChinese 检查是否包含中�?
 func (p *OpenAIVisionProvider) containsChinese(text string) bool {
 	for _, r := range text {
 		if r >= 0x4e00 && r <= 0x9fff {

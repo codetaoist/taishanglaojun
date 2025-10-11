@@ -46,7 +46,7 @@ import { Radar, Column, Pie } from '@ant-design/plots';
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
-const { TabPane } = Tabs;
+
 const { TextArea } = Input;
 
 // 技能领域定义
@@ -696,25 +696,35 @@ const AbilityAssessment: React.FC = () => {
         <Text type="secondary">全面评估您的技能水平，获得个性化学习建议</Text>
       </div>
 
-      <Tabs defaultActiveKey="assessment">
-        <TabPane tab="开始评估" key="assessment">
-          <Steps current={currentStep} style={{ marginBottom: 32 }}>
-            <Step title="选择领域" description="选择评估的技能领域" />
-            <Step title="测试准备" description="了解测试规则和要求" />
-            <Step title="进行测试" description="完成能力评估测试" />
-            <Step title="查看结果" description="获得评估报告和建议" />
-          </Steps>
+      <Tabs 
+        defaultActiveKey="assessment"
+        items={[
+          {
+            key: "assessment",
+            label: "开始评估",
+            children: (
+              <>
+                <Steps current={currentStep} style={{ marginBottom: 32 }}>
+                  <Step title="选择领域" description="选择评估的技能领域" />
+                  <Step title="测试准备" description="了解测试规则和要求" />
+                  <Step title="进行测试" description="完成能力评估测试" />
+                  <Step title="查看结果" description="获得评估报告和建议" />
+                </Steps>
 
-          {currentStep === 0 && renderDomainSelection()}
-          {currentStep === 1 && renderTestPreparation()}
-          {currentStep === 2 && renderTestInterface()}
-          {currentStep === 3 && renderAssessmentResult()}
-        </TabPane>
-        
-        <TabPane tab="评估历史" key="history">
-          {renderHistoryTab()}
-        </TabPane>
-      </Tabs>
+                {currentStep === 0 && renderDomainSelection()}
+                {currentStep === 1 && renderTestPreparation()}
+                {currentStep === 2 && renderTestInterface()}
+                {currentStep === 3 && renderAssessmentResult()}
+              </>
+            )
+          },
+          {
+            key: "history",
+            label: "评估历史",
+            children: renderHistoryTab()
+          }
+        ]}
+      />
     </div>
   );
 };

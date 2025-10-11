@@ -50,7 +50,7 @@ import { Pie, Column } from '@ant-design/plots';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
-const { TabPane } = Tabs;
+
 const { useBreakpoint } = Grid;
 const { Option } = Select;
 
@@ -669,41 +669,52 @@ const AchievementCenter: React.FC = () => {
         </Col>
       </Row>
 
-      <Tabs defaultActiveKey="all">
-        <TabPane tab={`全部成就 (${filteredAchievements.length})`} key="all">
-          {filteredAchievements.length > 0 ? (
-            <Row gutter={[16, 16]}>
-              {filteredAchievements.map(achievement => (
-                <Col key={achievement.id} xs={24} sm={12} lg={8} xl={6}>
-                  {renderAchievementCard(achievement)}
-                </Col>
-              ))}
-            </Row>
-          ) : (
-            <Empty description="没有找到匹配的成就" />
-          )}
-        </TabPane>
-        
-        <TabPane tab={`已获得 (${achievements.filter(a => a.unlocked).length})`} key="unlocked">
-          <Row gutter={[16, 16]}>
-            {achievements.filter(a => a.unlocked).map(achievement => (
-              <Col key={achievement.id} xs={24} sm={12} lg={8} xl={6}>
-                {renderAchievementCard(achievement)}
-              </Col>
-            ))}
-          </Row>
-        </TabPane>
-        
-        <TabPane tab={`进行中 (${achievements.filter(a => !a.unlocked && a.progress > 0).length})`} key="progress">
-          <Row gutter={[16, 16]}>
-            {achievements.filter(a => !a.unlocked && a.progress > 0).map(achievement => (
-              <Col key={achievement.id} xs={24} sm={12} lg={8} xl={6}>
-                {renderAchievementCard(achievement)}
-              </Col>
-            ))}
-          </Row>
-        </TabPane>
-      </Tabs>
+      <Tabs 
+        defaultActiveKey="all"
+        items={[
+          {
+            key: 'all',
+            label: `全部成就 (${filteredAchievements.length})`,
+            children: filteredAchievements.length > 0 ? (
+              <Row gutter={[16, 16]}>
+                {filteredAchievements.map(achievement => (
+                  <Col key={achievement.id} xs={24} sm={12} lg={8} xl={6}>
+                    {renderAchievementCard(achievement)}
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <Empty description="没有找到匹配的成就" />
+            )
+          },
+          {
+            key: 'unlocked',
+            label: `已获得 (${achievements.filter(a => a.unlocked).length})`,
+            children: (
+              <Row gutter={[16, 16]}>
+                {achievements.filter(a => a.unlocked).map(achievement => (
+                  <Col key={achievement.id} xs={24} sm={12} lg={8} xl={6}>
+                    {renderAchievementCard(achievement)}
+                  </Col>
+                ))}
+              </Row>
+            )
+          },
+          {
+            key: 'progress',
+            label: `进行中 (${achievements.filter(a => !a.unlocked && a.progress > 0).length})`,
+            children: (
+              <Row gutter={[16, 16]}>
+                {achievements.filter(a => !a.unlocked && a.progress > 0).map(achievement => (
+                  <Col key={achievement.id} xs={24} sm={12} lg={8} xl={6}>
+                    {renderAchievementCard(achievement)}
+                  </Col>
+                ))}
+              </Row>
+            )
+          }
+        ]}
+      />
 
       {renderDetailModal()}
       {renderShareModal()}

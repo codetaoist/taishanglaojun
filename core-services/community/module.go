@@ -30,7 +30,7 @@ type Module struct {
 	wsHub    *websocket.Hub
 	wsHandler *websocket.WebSocketHandler
 	
-	// 服务层
+	// 服务�?
 	postService        *services.PostService
 	commentService     *services.CommentService
 	userService        *services.UserService
@@ -46,7 +46,7 @@ type Module struct {
 	reviewHandler      *handlers.ContentReviewHandler
 	chatHandler        *handlers.ChatHandler
 	
-	// gRPC服务器
+	// gRPC服务�?
 	grpcServer   *grpc.Server
 	grpcListener net.Listener
 	
@@ -141,12 +141,12 @@ func NewModule(config *ModuleConfig, db *gorm.DB, redisClient *redis.Client, log
 		return nil, fmt.Errorf("failed to initialize services: %w", err)
 	}
 	
-	// 初始化处理器层
+	// 初始化处理器�?
 	if err := module.initHandlers(); err != nil {
 		return nil, fmt.Errorf("failed to initialize handlers: %w", err)
 	}
 	
-	// 初始化gRPC服务器（如果启用）
+	// 初始化gRPC服务器（如果启用�?
 	if config.GRPCEnabled {
 		if err := module.initGRPCServer(); err != nil {
 			return nil, fmt.Errorf("failed to initialize gRPC server: %w", err)
@@ -163,7 +163,7 @@ func (m *Module) initWebSocket() error {
 	// 创建WebSocket Hub
 	m.wsHub = websocket.NewHub()
 	
-	// 创建WebSocket处理器
+	// 创建WebSocket处理�?
 	m.wsHandler = websocket.NewWebSocketHandler(m.wsHub)
 	
 	m.logger.Info("Community WebSocket hub initialized successfully")
@@ -186,7 +186,7 @@ func (m *Module) initServices() error {
 	return nil
 }
 
-// initHandlers 初始化处理器层
+// initHandlers 初始化处理器�?
 func (m *Module) initHandlers() error {
 	m.logger.Info("Initializing community handlers")
 	
@@ -201,17 +201,17 @@ func (m *Module) initHandlers() error {
 	return nil
 }
 
-// initGRPCServer 初始化gRPC服务器
+// initGRPCServer 初始化gRPC服务�?
 func (m *Module) initGRPCServer() error {
 	m.logger.Info("Initializing community gRPC server")
 	
-	// 创建gRPC服务器
+	// 创建gRPC服务�?
 	m.grpcServer = grpc.NewServer()
 	
 	// 注册gRPC服务
-	// TODO: 实现gRPC服务定义和注册
+	// TODO: 实现gRPC服务定义和注�?
 	
-	// 创建监听器
+	// 创建监听�?
 	addr := fmt.Sprintf("%s:%d", m.config.GRPCHost, m.config.GRPCPort)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -232,7 +232,7 @@ func (m *Module) SetupRoutes(router *gin.RouterGroup, jwtMiddleware *middleware.
 	
 	m.logger.Info("Setting up community HTTP routes")
 	
-	// 社区路由组
+	// 社区路由�?
 	community := router.Group(m.config.HTTPPrefix)
 	{
 		// 帖子相关路由
@@ -283,7 +283,7 @@ func (m *Module) SetupRoutes(router *gin.RouterGroup, jwtMiddleware *middleware.
 			users.POST("/:id/ban", jwtMiddleware.AuthRequired(), m.userHandler.BanUser)                 // 封禁用户
 			users.DELETE("/:id/ban", jwtMiddleware.AuthRequired(), m.userHandler.UnbanUser)             // 解封用户
 			users.GET("/:id/posts", m.userHandler.GetUserPosts)           // 获取用户帖子
-			users.PUT("/:id/activity", jwtMiddleware.AuthRequired(), m.userHandler.UpdateUserActivity)  // 更新用户活跃度
+			users.PUT("/:id/activity", jwtMiddleware.AuthRequired(), m.userHandler.UpdateUserActivity)  // 更新用户活跃�?
 
 			// 用户互动路由
 			users.POST("/:id/follow", jwtMiddleware.AuthRequired(), m.interactionHandler.FollowUser)       // 关注用户
@@ -296,7 +296,7 @@ func (m *Module) SetupRoutes(router *gin.RouterGroup, jwtMiddleware *middleware.
 		interactions := community.Group("/interactions")
 		{
 			interactions.GET("/stats", m.interactionHandler.GetInteractionStats)    // 获取互动统计
-			interactions.GET("/status", jwtMiddleware.AuthRequired(), m.interactionHandler.CheckInteractionStatus) // 检查互动状态
+			interactions.GET("/status", jwtMiddleware.AuthRequired(), m.interactionHandler.CheckInteractionStatus) // 检查互动状�?
 		}
 
 		// 收藏相关路由
@@ -308,8 +308,8 @@ func (m *Module) SetupRoutes(router *gin.RouterGroup, jwtMiddleware *middleware.
 		// 内容审核相关路由
 		review := community.Group("/review")
 		{
-			review.GET("/posts/pending", jwtMiddleware.AuthRequired(), m.reviewHandler.GetPendingPosts)     // 获取待审核帖子
-			review.GET("/comments/pending", jwtMiddleware.AuthRequired(), m.reviewHandler.GetPendingComments) // 获取待审核评论
+			review.GET("/posts/pending", jwtMiddleware.AuthRequired(), m.reviewHandler.GetPendingPosts)     // 获取待审核帖�?
+			review.GET("/comments/pending", jwtMiddleware.AuthRequired(), m.reviewHandler.GetPendingComments) // 获取待审核评�?
 			review.POST("/posts/review", jwtMiddleware.AuthRequired(), m.reviewHandler.ReviewPost)          // 审核帖子
 			review.POST("/comments/review", jwtMiddleware.AuthRequired(), m.reviewHandler.ReviewComment)    // 审核评论
 			review.POST("/posts/batch-review", jwtMiddleware.AuthRequired(), m.reviewHandler.BatchReviewPosts)    // 批量审核帖子
@@ -321,24 +321,24 @@ func (m *Module) SetupRoutes(router *gin.RouterGroup, jwtMiddleware *middleware.
 		community.GET("/ws", m.wsHandler.HandleWebSocket)                    // 需要认证的WebSocket连接
 		community.GET("/ws/public", m.wsHandler.HandleWebSocketPublic)       // 公开WebSocket连接
 
-		// 聊天室相关路由
+		// 聊天室相关路�?
 		chat := community.Group("/chat")
 		{
-			// 聊天室管理
-			chat.POST("/rooms", jwtMiddleware.AuthRequired(), m.chatHandler.CreateChatRoom)           // 创建聊天室
-			chat.GET("/rooms", jwtMiddleware.AuthRequired(), m.chatHandler.GetChatRooms)              // 获取聊天室列表
-			chat.POST("/rooms/:room_id/join", jwtMiddleware.AuthRequired(), m.chatHandler.JoinChatRoom)    // 加入聊天室
-			chat.POST("/rooms/:room_id/leave", jwtMiddleware.AuthRequired(), m.chatHandler.LeaveChatRoom)  // 离开聊天室
+			// 聊天室管�?
+			chat.POST("/rooms", jwtMiddleware.AuthRequired(), m.chatHandler.CreateChatRoom)           // 创建聊天�?
+			chat.GET("/rooms", jwtMiddleware.AuthRequired(), m.chatHandler.GetChatRooms)              // 获取聊天室列�?
+			chat.POST("/rooms/:room_id/join", jwtMiddleware.AuthRequired(), m.chatHandler.JoinChatRoom)    // 加入聊天�?
+			chat.POST("/rooms/:room_id/leave", jwtMiddleware.AuthRequired(), m.chatHandler.LeaveChatRoom)  // 离开聊天�?
 
 			// 聊天消息
 			chat.GET("/rooms/:room_id/messages", jwtMiddleware.AuthRequired(), m.chatHandler.GetChatMessages) // 获取聊天消息
-			chat.POST("/rooms/:room_id/messages", jwtMiddleware.AuthRequired(), m.chatHandler.SendMessage)    // 发送消息
+			chat.POST("/rooms/:room_id/messages", jwtMiddleware.AuthRequired(), m.chatHandler.SendMessage)    // 发送消�?
 
 			// WebSocket 状态和统计
 			chat.GET("/online-users", m.wsHandler.GetConnectedUsers)          // 获取在线用户
 			chat.GET("/stats", m.wsHandler.GetStats)                          // 获取WebSocket统计
-			chat.POST("/send", jwtMiddleware.AuthRequired(), m.wsHandler.SendMessage) // HTTP方式发送消息
-			chat.GET("/user/:user_id/online", m.wsHandler.CheckUserOnline)    // 检查用户是否在线
+			chat.POST("/send", jwtMiddleware.AuthRequired(), m.wsHandler.SendMessage) // HTTP方式发送消�?
+			chat.GET("/user/:user_id/online", m.wsHandler.CheckUserOnline)    // 检查用户是否在�?
 		}
 	}
 
@@ -350,7 +350,7 @@ func (m *Module) SetupRoutes(router *gin.RouterGroup, jwtMiddleware *middleware.
 func (m *Module) Start() error {
 	m.logger.Info("Starting community module")
 	
-	// 自动迁移数据库
+	// 自动迁移数据�?
 	if err := m.migrateDatabase(); err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}
@@ -358,7 +358,7 @@ func (m *Module) Start() error {
 	// 启动WebSocket Hub
 	go m.wsHub.Run()
 	
-	// 启动gRPC服务器
+	// 启动gRPC服务�?
 	if m.config.GRPCEnabled && m.grpcServer != nil {
 		go func() {
 			m.logger.Info("Starting community gRPC server", 
@@ -385,7 +385,7 @@ func (m *Module) Stop() error {
 		m.wsHub = nil
 	}
 	
-	// 停止gRPC服务器
+	// 停止gRPC服务�?
 	if m.grpcServer != nil {
 		m.grpcServer.GracefulStop()
 		if m.grpcListener != nil {
@@ -397,7 +397,7 @@ func (m *Module) Stop() error {
 	return nil
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (m *Module) Health() map[string]interface{} {
 	health := map[string]interface{}{
 		"status": "healthy",
@@ -413,7 +413,7 @@ func (m *Module) Health() map[string]interface{} {
 		},
 		"websocket": map[string]interface{}{
 			"connected_users": m.wsHub.GetClientCount(),
-			"active_rooms":    0, // Hub没有GetActiveRoomsCount方法，暂时设为0
+			"active_rooms":    0, // Hub没有GetActiveRoomsCount方法，暂时设�?
 		},
 	}
 	
@@ -438,7 +438,7 @@ func (m *Module) Health() map[string]interface{} {
 	return health
 }
 
-// migrateDatabase 迁移数据库
+// migrateDatabase 迁移数据�?
 func (m *Module) migrateDatabase() error {
 	m.logger.Info("Migrating community database")
 	
@@ -452,7 +452,7 @@ func (m *Module) migrateDatabase() error {
 		&models.Bookmark{},
 		&models.Report{},
 		&models.ContentReviewLog{},
-		// 聊天相关表
+		// 聊天相关�?
 		&models.ChatRoom{},
 		&models.ChatRoomMember{},
 		&models.ChatMessage{},
@@ -477,7 +477,7 @@ func (m *Module) startBackgroundTasks() {
 	// 定期清理过期聊天消息
 	go m.cleanupExpiredMessagesPeriodically()
 	
-	// 定期更新用户活跃度
+	// 定期更新用户活跃�?
 	go m.updateUserActivityPeriodically()
 	
 	// 定期清理离线用户
@@ -490,12 +490,12 @@ func (m *Module) cleanupExpiredMessagesPeriodically() {
 	defer ticker.Stop()
 	
 	for range ticker.C {
-		// ChatService没有CleanupExpiredMessages方法，暂时跳过
+		// ChatService没有CleanupExpiredMessages方法，暂时跳�?
 		m.logger.Debug("Cleanup expired messages task executed")
 	}
 }
 
-// updateUserActivityPeriodically 定期更新用户活跃度
+// updateUserActivityPeriodically 定期更新用户活跃�?
 func (m *Module) updateUserActivityPeriodically() {
 	ticker := time.NewTicker(1 * time.Hour)
 	defer ticker.Stop()
@@ -512,7 +512,7 @@ func (m *Module) cleanupOfflineUsersPeriodically() {
 	defer ticker.Stop()
 	
 	for range ticker.C {
-		// Hub没有CleanupOfflineUsers方法，暂时跳过
+		// Hub没有CleanupOfflineUsers方法，暂时跳�?
 		m.logger.Debug("Cleanup offline users task executed")
 	}
 }
@@ -553,7 +553,7 @@ func getDefaultConfig() *ModuleConfig {
 		ChatConfig: &ChatConfig{
 			MaxRooms:          100,
 			MaxMembersPerRoom: 50,
-			MessageRetention:  30 * 24 * time.Hour, // 30天
+			MessageRetention:  30 * 24 * time.Hour, // 30�?
 			MaxMessageLength:  1000,
 			RateLimitPerMin:   60,
 		},

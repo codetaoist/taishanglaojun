@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# RPM package post-installation script for TaishangLaojun Desktop
+
+set -e
+
+# Update desktop database
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q /usr/share/applications || true
+fi
+
+# Update icon cache
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -q /usr/share/icons/hicolor || true
+fi
+
+# Update MIME database
+if command -v update-mime-database >/dev/null 2>&1; then
+    update-mime-database /usr/share/mime || true
+fi
+
+# Compile GLib schemas
+if command -v glib-compile-schemas >/dev/null 2>&1; then
+    glib-compile-schemas /usr/share/glib-2.0/schemas || true
+fi
+
+# Update GIO module cache
+if command -v gio-querymodules >/dev/null 2>&1; then
+    gio-querymodules /usr/lib64/gio/modules || true
+    gio-querymodules /usr/lib/gio/modules || true
+fi
+
+# Update GDK pixbuf loaders
+if command -v gdk-pixbuf-query-loaders >/dev/null 2>&1; then
+    gdk-pixbuf-query-loaders --update-cache || true
+fi
+
+# Create application directories if they don't exist
+mkdir -p /home/*/.config/taishang-laojun 2>/dev/null || true
+mkdir -p /home/*/.local/share/taishang-laojun 2>/dev/null || true
+mkdir -p /home/*/.cache/taishang-laojun 2>/dev/null || true
+
+# Set proper permissions for user directories
+for user_home in /home/*; do
+    if [ -d "$user_home" ]; then
+        user=$(basename "$user_home")
+        if id "$user" >/dev/null 2>&1; then
+            chown -R "$user:$user" "$user_home/.config/taishang-laojun" 2>/dev/null || true
+            chown -R "$user:$user" "$user_home/.local/share/taishang-laojun" 2>/dev/null || true
+            chown -R "$user:$user" "$user_home/.cache/taishang-laojun" 2>/dev/null || true
+        fi
+    fi
+done
+
+# Create symlink for easier access
+if [ ! -L /usr/local/bin/taishang-laojun ]; then
+    ln -sf /usr/bin/taishang-laojun /usr/local/bin/taishang-laojun 2>/dev/null || true
+fi
+
+# Install systemd user service if systemd is available
+if command -v systemctl >/dev/null 2>&1 && [ -d /etc/systemd/user ]; then
+    cat > /etc/systemd/user/taishang-laojun.service << 'EOF'
+[Unit]
+Description=TaishangLaojun Desktop Application
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/taishang-laojun --background
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+EOF
+
+    systemctl --global daemon-reload 2>/dev/null || true
+fi
+
+# Add to applications menu
+if [ -f /usr/share/applications/taishang-laojun.desktop ]; then
+    chmod 644 /usr/share/applications/taishang-laojun.desktop
+fi
+
+# Set up file associations
+if command -v xdg-mime >/dev/null 2>&1; then
+    # Associate with project files
+    xdg-mime default taishang-laojun.desktop application/x-taishang-project 2>/dev/null || true
+fi
+
+# Update shared library cache
+if command -v ldconfig >/dev/null 2>&1; then
+    ldconfig || true
+fi
+
+# SELinux context setup for RHEL/CentOS/Fedora
+if command -v semanage >/dev/null 2>&1 && command -v restorecon >/dev/null 2>&1; then
+    # Set proper SELinux context for the executable
+    restorecon -R /usr/bin/taishang-laojun 2>/dev/null || true
+    restorecon -R /usr/share/applications/taishang-laojun.desktop 2>/dev/null || true
+fi
+
+# Print installation success message
+echo "TaishangLaojun Desktop has been successfully installed!"
+echo "You can start it from the applications menu or by running 'taishang-laojun' in the terminal."
+
+exit 0

@@ -12,14 +12,14 @@ import (
 	"taishanglaojun/core-services/multi-tenancy/utils"
 )
 
-// TenantHandler 租户HTTP处理器
+// TenantHandler 租户HTTP处理�?
 type TenantHandler struct {
 	tenantService services.TenantService
 	logger        utils.Logger
 	validator     utils.Validator
 }
 
-// NewTenantHandler 创建租户HTTP处理器
+// NewTenantHandler 创建租户HTTP处理�?
 func NewTenantHandler(
 	tenantService services.TenantService,
 	logger utils.Logger,
@@ -41,8 +41,8 @@ func NewTenantHandler(
 // @Param request body models.CreateTenantRequest true "创建租户请求"
 // @Success 201 {object} models.TenantResponse "创建成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 409 {object} models.ErrorResponse "租户已存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 409 {object} models.ErrorResponse "租户已存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants [post]
 func (h *TenantHandler) CreateTenant(c *gin.Context) {
 	var req models.CreateTenantRequest
@@ -98,8 +98,8 @@ func (h *TenantHandler) CreateTenant(c *gin.Context) {
 // @Param id path string true "租户ID"
 // @Success 200 {object} models.TenantResponse "获取成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id} [get]
 func (h *TenantHandler) GetTenant(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -144,8 +144,8 @@ func (h *TenantHandler) GetTenant(c *gin.Context) {
 // @Param request body models.UpdateTenantRequest true "更新租户请求"
 // @Success 200 {object} models.TenantResponse "更新成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id} [put]
 func (h *TenantHandler) UpdateTenant(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -203,15 +203,15 @@ func (h *TenantHandler) UpdateTenant(c *gin.Context) {
 
 // DeleteTenant 删除租户
 // @Summary 删除租户
-// @Description 删除指定的租户
+// @Description 删除指定的租�?
 // @Tags 租户管理
 // @Accept json
 // @Produce json
 // @Param id path string true "租户ID"
 // @Success 200 {object} models.SuccessResponse "删除成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id} [delete]
 func (h *TenantHandler) DeleteTenant(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -256,15 +256,15 @@ func (h *TenantHandler) DeleteTenant(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param name query string false "租户名称过滤"
-// @Param status query string false "租户状态过滤"
-// @Param search query string false "搜索关键词"
+// @Param status query string false "租户状态过�?
+// @Param search query string false "搜索关键�?
 // @Param page query int false "页码" default(1)
 // @Param page_size query int false "每页大小" default(20)
 // @Param order_by query string false "排序字段" default(created_at)
 // @Param order query string false "排序方向" default(desc)
 // @Success 200 {object} models.TenantListResponse "获取成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants [get]
 func (h *TenantHandler) ListTenants(c *gin.Context) {
 	var query models.TenantQuery
@@ -301,17 +301,17 @@ func (h *TenantHandler) ListTenants(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// GetTenantBySubdomain 通过子域名获取租户
-// @Summary 通过子域名获取租户
-// @Description 根据子域名获取租户信息
+// GetTenantBySubdomain 通过子域名获取租�?
+// @Summary 通过子域名获取租�?
+// @Description 根据子域名获取租户信�?
 // @Tags 租户管理
 // @Accept json
 // @Produce json
-// @Param subdomain path string true "子域名"
+// @Param subdomain path string true "子域�?
 // @Success 200 {object} models.TenantResponse "获取成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/subdomain/{subdomain} [get]
 func (h *TenantHandler) GetTenantBySubdomain(c *gin.Context) {
 	subdomain := c.Param("subdomain")
@@ -354,8 +354,8 @@ func (h *TenantHandler) GetTenantBySubdomain(c *gin.Context) {
 // @Param domain path string true "域名"
 // @Success 200 {object} models.TenantResponse "获取成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/domain/{domain} [get]
 func (h *TenantHandler) GetTenantByDomain(c *gin.Context) {
 	domain := c.Param("domain")
@@ -399,8 +399,8 @@ func (h *TenantHandler) GetTenantByDomain(c *gin.Context) {
 // @Param request body models.AddTenantUserRequest true "添加用户请求"
 // @Success 200 {object} models.SuccessResponse "添加成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id}/users [post]
 func (h *TenantHandler) AddTenantUser(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -461,7 +461,7 @@ func (h *TenantHandler) AddTenantUser(c *gin.Context) {
 // @Success 200 {object} models.SuccessResponse "移除成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
 // @Failure 404 {object} models.ErrorResponse "租户或用户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id}/users/{user_id} [delete]
 func (h *TenantHandler) RemoveTenantUser(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -503,22 +503,22 @@ func (h *TenantHandler) RemoveTenantUser(c *gin.Context) {
 
 // ListTenantUsers 列出租户用户
 // @Summary 列出租户用户
-// @Description 获取租户的用户列表
+// @Description 获取租户的用户列�?
 // @Tags 租户用户管理
 // @Accept json
 // @Produce json
 // @Param id path string true "租户ID"
 // @Param role query string false "角色过滤"
-// @Param status query string false "状态过滤"
-// @Param search query string false "搜索关键词"
+// @Param status query string false "状态过�?
+// @Param search query string false "搜索关键�?
 // @Param page query int false "页码" default(1)
 // @Param page_size query int false "每页大小" default(20)
 // @Param order_by query string false "排序字段" default(created_at)
 // @Param order query string false "排序方向" default(desc)
 // @Success 200 {object} models.TenantUserListResponse "获取成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id}/users [get]
 func (h *TenantHandler) ListTenantUsers(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -567,15 +567,15 @@ func (h *TenantHandler) ListTenantUsers(c *gin.Context) {
 
 // GetTenantStats 获取租户统计
 // @Summary 获取租户统计
-// @Description 获取租户的使用统计信息
+// @Description 获取租户的使用统计信�?
 // @Tags 租户统计
 // @Accept json
 // @Produce json
 // @Param id path string true "租户ID"
 // @Success 200 {object} models.TenantStatsResponse "获取成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id}/stats [get]
 func (h *TenantHandler) GetTenantStats(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -611,17 +611,17 @@ func (h *TenantHandler) GetTenantStats(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-// GetTenantHealth 获取租户健康状态
-// @Summary 获取租户健康状态
-// @Description 获取租户的健康检查结果
+// GetTenantHealth 获取租户健康状�?
+// @Summary 获取租户健康状�?
+// @Description 获取租户的健康检查结�?
 // @Tags 租户监控
 // @Accept json
 // @Produce json
 // @Param id path string true "租户ID"
 // @Success 200 {object} models.TenantHealthResponse "获取成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id}/health [get]
 func (h *TenantHandler) GetTenantHealth(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -634,7 +634,7 @@ func (h *TenantHandler) GetTenantHealth(c *gin.Context) {
 		return
 	}
 	
-	// 获取租户健康状态
+	// 获取租户健康状�?
 	health, err := h.tenantService.GetTenantHealth(c.Request.Context(), tenantID)
 	if err != nil {
 		h.logger.Error("Failed to get tenant health", "error", err, "tenant_id", tenantID)
@@ -657,17 +657,17 @@ func (h *TenantHandler) GetTenantHealth(c *gin.Context) {
 	c.JSON(http.StatusOK, health)
 }
 
-// ActivateTenant 激活租户
-// @Summary 激活租户
+// ActivateTenant 激活租�?
+// @Summary 激活租�?
 // @Description 激活指定的租户
-// @Tags 租户状态管理
+// @Tags 租户状态管�?
 // @Accept json
 // @Produce json
 // @Param id path string true "租户ID"
-// @Success 200 {object} models.SuccessResponse "激活成功"
+// @Success 200 {object} models.SuccessResponse "激活成�?
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id}/activate [post]
 func (h *TenantHandler) ActivateTenant(c *gin.Context) {
 	tenantIDStr := c.Param("id")
@@ -680,7 +680,7 @@ func (h *TenantHandler) ActivateTenant(c *gin.Context) {
 		return
 	}
 	
-	// 激活租户
+	// 激活租�?
 	if err := h.tenantService.ActivateTenant(c.Request.Context(), tenantID); err != nil {
 		h.logger.Error("Failed to activate tenant", "error", err, "tenant_id", tenantID)
 		
@@ -707,16 +707,16 @@ func (h *TenantHandler) ActivateTenant(c *gin.Context) {
 
 // SuspendTenant 暂停租户
 // @Summary 暂停租户
-// @Description 暂停指定的租户
-// @Tags 租户状态管理
+// @Description 暂停指定的租�?
+// @Tags 租户状态管�?
 // @Accept json
 // @Produce json
 // @Param id path string true "租户ID"
 // @Param reason query string false "暂停原因"
 // @Success 200 {object} models.SuccessResponse "暂停成功"
 // @Failure 400 {object} models.ErrorResponse "请求参数错误"
-// @Failure 404 {object} models.ErrorResponse "租户不存在"
-// @Failure 500 {object} models.ErrorResponse "内部服务器错误"
+// @Failure 404 {object} models.ErrorResponse "租户不存�?
+// @Failure 500 {object} models.ErrorResponse "内部服务器错�?
 // @Router /api/v1/tenants/{id}/suspend [post]
 func (h *TenantHandler) SuspendTenant(c *gin.Context) {
 	tenantIDStr := c.Param("id")

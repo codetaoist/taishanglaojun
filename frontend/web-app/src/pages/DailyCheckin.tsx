@@ -42,7 +42,7 @@ import { Column, Pie } from '@ant-design/plots';
 import dayjs, { Dayjs } from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
-const { TabPane } = Tabs;
+
 const { useBreakpoint } = Grid;
 
 // 签到奖励配置
@@ -457,53 +457,63 @@ const DailyCheckin: React.FC = () => {
         </Col>
       </Row>
 
-      <Tabs defaultActiveKey="history">
-        <TabPane tab="签到历史" key="history">
-          <Row gutter={[16, 16]}>
-            <Col xs={24} lg={12}>
-              {renderCheckinHistory()}
-            </Col>
-            <Col xs={24} lg={12}>
-              {renderCheckinCalendar()}
-            </Col>
-          </Row>
-        </TabPane>
-        
-        <TabPane tab="奖励说明" key="rewards">
-          <Card>
-            <Title level={4}>签到奖励规则</Title>
-            <List
-              dataSource={checkinRewards}
-              renderItem={(reward, index) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={<Avatar>{reward.icon}</Avatar>}
-                    title={`第${index + 1}天：${reward.name}`}
-                    description={
-                      reward.type === 'points' 
-                        ? `获得 ${reward.amount} 积分`
-                        : reward.type === 'badge'
-                          ? '获得专属学习徽章'
-                          : reward.type === 'gift'
-                            ? '获得神秘礼包'
-                            : '获得会员体验'
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-            
-            <Divider />
-            
-            <Alert
-              message="温馨提示"
-              description="连续签到7天后，奖励循环重置。中断签到会重新开始计算连续天数。"
-              type="info"
-              showIcon
-            />
-          </Card>
-        </TabPane>
-      </Tabs>
+      <Tabs 
+        defaultActiveKey="history"
+        items={[
+          {
+            key: 'history',
+            label: '签到历史',
+            children: (
+              <Row gutter={[16, 16]}>
+                <Col xs={24} lg={12}>
+                  {renderCheckinHistory()}
+                </Col>
+                <Col xs={24} lg={12}>
+                  {renderCheckinCalendar()}
+                </Col>
+              </Row>
+            )
+          },
+          {
+            key: 'rewards',
+            label: '奖励说明',
+            children: (
+              <Card>
+                <Title level={4}>签到奖励规则</Title>
+                <List
+                  dataSource={checkinRewards}
+                  renderItem={(reward, index) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={<Avatar>{reward.icon}</Avatar>}
+                        title={`第${index + 1}天：${reward.name}`}
+                        description={
+                          reward.type === 'points' 
+                            ? `获得 ${reward.amount} 积分`
+                            : reward.type === 'badge'
+                              ? '获得专属学习徽章'
+                              : reward.type === 'gift'
+                                ? '获得神秘礼包'
+                                : '获得会员体验'
+                        }
+                      />
+                    </List.Item>
+                  )}
+                />
+                
+                <Divider />
+                
+                <Alert
+                  message="温馨提示"
+                  description="连续签到7天后，奖励循环重置。中断签到会重新开始计算连续天数。"
+                  type="info"
+                  showIcon
+                />
+              </Card>
+            )
+          }
+        ]}
+      />
 
       {renderRewardModal()}
     </div>

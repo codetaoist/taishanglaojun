@@ -21,7 +21,7 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-// PasswordUtils 密码工具类
+// PasswordUtils 密码工具�?
 type PasswordUtils struct{}
 
 // HashPassword 使用bcrypt哈希密码
@@ -56,11 +56,11 @@ func (p *PasswordUtils) ValidatePasswordStrength(password string) (bool, []strin
 	var errors []string
 	
 	if len(password) < 8 {
-		errors = append(errors, "密码长度至少8位")
+		errors = append(errors, "密码长度至少8�?)
 	}
 	
 	if len(password) > 128 {
-		errors = append(errors, "密码长度不能超过128位")
+		errors = append(errors, "密码长度不能超过128�?)
 	}
 	
 	hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(password)
@@ -86,7 +86,7 @@ func (p *PasswordUtils) ValidatePasswordStrength(password string) (bool, []strin
 	return len(errors) == 0, errors
 }
 
-// EncryptionUtils 加密工具类
+// EncryptionUtils 加密工具�?
 type EncryptionUtils struct{}
 
 // AESEncrypt AES加密
@@ -154,7 +154,7 @@ func (e *EncryptionUtils) GenerateAESKey(keySize int) (string, error) {
 	return hex.EncodeToString(key), nil
 }
 
-// HashUtils 哈希工具类
+// HashUtils 哈希工具�?
 type HashUtils struct{}
 
 // MD5Hash MD5哈希
@@ -184,7 +184,7 @@ func (h *HashUtils) ScryptHash(password, salt string) (string, error) {
 	return hex.EncodeToString(dk), nil
 }
 
-// GenerateSalt 生成盐值
+// GenerateSalt 生成盐�?
 func (h *HashUtils) GenerateSalt(length int) (string, error) {
 	salt := make([]byte, length)
 	_, err := rand.Read(salt)
@@ -194,7 +194,7 @@ func (h *HashUtils) GenerateSalt(length int) (string, error) {
 	return hex.EncodeToString(salt), nil
 }
 
-// ValidationUtils 验证工具类
+// ValidationUtils 验证工具�?
 type ValidationUtils struct{}
 
 // ValidateEmail 验证邮箱格式
@@ -203,7 +203,7 @@ func (v *ValidationUtils) ValidateEmail(email string) bool {
 	return emailRegex.MatchString(email)
 }
 
-// ValidatePhone 验证手机号格式
+// ValidatePhone 验证手机号格�?
 func (v *ValidationUtils) ValidatePhone(phone string) bool {
 	phoneRegex := regexp.MustCompile(`^1[3-9]\d{9}$`)
 	return phoneRegex.MatchString(phone)
@@ -310,7 +310,7 @@ func (d *DetectionUtils) DetectXSS(input string) bool {
 	return false
 }
 
-// DetectPathTraversal 检测路径遍历攻击
+// DetectPathTraversal 检测路径遍历攻�?
 func (d *DetectionUtils) DetectPathTraversal(input string) bool {
 	pathPatterns := []string{
 		`\.\.\/`,
@@ -331,7 +331,7 @@ func (d *DetectionUtils) DetectPathTraversal(input string) bool {
 	return false
 }
 
-// DetectCommandInjection 检测命令注入
+// DetectCommandInjection 检测命令注�?
 func (d *DetectionUtils) DetectCommandInjection(input string) bool {
 	cmdPatterns := []string{
 		`(?i)(;|\||\&\&|\|\|)\s*(ls|dir|cat|type|echo|ping|wget|curl|nc|netcat)`,
@@ -353,7 +353,7 @@ func (d *DetectionUtils) DetectCommandInjection(input string) bool {
 	return false
 }
 
-// TokenUtils 令牌工具类
+// TokenUtils 令牌工具�?
 type TokenUtils struct{}
 
 // GenerateRandomToken 生成随机令牌
@@ -398,10 +398,10 @@ func NewSecurityUtils() *SecurityUtils {
 	}
 }
 
-// TimeUtils 时间工具类
+// TimeUtils 时间工具�?
 type TimeUtils struct{}
 
-// IsExpired 检查时间是否过期
+// IsExpired 检查时间是否过�?
 func (t *TimeUtils) IsExpired(timestamp time.Time, duration time.Duration) bool {
 	return time.Since(timestamp) > duration
 }
@@ -416,12 +416,12 @@ func (t *TimeUtils) FormatSecurityTimestamp(t_time time.Time) string {
 	return t_time.Format("2006-01-02 15:04:05 MST")
 }
 
-// ParseSecurityTimestamp 解析安全时间戳
+// ParseSecurityTimestamp 解析安全时间�?
 func (t *TimeUtils) ParseSecurityTimestamp(timestamp string) (time.Time, error) {
 	return time.Parse("2006-01-02 15:04:05 MST", timestamp)
 }
 
-// NetworkUtils 网络工具类
+// NetworkUtils 网络工具�?
 type NetworkUtils struct{}
 
 // IsPrivateIP 检查是否为私有IP

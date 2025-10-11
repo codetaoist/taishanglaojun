@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Logger 日志中间件
+// Logger 日志中间�?
 func Logger() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		// 获取请求ID
@@ -32,16 +32,16 @@ func Logger() gin.HandlerFunc {
 	})
 }
 
-// RequestLogger 详细请求日志中间件
+// RequestLogger 详细请求日志中间�?
 func RequestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 开始时间
+		// 开始时�?
 		start := time.Now()
 
 		// 获取请求ID
 		requestID := requestid.Get(c)
 
-		// 读取请求体
+		// 读取请求�?
 		var requestBody []byte
 		if c.Request.Body != nil {
 			requestBody, _ = io.ReadAll(c.Request.Body)
@@ -55,7 +55,7 @@ func RequestLogger() gin.HandlerFunc {
 		}
 		c.Writer = writer
 
-		// 记录请求开始
+		// 记录请求开�?
 		logrus.WithFields(logrus.Fields{
 			"request_id":   requestID,
 			"method":       c.Request.Method,

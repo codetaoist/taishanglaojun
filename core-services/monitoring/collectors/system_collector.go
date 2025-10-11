@@ -14,11 +14,11 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 	"github.com/shirou/gopsutil/v3/process"
 
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
-// SystemCollector 系统指标收集器
+// SystemCollector 系统指标收集�?
 type SystemCollector struct {
 	name     string
 	interval time.Duration
@@ -33,12 +33,12 @@ type SystemCollector struct {
 	collectLoad    bool
 	collectProcess bool
 	
-	// 缓存上次的网络统计
+	// 缓存上次的网络统�?
 	lastNetStats map[string]net.IOCountersStat
 	lastTime     time.Time
 }
 
-// NewSystemCollector 创建系统指标收集器
+// NewSystemCollector 创建系统指标收集�?
 func NewSystemCollector(config SystemCollectorConfig) *SystemCollector {
 	hostname, _ := host.Info()
 	labels := map[string]string{
@@ -48,7 +48,7 @@ func NewSystemCollector(config SystemCollectorConfig) *SystemCollector {
 		"platform":  hostname.Platform,
 	}
 	
-	// 添加自定义标签
+	// 添加自定义标�?
 	for k, v := range config.Labels {
 		labels[k] = v
 	}
@@ -69,7 +69,7 @@ func NewSystemCollector(config SystemCollectorConfig) *SystemCollector {
 	}
 }
 
-// SystemCollectorConfig 系统收集器配置
+// SystemCollectorConfig 系统收集器配�?
 type SystemCollectorConfig struct {
 	Interval       time.Duration     `yaml:"interval"`
 	Enabled        bool              `yaml:"enabled"`
@@ -82,12 +82,12 @@ type SystemCollectorConfig struct {
 	CollectProcess bool              `yaml:"collect_process"`
 }
 
-// GetName 获取收集器名称
+// GetName 获取收集器名�?
 func (c *SystemCollector) GetName() string {
 	return c.name
 }
 
-// GetCategory 获取收集器分类
+// GetCategory 获取收集器分�?
 func (c *SystemCollector) GetCategory() models.MetricCategory {
 	return models.CategorySystem
 }
@@ -97,12 +97,12 @@ func (c *SystemCollector) GetInterval() time.Duration {
 	return c.interval
 }
 
-// IsEnabled 检查是否启用
+// IsEnabled 检查是否启�?
 func (c *SystemCollector) IsEnabled() bool {
 	return c.enabled
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (c *SystemCollector) Start(ctx context.Context) error {
 	if !c.enabled {
 		return nil
@@ -117,26 +117,26 @@ func (c *SystemCollector) Start(ctx context.Context) error {
 			return ctx.Err()
 		case <-ticker.C:
 			if _, err := c.Collect(ctx); err != nil {
-				// 记录错误但继续运行
+				// 记录错误但继续运�?
 				fmt.Printf("System collector error: %v\n", err)
 			}
 		}
 	}
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (c *SystemCollector) Stop() error {
 	c.enabled = false
 	return nil
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (c *SystemCollector) Health() error {
 	if !c.enabled {
 		return fmt.Errorf("system collector is disabled")
 	}
 	
-	// 尝试收集一个简单的指标来验证健康状态
+	// 尝试收集一个简单的指标来验证健康状�?
 	_, err := cpu.Percent(0, false)
 	if err != nil {
 		return fmt.Errorf("failed to collect CPU metrics: %w", err)
@@ -215,13 +215,13 @@ func (c *SystemCollector) Collect(ctx context.Context) ([]models.Metric, error) 
 func (c *SystemCollector) collectCPUMetrics(timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
-	// CPU使用率
+	// CPU使用�?
 	cpuPercents, err := cpu.Percent(0, true)
 	if err != nil {
 		return nil, err
 	}
 	
-	// 总体CPU使用率
+	// 总体CPU使用�?
 	totalPercent, err := cpu.Percent(0, false)
 	if err != nil {
 		return nil, err
@@ -319,7 +319,7 @@ func (c *SystemCollector) collectMemoryMetrics(timestamp time.Time) ([]models.Me
 		return nil, err
 	}
 	
-	// 总内存
+	// 总内�?
 	metric := models.NewMetric("system_memory_total_bytes", models.MetricTypeGauge, models.CategorySystem).
 		WithLabels(c.labels).
 		WithValue(float64(vmStat.Total)).
@@ -349,7 +349,7 @@ func (c *SystemCollector) collectMemoryMetrics(timestamp time.Time) ([]models.Me
 	metric.Description = "Used system memory"
 	metrics = append(metrics, *metric)
 	
-	// 内存使用率
+	// 内存使用�?
 	metric = models.NewMetric("system_memory_usage_percent", models.MetricTypeGauge, models.CategorySystem).
 		WithLabels(c.labels).
 		WithValue(vmStat.UsedPercent).
@@ -369,7 +369,7 @@ func (c *SystemCollector) collectMemoryMetrics(timestamp time.Time) ([]models.Me
 	metric.Description = "Cached memory"
 	metrics = append(metrics, *metric)
 	
-	// 缓冲区内存
+	// 缓冲区内�?
 	metric = models.NewMetric("system_memory_buffers_bytes", models.MetricTypeGauge, models.CategorySystem).
 		WithLabels(c.labels).
 		WithValue(float64(vmStat.Buffers)).
@@ -385,7 +385,7 @@ func (c *SystemCollector) collectMemoryMetrics(timestamp time.Time) ([]models.Me
 		return nil, err
 	}
 	
-	// 总交换内存
+	// 总交换内�?
 	metric = models.NewMetric("system_swap_total_bytes", models.MetricTypeGauge, models.CategorySystem).
 		WithLabels(c.labels).
 		WithValue(float64(swapStat.Total)).
@@ -405,7 +405,7 @@ func (c *SystemCollector) collectMemoryMetrics(timestamp time.Time) ([]models.Me
 	metric.Description = "Used swap memory"
 	metrics = append(metrics, *metric)
 	
-	// 交换内存使用率
+	// 交换内存使用�?
 	metric = models.NewMetric("system_swap_usage_percent", models.MetricTypeGauge, models.CategorySystem).
 		WithLabels(c.labels).
 		WithValue(swapStat.UsedPercent).
@@ -442,7 +442,7 @@ func (c *SystemCollector) collectDiskMetrics(timestamp time.Time) ([]models.Metr
 		labels["mountpoint"] = partition.Mountpoint
 		labels["fstype"] = partition.Fstype
 		
-		// 总空间
+		// 总空�?
 		metric := models.NewMetric("system_disk_total_bytes", models.MetricTypeGauge, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(float64(usage.Total)).
@@ -472,7 +472,7 @@ func (c *SystemCollector) collectDiskMetrics(timestamp time.Time) ([]models.Metr
 		metric.Description = "Free disk space"
 		metrics = append(metrics, *metric)
 		
-		// 使用率
+		// 使用�?
 		metric = models.NewMetric("system_disk_usage_percent", models.MetricTypeGauge, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(usage.UsedPercent).
@@ -544,7 +544,7 @@ func (c *SystemCollector) collectDiskMetrics(timestamp time.Time) ([]models.Metr
 		metric.Description = "Total disk writes"
 		metrics = append(metrics, *metric)
 		
-		// 读取字节数
+		// 读取字节�?
 		metric = models.NewMetric("system_disk_read_bytes_total", models.MetricTypeCounter, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(float64(stat.ReadBytes)).
@@ -554,7 +554,7 @@ func (c *SystemCollector) collectDiskMetrics(timestamp time.Time) ([]models.Metr
 		metric.Description = "Total bytes read from disk"
 		metrics = append(metrics, *metric)
 		
-		// 写入字节数
+		// 写入字节�?
 		metric = models.NewMetric("system_disk_write_bytes_total", models.MetricTypeCounter, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(float64(stat.WriteBytes)).
@@ -608,7 +608,7 @@ func (c *SystemCollector) collectNetworkMetrics(timestamp time.Time) ([]models.M
 		}
 		labels["interface"] = stat.Name
 		
-		// 接收字节数
+		// 接收字节�?
 		metric := models.NewMetric("system_network_receive_bytes_total", models.MetricTypeCounter, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(float64(stat.BytesRecv)).
@@ -638,7 +638,7 @@ func (c *SystemCollector) collectNetworkMetrics(timestamp time.Time) ([]models.M
 		metric.Description = "Total packets received"
 		metrics = append(metrics, *metric)
 		
-		// 发送包数
+		// 发送包�?
 		metric = models.NewMetric("system_network_transmit_packets_total", models.MetricTypeCounter, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(float64(stat.PacketsSent)).
@@ -648,7 +648,7 @@ func (c *SystemCollector) collectNetworkMetrics(timestamp time.Time) ([]models.M
 		metric.Description = "Total packets transmitted"
 		metrics = append(metrics, *metric)
 		
-		// 接收错误数
+		// 接收错误�?
 		metric = models.NewMetric("system_network_receive_errors_total", models.MetricTypeCounter, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(float64(stat.Errin)).
@@ -668,7 +668,7 @@ func (c *SystemCollector) collectNetworkMetrics(timestamp time.Time) ([]models.M
 		metric.Description = "Total transmit errors"
 		metrics = append(metrics, *metric)
 		
-		// 丢包数
+		// 丢包�?
 		metric = models.NewMetric("system_network_receive_dropped_total", models.MetricTypeCounter, models.CategorySystem).
 			WithLabels(labels).
 			WithValue(float64(stat.Dropin)).
@@ -783,7 +783,7 @@ func (c *SystemCollector) collectProcessMetrics(timestamp time.Time) ([]models.M
 	metric.Description = "Total number of processes"
 	metrics = append(metrics, *metric)
 	
-	// 按状态统计进程
+	// 按状态统计进�?
 	statusCount := make(map[string]int)
 	for _, p := range processes {
 		status, err := p.Status()
@@ -810,7 +810,7 @@ func (c *SystemCollector) collectProcessMetrics(timestamp time.Time) ([]models.M
 		metrics = append(metrics, *metric)
 	}
 	
-	// 文件描述符
+	// 文件描述�?
 	metric = models.NewMetric("system_file_descriptors_open", models.MetricTypeGauge, models.CategorySystem).
 		WithLabels(c.labels).
 		WithValue(float64(runtime.NumGoroutine())).
@@ -823,5 +823,5 @@ func (c *SystemCollector) collectProcessMetrics(timestamp time.Time) ([]models.M
 	return metrics, nil
 }
 
-// 确保实现了接口
+// 确保实现了接�?
 var _ interfaces.MetricCollector = (*SystemCollector)(nil)

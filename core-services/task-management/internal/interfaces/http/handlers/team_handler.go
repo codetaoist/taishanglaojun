@@ -12,12 +12,12 @@ import (
 	"task-management/internal/domain"
 )
 
-// TeamHandler 团队HTTP处理器
+// TeamHandler 团队HTTP处理�?
 type TeamHandler struct {
 	teamService *application.TeamService
 }
 
-// NewTeamHandler 创建团队处理器
+// NewTeamHandler 创建团队处理�?
 func NewTeamHandler(teamService *application.TeamService) *TeamHandler {
 	return &TeamHandler{
 		teamService: teamService,
@@ -38,7 +38,7 @@ func (h *TeamHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 转换为应用服务请求
+	// 转换为应用服务请�?
 	serviceReq := &application.CreateTeamRequest{
 		Name:           req.Name,
 		Description:    req.Description,
@@ -132,7 +132,7 @@ func (h *TeamHandler) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 转换为应用服务请求
+	// 转换为应用服务请�?
 	serviceReq := &application.UpdateTeamRequest{
 		TeamID:      teamID,
 		Name:        req.Name,

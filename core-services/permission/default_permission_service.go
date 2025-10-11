@@ -18,7 +18,7 @@ type DefaultPermissionService struct {
 	config     DefaultPermissionServiceConfig
 	mu         sync.RWMutex
 	
-	// 内部状态
+	// 内部状�?
 	policyEvaluators map[PolicyType]PolicyEvaluator
 	permissionCache  map[string]*PermissionCheckResponse
 	cacheExpiry      map[string]time.Time
@@ -33,7 +33,7 @@ type DefaultPermissionServiceConfig struct {
 	UserRolesTTL         time.Duration `json:"user_roles_ttl"`
 	PermissionCheckTTL   time.Duration `json:"permission_check_ttl"`
 	
-	// 权限检查配置
+	// 权限检查配�?
 	DefaultCheckMode     CheckMode `json:"default_check_mode"`
 	EnableInheritance    bool      `json:"enable_inheritance"`
 	EnablePolicyEngine   bool      `json:"enable_policy_engine"`
@@ -64,7 +64,7 @@ type DefaultPermissionServiceConfig struct {
 	MetricsInterval      time.Duration `json:"metrics_interval"`
 }
 
-// PolicyEvaluator 策略评估器接口
+// PolicyEvaluator 策略评估器接�?
 type PolicyEvaluator interface {
 	Evaluate(ctx context.Context, request *PolicyEvaluationRequest, policies []*Policy) (*PolicyEvaluationResponse, error)
 }
@@ -115,13 +115,13 @@ func NewDefaultPermissionService(
 		cacheExpiry:     make(map[string]time.Time),
 	}
 
-	// 注册策略评估器
+	// 注册策略评估�?
 	service.registerPolicyEvaluators()
 
 	return service
 }
 
-// CheckPermission 检查权限
+// CheckPermission 检查权�?
 func (s *DefaultPermissionService) CheckPermission(ctx context.Context, request *PermissionCheckRequest) (*PermissionCheckResponse, error) {
 	// 验证请求
 	if err := s.validatePermissionCheckRequest(request); err != nil {
@@ -132,7 +132,7 @@ func (s *DefaultPermissionService) CheckPermission(ctx context.Context, request 
 		}, nil
 	}
 
-	// 检查缓存
+	// 检查缓�?
 	if s.config.CacheEnabled {
 		cacheKey := CreatePermissionCheckKey(request.UserID, request.TenantID, request.Resource, request.Action, request.ResourceID)
 		if cached, err := s.getFromCache(cacheKey); err == nil && cached != nil {
@@ -141,7 +141,7 @@ func (s *DefaultPermissionService) CheckPermission(ctx context.Context, request 
 		}
 	}
 
-	// 执行权限检查
+	// 执行权限检�?
 	response, err := s.doPermissionCheck(ctx, request)
 	if err != nil {
 		s.logger.Error("Permission check failed", zap.Error(err))
@@ -166,7 +166,7 @@ func (s *DefaultPermissionService) CheckPermission(ctx context.Context, request 
 	return response, nil
 }
 
-// CheckPermissions 批量检查权限
+// CheckPermissions 批量检查权�?
 func (s *DefaultPermissionService) CheckPermissions(ctx context.Context, requests []*PermissionCheckRequest) ([]*PermissionCheckResponse, error) {
 	if len(requests) == 0 {
 		return []*PermissionCheckResponse{}, nil
@@ -174,12 +174,12 @@ func (s *DefaultPermissionService) CheckPermissions(ctx context.Context, request
 
 	responses := make([]*PermissionCheckResponse, len(requests))
 	
-	// 使用并发检查
+	// 使用并发检�?
 	if len(requests) > 1 && s.config.MaxConcurrentChecks > 1 {
 		return s.checkPermissionsConcurrent(ctx, requests)
 	}
 
-	// 顺序检查
+	// 顺序检�?
 	for i, request := range requests {
 		response, err := s.CheckPermission(ctx, request)
 		if err != nil {
@@ -496,7 +496,7 @@ func (s *DefaultPermissionService) ListPermissions(ctx context.Context, filter *
 	}, nil
 }
 
-// AssignPermissionToRole 分配权限给角色
+// AssignPermissionToRole 分配权限给角�?
 func (s *DefaultPermissionService) AssignPermissionToRole(ctx context.Context, roleID, permissionID string) error {
 	if err := s.repository.AssignPermissionToRole(ctx, roleID, permissionID); err != nil {
 		return fmt.Errorf("failed to assign permission to role: %w", err)
@@ -543,7 +543,7 @@ func (s *DefaultPermissionService) GetRolePermissions(ctx context.Context, roleI
 	return s.repository.GetRolePermissions(ctx, roleID)
 }
 
-// AssignRoleToUser 分配角色给用户
+// AssignRoleToUser 分配角色给用�?
 func (s *DefaultPermissionService) AssignRoleToUser(ctx context.Context, userID, roleID string, tenantID string) error {
 	if err := s.repository.AssignRoleToUser(ctx, userID, roleID, tenantID); err != nil {
 		return fmt.Errorf("failed to assign role to user: %w", err)
@@ -583,7 +583,7 @@ func (s *DefaultPermissionService) RevokeRoleFromUser(ctx context.Context, userI
 
 // GetUserRoles 获取用户角色
 func (s *DefaultPermissionService) GetUserRoles(ctx context.Context, userID string, tenantID string) ([]*Role, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.CacheEnabled && s.cache != nil {
 		if cached, err := s.cache.GetUserRoles(ctx, userID, tenantID); err == nil && cached != nil {
 			return cached, nil
@@ -606,7 +606,7 @@ func (s *DefaultPermissionService) GetUserRoles(ctx context.Context, userID stri
 
 // GetUserPermissions 获取用户权限
 func (s *DefaultPermissionService) GetUserPermissions(ctx context.Context, userID string, tenantID string) ([]*Permission, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.CacheEnabled && s.cache != nil {
 		if cached, err := s.cache.GetUserPermissions(ctx, userID, tenantID); err == nil && cached != nil {
 			return cached, nil
@@ -619,7 +619,7 @@ func (s *DefaultPermissionService) GetUserPermissions(ctx context.Context, userI
 		return nil, fmt.Errorf("failed to get user roles: %w", err)
 	}
 
-	// 收集所有权限
+	// 收集所有权�?
 	permissionMap := make(map[string]*Permission)
 	for _, role := range roles {
 		rolePermissions, err := s.repository.GetRolePermissions(ctx, role.ID)
@@ -635,7 +635,7 @@ func (s *DefaultPermissionService) GetUserPermissions(ctx context.Context, userI
 		}
 	}
 
-	// 转换为切片
+	// 转换为切�?
 	permissions := make([]*Permission, 0, len(permissionMap))
 	for _, permission := range permissionMap {
 		permissions = append(permissions, permission)
@@ -879,7 +879,7 @@ func (s *DefaultPermissionService) EvaluatePolicy(ctx context.Context, request *
 			}
 		}
 	} else {
-		// 获取所有活跃策略
+		// 获取所有活跃策�?
 		filter := &PolicyFilter{
 			IsActive: &[]bool{true}[0],
 			TenantID: request.TenantID,
@@ -918,7 +918,7 @@ func (s *DefaultPermissionService) InvalidateCache(ctx context.Context, userID, 
 	return nil
 }
 
-// InvalidateAllCache 清除所有缓存
+// InvalidateAllCache 清除所有缓�?
 func (s *DefaultPermissionService) InvalidateAllCache(ctx context.Context) error {
 	if s.config.CacheEnabled && s.cache != nil {
 		return s.cache.Clear(ctx)
@@ -950,7 +950,7 @@ func (s *DefaultPermissionService) GetPermissionAuditLog(ctx context.Context, fi
 	}, nil
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (s *DefaultPermissionService) HealthCheck(ctx context.Context) *HealthStatus {
 	status := &HealthStatus{
 		Healthy:   true,
@@ -968,7 +968,7 @@ func (s *DefaultPermissionService) HealthCheck(ctx context.Context) *HealthStatu
 		status.Checks["database"] = "ok"
 	}
 
-	// 检查缓存
+	// 检查缓�?
 	if s.cache != nil {
 		if err := s.cache.HealthCheck(ctx); err != nil {
 			status.Checks["cache"] = fmt.Sprintf("failed: %v", err)
@@ -982,7 +982,7 @@ func (s *DefaultPermissionService) HealthCheck(ctx context.Context) *HealthStatu
 
 // 私有方法
 
-// doPermissionCheck 执行权限检查
+// doPermissionCheck 执行权限检�?
 func (s *DefaultPermissionService) doPermissionCheck(ctx context.Context, request *PermissionCheckRequest) (*PermissionCheckResponse, error) {
 	// 获取用户权限
 	permissions, err := s.getUserEffectivePermissions(ctx, request.UserID, request.TenantID, request.ResourceID, request.Resource)
@@ -990,10 +990,10 @@ func (s *DefaultPermissionService) doPermissionCheck(ctx context.Context, reques
 		return nil, fmt.Errorf("failed to get user permissions: %w", err)
 	}
 
-	// 检查权限
+	// 检查权�?
 	for _, permission := range permissions {
 		if s.matchesPermission(permission, request) {
-			// 检查条件
+			// 检查条�?
 			if s.evaluateConditions(permission.Conditions, request.Context) {
 				return &PermissionCheckResponse{
 					Allowed:     permission.Effect == PermissionEffectAllow,
@@ -1005,7 +1005,7 @@ func (s *DefaultPermissionService) doPermissionCheck(ctx context.Context, reques
 		}
 	}
 
-	// 如果启用策略引擎，评估策略
+	// 如果启用策略引擎，评估策�?
 	if s.config.EnablePolicyEngine {
 		policyRequest := &PolicyEvaluationRequest{
 			UserID:     request.UserID,
@@ -1022,7 +1022,7 @@ func (s *DefaultPermissionService) doPermissionCheck(ctx context.Context, reques
 				Allowed:  true,
 				Reason:   "Policy evaluation allowed",
 				Effect:   policyResponse.Effect,
-				Policies: []*Policy{}, // 这里应该返回匹配的策略
+				Policies: []*Policy{}, // 这里应该返回匹配的策�?
 			}, nil
 		}
 	}
@@ -1046,7 +1046,7 @@ func (s *DefaultPermissionService) getUserEffectivePermissions(ctx context.Conte
 	effectivePermissions := make([]*Permission, 0, len(userPermissions))
 	effectivePermissions = append(effectivePermissions, userPermissions...)
 
-	// 如果指定了资源ID，获取资源特定权限
+	// 如果指定了资源ID，获取资源特定权�?
 	if resourceID != nil {
 		resourcePermissions, err := s.getResourceSpecificPermissions(ctx, *resourceID, resource, userID, tenantID)
 		if err != nil {
@@ -1056,7 +1056,7 @@ func (s *DefaultPermissionService) getUserEffectivePermissions(ctx context.Conte
 		}
 	}
 
-	// 如果启用继承，获取继承权限
+	// 如果启用继承，获取继承权�?
 	if s.config.EnableInheritance && resourceID != nil {
 		inheritedPermissions, err := s.getInheritedPermissions(ctx, *resourceID, resource, userID, tenantID, 0)
 		if err != nil {
@@ -1078,7 +1078,7 @@ func (s *DefaultPermissionService) getResourceSpecificPermissions(ctx context.Co
 
 	var permissions []*Permission
 	for _, rp := range resourcePermissions {
-		// 检查是否适用于当前用户
+		// 检查是否适用于当前用�?
 		if s.isResourcePermissionApplicable(rp, userID, tenantID) {
 			if rp.Permission != nil {
 				permissions = append(permissions, rp.Permission)
@@ -1108,7 +1108,7 @@ func (s *DefaultPermissionService) getInheritedPermissions(ctx context.Context, 
 		return nil, nil
 	}
 
-	// 获取父资源权限
+	// 获取父资源权�?
 	parentPermissions, err := s.getResourceSpecificPermissions(ctx, inheritance.ParentID, inheritance.ParentType, userID, tenantID)
 	if err != nil {
 		return nil, err
@@ -1127,22 +1127,22 @@ func (s *DefaultPermissionService) getInheritedPermissions(ctx context.Context, 
 
 // isResourcePermissionApplicable 检查资源权限是否适用
 func (s *DefaultPermissionService) isResourcePermissionApplicable(rp *ResourcePermission, userID, tenantID string) bool {
-	// 检查租户
+	// 检查租�?
 	if rp.TenantID != tenantID {
 		return false
 	}
 
-	// 检查过期时间
+	// 检查过期时�?
 	if rp.ExpiresAt != nil && rp.ExpiresAt.Before(time.Now()) {
 		return false
 	}
 
-	// 检查主体
+	// 检查主�?
 	switch rp.SubjectType {
 	case SubjectTypeUser:
 		return rp.SubjectID == userID
 	case SubjectTypeRole:
-		// 检查用户是否有该角色
+		// 检查用户是否有该角�?
 		userRoles, err := s.repository.GetUserRoles(context.Background(), userID, tenantID)
 		if err != nil {
 			return false
@@ -1162,14 +1162,14 @@ func (s *DefaultPermissionService) isResourcePermissionApplicable(rp *ResourcePe
 	}
 }
 
-// matchesPermission 检查权限是否匹配
+// matchesPermission 检查权限是否匹�?
 func (s *DefaultPermissionService) matchesPermission(permission *Permission, request *PermissionCheckRequest) bool {
-	// 检查资源
+	// 检查资�?
 	if !s.matchesResource(permission.Resource, request.Resource) {
 		return false
 	}
 
-	// 检查动作
+	// 检查动�?
 	if !s.matchesAction(permission.Action, request.Action) {
 		return false
 	}
@@ -1177,9 +1177,9 @@ func (s *DefaultPermissionService) matchesPermission(permission *Permission, req
 	return true
 }
 
-// matchesResource 检查资源是否匹配
+// matchesResource 检查资源是否匹�?
 func (s *DefaultPermissionService) matchesResource(permissionResource, requestResource string) bool {
-	// 支持通配符匹配
+	// 支持通配符匹�?
 	if permissionResource == "*" {
 		return true
 	}
@@ -1198,9 +1198,9 @@ func (s *DefaultPermissionService) matchesResource(permissionResource, requestRe
 	return false
 }
 
-// matchesAction 检查动作是否匹配
+// matchesAction 检查动作是否匹�?
 func (s *DefaultPermissionService) matchesAction(permissionAction, requestAction string) bool {
-	// 支持通配符匹配
+	// 支持通配符匹�?
 	if permissionAction == "*" {
 		return true
 	}
@@ -1239,7 +1239,7 @@ func (s *DefaultPermissionService) evaluateConditions(conditions map[string]inte
 	return true
 }
 
-// checkPermissionsConcurrent 并发检查权限
+// checkPermissionsConcurrent 并发检查权�?
 func (s *DefaultPermissionService) checkPermissionsConcurrent(ctx context.Context, requests []*PermissionCheckRequest) ([]*PermissionCheckResponse, error) {
 	responses := make([]*PermissionCheckResponse, len(requests))
 	
@@ -1252,11 +1252,11 @@ func (s *DefaultPermissionService) checkPermissionsConcurrent(ctx context.Contex
 		go func(index int, req *PermissionCheckRequest) {
 			defer wg.Done()
 			
-			// 获取信号量
+			// 获取信号�?
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
 			
-			// 执行权限检查
+			// 执行权限检�?
 			response, err := s.CheckPermission(ctx, req)
 			if err != nil {
 				responses[index] = &PermissionCheckResponse{
@@ -1276,7 +1276,7 @@ func (s *DefaultPermissionService) checkPermissionsConcurrent(ctx context.Contex
 
 // 缓存相关方法
 
-// getFromCache 从缓存获取
+// getFromCache 从缓存获�?
 func (s *DefaultPermissionService) getFromCache(key string) (*PermissionCheckResponse, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -1285,7 +1285,7 @@ func (s *DefaultPermissionService) getFromCache(key string) (*PermissionCheckRes
 		if expiry, exists := s.cacheExpiry[key]; exists && time.Now().Before(expiry) {
 			return response, nil
 		}
-		// 过期，删除
+		// 过期，删�?
 		delete(s.permissionCache, key)
 		delete(s.cacheExpiry, key)
 	}
@@ -1293,7 +1293,7 @@ func (s *DefaultPermissionService) getFromCache(key string) (*PermissionCheckRes
 	return nil, fmt.Errorf("not found")
 }
 
-// setToCache 设置到缓存
+// setToCache 设置到缓�?
 func (s *DefaultPermissionService) setToCache(key string, response *PermissionCheckResponse) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -1312,7 +1312,7 @@ func (s *DefaultPermissionService) invalidateUserCache(ctx context.Context, user
 // invalidateRoleCache 清除角色缓存
 func (s *DefaultPermissionService) invalidateRoleCache(ctx context.Context, roleID, tenantID string) {
 	// 这里需要清除所有相关用户的缓存
-	// 简化实现，清除所有缓存
+	// 简化实现，清除所有缓�?
 	if s.cache != nil {
 		s.cache.Clear(ctx)
 	}
@@ -1320,7 +1320,7 @@ func (s *DefaultPermissionService) invalidateRoleCache(ctx context.Context, role
 
 // 审计相关方法
 
-// logPermissionCheck 记录权限检查审计日志
+// logPermissionCheck 记录权限检查审计日�?
 func (s *DefaultPermissionService) logPermissionCheck(ctx context.Context, request *PermissionCheckRequest, response *PermissionCheckResponse) {
 	auditLog := &PermissionAuditLog{
 		ID:         GenerateAuditLogID(),
@@ -1344,23 +1344,23 @@ func (s *DefaultPermissionService) logPermissionCheck(ctx context.Context, reque
 	}()
 }
 
-// 策略评估器注册
+// 策略评估器注�?
 
-// registerPolicyEvaluators 注册策略评估器
+// registerPolicyEvaluators 注册策略评估�?
 func (s *DefaultPermissionService) registerPolicyEvaluators() {
-	// 注册RBAC评估器
+	// 注册RBAC评估�?
 	s.policyEvaluators[PolicyTypeRBAC] = &RBACPolicyEvaluator{
 		service: s,
 		logger:  s.logger,
 	}
 
-	// 注册ABAC评估器
+	// 注册ABAC评估�?
 	s.policyEvaluators[PolicyTypeABAC] = &ABACPolicyEvaluator{
 		service: s,
 		logger:  s.logger,
 	}
 
-	// 注册ACL评估器
+	// 注册ACL评估�?
 	s.policyEvaluators[PolicyTypeACL] = &ACLPolicyEvaluator{
 		service: s,
 		logger:  s.logger,
@@ -1369,7 +1369,7 @@ func (s *DefaultPermissionService) registerPolicyEvaluators() {
 
 // 验证方法
 
-// validatePermissionCheckRequest 验证权限检查请求
+// validatePermissionCheckRequest 验证权限检查请�?
 func (s *DefaultPermissionService) validatePermissionCheckRequest(request *PermissionCheckRequest) error {
 	if request.UserID == "" {
 		return fmt.Errorf("user_id is required")
@@ -1495,9 +1495,9 @@ func (s *DefaultPermissionService) validateCreatePolicyRequest(request *CreatePo
 	return nil
 }
 
-// 策略评估器实现
+// 策略评估器实�?
 
-// RBACPolicyEvaluator RBAC策略评估器
+// RBACPolicyEvaluator RBAC策略评估�?
 type RBACPolicyEvaluator struct {
 	service *DefaultPermissionService
 	logger  *zap.Logger
@@ -1526,19 +1526,19 @@ func (e *RBACPolicyEvaluator) Evaluate(ctx context.Context, request *PolicyEvalu
 	}, nil
 }
 
-// matchesRule 检查规则是否匹配
+// matchesRule 检查规则是否匹�?
 func (e *RBACPolicyEvaluator) matchesRule(rule *PolicyRule, request *PolicyEvaluationRequest) bool {
-	// 检查资源
+	// 检查资�?
 	if rule.Resource != "*" && rule.Resource != request.Resource {
 		return false
 	}
 
-	// 检查动作
+	// 检查动�?
 	if rule.Action != "*" && rule.Action != request.Action {
 		return false
 	}
 
-	// 检查条件
+	// 检查条�?
 	return e.evaluateConditions(rule.Conditions, request.Context)
 }
 
@@ -1561,7 +1561,7 @@ func (e *RBACPolicyEvaluator) evaluateConditions(conditions map[string]interface
 	return true
 }
 
-// ABACPolicyEvaluator ABAC策略评估器
+// ABACPolicyEvaluator ABAC策略评估�?
 type ABACPolicyEvaluator struct {
 	service *DefaultPermissionService
 	logger  *zap.Logger
@@ -1578,7 +1578,7 @@ func (e *ABACPolicyEvaluator) Evaluate(ctx context.Context, request *PolicyEvalu
 	}, nil
 }
 
-// ACLPolicyEvaluator ACL策略评估器
+// ACLPolicyEvaluator ACL策略评估�?
 type ACLPolicyEvaluator struct {
 	service *DefaultPermissionService
 	logger  *zap.Logger

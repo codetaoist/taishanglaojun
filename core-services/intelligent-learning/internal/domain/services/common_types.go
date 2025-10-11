@@ -5,24 +5,24 @@ import (
 	"github.com/google/uuid"
 )
 
-// EmotionalState 情绪状态
+// EmotionalState 情绪状�?
 type EmotionalState struct {
 	Mood        string  `json:"mood"`        // 情绪
 	Stress      float64 `json:"stress"`      // 压力水平
 	Motivation  float64 `json:"motivation"`  // 动机水平
 	Confidence  float64 `json:"confidence"`  // 自信水平
-	Engagement  float64 `json:"engagement"`  // 参与度
+	Engagement  float64 `json:"engagement"`  // 参与�?
 }
 
 // PerformanceMetrics 性能指标
 type PerformanceMetrics struct {
-	Accuracy        float64 `json:"accuracy"`         // 准确率
+	Accuracy        float64 `json:"accuracy"`         // 准确�?
 	Speed           float64 `json:"speed"`            // 速度
 	Efficiency      float64 `json:"efficiency"`       // 效率
-	CompletionRate  float64 `json:"completion_rate"`  // 完成率
-	ErrorRate       float64 `json:"error_rate"`       // 错误率
-	Consistency     float64 `json:"consistency"`      // 一致性
-	Timeline        string  `json:"timeline"`         // 时间线
+	CompletionRate  float64 `json:"completion_rate"`  // 完成�?
+	ErrorRate       float64 `json:"error_rate"`       // 错误�?
+	Consistency     float64 `json:"consistency"`      // 一致�?
+	Timeline        string  `json:"timeline"`         // 时间�?
 	ExpectedOutcome string  `json:"expected_outcome"` // 预期结果
 }
 
@@ -56,7 +56,7 @@ const (
 type ConfidenceInterval struct {
 	Lower      float64 `json:"lower"`       // 下界
 	Upper      float64 `json:"upper"`       // 上界
-	Confidence float64 `json:"confidence"`  // 置信度
+	Confidence float64 `json:"confidence"`  // 置信�?
 }
 
 // Evidence 证据
@@ -65,19 +65,19 @@ type Evidence struct {
 	Type        string                 `json:"type"`        // 证据类型
 	Source      string                 `json:"source"`      // 证据来源
 	Content     string                 `json:"content"`     // 证据内容
-	Reliability float64                `json:"reliability"` // 可靠性
-	Timestamp   time.Time              `json:"timestamp"`   // 时间戳
-	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
+	Reliability float64                `json:"reliability"` // 可靠�?
+	Timestamp   time.Time              `json:"timestamp"`   // 时间�?
+	Metadata    map[string]interface{} `json:"metadata"`    // 元数�?
 }
 
-// CachedInferenceResult 缓存的推理结果
+// CachedInferenceResult 缓存的推理结�?
 type CachedInferenceResult struct {
 	QueryID     string                 `json:"query_id"`     // 查询ID
 	Result      interface{}            `json:"result"`       // 推理结果
-	Confidence  float64                `json:"confidence"`   // 置信度
+	Confidence  float64                `json:"confidence"`   // 置信�?
 	CachedAt    time.Time              `json:"cached_at"`    // 缓存时间
 	ExpiresAt   time.Time              `json:"expires_at"`   // 过期时间
-	Metadata    map[string]interface{} `json:"metadata"`     // 元数据
+	Metadata    map[string]interface{} `json:"metadata"`     // 元数�?
 }
 
 // RecommendationType 推荐类型
@@ -108,11 +108,11 @@ type Challenge struct {
 	Description string                     `json:"description"`  // 描述
 	Difficulty  float64                   `json:"difficulty"`   // 难度
 	Reward      *Reward                   `json:"reward"`       // 奖励
-	StartTime   time.Time                 `json:"start_time"`   // 开始时间
+	StartTime   time.Time                 `json:"start_time"`   // 开始时�?
 	EndTime     *time.Time                `json:"end_time"`     // 结束时间
 	Progress    float64                   `json:"progress"`     // 进度
-	Status      ChallengeStatus           `json:"status"`       // 状态
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Status      ChallengeStatus           `json:"status"`       // 状�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
 // ChallengeType 挑战类型
@@ -127,7 +127,7 @@ const (
 	ChallengeTypeGroup    ChallengeType = "group"    // 群组
 )
 
-// ChallengeStatus 挑战状态
+// ChallengeStatus 挑战状�?
 type ChallengeStatus string
 
 const (
@@ -140,9 +140,9 @@ const (
 // Reward 奖励
 type Reward struct {
 	Type        RewardType                 `json:"type"`        // 奖励类型
-	Value       interface{}                `json:"value"`       // 奖励值
+	Value       interface{}                `json:"value"`       // 奖励�?
 	Description string                     `json:"description"` // 描述
-	Metadata    map[string]interface{}     `json:"metadata"`    // 元数据
+	Metadata    map[string]interface{}     `json:"metadata"`    // 元数�?
 }
 
 // RewardType 奖励类型
@@ -155,11 +155,11 @@ const (
 	RewardTypeUnlock      RewardType = "unlock"      // 解锁
 )
 
-// ModalityType 模态类型
+// ModalityType 模态类�?
 type ModalityType string
 
 const (
-	// 基础模态类型
+	// 基础模态类�?
 	ModalityTypeText        ModalityType = "text"        // 文本
 	ModalityTypeImage       ModalityType = "image"       // 图像
 	ModalityTypeAudio       ModalityType = "audio"       // 音频
@@ -168,9 +168,9 @@ const (
 	ModalityTypeTabular     ModalityType = "tabular"     // 表格
 	ModalityTypeTime        ModalityType = "time_series" // 时间序列
 	ModalityTypeSpatial     ModalityType = "spatial"     // 空间
-	ModalityTypeMultimodal  ModalityType = "multimodal"  // 多模态
+	ModalityTypeMultimodal  ModalityType = "multimodal"  // 多模�?
 	
-	// 学习模态类型
+	// 学习模态类�?
 	ModalityTypeVisual      ModalityType = "visual"      // 视觉
 	ModalityTypeAuditory    ModalityType = "auditory"    // 听觉
 	ModalityTypeKinesthetic ModalityType = "kinesthetic" // 动觉
@@ -184,11 +184,11 @@ type ImplementationPlan struct {
 	Name        string                     `json:"name"`         // 名称
 	Description string                     `json:"description"`  // 描述
 	Steps       []ImplementationStep       `json:"steps"`        // 步骤
-	Timeline    *Timeline                  `json:"timeline"`     // 时间线
+	Timeline    *Timeline                  `json:"timeline"`     // 时间�?
 	Resources   []Resource                 `json:"resources"`    // 资源
-	Status      PlanStatus                 `json:"status"`       // 状态
+	Status      PlanStatus                 `json:"status"`       // 状�?
 	Progress    float64                    `json:"progress"`     // 进度
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
 // ImplementationStep 实施步骤
@@ -199,26 +199,26 @@ type ImplementationStep struct {
 	Order       int                        `json:"order"`        // 顺序
 	Duration    time.Duration              `json:"duration"`     // 持续时间
 	Dependencies []uuid.UUID               `json:"dependencies"` // 依赖
-	Status      StepStatus                 `json:"status"`       // 状态
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Status      StepStatus                 `json:"status"`       // 状�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
-// Timeline 时间线
+// Timeline 时间�?
 type Timeline struct {
-	StartTime   time.Time                  `json:"start_time"`   // 开始时间
+	StartTime   time.Time                  `json:"start_time"`   // 开始时�?
 	EndTime     time.Time                  `json:"end_time"`     // 结束时间
-	Milestones  []Milestone                `json:"milestones"`   // 里程碑
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Milestones  []Milestone                `json:"milestones"`   // 里程�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
-// Milestone 里程碑
+// Milestone 里程�?
 type Milestone struct {
 	MilestoneID uuid.UUID                  `json:"milestone_id"` // 里程碑ID
 	Name        string                     `json:"name"`         // 名称
 	Description string                     `json:"description"`  // 描述
 	TargetDate  time.Time                  `json:"target_date"`  // 目标日期
-	Status      MilestoneStatus            `json:"status"`       // 状态
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Status      MilestoneStatus            `json:"status"`       // 状�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
 // Resource 资源
@@ -229,11 +229,11 @@ type Resource struct {
 	Description string                     `json:"description"`  // 描述
 	Quantity    float64                    `json:"quantity"`     // 数量
 	Unit        string                     `json:"unit"`         // 单位
-	Status      ResourceStatus             `json:"status"`       // 状态
-	Metadata    map[string]interface{}     `json:"metadata"`     // 元数据
+	Status      ResourceStatus             `json:"status"`       // 状�?
+	Metadata    map[string]interface{}     `json:"metadata"`     // 元数�?
 }
 
-// PlanStatus 计划状态
+// PlanStatus 计划状�?
 type PlanStatus string
 
 const (
@@ -244,23 +244,23 @@ const (
 	PlanStatusCancelled  PlanStatus = "cancelled"  // 取消
 )
 
-// StepStatus 步骤状态
+// StepStatus 步骤状�?
 type StepStatus string
 
 const (
-	StepStatusPending    StepStatus = "pending"    // 待处理
-	StepStatusInProgress StepStatus = "in_progress" // 进行中
+	StepStatusPending    StepStatus = "pending"    // 待处�?
+	StepStatusInProgress StepStatus = "in_progress" // 进行�?
 	StepStatusCompleted  StepStatus = "completed"  // 完成
 	StepStatusSkipped    StepStatus = "skipped"    // 跳过
 	StepStatusFailed     StepStatus = "failed"     // 失败
 )
 
-// MilestoneStatus 里程碑状态
+// MilestoneStatus 里程碑状�?
 type MilestoneStatus string
 
 const (
-	MilestoneStatusPending   MilestoneStatus = "pending"   // 待处理
-	MilestoneStatusAchieved  MilestoneStatus = "achieved"  // 已达成
+	MilestoneStatusPending   MilestoneStatus = "pending"   // 待处�?
+	MilestoneStatusAchieved  MilestoneStatus = "achieved"  // 已达�?
 	MilestoneStatusMissed    MilestoneStatus = "missed"    // 错过
 )
 
@@ -271,14 +271,14 @@ const (
 	ResourceTypeHuman     ResourceType = "human"     // 人力
 	ResourceTypeMaterial  ResourceType = "material"  // 物料
 	ResourceTypeFinancial ResourceType = "financial" // 财务
-	ResourceTypeTechnical ResourceType = "technical" // 技术
+	ResourceTypeTechnical ResourceType = "technical" // 技�?
 )
 
-// ResourceStatus 资源状态
+// ResourceStatus 资源状�?
 type ResourceStatus string
 
 const (
 	ResourceStatusAvailable ResourceStatus = "available" // 可用
-	ResourceStatusAllocated ResourceStatus = "allocated" // 已分配
+	ResourceStatusAllocated ResourceStatus = "allocated" // 已分�?
 	ResourceStatusExhausted ResourceStatus = "exhausted" // 耗尽
 )

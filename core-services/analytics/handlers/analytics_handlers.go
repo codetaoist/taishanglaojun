@@ -9,15 +9,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/taishanglaojun/core-services/analytics"
+	"github.com/codetaoist/taishanglaojun/core-services/analytics"
 )
 
-// AnalyticsHandlers 数据分析HTTP处理器
+// AnalyticsHandlers 数据分析HTTP处理�?
 type AnalyticsHandlers struct {
 	service analytics.AnalyticsService
 }
 
-// NewAnalyticsHandlers 创建数据分析处理器
+// NewAnalyticsHandlers 创建数据分析处理�?
 func NewAnalyticsHandlers(service analytics.AnalyticsService) *AnalyticsHandlers {
 	return &AnalyticsHandlers{
 		service: service,
@@ -249,7 +249,7 @@ func (h *AnalyticsHandlers) BatchAnalyzeData(c *gin.Context) {
 	c.JSON(http.StatusAccepted, resp)
 }
 
-// StartRealtimeAnalysis 开始实时分析
+// StartRealtimeAnalysis 开始实时分�?
 func (h *AnalyticsHandlers) StartRealtimeAnalysis(c *gin.Context) {
 	var req analytics.StartRealtimeAnalysisRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -302,7 +302,7 @@ func (h *AnalyticsHandlers) StopRealtimeAnalysis(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// GetRealtimeAnalysisStatus 获取实时分析状态
+// GetRealtimeAnalysisStatus 获取实时分析状�?
 func (h *AnalyticsHandlers) GetRealtimeAnalysisStatus(c *gin.Context) {
 	analysisID := c.Param("id")
 	if analysisID == "" {
@@ -489,7 +489,7 @@ func (h *AnalyticsHandlers) DownloadReport(c *gin.Context) {
 		return
 	}
 
-	// 设置响应头
+	// 设置响应�?
 	c.Header("Content-Type", resp.ContentType)
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", resp.FileName))
 	c.Header("Content-Length", strconv.FormatInt(resp.FileSize, 10))
@@ -524,7 +524,7 @@ func (h *AnalyticsHandlers) ExportData(c *gin.Context) {
 	c.JSON(http.StatusAccepted, resp)
 }
 
-// GetExportStatus 获取导出状态
+// GetExportStatus 获取导出状�?
 func (h *AnalyticsHandlers) GetExportStatus(c *gin.Context) {
 	exportID := c.Param("id")
 	if exportID == "" {
@@ -575,7 +575,7 @@ func (h *AnalyticsHandlers) DownloadExport(c *gin.Context) {
 		return
 	}
 
-	// 设置响应头
+	// 设置响应�?
 	c.Header("Content-Type", resp.ContentType)
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", resp.FileName))
 	c.Header("Content-Length", strconv.FormatInt(resp.FileSize, 10))
@@ -609,7 +609,7 @@ func (h *AnalyticsHandlers) CleanupData(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (h *AnalyticsHandlers) HealthCheck(c *gin.Context) {
 	resp, err := h.service.HealthCheck(c.Request.Context(), &analytics.HealthCheckRequest{})
 	if err != nil {
@@ -650,7 +650,7 @@ func (h *AnalyticsHandlers) GetSystemStats(c *gin.Context) {
 func (h *AnalyticsHandlers) parseDataFilter(c *gin.Context) *analytics.DataFilter {
 	filter := &analytics.DataFilter{}
 
-	// 解析数据源
+	// 解析数据�?
 	if sources := c.QueryArray("sources"); len(sources) > 0 {
 		filter.Sources = sources
 	}
@@ -715,7 +715,7 @@ func (h *AnalyticsHandlers) parseDataFilter(c *gin.Context) *analytics.DataFilte
 func (h *AnalyticsHandlers) parseAggregationFilter(c *gin.Context) *analytics.AggregationFilter {
 	filter := &analytics.AggregationFilter{}
 
-	// 解析数据源
+	// 解析数据�?
 	if sources := c.QueryArray("sources"); len(sources) > 0 {
 		filter.Sources = sources
 	}
@@ -771,7 +771,7 @@ func (h *AnalyticsHandlers) parseReportFilter(c *gin.Context) *analytics.ReportF
 		}
 	}
 
-	// 解析状态
+	// 解析状�?
 	if statuses := c.QueryArray("statuses"); len(statuses) > 0 {
 		for _, s := range statuses {
 			filter.Statuses = append(filter.Statuses, analytics.ReportStatus(s))
@@ -819,10 +819,10 @@ func (h *AnalyticsHandlers) parseReportFilter(c *gin.Context) *analytics.ReportF
 }
 
 func (h *AnalyticsHandlers) checkPermission(c *gin.Context, permission string) bool {
-	// 这里应该集成权限系统进行权限检查
+	// 这里应该集成权限系统进行权限检�?
 	// 暂时返回true，实际应用中需要实现具体的权限验证逻辑
 	
-	// 示例权限检查逻辑：
+	// 示例权限检查逻辑�?
 	// userID := h.getUserID(c)
 	// tenantID := h.getTenantID(c)
 	// 

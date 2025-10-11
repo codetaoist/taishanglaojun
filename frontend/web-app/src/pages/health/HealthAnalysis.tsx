@@ -21,8 +21,8 @@ import {
 } from 'antd';
 import { 
   BarChartOutlined, 
-  TrendingUpOutlined, 
-  TrendingDownOutlined,
+  RiseOutlined, 
+  FallOutlined,
   ExclamationCircleOutlined,
   CheckCircleOutlined,
   InfoCircleOutlined,
@@ -39,7 +39,6 @@ import { Line, Column, Pie, Area } from '@ant-design/plots';
 
 const { Title, Paragraph, Text } = Typography;
 const { RangePicker } = DatePicker;
-const { TabPane } = Tabs;
 
 interface AnalysisReport {
   id: string;
@@ -188,9 +187,9 @@ const HealthAnalysis: React.FC = () => {
   // 获取趋势图标
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'improving': return <TrendingUpOutlined style={{ color: '#52c41a' }} />;
-      case 'stable': return <TrendingUpOutlined style={{ color: '#1890ff', transform: 'rotate(90deg)' }} />;
-      case 'declining': return <TrendingDownOutlined style={{ color: '#ff4d4f' }} />;
+      case 'improving': return <RiseOutlined style={{ color: '#52c41a' }} />;
+      case 'stable': return <RiseOutlined style={{ color: '#1890ff', transform: 'rotate(90deg)' }} />;
+      case 'declining': return <FallOutlined style={{ color: '#ff4d4f' }} />;
       default: return null;
     }
   };
@@ -438,106 +437,120 @@ const HealthAnalysis: React.FC = () => {
       <Row gutter={[24, 24]}>
         {/* 左侧主要内容 */}
         <Col xs={24} lg={16}>
-          <Tabs activeKey={activeTab} onChange={setActiveTab}>
-            <TabPane tab="分析概览" key="overview">
-              <Space direction="vertical" style={{ width: '100%' }} size="large">
-                {/* 健康趋势图表 */}
-                <Card title="健康趋势分析" extra={<Button icon={<EyeOutlined />} size="small">查看详情</Button>}>
-                  <div style={{ height: '300px' }}>
-                    {renderTrendChart()}
-                  </div>
-                </Card>
+          <Tabs 
+            activeKey={activeTab} 
+            onChange={setActiveTab}
+            items={[
+              {
+                key: 'overview',
+                label: '分析概览',
+                children: (
+                  <Space direction="vertical" style={{ width: '100%' }} size="large">
+                    {/* 健康趋势图表 */}
+                    <Card title="健康趋势分析" extra={<Button icon={<EyeOutlined />} size="small">查看详情</Button>}>
+                      <div style={{ height: '300px' }}>
+                        {renderTrendChart()}
+                      </div>
+                    </Card>
 
-                {/* 趋势列表 */}
-                <Card title="指标变化趋势">
-                  <Row gutter={[16, 16]}>
-                    {healthTrends.map((trend, index) => (
-                      <Col xs={24} sm={12} md={8} key={index}>
-                        <Card size="small" style={{ textAlign: 'center' }}>
-                          <Space direction="vertical">
-                            <Text strong>{trend.metric}</Text>
-                            {getTrendIcon(trend.trend)}
-                            <Text style={{ color: getTrendColor(trend.trend) }}>
-                              {trend.trend === 'improving' ? '改善' : 
-                               trend.trend === 'stable' ? '稳定' : '下降'}
-                            </Text>
-                            <Text type="secondary">
-                              {trend.change > 0 ? '+' : ''}{trend.change}% ({trend.period})
-                            </Text>
-                            <Badge 
-                              color={trend.significance === 'high' ? '#ff4d4f' : 
-                                     trend.significance === 'medium' ? '#faad14' : '#52c41a'}
-                              text={trend.significance === 'high' ? '显著' : 
-                                    trend.significance === 'medium' ? '中等' : '轻微'}
-                            />
-                          </Space>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                </Card>
-              </Space>
-            </TabPane>
-
-            <TabPane tab="风险评估" key="risk">
-              <Space direction="vertical" style={{ width: '100%' }} size="large">
-                {/* 风险分布图 */}
-                <Card title="健康风险分布">
-                  <div style={{ height: '300px' }}>
-                    {renderRiskChart()}
-                  </div>
-                </Card>
-
-                {/* 风险因子详情 */}
-                <Card title="风险因子分析">
-                  <Space direction="vertical" style={{ width: '100%' }}>
-                    {riskFactors.map((risk) => (
-                      <Card key={risk.id} size="small" style={{ marginBottom: '8px' }}>
-                        <Row justify="space-between" align="middle">
-                          <Col span={16}>
-                            <Space direction="vertical" size="small">
-                              <Space>
-                                <Text strong>{risk.name}</Text>
-                                <Tag color={getRiskColor(risk.level)}>
-                                  {risk.level === 'low' ? '低风险' : 
-                                   risk.level === 'medium' ? '中风险' : '高风险'}
-                                </Tag>
+                    {/* 趋势列表 */}
+                    <Card title="指标变化趋势">
+                      <Row gutter={[16, 16]}>
+                        {healthTrends.map((trend, index) => (
+                          <Col xs={24} sm={12} md={8} key={index}>
+                            <Card size="small" style={{ textAlign: 'center' }}>
+                              <Space direction="vertical">
+                                <Text strong>{trend.metric}</Text>
+                                {getTrendIcon(trend.trend)}
+                                <Text style={{ color: getTrendColor(trend.trend) }}>
+                                  {trend.trend === 'improving' ? '改善' : 
+                                   trend.trend === 'stable' ? '稳定' : '下降'}
+                                </Text>
+                                <Text type="secondary">
+                                  {trend.change > 0 ? '+' : ''}{trend.change}% ({trend.period})
+                                </Text>
+                                <Badge 
+                                  color={trend.significance === 'high' ? '#ff4d4f' : 
+                                         trend.significance === 'medium' ? '#faad14' : '#52c41a'}
+                                  text={trend.significance === 'high' ? '显著' : 
+                                        trend.significance === 'medium' ? '中等' : '轻微'}
+                                />
                               </Space>
-                              <Text type="secondary">{risk.impact}</Text>
-                              <div>
-                                <Text strong>预防措施: </Text>
-                                {risk.prevention.map((item, index) => (
-                                  <Tag key={index} style={{ marginBottom: '4px' }}>{item}</Tag>
-                                ))}
-                              </div>
-                            </Space>
+                            </Card>
                           </Col>
-                          <Col span={8} style={{ textAlign: 'center' }}>
-                            <Progress
-                              type="circle"
-                              percent={risk.probability}
-                              width={80}
-                              strokeColor={getRiskColor(risk.level)}
-                              format={(percent) => `${percent}%`}
-                            />
-                            <div style={{ marginTop: '8px' }}>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>发生概率</Text>
-                            </div>
-                          </Col>
-                        </Row>
-                      </Card>
-                    ))}
+                        ))}
+                      </Row>
+                    </Card>
                   </Space>
-                </Card>
-              </Space>
-            </TabPane>
+                )
+              },
+              {
+                key: 'risk',
+                label: '风险评估',
+                children: (
+                  <Space direction="vertical" style={{ width: '100%' }} size="large">
+                    {/* 风险分布图 */}
+                    <Card title="健康风险分布">
+                      <div style={{ height: '300px' }}>
+                        {renderRiskChart()}
+                      </div>
+                    </Card>
 
-            <TabPane tab="AI报告" key="reports">
-              <div>
-                {analysisReports.map(renderAnalysisReport)}
-              </div>
-            </TabPane>
-          </Tabs>
+                    {/* 风险因子详情 */}
+                    <Card title="风险因子分析">
+                      <Space direction="vertical" style={{ width: '100%' }}>
+                        {riskFactors.map((risk) => (
+                          <Card key={risk.id} size="small" style={{ marginBottom: '8px' }}>
+                            <Row justify="space-between" align="middle">
+                              <Col span={16}>
+                                <Space direction="vertical" size="small">
+                                  <Space>
+                                    <Text strong>{risk.name}</Text>
+                                    <Tag color={getRiskColor(risk.level)}>
+                                      {risk.level === 'low' ? '低风险' : 
+                                       risk.level === 'medium' ? '中风险' : '高风险'}
+                                    </Tag>
+                                  </Space>
+                                  <Text type="secondary">{risk.impact}</Text>
+                                  <div>
+                                    <Text strong>预防措施: </Text>
+                                    {risk.prevention.map((item, index) => (
+                                      <Tag key={index} style={{ marginBottom: '4px' }}>{item}</Tag>
+                                    ))}
+                                  </div>
+                                </Space>
+                              </Col>
+                              <Col span={8} style={{ textAlign: 'center' }}>
+                                <Progress
+                                  type="circle"
+                                  percent={risk.probability}
+                                  width={80}
+                                  strokeColor={getRiskColor(risk.level)}
+                                  format={(percent) => `${percent}%`}
+                                />
+                                <div style={{ marginTop: '8px' }}>
+                                  <Text type="secondary" style={{ fontSize: '12px' }}>发生概率</Text>
+                                </div>
+                              </Col>
+                            </Row>
+                          </Card>
+                        ))}
+                      </Space>
+                    </Card>
+                  </Space>
+                )
+              },
+              {
+                key: 'reports',
+                label: 'AI报告',
+                children: (
+                  <div>
+                    {analysisReports.map(renderAnalysisReport)}
+                  </div>
+                )
+              }
+            ]}
+          />
         </Col>
 
         {/* 右侧侧边栏 */}
@@ -554,7 +567,7 @@ const HealthAnalysis: React.FC = () => {
                   value={68}
                   suffix="%"
                   valueStyle={{ color: '#52c41a' }}
-                  prefix={<TrendingUpOutlined />}
+                  prefix={<RiseOutlined />}
                 />
                 <Statistic
                   title="风险控制率"

@@ -134,7 +134,7 @@ type OptimizationImprovement struct {
 	Metadata        map[string]interface{} `json:"metadata"`
 }
 
-// IntegrityValidation 完整性验证
+// IntegrityValidation 完整性验�?
 type IntegrityValidation struct {
 	ID               string                 `json:"id" gorm:"primaryKey"`
 	CompositionID    string                 `json:"composition_id" gorm:"index"`
@@ -175,7 +175,7 @@ type CompositionRecommendation struct {
 	CreatedAt        time.Time              `json:"created_at"`
 }
 
-// CompositionContext 组合上下文
+// CompositionContext 组合上下�?
 type CompositionContext struct {
 	ID               string                 `json:"id" gorm:"primaryKey"`
 	EntityID         string                 `json:"entity_id" gorm:"index"`

@@ -10,7 +10,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 
-	"../permission"
+	"github.com/codetaoist/taishanglaojun/core-services/permission"
 )
 
 // RedisPermissionCache Redis权限缓存实现
@@ -39,7 +39,7 @@ type RedisPermissionCacheConfig struct {
 	MaxRetries       int  `json:"max_retries"`
 	RetryDelay       time.Duration `json:"retry_delay"`
 	
-	// 序列化配置
+	// 序列化配�?
 	SerializationFormat string `json:"serialization_format"` // json, msgpack
 	
 	// 监控配置
@@ -129,7 +129,7 @@ func (c *RedisPermissionCache) GetRole(ctx context.Context, roleID string) (*per
 	data, err := c.client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, nil // 缓存未命中
+			return nil, nil // 缓存未命�?
 		}
 		c.logger.Error("Failed to get role cache", zap.String("key", key), zap.Error(err))
 		return nil, &CacheError{Operation: "get", Key: key, Err: err}
@@ -183,7 +183,7 @@ func (c *RedisPermissionCache) GetPermission(ctx context.Context, permissionID s
 	data, err := c.client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, nil // 缓存未命中
+			return nil, nil // 缓存未命�?
 		}
 		c.logger.Error("Failed to get permission cache", zap.String("key", key), zap.Error(err))
 		return nil, &CacheError{Operation: "get", Key: key, Err: err}
@@ -237,7 +237,7 @@ func (c *RedisPermissionCache) GetUserRoles(ctx context.Context, userID string, 
 	data, err := c.client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, nil // 缓存未命中
+			return nil, nil // 缓存未命�?
 		}
 		c.logger.Error("Failed to get user roles cache", zap.String("key", key), zap.Error(err))
 		return nil, &CacheError{Operation: "get", Key: key, Err: err}
@@ -291,7 +291,7 @@ func (c *RedisPermissionCache) GetRolePermissions(ctx context.Context, roleID st
 	data, err := c.client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, nil // 缓存未命中
+			return nil, nil // 缓存未命�?
 		}
 		c.logger.Error("Failed to get role permissions cache", zap.String("key", key), zap.Error(err))
 		return nil, &CacheError{Operation: "get", Key: key, Err: err}
@@ -321,7 +321,7 @@ func (c *RedisPermissionCache) DeleteRolePermissions(ctx context.Context, roleID
 	return nil
 }
 
-// SetPermissionCheckResult 设置权限检查结果缓存
+// SetPermissionCheckResult 设置权限检查结果缓�?
 func (c *RedisPermissionCache) SetPermissionCheckResult(ctx context.Context, checkKey string, result *permission.PermissionCheckResult) error {
 	key := c.buildCheckResultKey(checkKey)
 	data, err := c.serialize(result)
@@ -339,13 +339,13 @@ func (c *RedisPermissionCache) SetPermissionCheckResult(ctx context.Context, che
 	return nil
 }
 
-// GetPermissionCheckResult 获取权限检查结果缓存
+// GetPermissionCheckResult 获取权限检查结果缓�?
 func (c *RedisPermissionCache) GetPermissionCheckResult(ctx context.Context, checkKey string) (*permission.PermissionCheckResult, error) {
 	key := c.buildCheckResultKey(checkKey)
 	data, err := c.client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, nil // 缓存未命中
+			return nil, nil // 缓存未命�?
 		}
 		c.logger.Error("Failed to get permission check result cache", zap.String("key", key), zap.Error(err))
 		return nil, &CacheError{Operation: "get", Key: key, Err: err}
@@ -362,7 +362,7 @@ func (c *RedisPermissionCache) GetPermissionCheckResult(ctx context.Context, che
 	return &result, nil
 }
 
-// DeletePermissionCheckResult 删除权限检查结果缓存
+// DeletePermissionCheckResult 删除权限检查结果缓�?
 func (c *RedisPermissionCache) DeletePermissionCheckResult(ctx context.Context, checkKey string) error {
 	key := c.buildCheckResultKey(checkKey)
 	err := c.client.Del(ctx, key).Err()
@@ -410,13 +410,13 @@ func (c *RedisPermissionCache) InvalidatePermissionCache(ctx context.Context, pe
 	return c.deleteByPattern(ctx, pattern)
 }
 
-// Clear 清空所有缓存
+// Clear 清空所有缓�?
 func (c *RedisPermissionCache) Clear(ctx context.Context) error {
 	pattern := c.config.KeyPrefix + "*"
 	return c.deleteByPattern(ctx, pattern)
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (c *RedisPermissionCache) HealthCheck(ctx context.Context) error {
 	_, err := c.client.Ping(ctx).Result()
 	if err != nil {
@@ -425,22 +425,22 @@ func (c *RedisPermissionCache) HealthCheck(ctx context.Context) error {
 	return nil
 }
 
-// 构建角色缓存键
+// 构建角色缓存�?
 func (c *RedisPermissionCache) buildRoleKey(roleID string) string {
 	return fmt.Sprintf("%srole:%s", c.config.KeyPrefix, roleID)
 }
 
-// 构建权限缓存键
+// 构建权限缓存�?
 func (c *RedisPermissionCache) buildPermissionKey(permissionID string) string {
 	return fmt.Sprintf("%spermission:%s", c.config.KeyPrefix, permissionID)
 }
 
-// 构建用户角色缓存键
+// 构建用户角色缓存�?
 func (c *RedisPermissionCache) buildUserRolesKey(userID, tenantID string) string {
 	return fmt.Sprintf("%suser_roles:%s:%s", c.config.KeyPrefix, userID, tenantID)
 }
 
-// 构建角色权限缓存键
+// 构建角色权限缓存�?
 func (c *RedisPermissionCache) buildRolePermissionsKey(roleID string) string {
 	return fmt.Sprintf("%srole_permissions:%s", c.config.KeyPrefix, roleID)
 }
@@ -455,7 +455,7 @@ func (c *RedisPermissionCache) buildUserCachePattern(userID, tenantID string) st
 	return fmt.Sprintf("%suser_*:%s:*", c.config.KeyPrefix, userID)
 }
 
-// 序列化数据
+// 序列化数�?
 func (c *RedisPermissionCache) serialize(data interface{}) ([]byte, error) {
 	switch c.config.SerializationFormat {
 	case "json":
@@ -528,7 +528,7 @@ func (c *RedisPermissionCache) GetCacheStats(ctx context.Context) (map[string]in
 		}
 	}
 
-	// 添加自定义统计信息
+	// 添加自定义统计信�?
 	keyCount, err := c.client.DBSize(ctx).Result()
 	if err == nil {
 		stats["total_keys"] = keyCount

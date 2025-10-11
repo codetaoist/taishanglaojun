@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	multitenant "github.com/taishanglaojun/core-services/multi-tenant"
+	multitenant "github.com/codetaoist/taishanglaojun/core-services/multi-tenant"
 	"go.uber.org/zap"
 )
 
@@ -29,7 +29,7 @@ type RedisCacheConfig struct {
 	// 租户信息过期时间
 	TenantTTL time.Duration `json:"tenant_ttl"`
 	
-	// 租户上下文过期时间
+	// 租户上下文过期时�?
 	ContextTTL time.Duration `json:"context_ttl"`
 	
 	// 使用情况过期时间
@@ -38,7 +38,7 @@ type RedisCacheConfig struct {
 	// 是否启用压缩
 	EnableCompression bool `json:"enable_compression"`
 	
-	// 序列化格式
+	// 序列化格�?
 	SerializationFormat string `json:"serialization_format"`
 }
 
@@ -48,7 +48,7 @@ func NewRedisTenantCache(
 	config RedisCacheConfig,
 	logger *zap.Logger,
 ) *RedisTenantCache {
-	// 设置默认值
+	// 设置默认�?
 	if config.KeyPrefix == "" {
 		config.KeyPrefix = "tenant:"
 	}
@@ -217,7 +217,7 @@ func (c *RedisTenantCache) DeleteTenant(ctx context.Context, tenantID string) er
 	return nil
 }
 
-// SetTenantContext 设置租户上下文缓存
+// SetTenantContext 设置租户上下文缓�?
 func (c *RedisTenantCache) SetTenantContext(ctx context.Context, tenantID, userID string, tenantContext *multitenant.TenantContext) error {
 	key := c.getContextKey(tenantID, userID)
 	
@@ -244,7 +244,7 @@ func (c *RedisTenantCache) SetTenantContext(ctx context.Context, tenantID, userI
 	return nil
 }
 
-// GetTenantContext 获取租户上下文缓存
+// GetTenantContext 获取租户上下文缓�?
 func (c *RedisTenantCache) GetTenantContext(ctx context.Context, tenantID, userID string) (*multitenant.TenantContext, error) {
 	key := c.getContextKey(tenantID, userID)
 	
@@ -286,7 +286,7 @@ func (c *RedisTenantCache) GetTenantContext(ctx context.Context, tenantID, userI
 	return &tenantContext, nil
 }
 
-// DeleteTenantContext 删除租户上下文缓存
+// DeleteTenantContext 删除租户上下文缓�?
 func (c *RedisTenantCache) DeleteTenantContext(ctx context.Context, tenantID, userID string) error {
 	key := c.getContextKey(tenantID, userID)
 	
@@ -391,7 +391,7 @@ func (c *RedisTenantCache) DeleteUsage(ctx context.Context, tenantID string) err
 	return nil
 }
 
-// Clear 清空所有缓存
+// Clear 清空所有缓�?
 func (c *RedisTenantCache) Clear(ctx context.Context) error {
 	pattern := c.config.KeyPrefix + "*"
 	
@@ -405,7 +405,7 @@ func (c *RedisTenantCache) Clear(ctx context.Context) error {
 	return nil
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (c *RedisTenantCache) HealthCheck(ctx context.Context) error {
 	// 执行PING命令
 	err := c.client.Ping(ctx).Err()
@@ -417,13 +417,13 @@ func (c *RedisTenantCache) HealthCheck(ctx context.Context) error {
 	testKey := c.config.KeyPrefix + "health_check"
 	testValue := "ok"
 	
-	// 设置测试值
+	// 设置测试�?
 	err = c.client.Set(ctx, testKey, testValue, 10*time.Second).Err()
 	if err != nil {
 		return fmt.Errorf("redis set failed: %w", err)
 	}
 
-	// 获取测试值
+	// 获取测试�?
 	result, err := c.client.Get(ctx, testKey).Result()
 	if err != nil {
 		return fmt.Errorf("redis get failed: %w", err)
@@ -433,7 +433,7 @@ func (c *RedisTenantCache) HealthCheck(ctx context.Context) error {
 		return fmt.Errorf("redis value mismatch: expected %s, got %s", testValue, result)
 	}
 
-	// 删除测试值
+	// 删除测试�?
 	err = c.client.Del(ctx, testKey).Err()
 	if err != nil {
 		return fmt.Errorf("redis del failed: %w", err)
@@ -444,12 +444,12 @@ func (c *RedisTenantCache) HealthCheck(ctx context.Context) error {
 
 // 辅助方法
 
-// getTenantKey 获取租户键
+// getTenantKey 获取租户�?
 func (c *RedisTenantCache) getTenantKey(tenantID string) string {
 	return fmt.Sprintf("%stenant:%s", c.config.KeyPrefix, tenantID)
 }
 
-// getDomainKey 获取域名键
+// getDomainKey 获取域名�?
 func (c *RedisTenantCache) getDomainKey(domain string) string {
 	return fmt.Sprintf("%sdomain:%s", c.config.KeyPrefix, domain)
 }
@@ -464,12 +464,12 @@ func (c *RedisTenantCache) getContextKeyPattern(tenantID string) string {
 	return fmt.Sprintf("%scontext:%s:*", c.config.KeyPrefix, tenantID)
 }
 
-// getUsageKey 获取使用情况键
+// getUsageKey 获取使用情况�?
 func (c *RedisTenantCache) getUsageKey(tenantID string) string {
 	return fmt.Sprintf("%susage:%s", c.config.KeyPrefix, tenantID)
 }
 
-// serialize 序列化数据
+// serialize 序列化数�?
 func (c *RedisTenantCache) serialize(data interface{}) ([]byte, error) {
 	switch c.config.SerializationFormat {
 	case "json":
@@ -527,7 +527,7 @@ func (e *CacheError) Error() string {
 	return e.Message
 }
 
-// isCacheMiss 检查是否为缓存未命中错误
+// isCacheMiss 检查是否为缓存未命中错�?
 func isCacheMiss(err error) bool {
 	if cacheErr, ok := err.(*CacheError); ok {
 		return cacheErr.Code == "CACHE_MISS"

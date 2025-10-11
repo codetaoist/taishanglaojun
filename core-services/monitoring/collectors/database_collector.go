@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
 // DatabaseCollector 数据库指标收集器
@@ -18,9 +18,9 @@ type DatabaseCollector struct {
 	enabled  bool
 	labels   map[string]string
 	
-	// 数据库连接
+	// 数据库连�?
 	db       *sql.DB
-	dbType   string // postgres, mysql, sqlite等
+	dbType   string // postgres, mysql, sqlite�?
 	dbName   string
 	
 	// 配置选项
@@ -65,7 +65,7 @@ type QueryStats struct {
 	Errors        uint64
 }
 
-// TableStats 表统计
+// TableStats 表统�?
 type TableStats struct {
 	TableName    string
 	RowCount     uint64
@@ -90,7 +90,7 @@ type IndexStats struct {
 	TuplesFetched uint64
 }
 
-// LockStats 锁统计
+// LockStats 锁统�?
 type LockStats struct {
 	LockType     string
 	Mode         string
@@ -118,7 +118,7 @@ func NewDatabaseCollector(config DatabaseCollectorConfig, db *sql.DB) *DatabaseC
 		"db_name":   config.DBName,
 	}
 	
-	// 添加自定义标签
+	// 添加自定义标�?
 	for k, v := range config.Labels {
 		labels[k] = v
 	}
@@ -142,12 +142,12 @@ func NewDatabaseCollector(config DatabaseCollectorConfig, db *sql.DB) *DatabaseC
 	}
 }
 
-// GetName 获取收集器名称
+// GetName 获取收集器名�?
 func (c *DatabaseCollector) GetName() string {
 	return c.name
 }
 
-// GetCategory 获取收集器分类
+// GetCategory 获取收集器分�?
 func (c *DatabaseCollector) GetCategory() models.MetricCategory {
 	return models.CategoryDatabase
 }
@@ -157,12 +157,12 @@ func (c *DatabaseCollector) GetInterval() time.Duration {
 	return c.interval
 }
 
-// IsEnabled 检查是否启用
+// IsEnabled 检查是否启�?
 func (c *DatabaseCollector) IsEnabled() bool {
 	return c.enabled
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (c *DatabaseCollector) Start(ctx context.Context) error {
 	if !c.enabled {
 		return nil
@@ -183,13 +183,13 @@ func (c *DatabaseCollector) Start(ctx context.Context) error {
 	}
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (c *DatabaseCollector) Stop() error {
 	c.enabled = false
 	return nil
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (c *DatabaseCollector) Health() error {
 	if !c.enabled {
 		return fmt.Errorf("database collector is disabled")
@@ -219,7 +219,7 @@ func (c *DatabaseCollector) Collect(ctx context.Context) ([]models.Metric, error
 	var metrics []models.Metric
 	now := time.Now()
 	
-	// 收集连接池指标
+	// 收集连接池指�?
 	if c.collectConnections {
 		connMetrics, err := c.collectConnectionMetrics(now)
 		if err != nil {
@@ -237,7 +237,7 @@ func (c *DatabaseCollector) Collect(ctx context.Context) ([]models.Metric, error
 		metrics = append(metrics, queryMetrics...)
 	}
 	
-	// 收集表统计
+	// 收集表统�?
 	if c.collectTables {
 		tableMetrics, err := c.collectTableMetrics(ctx, now)
 		if err != nil {
@@ -255,7 +255,7 @@ func (c *DatabaseCollector) Collect(ctx context.Context) ([]models.Metric, error
 		metrics = append(metrics, indexMetrics...)
 	}
 	
-	// 收集锁统计
+	// 收集锁统�?
 	if c.collectLocks {
 		lockMetrics, err := c.collectLockMetrics(ctx, now)
 		if err != nil {
@@ -277,13 +277,13 @@ func (c *DatabaseCollector) Collect(ctx context.Context) ([]models.Metric, error
 	return metrics, nil
 }
 
-// collectConnectionMetrics 收集连接池指标
+// collectConnectionMetrics 收集连接池指�?
 func (c *DatabaseCollector) collectConnectionMetrics(timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
 	stats := c.db.Stats()
 	
-	// 最大打开连接数
+	// 最大打开连接�?
 	metric := models.NewMetric("database_connections_max_open", models.MetricTypeGauge, models.CategoryDatabase).
 		WithLabels(c.labels).
 		WithValue(float64(stats.MaxOpenConnections)).
@@ -293,7 +293,7 @@ func (c *DatabaseCollector) collectConnectionMetrics(timestamp time.Time) ([]mod
 	metric.Description = "Maximum number of open connections"
 	metrics = append(metrics, *metric)
 	
-	// 当前打开连接数
+	// 当前打开连接�?
 	metric = models.NewMetric("database_connections_open", models.MetricTypeGauge, models.CategoryDatabase).
 		WithLabels(c.labels).
 		WithValue(float64(stats.OpenConnections)).
@@ -313,7 +313,7 @@ func (c *DatabaseCollector) collectConnectionMetrics(timestamp time.Time) ([]mod
 	metric.Description = "Number of connections in use"
 	metrics = append(metrics, *metric)
 	
-	// 空闲连接数
+	// 空闲连接�?
 	metric = models.NewMetric("database_connections_idle", models.MetricTypeGauge, models.CategoryDatabase).
 		WithLabels(c.labels).
 		WithValue(float64(stats.Idle)).
@@ -323,7 +323,7 @@ func (c *DatabaseCollector) collectConnectionMetrics(timestamp time.Time) ([]mod
 	metric.Description = "Number of idle connections"
 	metrics = append(metrics, *metric)
 	
-	// 等待连接数
+	// 等待连接�?
 	metric = models.NewMetric("database_connections_wait_count", models.MetricTypeCounter, models.CategoryDatabase).
 		WithLabels(c.labels).
 		WithValue(float64(stats.WaitCount)).
@@ -363,7 +363,7 @@ func (c *DatabaseCollector) collectConnectionMetrics(timestamp time.Time) ([]mod
 	metric.Description = "Total number of connections closed due to max lifetime"
 	metrics = append(metrics, *metric)
 	
-	// 连接利用率
+	// 连接利用�?
 	if stats.MaxOpenConnections > 0 {
 		utilization := float64(stats.InUse) / float64(stats.MaxOpenConnections) * 100
 		metric = models.NewMetric("database_connections_utilization_percent", models.MetricTypeGauge, models.CategoryDatabase).
@@ -418,7 +418,7 @@ func (c *DatabaseCollector) collectPostgreSQLQueryMetrics(ctx context.Context, t
 	
 	rows, err := c.db.QueryContext(ctx, query)
 	if err != nil {
-		// pg_stat_statements可能未启用，返回空指标
+		// pg_stat_statements可能未启用，返回空指�?
 		return metrics, nil
 	}
 	defer rows.Close()
@@ -439,7 +439,7 @@ func (c *DatabaseCollector) collectPostgreSQLQueryMetrics(ctx context.Context, t
 		totalQueries += calls
 		totalTime += totalTimeMs
 		
-		// 为每个查询创建指标（限制查询长度）
+		// 为每个查询创建指标（限制查询长度�?
 		queryHash := fmt.Sprintf("%x", query)
 		if len(queryHash) > 16 {
 			queryHash = queryHash[:16]
@@ -471,7 +471,7 @@ func (c *DatabaseCollector) collectPostgreSQLQueryMetrics(ctx context.Context, t
 		metric.Description = "Average query duration"
 		metrics = append(metrics, *metric)
 		
-		// 查询最大时间
+		// 查询最大时�?
 		metric = models.NewMetric("database_query_duration_max_seconds", models.MetricTypeGauge, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(maxTimeMs / 1000).
@@ -502,7 +502,7 @@ func (c *DatabaseCollector) collectPostgreSQLQueryMetrics(ctx context.Context, t
 	metric.Description = "Total number of queries"
 	metrics = append(metrics, *metric)
 	
-	// 总查询时间
+	// 总查询时�?
 	metric = models.NewMetric("database_query_time_total_seconds", models.MetricTypeCounter, models.CategoryDatabase).
 		WithLabels(c.labels).
 		WithValue(totalTime / 1000).
@@ -551,7 +551,7 @@ func (c *DatabaseCollector) collectMySQLQueryMetrics(ctx context.Context, timest
 	
 	rows, err := c.db.QueryContext(ctx, query)
 	if err != nil {
-		// performance_schema可能未启用，返回空指标
+		// performance_schema可能未启用，返回空指�?
 		return metrics, nil
 	}
 	defer rows.Close()
@@ -572,7 +572,7 @@ func (c *DatabaseCollector) collectMySQLQueryMetrics(ctx context.Context, timest
 		totalQueries += countStar
 		totalTime += sumTimerWait
 		
-		// 为每个查询创建指标
+		// 为每个查询创建指�?
 		queryHash := "unknown"
 		if digestText.Valid && len(digestText.String) > 0 {
 			queryHash = fmt.Sprintf("%x", digestText.String)
@@ -607,7 +607,7 @@ func (c *DatabaseCollector) collectMySQLQueryMetrics(ctx context.Context, timest
 		metric.Description = "Average query duration"
 		metrics = append(metrics, *metric)
 		
-		// 检查行数
+		// 检查行�?
 		metric = models.NewMetric("database_query_rows_examined", models.MetricTypeGauge, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(sumRowsExamined)).
@@ -638,7 +638,7 @@ func (c *DatabaseCollector) collectMySQLQueryMetrics(ctx context.Context, timest
 	metric.Description = "Total number of queries"
 	metrics = append(metrics, *metric)
 	
-	// 总查询时间
+	// 总查询时�?
 	metric = models.NewMetric("database_query_time_total_seconds", models.MetricTypeCounter, models.CategoryDatabase).
 		WithLabels(c.labels).
 		WithValue(float64(totalTime) / 1e12).
@@ -663,7 +663,7 @@ func (c *DatabaseCollector) collectSQLiteQueryMetrics(ctx context.Context, times
 func (c *DatabaseCollector) collectGenericQueryMetrics(timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
-	// 使用缓存的查询统计
+	// 使用缓存的查询统�?
 	var totalQueries uint64
 	var totalTime time.Duration
 	
@@ -682,7 +682,7 @@ func (c *DatabaseCollector) collectGenericQueryMetrics(timestamp time.Time) ([]m
 	metric.Description = "Total number of queries"
 	metrics = append(metrics, *metric)
 	
-	// 总查询时间
+	// 总查询时�?
 	metric = models.NewMetric("database_query_time_total_seconds", models.MetricTypeCounter, models.CategoryDatabase).
 		WithLabels(c.labels).
 		WithValue(totalTime.Seconds()).
@@ -708,7 +708,7 @@ func (c *DatabaseCollector) collectGenericQueryMetrics(timestamp time.Time) ([]m
 	return metrics, nil
 }
 
-// collectTableMetrics 收集表统计
+// collectTableMetrics 收集表统�?
 func (c *DatabaseCollector) collectTableMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
@@ -723,7 +723,7 @@ func (c *DatabaseCollector) collectTableMetrics(ctx context.Context, timestamp t
 	}
 }
 
-// collectPostgreSQLTableMetrics 收集PostgreSQL表统计
+// collectPostgreSQLTableMetrics 收集PostgreSQL表统�?
 func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
@@ -762,7 +762,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 		labels["schema"] = schemaName
 		labels["table"] = tableName
 		
-		// 表行数
+		// 表行�?
 		metric := models.NewMetric("database_table_rows", models.MetricTypeGauge, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(liveTuples)).
@@ -772,7 +772,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 		metric.Description = "Number of live rows in table"
 		metrics = append(metrics, *metric)
 		
-		// 死行数
+		// 死行�?
 		metric = models.NewMetric("database_table_dead_rows", models.MetricTypeGauge, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(deadTuples)).
@@ -782,7 +782,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 		metric.Description = "Number of dead rows in table"
 		metrics = append(metrics, *metric)
 		
-		// 插入数
+		// 插入�?
 		metric = models.NewMetric("database_table_inserts_total", models.MetricTypeCounter, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(inserts)).
@@ -792,7 +792,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 		metric.Description = "Total number of inserts"
 		metrics = append(metrics, *metric)
 		
-		// 更新数
+		// 更新�?
 		metric = models.NewMetric("database_table_updates_total", models.MetricTypeCounter, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(updates)).
@@ -802,7 +802,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 		metric.Description = "Total number of updates"
 		metrics = append(metrics, *metric)
 		
-		// 删除数
+		// 删除�?
 		metric = models.NewMetric("database_table_deletes_total", models.MetricTypeCounter, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(deletes)).
@@ -812,7 +812,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 		metric.Description = "Total number of deletes"
 		metrics = append(metrics, *metric)
 		
-		// 顺序扫描数
+		// 顺序扫描�?
 		metric = models.NewMetric("database_table_seq_scans_total", models.MetricTypeCounter, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(seqScans)).
@@ -822,7 +822,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 		metric.Description = "Total number of sequential scans"
 		metrics = append(metrics, *metric)
 		
-		// 索引扫描数
+		// 索引扫描�?
 		metric = models.NewMetric("database_table_index_scans_total", models.MetricTypeCounter, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(idxScans)).
@@ -836,7 +836,7 @@ func (c *DatabaseCollector) collectPostgreSQLTableMetrics(ctx context.Context, t
 	return metrics, nil
 }
 
-// collectMySQLTableMetrics 收集MySQL表统计
+// collectMySQLTableMetrics 收集MySQL表统�?
 func (c *DatabaseCollector) collectMySQLTableMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
@@ -872,7 +872,7 @@ func (c *DatabaseCollector) collectMySQLTableMetrics(ctx context.Context, timest
 		labels["schema"] = schemaName
 		labels["table"] = tableName
 		
-		// 表行数
+		// 表行�?
 		metric := models.NewMetric("database_table_rows", models.MetricTypeGauge, models.CategoryDatabase).
 			WithLabels(labels).
 			WithValue(float64(tableRows)).
@@ -902,7 +902,7 @@ func (c *DatabaseCollector) collectMySQLTableMetrics(ctx context.Context, timest
 		metric.Description = "Table index size in bytes"
 		metrics = append(metrics, *metric)
 		
-		// 总大小
+		// 总大�?
 		totalSize := dataLength + indexLength
 		metric = models.NewMetric("database_table_total_size_bytes", models.MetricTypeGauge, models.CategoryDatabase).
 			WithLabels(labels).
@@ -921,18 +921,18 @@ func (c *DatabaseCollector) collectMySQLTableMetrics(ctx context.Context, timest
 func (c *DatabaseCollector) collectIndexMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
-	// 根据数据库类型实现索引统计收集
-	// 这里简化实现，实际应该根据不同数据库类型执行相应查询
+	// 根据数据库类型实现索引统计收�?
+	// 这里简化实现，实际应该根据不同数据库类型执行相应查�?
 	
 	return metrics, nil
 }
 
-// collectLockMetrics 收集锁统计
+// collectLockMetrics 收集锁统�?
 func (c *DatabaseCollector) collectLockMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
 	// 根据数据库类型实现锁统计收集
-	// 这里简化实现，实际应该根据不同数据库类型执行相应查询
+	// 这里简化实现，实际应该根据不同数据库类型执行相应查�?
 	
 	return metrics, nil
 }
@@ -941,8 +941,8 @@ func (c *DatabaseCollector) collectLockMetrics(ctx context.Context, timestamp ti
 func (c *DatabaseCollector) collectReplicationMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
-	// 根据数据库类型实现复制统计收集
-	// 这里简化实现，实际应该根据不同数据库类型执行相应查询
+	// 根据数据库类型实现复制统计收�?
+	// 这里简化实现，实际应该根据不同数据库类型执行相应查�?
 	
 	return metrics, nil
 }
@@ -986,5 +986,5 @@ func (c *DatabaseCollector) RecordQuery(query string, duration time.Duration, er
 	}
 }
 
-// 确保实现了接口
+// 确保实现了接�?
 var _ interfaces.MetricCollector = (*DatabaseCollector)(nil)

@@ -7,23 +7,23 @@ import (
 	"github.com/google/uuid"
 )
 
-// TeamStatus 团队状态枚举
+// TeamStatus 团队状态枚�?
 type TeamStatus string
 
 const (
 	TeamStatusActive    TeamStatus = "active"    // 活跃
-	TeamStatusInactive  TeamStatus = "inactive"  // 非活跃
-	TeamStatusDisbanded TeamStatus = "disbanded" // 已解散
+	TeamStatusInactive  TeamStatus = "inactive"  // 非活�?
+	TeamStatusDisbanded TeamStatus = "disbanded" // 已解�?
 )
 
 // TeamMemberRole 团队成员角色枚举
 type TeamMemberRole string
 
 const (
-	TeamMemberRoleLeader    TeamMemberRole = "leader"    // 团队负责人
-	TeamMemberRoleMember    TeamMemberRole = "member"    // 普通成员
+	TeamMemberRoleLeader    TeamMemberRole = "leader"    // 团队负责�?
+	TeamMemberRoleMember    TeamMemberRole = "member"    // 普通成�?
 	TeamMemberRoleMentor    TeamMemberRole = "mentor"    // 导师
-	TeamMemberRoleIntern    TeamMemberRole = "intern"    // 实习生
+	TeamMemberRoleIntern    TeamMemberRole = "intern"    // 实习�?
 	TeamMemberRoleConsultant TeamMemberRole = "consultant" // 顾问
 )
 
@@ -40,13 +40,13 @@ type TeamMember struct {
 	// 成员技能和专长
 	Skills       []string               `json:"skills" gorm:"type:text[]"`
 	Specialties  []string               `json:"specialties" gorm:"type:text[]"`
-	Availability map[string]interface{} `json:"availability" gorm:"type:jsonb"` // 可用性信息
+	Availability map[string]interface{} `json:"availability" gorm:"type:jsonb"` // 可用性信�?
 	
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-// TeamSkill 团队技能
+// TeamSkill 团队技�?
 type TeamSkill struct {
 	ID          uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	TeamID      uuid.UUID `json:"team_id" gorm:"type:uuid;not null;index"`
@@ -87,7 +87,7 @@ type TeamMetrics struct {
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-// Team 团队聚合根
+// Team 团队聚合�?
 type Team struct {
 	// 基本信息
 	ID          uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
@@ -103,7 +103,7 @@ type Team struct {
 	// 团队配置
 	MaxMembers     *int    `json:"max_members,omitempty" gorm:"default:null"`
 	TimeZone       string  `json:"time_zone" gorm:"type:varchar(50);default:'UTC'"`
-	WorkingHours   string  `json:"working_hours" gorm:"type:varchar(100)"` // JSON格式的工作时间
+	WorkingHours   string  `json:"working_hours" gorm:"type:varchar(100)"` // JSON格式的工作时�?
 	
 	// 标签和元数据
 	Tags     []string               `json:"tags" gorm:"type:text[]"`
@@ -124,7 +124,7 @@ type Team struct {
 	domainEvents []DomainEvent `json:"-" gorm:"-"`
 }
 
-// NewTeam 创建新团队
+// NewTeam 创建新团�?
 func NewTeam(name, description string, leaderID, organizationID uuid.UUID) (*Team, error) {
 	if name == "" {
 		return nil, errors.New("team name cannot be empty")
@@ -205,7 +205,7 @@ func (t *Team) AddMember(userID uuid.UUID, role TeamMemberRole, addedBy uuid.UUI
 		}
 	}
 
-	// 检查团队成员数量限制
+	// 检查团队成员数量限�?
 	if t.MaxMembers != nil && t.GetActiveMemberCount() >= *t.MaxMembers {
 		return errors.New("team has reached maximum member limit")
 	}
@@ -256,12 +256,12 @@ func (t *Team) RemoveMember(userID uuid.UUID, removedBy uuid.UUID) error {
 		return errors.New("user not authorized to remove members")
 	}
 
-	// 不能移除团队负责人
+	// 不能移除团队负责�?
 	if userID == t.LeaderID {
 		return errors.New("cannot remove team leader")
 	}
 
-	// 查找并移除成员
+	// 查找并移除成�?
 	for i := range t.Members {
 		if t.Members[i].UserID == userID && t.Members[i].IsActive {
 			now := time.Now()
@@ -303,7 +303,7 @@ func (t *Team) UpdateMemberRole(userID uuid.UUID, newRole TeamMemberRole, update
 		return errors.New("cannot change team leader role")
 	}
 
-	// 查找并更新成员角色
+	// 查找并更新成员角�?
 	for i := range t.Members {
 		if t.Members[i].UserID == userID && t.Members[i].IsActive {
 			t.Members[i].Role = newRole
@@ -316,7 +316,7 @@ func (t *Team) UpdateMemberRole(userID uuid.UUID, newRole TeamMemberRole, update
 	return errors.New("user is not a member of this team")
 }
 
-// ChangeLeader 更换团队负责人
+// ChangeLeader 更换团队负责�?
 func (t *Team) ChangeLeader(newLeaderID uuid.UUID, changedBy uuid.UUID) error {
 	if newLeaderID == uuid.Nil {
 		return errors.New("new leader ID cannot be empty")
@@ -324,7 +324,7 @@ func (t *Team) ChangeLeader(newLeaderID uuid.UUID, changedBy uuid.UUID) error {
 
 	// 只有当前负责人或组织管理员可以更换负责人
 	if changedBy != t.LeaderID {
-		// 这里可以添加组织管理员权限检查
+		// 这里可以添加组织管理员权限检�?
 		return errors.New("only current leader can change team leader")
 	}
 
@@ -354,28 +354,28 @@ func (t *Team) ChangeLeader(newLeaderID uuid.UUID, changedBy uuid.UUID) error {
 	newLeaderMember.Role = TeamMemberRoleLeader
 	newLeaderMember.UpdatedAt = time.Now()
 
-	// 更新团队负责人
+	// 更新团队负责�?
 	t.LeaderID = newLeaderID
 	t.UpdatedAt = time.Now()
 
 	return nil
 }
 
-// UpdateMemberSkills 更新成员技能
+// UpdateMemberSkills 更新成员技�?
 func (t *Team) UpdateMemberSkills(userID uuid.UUID, skills []string, updatedBy uuid.UUID) error {
-	// 检查权限：成员可以更新自己的技能，负责人可以更新任何成员的技能
+	// 检查权限：成员可以更新自己的技能，负责人可以更新任何成员的技�?
 	if updatedBy != userID && !t.isUserAuthorized(updatedBy, []TeamMemberRole{TeamMemberRoleLeader}) {
 		return errors.New("not authorized to update member skills")
 	}
 
-	// 查找并更新成员技能
+	// 查找并更新成员技�?
 	for i := range t.Members {
 		if t.Members[i].UserID == userID && t.Members[i].IsActive {
 			t.Members[i].Skills = skills
 			t.Members[i].UpdatedAt = time.Now()
 			t.UpdatedAt = time.Now()
 
-			// 更新团队技能统计
+			// 更新团队技能统�?
 			t.updateTeamSkills()
 			return nil
 		}
@@ -384,14 +384,14 @@ func (t *Team) UpdateMemberSkills(userID uuid.UUID, skills []string, updatedBy u
 	return errors.New("user is not a member of this team")
 }
 
-// UpdateMemberAvailability 更新成员可用性
+// UpdateMemberAvailability 更新成员可用�?
 func (t *Team) UpdateMemberAvailability(userID uuid.UUID, availability map[string]interface{}, updatedBy uuid.UUID) error {
-	// 检查权限：成员可以更新自己的可用性，负责人可以更新任何成员的可用性
+	// 检查权限：成员可以更新自己的可用性，负责人可以更新任何成员的可用�?
 	if updatedBy != userID && !t.isUserAuthorized(updatedBy, []TeamMemberRole{TeamMemberRoleLeader}) {
 		return errors.New("not authorized to update member availability")
 	}
 
-	// 查找并更新成员可用性
+	// 查找并更新成员可用�?
 	for i := range t.Members {
 		if t.Members[i].UserID == userID && t.Members[i].IsActive {
 			t.Members[i].Availability = availability
@@ -406,7 +406,7 @@ func (t *Team) UpdateMemberAvailability(userID uuid.UUID, availability map[strin
 
 // Disband 解散团队
 func (t *Team) Disband(disbandedBy uuid.UUID, reason string) error {
-	// 只有团队负责人可以解散团队
+	// 只有团队负责人可以解散团�?
 	if !t.isUserAuthorized(disbandedBy, []TeamMemberRole{TeamMemberRoleLeader}) {
 		return errors.New("only team leader can disband team")
 	}
@@ -499,7 +499,7 @@ func (t *Team) GetActiveMemberCount() int {
 	return count
 }
 
-// GetMembersByRole 按角色获取成员
+// GetMembersByRole 按角色获取成�?
 func (t *Team) GetMembersByRole(role TeamMemberRole) []TeamMember {
 	var members []TeamMember
 	for _, member := range t.Members {
@@ -510,7 +510,7 @@ func (t *Team) GetMembersByRole(role TeamMemberRole) []TeamMember {
 	return members
 }
 
-// GetMemberSkills 获取成员技能
+// GetMemberSkills 获取成员技�?
 func (t *Team) GetMemberSkills(userID uuid.UUID) ([]string, error) {
 	for _, member := range t.Members {
 		if member.UserID == userID && member.IsActive {
@@ -520,7 +520,7 @@ func (t *Team) GetMemberSkills(userID uuid.UUID) ([]string, error) {
 	return nil, errors.New("user is not a member of this team")
 }
 
-// GetTeamSkillCoverage 获取团队技能覆盖情况
+// GetTeamSkillCoverage 获取团队技能覆盖情�?
 func (t *Team) GetTeamSkillCoverage() map[string]int {
 	skillCount := make(map[string]int)
 	for _, member := range t.Members {
@@ -533,7 +533,7 @@ func (t *Team) GetTeamSkillCoverage() map[string]int {
 	return skillCount
 }
 
-// HasSkill 检查团队是否具备某项技能
+// HasSkill 检查团队是否具备某项技�?
 func (t *Team) HasSkill(skill string) bool {
 	for _, member := range t.Members {
 		if member.IsActive {
@@ -552,7 +552,7 @@ func (t *Team) GetAvailableMembers(timeSlot string) []TeamMember {
 	var availableMembers []TeamMember
 	for _, member := range t.Members {
 		if member.IsActive {
-			// 这里可以根据成员的可用性信息判断是否在指定时间段可用
+			// 这里可以根据成员的可用性信息判断是否在指定时间段可�?
 			// 简化实现，假设所有活跃成员都可用
 			availableMembers = append(availableMembers, member)
 		}
@@ -560,20 +560,20 @@ func (t *Team) GetAvailableMembers(timeSlot string) []TeamMember {
 	return availableMembers
 }
 
-// updateTeamSkills 更新团队技能统计
+// updateTeamSkills 更新团队技能统�?
 func (t *Team) updateTeamSkills() {
 	skillCount := t.GetTeamSkillCoverage()
 	
-	// 清空现有技能记录
+	// 清空现有技能记�?
 	t.Skills = nil
 	
-	// 重新创建技能记录
+	// 重新创建技能记�?
 	for skill, count := range skillCount {
 		teamSkill := TeamSkill{
 			ID:          uuid.New(),
 			TeamID:      t.ID,
 			SkillName:   skill,
-			Level:       "intermediate", // 简化实现，可以根据成员技能水平计算
+			Level:       "intermediate", // 简化实现，可以根据成员技能水平计�?
 			MemberCount: count,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
@@ -596,7 +596,7 @@ func (t *Team) isUserAuthorized(userID uuid.UUID, allowedRoles []TeamMemberRole)
 	return false
 }
 
-// GetUserRole 获取用户在团队中的角色
+// GetUserRole 获取用户在团队中的角�?
 func (t *Team) GetUserRole(userID uuid.UUID) (TeamMemberRole, bool) {
 	for _, member := range t.Members {
 		if member.UserID == userID && member.IsActive {
@@ -661,7 +661,7 @@ func (t *Team) RemoveLabel(key string) {
 	}
 }
 
-// SetMetadata 设置元数据
+// SetMetadata 设置元数�?
 func (t *Team) SetMetadata(key string, value interface{}) {
 	if t.Metadata == nil {
 		t.Metadata = make(map[string]interface{})
@@ -670,7 +670,7 @@ func (t *Team) SetMetadata(key string, value interface{}) {
 	t.UpdatedAt = time.Now()
 }
 
-// GetMetadata 获取元数据
+// GetMetadata 获取元数�?
 func (t *Team) GetMetadata(key string) (interface{}, bool) {
 	if t.Metadata == nil {
 		return nil, false

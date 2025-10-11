@@ -1,0 +1,239 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taishanglaojun-config
+  namespace: taishanglaojun
+  labels:
+    app: taishanglaojun-platform
+    component: config
+data:
+  # 应用配置
+  app.yaml: |
+    server:
+      name: "taishang-laojun-core-services"
+      version: "1.0.0"
+      host: "0.0.0.0"
+      port: 8080
+      mode: "production"
+      timeout: 30
+      max_body_size: 10
+      enable_cors: true
+      allowed_origins:
+        - "https://taishanglaojun.com"
+        - "https://www.taishanglaojun.com"
+      enable_request_log: true
+
+    database:
+      primary:
+        driver: "postgres"
+        host: "postgres-service"
+        port: 5432
+        database: "taishanglaojun"
+        username: "postgres"
+        max_open_conns: 25
+        max_idle_conns: 10
+        conn_max_lifetime: "1h"
+        ssl_mode: "require"
+        connect_timeout: "10s"
+
+    redis:
+      primary:
+        host: "redis-service"
+        port: 6379
+        database: 0
+        pool_size: 10
+        min_idle_conns: 5
+        dial_timeout: "5s"
+        read_timeout: "3s"
+        write_timeout: "3s"
+        enabled: true
+
+    jwt:
+      expires_in: "24h"
+      refresh_expires_in: "168h"
+      issuer: "taishang-laojun"
+      audience: "taishang-laojun-users"
+
+    ai:
+      default_provider: "openai"
+      openai:
+        enabled: true
+        base_url: "https://api.openai.com/v1"
+        model: "gpt-3.5-turbo"
+        max_tokens: 2000
+        temperature: 0.7
+        timeout: "30s"
+        retry_attempts: 3
+        retry_delay: "1s"
+
+    search:
+      elasticsearch:
+        enabled: true
+        hosts:
+          - "http://elasticsearch-service:9200"
+        wisdom_index: "cultural_wisdom"
+        max_results: 100
+        timeout: "10s"
+      vector:
+        enabled: true
+        dimension: 1536
+        similarity_threshold: 0.7
+        max_results: 50
+
+    cache:
+      default_ttl: "1h"
+      wisdom:
+        ttl: "24h"
+        prefix: "wisdom:"
+      search:
+        ttl: "30m"
+        prefix: "search:"
+      session:
+        ttl: "24h"
+        prefix: "session:"
+      conversation:
+        ttl: "168h"
+        prefix: "conv:"
+
+    logging:
+      level: "info"
+      format: "json"
+      output: "stdout"
+      access_log:
+        enabled: true
+
+    monitoring:
+      enabled: true
+      prometheus:
+        enabled: true
+        path: "/metrics"
+        port: 9090
+      health_check:
+        enabled: true
+        path: "/health"
+        detailed_path: "/health/detailed"
+
+  # Nginx配置
+  nginx.conf: |
+    upstream backend {
+        server backend-service:8080;
+    }
+
+    upstream frontend {
+        server frontend-service:3000;
+    }
+
+    server {
+        listen 80;
+        server_name taishanglaojun.com www.taishanglaojun.com;
+        
+        # 重定向到HTTPS
+        return 301 https://$server_name$request_uri;
+    }
+
+    server {
+        listen 443 ssl http2;
+        server_name taishanglaojun.com www.taishanglaojun.com;
+
+        ssl_certificate /etc/ssl/certs/taishanglaojun.crt;
+        ssl_certificate_key /etc/ssl/private/taishanglaojun.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
+        ssl_prefer_server_ciphers off;
+
+        # 安全头
+        add_header X-Frame-Options DENY;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+
+        # API代理
+        location /api/ {
+            proxy_pass http://backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+        }
+
+        # WebSocket代理
+        location /ws/ {
+            proxy_pass http://backend;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # 静态文件
+        location / {
+            proxy_pass http://frontend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # 健康检查
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: database
+data:
+  POSTGRES_DB: "taishanglaojun"
+  POSTGRES_USER: "postgres"
+  POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: taishanglaojun
+  labels:
+    app: redis
+    component: cache
+data:
+  redis.conf: |
+    # Redis配置文件
+    bind 0.0.0.0
+    port 6379
+    timeout 0
+    tcp-keepalive 300
+    
+    # 内存配置
+    maxmemory 512mb
+    maxmemory-policy allkeys-lru
+    
+    # 持久化配置
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # 日志配置
+    loglevel notice
+    
+    # 安全配置
+    protected-mode yes
+    
+    # 性能配置
+    tcp-backlog 511
+    databases 16

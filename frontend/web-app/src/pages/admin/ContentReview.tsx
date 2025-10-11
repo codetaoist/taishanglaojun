@@ -35,7 +35,7 @@ import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 const { Option } = Select;
-const { TabPane } = Tabs;
+
 const { Title, Text, Paragraph } = Typography;
 
 interface ReviewItem {
@@ -437,12 +437,16 @@ const ContentReview: React.FC = () => {
       </Row>
 
       <Card>
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="待审核" key="pending" />
-          <TabPane tab="已通过" key="approved" />
-          <TabPane tab="已拒绝" key="rejected" />
-          <TabPane tab="全部" key="all" />
-        </Tabs>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          items={[
+            { key: 'pending', label: '待审核' },
+            { key: 'approved', label: '已通过' },
+            { key: 'rejected', label: '已拒绝' },
+            { key: 'all', label: '全部' }
+          ]}
+        />
 
         <div style={{ marginBottom: 16 }}>
           <Space>

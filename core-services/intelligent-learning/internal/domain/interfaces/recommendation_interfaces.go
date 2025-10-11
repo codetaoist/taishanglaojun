@@ -2,10 +2,10 @@ package interfaces
 
 import (
 	"context"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 )
 
-// RecommendationItem 推荐项
+// RecommendationItem 推荐�?
 type RecommendationItem struct {
 	ID          string                 `json:"id"`
 	Type        string                 `json:"type"`
@@ -17,7 +17,7 @@ type RecommendationItem struct {
 	Metadata    map[string]interface{} `json:"metadata"`
 }
 
-// ContentItem 内容项
+// ContentItem 内容�?
 type ContentItem struct {
 	ID          string                 `json:"id"`
 	Type        string                 `json:"type"`

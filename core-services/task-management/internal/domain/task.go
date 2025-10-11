@@ -7,36 +7,36 @@ import (
 	"github.com/google/uuid"
 )
 
-// TaskStatus 任务状态枚举
+// TaskStatus 任务状态枚�?
 type TaskStatus string
 
 const (
-	TaskStatusPending    TaskStatus = "pending"     // 待处理
-	TaskStatusAssigned   TaskStatus = "assigned"    // 已分配
-	TaskStatusInProgress TaskStatus = "in_progress" // 进行中
-	TaskStatusCompleted  TaskStatus = "completed"   // 已完成
-	TaskStatusCancelled  TaskStatus = "cancelled"   // 已取消
+	TaskStatusPending    TaskStatus = "pending"     // 待处�?
+	TaskStatusAssigned   TaskStatus = "assigned"    // 已分�?
+	TaskStatusInProgress TaskStatus = "in_progress" // 进行�?
+	TaskStatusCompleted  TaskStatus = "completed"   // 已完�?
+	TaskStatusCancelled  TaskStatus = "cancelled"   // 已取�?
 	TaskStatusOnHold     TaskStatus = "on_hold"     // 暂停
 	TaskStatusOverdue    TaskStatus = "overdue"     // 逾期
 )
 
-// TaskPriority 任务优先级枚举
+// TaskPriority 任务优先级枚�?
 type TaskPriority string
 
 const (
 	TaskPriorityLow      TaskPriority = "low"      // 低优先级
 	TaskPriorityMedium   TaskPriority = "medium"   // 中优先级
 	TaskPriorityHigh     TaskPriority = "high"     // 高优先级
-	TaskPriorityCritical TaskPriority = "critical" // 紧急
+	TaskPriorityCritical TaskPriority = "critical" // 紧�?
 )
 
 // TaskType 任务类型枚举
 type TaskType string
 
 const (
-	TaskTypeDevelopment TaskType = "development" // 开发任务
+	TaskTypeDevelopment TaskType = "development" // 开发任�?
 	TaskTypeBug         TaskType = "bug"         // 缺陷修复
-	TaskTypeFeature     TaskType = "feature"     // 功能开发
+	TaskTypeFeature     TaskType = "feature"     // 功能开�?
 	TaskTypeResearch    TaskType = "research"    // 研究任务
 	TaskTypeMaintenance TaskType = "maintenance" // 维护任务
 	TaskTypeReview      TaskType = "review"      // 代码审查
@@ -44,14 +44,14 @@ const (
 	TaskTypeDocumentation TaskType = "documentation" // 文档编写
 )
 
-// TaskComplexity 任务复杂度枚举
+// TaskComplexity 任务复杂度枚�?
 type TaskComplexity string
 
 const (
-	TaskComplexitySimple   TaskComplexity = "simple"   // 简单
+	TaskComplexitySimple   TaskComplexity = "simple"   // 简�?
 	TaskComplexityModerate TaskComplexity = "moderate" // 中等
 	TaskComplexityComplex  TaskComplexity = "complex"  // 复杂
-	TaskComplexityExpert   TaskComplexity = "expert"   // 专家级
+	TaskComplexityExpert   TaskComplexity = "expert"   // 专家�?
 )
 
 // TaskDependency 任务依赖关系
@@ -103,13 +103,13 @@ type TaskTimeLog struct {
 	UserID      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;index"`
 	StartTime   time.Time  `json:"start_time" gorm:"not null"`
 	EndTime     *time.Time `json:"end_time,omitempty"`
-	Duration    int64      `json:"duration" gorm:"default:0"` // 持续时间（秒）
+	Duration    int64      `json:"duration" gorm:"default:0"` // 持续时间（秒�?
 	Description string     `json:"description" gorm:"type:text"`
 	CreatedAt   time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-// Task 任务聚合根
+// Task 任务聚合�?
 type Task struct {
 	// 基本信息
 	ID          uuid.UUID    `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
@@ -120,7 +120,7 @@ type Task struct {
 	Type        TaskType     `json:"type" gorm:"type:varchar(30);not null;index"`
 	Complexity  TaskComplexity `json:"complexity" gorm:"type:varchar(20);not null;default:'moderate'"`
 
-	// 项目和组织信息
+	// 项目和组织信�?
 	ProjectID    uuid.UUID  `json:"project_id" gorm:"type:uuid;not null;index"`
 	TeamID       *uuid.UUID `json:"team_id,omitempty" gorm:"type:uuid;index"`
 	CreatorID    uuid.UUID  `json:"creator_id" gorm:"type:uuid;not null;index"`
@@ -141,7 +141,7 @@ type Task struct {
 	Labels   map[string]string      `json:"labels" gorm:"type:jsonb"`
 	Metadata map[string]interface{} `json:"metadata" gorm:"type:jsonb"`
 
-	// 进度和质量
+	// 进度和质�?
 	Progress      float64 `json:"progress" gorm:"type:decimal(5,2);default:0"` // 0-100
 	QualityScore  *float64 `json:"quality_score,omitempty" gorm:"type:decimal(3,2)"` // 0-10
 	
@@ -156,7 +156,7 @@ type Task struct {
 	domainEvents []DomainEvent `json:"-" gorm:"-"`
 }
 
-// NewTask 创建新任务
+// NewTask 创建新任�?
 func NewTask(title, description string, taskType TaskType, priority TaskPriority, 
 	complexity TaskComplexity, projectID, creatorID uuid.UUID) (*Task, error) {
 	
@@ -210,7 +210,7 @@ func NewTask(title, description string, taskType TaskType, priority TaskPriority
 	return task, nil
 }
 
-// AssignTo 分配任务给用户
+// AssignTo 分配任务给用�?
 func (t *Task) AssignTo(assigneeID, assignerID uuid.UUID) error {
 	if assigneeID == uuid.Nil {
 		return errors.New("assignee ID cannot be empty")
@@ -220,12 +220,12 @@ func (t *Task) AssignTo(assigneeID, assignerID uuid.UUID) error {
 		return errors.New("assigner ID cannot be empty")
 	}
 
-	// 如果已经分配给同一个人，则不需要重复分配
+	// 如果已经分配给同一个人，则不需要重复分�?
 	if t.AssigneeID != nil && *t.AssigneeID == assigneeID {
 		return nil
 	}
 
-	// 取消之前的分配
+	// 取消之前的分�?
 	if t.AssigneeID != nil {
 		t.unassignCurrent()
 	}
@@ -297,7 +297,7 @@ func (t *Task) unassignCurrent() {
 	}
 }
 
-// Start 开始任务
+// Start 开始任�?
 func (t *Task) Start(userID uuid.UUID) error {
 	if t.Status != TaskStatusAssigned && t.Status != TaskStatusPending {
 		return errors.New("task cannot be started in current status")
@@ -314,7 +314,7 @@ func (t *Task) Start(userID uuid.UUID) error {
 	}
 	t.UpdatedAt = time.Now()
 
-	// 发布任务开始事件
+	// 发布任务开始事�?
 	event := &TaskStartedEvent{
 		BaseDomainEvent: BaseDomainEvent{
 			EventID:     uuid.New(),
@@ -411,7 +411,7 @@ func (t *Task) UpdateProgress(progress float64, userID uuid.UUID) error {
 	t.Progress = progress
 	t.UpdatedAt = time.Now()
 
-	// 如果进度达到100%，自动完成任务
+	// 如果进度达到100%，自动完成任�?
 	if progress == 100.0 && t.Status == TaskStatusInProgress {
 		t.Complete(userID)
 	}
@@ -434,7 +434,7 @@ func (t *Task) UpdateProgress(progress float64, userID uuid.UUID) error {
 	return nil
 }
 
-// SetPriority 设置任务优先级
+// SetPriority 设置任务优先�?
 func (t *Task) SetPriority(priority TaskPriority, userID uuid.UUID) error {
 	if t.Priority == priority {
 		return nil
@@ -444,7 +444,7 @@ func (t *Task) SetPriority(priority TaskPriority, userID uuid.UUID) error {
 	t.Priority = priority
 	t.UpdatedAt = time.Now()
 
-	// 发布优先级更新事件
+	// 发布优先级更新事�?
 	event := &TaskPriorityUpdatedEvent{
 		BaseDomainEvent: BaseDomainEvent{
 			EventID:     uuid.New(),
@@ -585,7 +585,7 @@ func (t *Task) AddDependency(dependsOnID uuid.UUID, dependencyType string) error
 	// 检查是否已存在相同依赖
 	for _, dep := range t.Dependencies {
 		if dep.DependsOnID == dependsOnID && dep.DependencyType == dependencyType {
-			return nil // 已存在，不重复添加
+			return nil // 已存在，不重复添�?
 		}
 	}
 
@@ -627,16 +627,16 @@ func (t *Task) GetActualDuration() time.Duration {
 	return time.Duration(*t.ActualHours * float64(time.Hour))
 }
 
-// CalculateActualHours 计算实际工作小时数
+// CalculateActualHours 计算实际工作小时�?
 func (t *Task) CalculateActualHours() float64 {
 	var totalSeconds int64
 	for _, timeLog := range t.TimeLogs {
 		totalSeconds += timeLog.Duration
 	}
-	return float64(totalSeconds) / 3600.0 // 转换为小时
+	return float64(totalSeconds) / 3600.0 // 转换为小�?
 }
 
-// UpdateActualHours 更新实际工作小时数
+// UpdateActualHours 更新实际工作小时�?
 func (t *Task) UpdateActualHours() {
 	actualHours := t.CalculateActualHours()
 	t.ActualHours = &actualHours
@@ -688,7 +688,7 @@ func (t *Task) RemoveLabel(key string) {
 	}
 }
 
-// SetMetadata 设置元数据
+// SetMetadata 设置元数�?
 func (t *Task) SetMetadata(key string, value interface{}) {
 	if t.Metadata == nil {
 		t.Metadata = make(map[string]interface{})
@@ -697,7 +697,7 @@ func (t *Task) SetMetadata(key string, value interface{}) {
 	t.UpdatedAt = time.Now()
 }
 
-// GetMetadata 获取元数据
+// GetMetadata 获取元数�?
 func (t *Task) GetMetadata(key string) (interface{}, bool) {
 	if t.Metadata == nil {
 		return nil, false

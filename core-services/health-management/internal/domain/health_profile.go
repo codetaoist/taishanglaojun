@@ -10,22 +10,22 @@ import (
 type Gender string
 
 const (
-	GenderMale   Gender = "male"   // 男性
-	GenderFemale Gender = "female" // 女性
+	GenderMale   Gender = "male"   // 男�?
+	GenderFemale Gender = "female" // 女�?
 	GenderOther  Gender = "other"  // 其他
 )
 
-// BloodType 血型枚举
+// BloodType 血型枚�?
 type BloodType string
 
 const (
-	BloodTypeA  BloodType = "A"  // A型
-	BloodTypeB  BloodType = "B"  // B型
-	BloodTypeAB BloodType = "AB" // AB型
-	BloodTypeO  BloodType = "O"  // O型
+	BloodTypeA  BloodType = "A"  // A�?
+	BloodTypeB  BloodType = "B"  // B�?
+	BloodTypeAB BloodType = "AB" // AB�?
+	BloodTypeO  BloodType = "O"  // O�?
 )
 
-// HealthProfile 健康档案聚合根
+// HealthProfile 健康档案聚合�?
 type HealthProfile struct {
 	ID                uuid.UUID  `json:"id" gorm:"type:uuid;primary_key"`
 	UserID            uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;unique"`
@@ -36,8 +36,8 @@ type HealthProfile struct {
 	EmergencyContact  string     `json:"emergency_contact" gorm:"type:varchar(20)"`
 	EmergencyName     string     `json:"emergency_name" gorm:"type:varchar(100)"`
 	MedicalHistory    []string   `json:"medical_history,omitempty" gorm:"type:jsonb;comment:病史"`
-	Allergies         []string   `json:"allergies,omitempty" gorm:"type:jsonb;comment:过敏史"`
-	Medications       []string   `json:"medications,omitempty" gorm:"type:jsonb;comment:用药史"`
+	Allergies         []string   `json:"allergies,omitempty" gorm:"type:jsonb;comment:过敏�?`
+	Medications       []string   `json:"medications,omitempty" gorm:"type:jsonb;comment:用药�?`
 	HealthGoals       []string   `json:"health_goals,omitempty" gorm:"type:jsonb;comment:健康目标"`
 	PreferredUnits    map[string]string `json:"preferred_units,omitempty" gorm:"type:jsonb;comment:偏好单位"`
 	NotificationPrefs map[string]bool   `json:"notification_prefs,omitempty" gorm:"type:jsonb;comment:通知偏好"`
@@ -130,7 +130,7 @@ func (h *HealthProfile) RemoveMedicalHistory(condition string) {
 	}
 }
 
-// AddAllergy 添加过敏史
+// AddAllergy 添加过敏�?
 func (h *HealthProfile) AddAllergy(allergen string) {
 	if h.Allergies == nil {
 		h.Allergies = make([]string, 0)
@@ -146,11 +146,11 @@ func (h *HealthProfile) AddAllergy(allergen string) {
 	h.Allergies = append(h.Allergies, allergen)
 	h.UpdatedAt = time.Now()
 	
-	// 发布过敏史添加事件
+	// 发布过敏史添加事�?
 	h.publishEvent(NewAllergyAddedEvent(h.ID, h.UserID, allergen))
 }
 
-// RemoveAllergy 移除过敏史
+// RemoveAllergy 移除过敏�?
 func (h *HealthProfile) RemoveAllergy(allergen string) {
 	if h.Allergies == nil {
 		return
@@ -161,14 +161,14 @@ func (h *HealthProfile) RemoveAllergy(allergen string) {
 			h.Allergies = append(h.Allergies[:i], h.Allergies[i+1:]...)
 			h.UpdatedAt = time.Now()
 			
-			// 发布过敏史移除事件
+			// 发布过敏史移除事�?
 			h.publishEvent(NewAllergyRemovedEvent(h.ID, h.UserID, allergen))
 			break
 		}
 	}
 }
 
-// AddMedication 添加用药史
+// AddMedication 添加用药�?
 func (h *HealthProfile) AddMedication(medication string) {
 	if h.Medications == nil {
 		h.Medications = make([]string, 0)
@@ -184,11 +184,11 @@ func (h *HealthProfile) AddMedication(medication string) {
 	h.Medications = append(h.Medications, medication)
 	h.UpdatedAt = time.Time{}
 	
-	// 发布用药史添加事件
+	// 发布用药史添加事�?
 	h.publishEvent(NewMedicationAddedEvent(h.ID, h.UserID, medication))
 }
 
-// RemoveMedication 移除用药史
+// RemoveMedication 移除用药�?
 func (h *HealthProfile) RemoveMedication(medication string) {
 	if h.Medications == nil {
 		return
@@ -199,7 +199,7 @@ func (h *HealthProfile) RemoveMedication(medication string) {
 			h.Medications = append(h.Medications[:i], h.Medications[i+1:]...)
 			h.UpdatedAt = time.Now()
 			
-			// 发布用药史移除事件
+			// 发布用药史移除事�?
 			h.publishEvent(NewMedicationRemovedEvent(h.ID, h.UserID, medication))
 			break
 		}

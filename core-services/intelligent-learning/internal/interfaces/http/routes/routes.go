@@ -10,18 +10,18 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	learnerservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
-	contentservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/content"
-	knowledgeservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
-	adaptiveservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
-	analyticsservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
-	recommendationservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/handlers"
-	httphandlers "github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/handlers"
-	httpinterfaces "github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/middleware"
-	websockethandlers "github.com/taishanglaojun/core-services/intelligent-learning/internal/interfaces/websocket"
-	realtimeservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	learnerservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/learner"
+	contentservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/content"
+	knowledgeservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	adaptiveservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
+	analyticsservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	recommendationservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/interfaces/handlers"
+	httphandlers "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/handlers"
+	httpinterfaces "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/interfaces/http/middleware"
+	websockethandlers "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/interfaces/websocket"
+	realtimeservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // RouterConfig 路由配置
@@ -49,10 +49,10 @@ func SetupRoutes(config *RouterConfig) *gin.Engine {
 	// 创建Gin引擎
 	r := gin.New()
 
-	// 添加中间件
+	// 添加中间�?
 	setupMiddleware(r)
 
-	// 创建处理器
+	// 创建处理�?
 	learnerHandler := httphandlers.NewLearnerHandler(config.LearnerService)
 	contentHandler := httphandlers.NewContentHandler(config.ContentService)
 	kgHandler := httphandlers.NewKnowledgeGraphHandler(config.KnowledgeGraphService)
@@ -65,7 +65,7 @@ func SetupRoutes(config *RouterConfig) *gin.Engine {
 	// 创建学习路径处理器（需要添加到RouterConfig中）
 	// learningPathHandler := httphandlers.NewLearningPathHandler(config.LearningPathService)
 	
-	// 创建推荐处理器
+	// 创建推荐处理�?
 	recommendationHandler := httphandlers.NewRecommendationHandler(
 		config.PersonalizationEngine,
 		config.UserBehaviorTracker,
@@ -73,17 +73,17 @@ func SetupRoutes(config *RouterConfig) *gin.Engine {
 		config.ContextAnalyzer,
 	)
 
-	// 创建实时推荐处理器
+	// 创建实时推荐处理�?
 	realtimeRecommendationHandler := httphandlers.NewRealtimeRecommendationHandler(
 		config.RealtimeRecommendationService,
 	)
 
-	// 创建推荐集成处理器
+	// 创建推荐集成处理�?
 	recommendationIntegrationHandler := httphandlers.NewRecommendationIntegrationHandler(
 		config.RecommendationIntegrationService,
 	)
 
-	// 创建API路由组
+	// 创建API路由�?
 	api := r.Group("/api/v1")
 	
 	// 设置API路由
@@ -92,24 +92,24 @@ func SetupRoutes(config *RouterConfig) *gin.Engine {
 	// 设置Swagger文档
 	setupSwagger(r)
 
-	// 健康检查
+	// 健康检�?
 	setupHealthCheck(r)
 
 	return r
 }
 
-// setupMiddleware 设置中间件
+// setupMiddleware 设置中间�?
 func setupMiddleware(r *gin.Engine) {
-	// 恢复中间件
+	// 恢复中间�?
 	r.Use(gin.Recovery())
 
-	// 请求ID中间件
+	// 请求ID中间�?
 	r.Use(requestid.New())
 
-	// 日志中间件
+	// 日志中间�?
 	r.Use(middleware.Logger())
 
-	// CORS中间件
+	// CORS中间�?
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -119,7 +119,7 @@ func setupMiddleware(r *gin.Engine) {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// 限流中间件
+	// 限流中间�?
 	r.Use(middleware.RateLimit())
 
 	// 认证中间件（可选）
@@ -142,10 +142,10 @@ func setupAPIRoutes(
 	recommendationIntegrationHandler *httphandlers.RecommendationIntegrationHandler,
 ) {
 
-	// API v1 路由组
+	// API v1 路由�?
 	v1 := r.Group("/api/v1")
 	{
-		// 学习者路由
+		// 学习者路�?
 		learners := v1.Group("/learners")
 		{
 			learners.POST("", learnerHandler.CreateLearner)
@@ -157,14 +157,14 @@ func setupAPIRoutes(
 			learners.POST("/:id/goals", learnerHandler.AddLearningGoal)
 			learners.PUT("/:id/goals/:goalId", learnerHandler.UpdateLearningGoal)
 			
-			// 技能
+			// 技�?
 			learners.PUT("/:id/skills", learnerHandler.UpdateSkill)
 			
 			// 学习活动
 			learners.POST("/:id/activities", learnerHandler.RecordLearningActivity)
 			learners.GET("/:id/history", learnerHandler.GetLearningHistory)
 			
-			// 分析和推荐
+			// 分析和推�?
 			learners.GET("/:id/analytics", learnerHandler.GetLearningAnalytics)
 			learners.GET("/:id/recommendations", learnerHandler.GetPersonalizedRecommendations)
 		}
@@ -178,19 +178,19 @@ func setupAPIRoutes(
 			content.PUT("/:id", contentHandler.UpdateContent)
 			content.DELETE("/:id", contentHandler.DeleteContent)
 			
-			// 内容状态管理
+			// 内容状态管�?
 			content.POST("/:id/publish", contentHandler.PublishContent)
 			content.POST("/:id/archive", contentHandler.ArchiveContent)
 			
-			// 搜索和推荐
+			// 搜索和推�?
 			content.GET("/search", contentHandler.SearchContent)
 			content.GET("/personalized", contentHandler.GetPersonalizedContent)
 			
-			// 交互和分析
+			// 交互和分�?
 			content.POST("/:id/interactions", contentHandler.RecordContentInteraction)
 			content.GET("/:id/analytics", contentHandler.GetContentAnalytics)
 			
-			// 按知识节点获取内容
+			// 按知识节点获取内�?
 			content.GET("/knowledge-node/:nodeId", contentHandler.GetContentByKnowledgeNode)
 		}
 
@@ -269,7 +269,7 @@ func setupAPIRoutes(
 			// 概念关系分析
 			analysis.POST("/concept-relationships", knowledgeAnalysisHandler.AnalyzeConceptRelationships)
 			
-			// 依赖图构建
+			// 依赖图构�?
 			analysis.POST("/dependency-graph", knowledgeAnalysisHandler.BuildDependencyGraph)
 			
 			// 内容推荐
@@ -303,7 +303,7 @@ func setupAPIRoutes(
 			realtime.GET("/:learnerId/alerts", realtimeAnalyticsHandler.GetAlerts)
 			realtime.GET("/:learnerId/recommendations", realtimeAnalyticsHandler.GetRecommendations)
 			
-			// 分析器管理
+			// 分析器管�?
 			realtime.POST("/analyzers", realtimeAnalyticsHandler.CreateAnalyzer)
 			
 			// WebSocket订阅
@@ -328,7 +328,7 @@ func setupAPIRoutes(
 			// 用户偏好分析
 			recommendations.GET("/preferences/:user_id", recommendationHandler.GetUserPreferences)
 			
-			// 学习上下文分析
+			// 学习上下文分�?
 			recommendations.GET("/context/:user_id", recommendationHandler.GetLearningContext)
 			
 			// 行为洞察
@@ -384,9 +384,9 @@ func setupSwagger(r *gin.Engine) {
 	})
 }
 
-// setupHealthCheck 设置健康检查
+// setupHealthCheck 设置健康检�?
 func setupHealthCheck(r *gin.Engine) {
-	// 健康检查端点
+	// 健康检查端�?
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":    "healthy",
@@ -396,7 +396,7 @@ func setupHealthCheck(r *gin.Engine) {
 		})
 	})
 
-	// 就绪检查端点
+	// 就绪检查端�?
 	r.GET("/ready", func(c *gin.Context) {
 		// 这里可以添加数据库连接检查等
 		c.JSON(http.StatusOK, gin.H{
@@ -404,7 +404,7 @@ func setupHealthCheck(r *gin.Engine) {
 		})
 	})
 
-	// 存活检查端点
+	// 存活检查端�?
 	r.GET("/live", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "alive",

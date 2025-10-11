@@ -28,7 +28,7 @@ type AppConfig struct {
 	Debug       bool   `yaml:"debug" env:"APP_DEBUG" default:"true"`
 }
 
-// ServerConfig 服务器配置
+// ServerConfig 服务器配�?
 type ServerConfig struct {
 	Host            string        `yaml:"host" env:"SERVER_HOST" default:"0.0.0.0"`
 	Port            int           `yaml:"port" env:"SERVER_PORT" default:"8080"`
@@ -83,12 +83,12 @@ func (c *ServerConfig) Address() string {
 	return fmt.Sprintf("%s:%d", c.Host, c.Port)
 }
 
-// IsDevelopment 是否为开发环境
+// IsDevelopment 是否为开发环�?
 func (c *AppConfig) IsDevelopment() bool {
 	return c.Environment == "development"
 }
 
-// IsProduction 是否为生产环境
+// IsProduction 是否为生产环�?
 func (c *AppConfig) IsProduction() bool {
 	return c.Environment == "production"
 }
@@ -97,7 +97,7 @@ func (c *AppConfig) IsProduction() bool {
 func Load(configPath string) (*Config, error) {
 	config := &Config{}
 
-	// 设置默认值
+	// 设置默认�?
 	setDefaults(config)
 
 	// 如果配置文件存在，则加载文件配置
@@ -107,7 +107,7 @@ func Load(configPath string) (*Config, error) {
 		}
 	}
 
-	// 从环境变量覆盖配置
+	// 从环境变量覆盖配�?
 	if err := loadFromEnv(config); err != nil {
 		return nil, fmt.Errorf("failed to load config from env: %w", err)
 	}
@@ -120,7 +120,7 @@ func Load(configPath string) (*Config, error) {
 	return config, nil
 }
 
-// setDefaults 设置默认值
+// setDefaults 设置默认�?
 func setDefaults(config *Config) {
 	config.App = AppConfig{
 		Name:        "intelligent-learning",
@@ -205,7 +205,7 @@ func setDefaults(config *Config) {
 	}
 }
 
-// loadFromFile 从文件加载配置
+// loadFromFile 从文件加载配�?
 func loadFromFile(config *Config, configPath string) error {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -215,7 +215,7 @@ func loadFromFile(config *Config, configPath string) error {
 	return yaml.Unmarshal(data, config)
 }
 
-// loadFromEnv 从环境变量加载配置
+// loadFromEnv 从环境变量加载配�?
 func loadFromEnv(config *Config) error {
 	// App配置
 	if val := os.Getenv("APP_NAME"); val != "" {
@@ -337,7 +337,7 @@ func validate(config *Config) error {
 	return nil
 }
 
-// fileExists 检查文件是否存在
+// fileExists 检查文件是否存�?
 func fileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {

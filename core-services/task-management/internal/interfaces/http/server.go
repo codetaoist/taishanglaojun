@@ -10,19 +10,19 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/taishanglaojun/core-services/task-management/internal/application"
-	"github.com/taishanglaojun/core-services/task-management/internal/infrastructure/persistence"
-	"github.com/taishanglaojun/core-services/task-management/internal/infrastructure/services"
-	"github.com/taishanglaojun/core-services/task-management/internal/interfaces/http/middleware"
+	"github.com/codetaoist/taishanglaojun/core-services/task-management/internal/application"
+	"github.com/codetaoist/taishanglaojun/core-services/task-management/internal/infrastructure/persistence"
+	"github.com/codetaoist/taishanglaojun/core-services/task-management/internal/infrastructure/services"
+	"github.com/codetaoist/taishanglaojun/core-services/task-management/internal/interfaces/http/middleware"
 )
 
-// Server HTTP服务器
+// Server HTTP服务�?
 type Server struct {
 	httpServer *http.Server
 	router     *Router
 }
 
-// Config 服务器配置
+// Config 服务器配�?
 type Config struct {
 	Port         string
 	ReadTimeout  time.Duration
@@ -30,25 +30,25 @@ type Config struct {
 	IdleTimeout  time.Duration
 }
 
-// NewServer 创建新的HTTP服务器
+// NewServer 创建新的HTTP服务�?
 func NewServer(config *Config) *Server {
 	// 初始化仓储层
 	taskRepo := persistence.NewInMemoryTaskRepository()
 	projectRepo := persistence.NewInMemoryProjectRepository()
 	teamRepo := persistence.NewInMemoryTeamRepository()
 
-	// 初始化领域服务工厂
+	// 初始化领域服务工�?
 	domainServiceFactory := services.NewDomainServiceFactory(taskRepo, projectRepo, teamRepo)
 
-	// 初始化应用服务
+	// 初始化应用服�?
 	taskService := application.NewTaskService(taskRepo, projectRepo, teamRepo, domainServiceFactory)
 	projectService := application.NewProjectService(projectRepo, taskRepo, teamRepo, domainServiceFactory)
 	teamService := application.NewTeamService(teamRepo, taskRepo, projectRepo, domainServiceFactory)
 
-	// 初始化路由
+	// 初始化路�?
 	router := NewRouter(taskService, projectService, teamService)
 
-	// 创建HTTP服务器
+	// 创建HTTP服务�?
 	httpServer := &http.Server{
 		Addr:         ":" + config.Port,
 		Handler:      router.SetupRoutes(),
@@ -63,11 +63,11 @@ func NewServer(config *Config) *Server {
 	}
 }
 
-// Start 启动服务器
+// Start 启动服务�?
 func (s *Server) Start() error {
 	log.Printf("Starting HTTP server on port %s", s.httpServer.Addr)
 
-	// 启动服务器
+	// 启动服务�?
 	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("failed to start server: %w", err)
 	}
@@ -75,7 +75,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Stop 停止服务器
+// Stop 停止服务�?
 func (s *Server) Stop(ctx context.Context) error {
 	log.Println("Stopping HTTP server...")
 
@@ -103,14 +103,14 @@ func (s *Server) StartWithGracefulShutdown() error {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// 等待错误或信号
+	// 等待错误或信�?
 	select {
 	case err := <-errChan:
 		return err
 	case sig := <-sigChan:
 		log.Printf("Received signal: %v", sig)
 
-		// 创建关闭上下文
+		// 创建关闭上下�?
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
@@ -129,7 +129,7 @@ func DefaultConfig() *Config {
 	}
 }
 
-// ConfigFromEnv 从环境变量创建配置
+// ConfigFromEnv 从环境变量创建配�?
 func ConfigFromEnv() *Config {
 	config := DefaultConfig()
 
@@ -165,12 +165,12 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"ok","timestamp":"` + time.Now().Format(time.RFC3339) + `"}`))
 }
 
-// ApplyMiddleware 应用中间件
+// ApplyMiddleware 应用中间�?
 func ApplyMiddleware(handler http.Handler) http.Handler {
 	// 按顺序应用中间件
 	handler = middleware.CORSMiddleware(handler)
 	handler = middleware.ValidationMiddleware(handler)
-	handler = middleware.RateLimitMiddleware(100)(handler) // 每分钟100个请求
+	handler = middleware.RateLimitMiddleware(100)(handler) // 每分�?00个请�?
 	handler = middleware.RequestIDMiddleware(handler)
 	handler = middleware.LoggingMiddleware(handler)
 	handler = middleware.RecoveryMiddleware(handler)

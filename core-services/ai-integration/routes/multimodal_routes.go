@@ -1,8 +1,7 @@
 package routes
 
 import (
-	"github.com/taishanglaojun/core-services/ai-integration/handlers"
-	"github.com/taishanglaojun/core-services/ai-integration/middleware"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/handlers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,15 +10,9 @@ func SetupMultimodalRoutes(router *gin.Engine, handler *handlers.MultimodalHandl
 	// API版本分组
 	v1 := router.Group("/api/v1")
 	{
-		// 多模态AI路由组
+		// 多模态AI路由�?
 		multimodal := v1.Group("/multimodal")
 		{
-			// 应用认证中间件
-			multimodal.Use(middleware.AuthMiddleware())
-			
-			// 应用限流中间件
-			multimodal.Use(middleware.RateLimitMiddleware())
-			
 			// 核心处理端点
 			multimodal.POST("/process", handler.ProcessMultimodal)
 			multimodal.POST("/upload", handler.UploadFile)
@@ -52,7 +45,7 @@ func SetupMultimodalRoutes(router *gin.Engine, handler *handlers.MultimodalHandl
 		}
 	}
 	
-	// 健康检查端点（无需认证）
+	// 健康检查端点（无需认证�?
 	router.GET("/health/multimodal", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "healthy",

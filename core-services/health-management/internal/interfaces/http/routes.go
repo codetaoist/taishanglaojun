@@ -6,7 +6,7 @@ import (
 	"github.com/taishanglaojun/health-management/internal/application"
 )
 
-// Router HTTP路由器
+// Router HTTP路由�?
 type Router struct {
 	healthDataHandler         *HealthDataHandler
 	healthProfileHandler      *HealthProfileHandler
@@ -16,7 +16,7 @@ type Router struct {
 	healthDashboardHandler    *HealthDashboardHandler
 }
 
-// NewRouter 创建新的路由器
+// NewRouter 创建新的路由�?
 func NewRouter(
 	healthDataHandler *HealthDataHandler,
 	healthProfileHandler *HealthProfileHandler,
@@ -55,7 +55,7 @@ func (r *Router) SetupRoutes(engine *gin.Engine) {
 	// 健康建议路由
 	r.setupHealthRecommendationRoutes(v1)
 	
-	// 健康仪表板路由
+	// 健康仪表板路�?
 	r.setupHealthDashboardRoutes(v1)
 	
 	// 用户相关路由
@@ -87,7 +87,7 @@ func (r *Router) setupHealthProfileRoutes(rg *gin.RouterGroup) {
 		healthProfiles.POST("/:id/medical-history", r.healthProfileHandler.AddMedicalHistory)
 		healthProfiles.DELETE("/:id/medical-history/:condition", r.healthProfileHandler.RemoveMedicalHistory)
 		
-		// 过敏史管理
+		// 过敏史管�?
 		healthProfiles.POST("/:id/allergies", r.healthProfileHandler.AddAllergy)
 		healthProfiles.DELETE("/:id/allergies/:allergen", r.healthProfileHandler.RemoveAllergy)
 		
@@ -130,7 +130,7 @@ func (r *Router) setupHealthRecommendationRoutes(v1 *gin.RouterGroup) {
 	}
 }
 
-// setupHealthDashboardRoutes 设置健康仪表板路由
+// setupHealthDashboardRoutes 设置健康仪表板路�?
 func (r *Router) setupHealthDashboardRoutes(v1 *gin.RouterGroup) {
 	dashboard := v1.Group("/health-dashboard")
 	{
@@ -167,15 +167,15 @@ func (r *Router) setupUserRoutes(rg *gin.RouterGroup) {
 		users.POST("/:user_id/health-recommendations", r.healthRecommendationHandler.GetRecommendationsByUser)
 		users.GET("/:user_id/health-tips", r.healthRecommendationHandler.GetTipsByUser)
 
-		// 健康仪表板
+		// 健康仪表�?
 		users.GET("/:user_id/health-dashboard", r.healthDashboardHandler.GetDashboardByUser)
 		users.GET("/:user_id/health-dashboard/summary", r.healthDashboardHandler.GetDashboardSummaryByUser)
 	}
 }
 
-// SetupMiddlewares 设置中间件
+// SetupMiddlewares 设置中间�?
 func SetupMiddlewares(engine *gin.Engine) {
-	// CORS中间件
+	// CORS中间�?
 	engine.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -189,13 +189,13 @@ func SetupMiddlewares(engine *gin.Engine) {
 		c.Next()
 	})
 	
-	// 请求日志中间件
+	// 请求日志中间�?
 	engine.Use(gin.Logger())
 	
-	// 恢复中间件
+	// 恢复中间�?
 	engine.Use(gin.Recovery())
 	
-	// 请求ID中间件
+	// 请求ID中间�?
 	engine.Use(func(c *gin.Context) {
 		requestID := c.GetHeader("X-Request-ID")
 		if requestID == "" {
@@ -213,12 +213,12 @@ func generateRequestID() string {
 	return "req-" + randomString(8)
 }
 
-// randomString 生成随机字符串
+// randomString 生成随机字符�?
 func randomString(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = charset[len(charset)/2] // 简化处理
+		b[i] = charset[len(charset)/2] // 简化处�?
 	}
 	return string(b)
 }
@@ -232,7 +232,7 @@ func HealthCheckHandler(c *gin.Context) {
 	})
 }
 
-// SetupHealthCheck 设置健康检查路由
+// SetupHealthCheck 设置健康检查路�?
 func SetupHealthCheck(engine *gin.Engine, router *Router) {
 	engine.GET("/health", HealthCheckHandler)
 	engine.GET("/health/ready", HealthCheckHandler)

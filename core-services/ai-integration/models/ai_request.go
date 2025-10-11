@@ -16,7 +16,7 @@ type AIRequest struct {
 	Metadata    RequestMetadata   `json:"metadata" bson:"metadata"`
 }
 
-// RequestMetadata 请求元数据
+// RequestMetadata 请求元数�?
 type RequestMetadata struct {
 	SessionID   string            `json:"session_id" bson:"session_id"`
 	Source      string            `json:"source" bson:"source"`
@@ -64,7 +64,7 @@ type AnalyzeRequestData struct {
 	Options  map[string]interface{} `json:"options"`
 }
 
-// EmbedRequestData 向量化请求数据
+// EmbedRequestData 向量化请求数�?
 type EmbedRequestData struct {
 	Texts []string `json:"texts"`
 	Model string   `json:"model"`

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
 )
 
 // KnowledgeGraphRepository 定义知识图谱数据访问接口
@@ -52,7 +52,7 @@ type KnowledgeGraphRepository interface {
 	GetLearningPathsByGoal(ctx context.Context, graphID, goalNodeID uuid.UUID) ([]*entities.LearningPath, error)
 	GetPersonalizedPaths(ctx context.Context, graphID, learnerID uuid.UUID, targetNodeID uuid.UUID) ([]*entities.LearningPath, error)
 
-	// 概念图操作
+	// 概念图操�?
 	CreateConceptMap(ctx context.Context, conceptMap *entities.ConceptMap) error
 	GetConceptMap(ctx context.Context, centerNodeID uuid.UUID, depth, maxNodes int) (*entities.ConceptMap, error)
 	GetConceptMapByID(ctx context.Context, id uuid.UUID) (*entities.ConceptMap, error)
@@ -67,13 +67,13 @@ type KnowledgeGraphRepository interface {
 	GetGraphComplexity(ctx context.Context, graphID uuid.UUID) (*GraphComplexity, error)
 	GetLearningPathEffectiveness(ctx context.Context, pathID uuid.UUID) (*PathEffectiveness, error)
 
-	// 推荐和智能分析
+	// 推荐和智能分�?
 	RecommendNextNodes(ctx context.Context, graphID, currentNodeID, learnerID uuid.UUID, limit int) ([]*NodeRecommendation, error)
 	RecommendLearningPaths(ctx context.Context, graphID, learnerID uuid.UUID, targetSkills []string, limit int) ([]*PathRecommendation, error)
 	AnalyzeLearningGaps(ctx context.Context, graphID, learnerID uuid.UUID) ([]*LearningGap, error)
 	PredictLearningDifficulty(ctx context.Context, graphID, nodeID, learnerID uuid.UUID) (*DifficultyPrediction, error)
 
-	// 版本控制和历史
+	// 版本控制和历�?
 	CreateGraphVersion(ctx context.Context, graphID uuid.UUID, version *GraphVersion) error
 	GetGraphVersions(ctx context.Context, graphID uuid.UUID) ([]*GraphVersion, error)
 	RestoreGraphVersion(ctx context.Context, graphID uuid.UUID, versionID uuid.UUID) error
@@ -126,7 +126,7 @@ type GraphComplexity struct {
 	AveragePathLength   float64                 `json:"average_path_length"`
 }
 
-// PathEffectiveness 学习路径有效性
+// PathEffectiveness 学习路径有效�?
 type PathEffectiveness struct {
 	PathID              uuid.UUID   `json:"path_id"`
 	CompletionRate      float64     `json:"completion_rate"`
@@ -190,7 +190,7 @@ type DifficultyPrediction struct {
 	SupportResources    []string    `json:"support_resources"`
 }
 
-// GraphVersion 图版本
+// GraphVersion 图版�?
 type GraphVersion struct {
 	ID          uuid.UUID   `json:"id"`
 	GraphID     uuid.UUID   `json:"graph_id"`
@@ -212,7 +212,7 @@ type Change struct {
 	Timestamp   time.Time   `json:"timestamp"`
 }
 
-// GraphComparison 图比较
+// GraphComparison 图比�?
 type GraphComparison struct {
 	Version1ID      uuid.UUID   `json:"version1_id"`
 	Version2ID      uuid.UUID   `json:"version2_id"`
@@ -234,7 +234,7 @@ type ComparisonSummary struct {
 	MajorChanges    []string `json:"major_changes"`
 }
 
-// GraphValidation 图验证
+// GraphValidation 图验�?
 type GraphValidation struct {
 	IsValid         bool            `json:"is_valid"`
 	Errors          []ValidationError `json:"errors"`
@@ -281,7 +281,7 @@ const (
 	RelationDirectionBoth     RelationDirection = "both"
 )
 
-// GraphStatistics 图统计信息
+// GraphStatistics 图统计信�?
 type GraphStatistics struct {
 	NodeCount       int                                    `json:"node_count"`
 	RelationCount   int                                    `json:"relation_count"`

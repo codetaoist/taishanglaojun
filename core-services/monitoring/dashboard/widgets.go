@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
 // Widget 组件接口
@@ -37,7 +37,7 @@ type WidgetPosition struct {
 	Height int `json:"height"`
 }
 
-// DataSourceConfig 数据源配置
+// DataSourceConfig 数据源配�?
 type DataSourceConfig struct {
 	Type     string                 `json:"type"`     // prometheus, influxdb, static
 	Query    string                 `json:"query"`    // 查询语句
@@ -88,7 +88,7 @@ type MetricWidget struct {
 	Thresholds []MetricThreshold `json:"thresholds"`
 }
 
-// MetricThreshold 指标阈值
+// MetricThreshold 指标阈�?
 type MetricThreshold struct {
 	Value     float64 `json:"value"`
 	Color     string  `json:"color"`
@@ -128,13 +128,13 @@ func (mw *MetricWidget) Render(data interface{}) (map[string]interface{}, error)
 	if metrics, ok := data.([]*models.Metric); ok && len(metrics) > 0 {
 		metric := metrics[0]
 		
-		// 获取当前值
+		// 获取当前�?
 		var currentValue float64
 		if len(metric.Samples) > 0 {
 			currentValue = metric.Samples[len(metric.Samples)-1].Value
 		}
 		
-		// 格式化值
+		// 格式化�?
 		formattedValue := mw.formatValue(currentValue)
 		
 		// 确定颜色
@@ -154,7 +154,7 @@ func (mw *MetricWidget) Render(data interface{}) (map[string]interface{}, error)
 			result["data"].(map[string]interface{})["trend"] = trend
 		}
 		
-		// 添加迷你图数据
+		// 添加迷你图数�?
 		if mw.Config["show_sparkline"].(bool) {
 			sparkline := mw.generateSparkline(metric.Samples)
 			result["data"].(map[string]interface{})["sparkline"] = sparkline
@@ -164,7 +164,7 @@ func (mw *MetricWidget) Render(data interface{}) (map[string]interface{}, error)
 	return result, nil
 }
 
-// formatValue 格式化值
+// formatValue 格式化�?
 func (mw *MetricWidget) formatValue(value float64) string {
 	switch mw.Format {
 	case "bytes":
@@ -178,7 +178,7 @@ func (mw *MetricWidget) formatValue(value float64) string {
 	}
 }
 
-// getThresholdColor 获取阈值颜色
+// getThresholdColor 获取阈值颜�?
 func (mw *MetricWidget) getThresholdColor(value float64) string {
 	for _, threshold := range mw.Thresholds {
 		if mw.checkThreshold(value, threshold) {
@@ -188,7 +188,7 @@ func (mw *MetricWidget) getThresholdColor(value float64) string {
 	return "#28a745" // 默认绿色
 }
 
-// checkThreshold 检查阈值
+// checkThreshold 检查阈�?
 func (mw *MetricWidget) checkThreshold(value float64, threshold MetricThreshold) bool {
 	switch threshold.Condition {
 	case ">":
@@ -242,7 +242,7 @@ func (mw *MetricWidget) calculateTrend(samples []*models.Sample) map[string]inte
 	}
 }
 
-// generateSparkline 生成迷你图数据
+// generateSparkline 生成迷你图数�?
 func (mw *MetricWidget) generateSparkline(samples []*models.Sample) []float64 {
 	var values []float64
 	for _, sample := range samples {
@@ -272,7 +272,7 @@ type ChartSeries struct {
 	YAxis  int    `json:"y_axis"` // 0 for left, 1 for right
 }
 
-// ChartAxis 图表轴
+// ChartAxis 图表�?
 type ChartAxis struct {
 	Title    string  `json:"title"`
 	Min      *float64 `json:"min"`
@@ -318,7 +318,7 @@ func NewChartWidget(id, title, chartType string) *ChartWidget {
 			Format: "time",
 		},
 		YAxis: ChartAxis{
-			Title:  "值",
+			Title:  "�?,
 			Format: "number",
 		},
 		Legend: ChartLegend{
@@ -356,7 +356,7 @@ func (cw *ChartWidget) Render(data interface{}) (map[string]interface{}, error) 
 				for _, metric := range metrics {
 					for _, sample := range metric.Samples {
 						points = append(points, map[string]interface{}{
-							"x": sample.Timestamp.Unix() * 1000, // JavaScript时间戳
+							"x": sample.Timestamp.Unix() * 1000, // JavaScript时间�?
 							"y": sample.Value,
 						})
 					}
@@ -382,7 +382,7 @@ type TableWidget struct {
 	Searchable  bool          `json:"searchable"`
 }
 
-// TableColumn 表格列
+// TableColumn 表格�?
 type TableColumn struct {
 	Key       string `json:"key"`
 	Title     string `json:"title"`
@@ -443,7 +443,7 @@ type StatWidget struct {
 	Stats []StatItem `json:"stats"`
 }
 
-// StatItem 统计项
+// StatItem 统计�?
 type StatItem struct {
 	Label string  `json:"label"`
 	Value float64 `json:"value"`
@@ -489,8 +489,8 @@ func (sw *StatWidget) Render(data interface{}) (map[string]interface{}, error) {
 // AlertWidget 告警组件
 type AlertWidget struct {
 	BaseWidget
-	Severity    []string `json:"severity"`    // 显示的严重级别
-	MaxAlerts   int      `json:"max_alerts"`  // 最大显示数量
+	Severity    []string `json:"severity"`    // 显示的严重级�?
+	MaxAlerts   int      `json:"max_alerts"`  // 最大显示数�?
 	ShowResolved bool    `json:"show_resolved"` // 是否显示已解决的告警
 }
 
@@ -531,7 +531,7 @@ func (aw *AlertWidget) Render(data interface{}) (map[string]interface{}, error) 
 		// 过滤告警
 		filteredAlerts := make([]*models.Alert, 0)
 		for _, alert := range alerts {
-			// 检查严重级别
+			// 检查严重级�?
 			severityMatch := false
 			for _, severity := range aw.Severity {
 				if string(alert.Severity) == severity {
@@ -544,14 +544,14 @@ func (aw *AlertWidget) Render(data interface{}) (map[string]interface{}, error) 
 				continue
 			}
 			
-			// 检查是否显示已解决的告警
+			// 检查是否显示已解决的告�?
 			if !aw.ShowResolved && alert.Status == models.AlertStatusResolved {
 				continue
 			}
 			
 			filteredAlerts = append(filteredAlerts, alert)
 			
-			// 检查最大数量
+			// 检查最大数�?
 			if len(filteredAlerts) >= aw.MaxAlerts {
 				break
 			}
@@ -580,7 +580,7 @@ func formatBytes(bytes float64) string {
 	return fmt.Sprintf("%.1f %cB", bytes/float64(div), "KMGTPE"[exp])
 }
 
-// formatDuration 格式化持续时间
+// formatDuration 格式化持续时�?
 func formatDuration(seconds float64) string {
 	duration := time.Duration(seconds) * time.Second
 	

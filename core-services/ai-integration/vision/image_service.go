@@ -1,6 +1,7 @@
 package vision
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"image"
@@ -80,7 +81,7 @@ type ObjectRecognitionResult struct {
 	Timestamp      time.Time              `json:"timestamp"`
 }
 
-// DetectedObject 检测到的物体
+// DetectedObject 检测到的物�?
 type DetectedObject struct {
 	ID         string      `json:"id"`
 	Label      string      `json:"label"`
@@ -91,7 +92,7 @@ type DetectedObject struct {
 	SubObjects []DetectedObject       `json:"sub_objects,omitempty"`
 }
 
-// BoundingBox 边界框
+// BoundingBox 边界�?
 type BoundingBox struct {
 	X      float64 `json:"x"`
 	Y      float64 `json:"y"`
@@ -110,7 +111,7 @@ type FaceRecognitionResult struct {
 	Timestamp      time.Time              `json:"timestamp"`
 }
 
-// DetectedFace 检测到的人脸
+// DetectedFace 检测到的人�?
 type DetectedFace struct {
 	ID          string                 `json:"id"`
 	BoundingBox BoundingBox            `json:"bounding_box"`
@@ -122,14 +123,14 @@ type DetectedFace struct {
 	Encoding    []float64              `json:"encoding,omitempty"`
 }
 
-// FaceLandmark 人脸关键点
+// FaceLandmark 人脸关键�?
 type FaceLandmark struct {
 	Type string  `json:"type"`
 	X    float64 `json:"x"`
 	Y    float64 `json:"y"`
 }
 
-// FaceAttributes 人脸属性
+// FaceAttributes 人脸属�?
 type FaceAttributes struct {
 	Age        *AgeRange `json:"age,omitempty"`
 	Gender     string    `json:"gender"`
@@ -149,7 +150,7 @@ type AgeRange struct {
 	High int `json:"high"`
 }
 
-// HeadPose 头部姿态
+// HeadPose 头部姿�?
 type HeadPose struct {
 	Pitch float64 `json:"pitch"`
 	Roll  float64 `json:"roll"`
@@ -176,7 +177,7 @@ type TextRecognitionResult struct {
 	Timestamp      time.Time              `json:"timestamp"`
 }
 
-// TextBlock 文本块
+// TextBlock 文本�?
 type TextBlock struct {
 	ID          string      `json:"id"`
 	Text        string      `json:"text"`
@@ -194,7 +195,7 @@ type Word struct {
 	Confidence  float64     `json:"confidence"`
 }
 
-// Line 行
+// Line �?
 type Line struct {
 	Text        string      `json:"text"`
 	BoundingBox BoundingBox `json:"bounding_box"`
@@ -285,7 +286,7 @@ type Line2D struct {
 	Angle float64 `json:"angle"`
 }
 
-// Point2D 二维点
+// Point2D 二维�?
 type Point2D struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
@@ -305,7 +306,7 @@ type ContentAnalysis struct {
 	Weather     string   `json:"weather"`
 }
 
-// TechnicalAnalysis 技术分析
+// TechnicalAnalysis 技术分�?
 type TechnicalAnalysis struct {
 	Resolution   Resolution `json:"resolution"`
 	AspectRatio  string     `json:"aspect_ratio"`
@@ -316,7 +317,7 @@ type TechnicalAnalysis struct {
 	EXIF         EXIFData   `json:"exif,omitempty"`
 }
 
-// Resolution 分辨率
+// Resolution 分辨�?
 type Resolution struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
@@ -352,7 +353,7 @@ type AestheticAnalysis struct {
 	Artistic    float64 `json:"artistic"`
 }
 
-// AnomalyDetectionResult 异常检测结果
+// AnomalyDetectionResult 异常检测结�?
 type AnomalyDetectionResult struct {
 	ID             string                 `json:"id"`
 	RequestID      string                 `json:"request_id"`
@@ -364,7 +365,7 @@ type AnomalyDetectionResult struct {
 	Timestamp      time.Time              `json:"timestamp"`
 }
 
-// DetectedAnomaly 检测到的异常
+// DetectedAnomaly 检测到的异�?
 type DetectedAnomaly struct {
 	ID          string      `json:"id"`
 	Type        string      `json:"type"`
@@ -494,7 +495,7 @@ type ImageConfig struct {
 	EnableCache     bool          `json:"enable_cache" yaml:"enable_cache"`
 	CacheExpiry     time.Duration `json:"cache_expiry" yaml:"cache_expiry"`
 	
-	// 提供商配置
+	// 提供商配�?
 	Providers       map[string]ProviderConfig `json:"providers" yaml:"providers"`
 	
 	// 特定功能配置
@@ -504,7 +505,7 @@ type ImageConfig struct {
 	ImageProcessing ImageProcessingConfig `json:"image_processing" yaml:"image_processing"`
 }
 
-// ProviderConfig 提供商配置
+// ProviderConfig 提供商配�?
 type ProviderConfig struct {
 	Name     string                 `json:"name" yaml:"name"`
 	Endpoint string                 `json:"endpoint" yaml:"endpoint"`
@@ -513,7 +514,7 @@ type ProviderConfig struct {
 	Params   map[string]interface{} `json:"params" yaml:"params"`
 }
 
-// ObjectDetectionConfig 物体检测配置
+// ObjectDetectionConfig 物体检测配�?
 type ObjectDetectionConfig struct {
 	Provider          string  `json:"provider" yaml:"provider"`
 	Model             string  `json:"model" yaml:"model"`
@@ -552,7 +553,7 @@ type ImageProcessingConfig struct {
 	EnableGPU      bool    `json:"enable_gpu" yaml:"enable_gpu"`
 }
 
-// ImageProvider 图像提供商接口
+// ImageProvider 图像提供商接�?
 type ImageProvider interface {
 	// 识别功能
 	RecognizeObjects(ctx context.Context, input ImageInput) (*ObjectRecognitionResult, error)
@@ -566,7 +567,7 @@ type ImageProvider interface {
 	// 处理功能
 	ProcessImage(ctx context.Context, input ImageInput, operations []ImageOperation) (*ImageProcessingResult, error)
 	
-	// 配置和状态
+	// 配置和状�?
 	GetSupportedFormats() []ImageFormat
 	GetSupportedOperations() []OperationType
 	HealthCheck(ctx context.Context) error

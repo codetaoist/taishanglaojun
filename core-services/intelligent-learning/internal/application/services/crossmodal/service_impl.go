@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// CrossModalServiceImpl 跨模态服务实现
+// CrossModalServiceImpl 跨模态服务实�?
 type CrossModalServiceImpl struct {
 	config           *CrossModalServiceConfig
 	textProcessor    *CrossModalTextProcessor
@@ -30,28 +30,28 @@ type CrossModalTextProcessor struct {
 	mu         sync.RWMutex
 }
 
-// ImageProcessor 图像处理器
+// ImageProcessor 图像处理�?
 type ImageProcessor struct {
 	featureExtractor *ImageFeatureExtractor
 	classifier       *ImageClassifier
 	mu              sync.RWMutex
 }
 
-// AudioProcessor 音频处理器
+// AudioProcessor 音频处理�?
 type AudioProcessor struct {
 	spectrogramAnalyzer *SpectrogramAnalyzer
 	speechRecognizer    *SpeechRecognizer
 	mu                 sync.RWMutex
 }
 
-// VideoProcessor 视频处理器
+// VideoProcessor 视频处理�?
 type VideoProcessor struct {
 	frameExtractor *FrameExtractor
 	motionAnalyzer *MotionAnalyzer
 	mu            sync.RWMutex
 }
 
-// ModalityFusionEngine 模态融合引擎
+// ModalityFusionEngine 模态融合引�?
 type ModalityFusionEngine struct {
 	fusionStrategies map[string]*FusionStrategy
 	weightCalculator *WeightCalculator
@@ -66,14 +66,14 @@ type FusionStrategy struct {
 	Parameters  map[string]interface{}
 }
 
-// WeightCalculator 权重计算器
+// WeightCalculator 权重计算�?
 type WeightCalculator struct {
 	learningRate float64
 	momentum     float64
 	weights      map[string]float64
 }
 
-// CrossModalCache 跨模态缓存
+// CrossModalCache 跨模态缓�?
 type CrossModalCache struct {
 	embeddings    map[string]*CachedEmbedding
 	inferences    map[string]*CachedInference
@@ -83,28 +83,28 @@ type CrossModalCache struct {
 	mu            sync.RWMutex
 }
 
-// CachedEmbedding 缓存的嵌入
+// CachedEmbedding 缓存的嵌�?
 type CachedEmbedding struct {
 	Embedding []float64
 	Modality  string
 	Timestamp time.Time
 }
 
-// CachedInference 缓存的推理结果
+// CachedInference 缓存的推理结�?
 type CachedInference struct {
 	Result    interface{}
 	Confidence float64
 	Timestamp time.Time
 }
 
-// CachedFeature 缓存的特征
+// CachedFeature 缓存的特�?
 type CachedFeature struct {
 	Features  map[string]interface{}
 	Modality  string
 	Timestamp time.Time
 }
 
-// CrossModalMetrics 跨模态指标
+// CrossModalMetrics 跨模态指�?
 type CrossModalMetrics struct {
 	TotalRequests      int64
 	SuccessfulRequests int64
@@ -115,7 +115,7 @@ type CrossModalMetrics struct {
 	mu                sync.RWMutex
 }
 
-// ModalityStats 模态统计
+// ModalityStats 模态统�?
 type ModalityStats struct {
 	RequestCount   int64
 	ProcessingTime time.Duration
@@ -131,7 +131,7 @@ type FusionStats struct {
 	WorstStrategy   string
 }
 
-// NewCrossModalServiceImpl 创建跨模态服务实现
+// NewCrossModalServiceImpl 创建跨模态服务实�?
 func NewCrossModalServiceImpl(config *CrossModalServiceConfig) *CrossModalServiceImpl {
 	return &CrossModalServiceImpl{
 		config:         config,
@@ -145,7 +145,7 @@ func NewCrossModalServiceImpl(config *CrossModalServiceConfig) *CrossModalServic
 	}
 }
 
-// ProcessCrossModalInference 处理跨模态推理
+// ProcessCrossModalInference 处理跨模态推�?
 func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context, req *CrossModalInferenceRequest) (*CrossModalInferenceResponse, error) {
 	cms.mu.Lock()
 	defer cms.mu.Unlock()
@@ -153,7 +153,7 @@ func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context
 	startTime := time.Now()
 	cms.metrics.TotalRequests++
 
-	// 检查缓存
+	// 检查缓�?
 	if cached := cms.getCachedInference(req); cached != nil {
 		return &CrossModalInferenceResponse{
 			Success:     true,
@@ -172,7 +172,7 @@ func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context
 	modalityResults := make(map[string]interface{})
 	modalityConfidences := make(map[string]float64)
 
-	// 处理文本模态
+	// 处理文本模�?
 	if textData, exists := req.Data["text"]; exists && textData != nil {
 		result, confidence, err := cms.processTextModality(ctx, textData)
 		if err != nil {
@@ -182,7 +182,7 @@ func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context
 		modalityConfidences["text"] = confidence
 	}
 
-	// 处理图像模态
+	// 处理图像模�?
 	if imageData, exists := req.Data["image"]; exists && imageData != nil {
 		result, confidence, err := cms.processImageModality(ctx, imageData)
 		if err != nil {
@@ -192,7 +192,7 @@ func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context
 		modalityConfidences["image"] = confidence
 	}
 
-	// 处理音频模态
+	// 处理音频模�?
 	if audioData, exists := req.Data["audio"]; exists && audioData != nil {
 		result, confidence, err := cms.processAudioModality(ctx, audioData)
 		if err != nil {
@@ -202,7 +202,7 @@ func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context
 		modalityConfidences["audio"] = confidence
 	}
 
-	// 处理视频模态
+	// 处理视频模�?
 	if videoData, exists := req.Data["video"]; exists && videoData != nil {
 		result, confidence, err := cms.processVideoModality(ctx, videoData)
 		if err != nil {
@@ -212,7 +212,7 @@ func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context
 		modalityConfidences["video"] = confidence
 	}
 
-	// 模态融合
+	// 模态融�?
 	fusionStrategy := "default"
 	if strategy, exists := req.Options["fusion_strategy"]; exists {
 		if strategyStr, ok := strategy.(string); ok {
@@ -247,7 +247,7 @@ func (cms *CrossModalServiceImpl) ProcessCrossModalInference(ctx context.Context
 	}, nil
 }
 
-// ProcessMultiModalContent 处理多模态内容
+// ProcessMultiModalContent 处理多模态内�?
 func (cms *CrossModalServiceImpl) ProcessMultiModalContent(ctx context.Context, content interface{}) (interface{}, error) {
 	cms.mu.Lock()
 	defer cms.mu.Unlock()
@@ -258,7 +258,7 @@ func (cms *CrossModalServiceImpl) ProcessMultiModalContent(ctx context.Context, 
 		return nil, fmt.Errorf("content type detection failed: %w", err)
 	}
 
-	// 根据内容类型选择处理器
+	// 根据内容类型选择处理�?
 	switch contentType {
 	case "text":
 		return cms.textProcessor.processContent(content)
@@ -289,7 +289,7 @@ func (cms *CrossModalServiceImpl) AnalyzeContent(ctx context.Context, content in
 		Confidence:  0.0,
 	}
 
-	// 检测内容类型
+	// 检测内容类�?
 	contentType, err := cms.detectContentType(content)
 	if err != nil {
 		return nil, fmt.Errorf("content type detection failed: %w", err)
@@ -437,7 +437,7 @@ func (cms *CrossModalServiceImpl) processVideoModality(ctx context.Context, vide
 }
 
 func (cms *CrossModalServiceImpl) detectContentType(content interface{}) (string, error) {
-	// 简化的内容类型检测
+	// 简化的内容类型检�?
 	switch content.(type) {
 	case string:
 		return "text", nil
@@ -489,7 +489,7 @@ func (cms *CrossModalServiceImpl) cacheInference(req *CrossModalInferenceRequest
 }
 
 func (cms *CrossModalServiceImpl) processMultiModalContentInternal(content interface{}) (interface{}, error) {
-	// 简化的多模态内容处理
+	// 简化的多模态内容处�?
 	return map[string]interface{}{
 		"processed":  true,
 		"type":       "multimodal",
@@ -503,7 +503,7 @@ func (cms *CrossModalServiceImpl) saveMetrics() error {
 	if err != nil {
 		return err
 	}
-	// 这里可以保存到文件或数据库
+	// 这里可以保存到文件或数据�?
 	_ = metricsData
 	return nil
 }
@@ -517,14 +517,14 @@ func (cms *CrossModalCache) clear() {
 }
 
 func (mfe *ModalityFusionEngine) fuseModalities(results map[string]interface{}, confidences map[string]float64, strategy string) (interface{}, float64, error) {
-	// 简化的模态融合实现
+	// 简化的模态融合实�?
 	fusedResult := map[string]interface{}{
 		"fusion_strategy": strategy,
 		"modalities":      results,
 		"confidences":     confidences,
 	}
 	
-	// 计算平均置信度
+	// 计算平均置信�?
 	totalConfidence := 0.0
 	count := 0
 	for _, conf := range confidences {

@@ -41,7 +41,6 @@ import dayjs from 'dayjs';
 
 const { Option } = Select;
 const { TextArea } = Input;
-const { TabPane } = Tabs;
 
 interface Task {
   id: string;
@@ -485,14 +484,18 @@ const TaskManagement: React.FC = () => {
 
       {/* 任务列表 */}
       <Card>
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab={`全部任务 (${stats.total})`} key="all" />
-          <TabPane tab={`待开始 (${stats.todo})`} key="todo" />
-          <TabPane tab={`进行中 (${stats.inProgress})`} key="in_progress" />
-          <TabPane tab={`待审核 (${stats.review})`} key="review" />
-          <TabPane tab={`已完成 (${stats.completed})`} key="completed" />
-          <TabPane tab="我的任务" key="my_tasks" />
-        </Tabs>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          items={[
+            { key: 'all', label: `全部任务 (${stats.total})` },
+            { key: 'todo', label: `待开始 (${stats.todo})` },
+            { key: 'in_progress', label: `进行中 (${stats.inProgress})` },
+            { key: 'review', label: `待审核 (${stats.review})` },
+            { key: 'completed', label: `已完成 (${stats.completed})` },
+            { key: 'my_tasks', label: '我的任务' }
+          ]}
+        />
 
         <Table
           columns={columns}

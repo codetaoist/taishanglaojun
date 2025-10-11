@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.taishanglaojun.Desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>TaishangLaojun Desktop</name>
+  <name xml:lang="zh-CN">太上老君桌面版</name>
+  <name xml:lang="zh-TW">太上老君桌面版</name>
+  
+  <summary>Advanced communication and collaboration platform</summary>
+  <summary xml:lang="zh-CN">先进的通信和协作平台</summary>
+  <summary xml:lang="zh-TW">先進的通信和協作平台</summary>
+  
+  <description>
+    <p>
+      TaishangLaojun Desktop is a comprehensive communication and collaboration 
+      platform designed for modern teams and individuals. It provides secure 
+      messaging, file sharing, project management, and real-time collaboration 
+      tools in a unified interface.
+    </p>
+    <p xml:lang="zh-CN">
+      太上老君桌面版是一个为现代团队和个人设计的综合通信和协作平台。
+      它在统一的界面中提供安全消息传递、文件共享、项目管理和实时协作工具。
+    </p>
+    <p xml:lang="zh-TW">
+      太上老君桌面版是一個為現代團隊和個人設計的綜合通信和協作平台。
+      它在統一的界面中提供安全消息傳遞、文件共享、項目管理和實時協作工具。
+    </p>
+    
+    <p>Key Features:</p>
+    <ul>
+      <li>End-to-end encrypted messaging for secure communication</li>
+      <li>Real-time file sharing and collaboration</li>
+      <li>Integrated project management tools</li>
+      <li>Cross-platform compatibility</li>
+      <li>Modern and intuitive user interface</li>
+      <li>Audio and video communication capabilities</li>
+      <li>System integration and desktop notifications</li>
+      <li>Customizable themes and appearance</li>
+    </ul>
+    
+    <p xml:lang="zh-CN">主要功能：</p>
+    <ul xml:lang="zh-CN">
+      <li>端到端加密消息传递，确保通信安全</li>
+      <li>实时文件共享和协作</li>
+      <li>集成的项目管理工具</li>
+      <li>跨平台兼容性</li>
+      <li>现代直观的用户界面</li>
+      <li>音频和视频通信功能</li>
+      <li>系统集成和桌面通知</li>
+      <li>可自定义的主题和外观</li>
+    </ul>
+  </description>
+  
+  <launchable type="desktop-id">taishang-laojun.desktop</launchable>
+  
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main application window</caption>
+      <caption xml:lang="zh-CN">主应用程序窗口</caption>
+      <image>https://example.com/screenshots/main-window.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Chat interface</caption>
+      <caption xml:lang="zh-CN">聊天界面</caption>
+      <image>https://example.com/screenshots/chat-interface.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Project management</caption>
+      <caption xml:lang="zh-CN">项目管理</caption>
+      <image>https://example.com/screenshots/project-management.png</image>
+    </screenshot>
+  </screenshots>
+  
+  <url type="homepage">https://taishanglaojun.com</url>
+  <url type="bugtracker">https://github.com/taishanglaojun/desktop-apps/issues</url>
+  <url type="help">https://docs.taishanglaojun.com</url>
+  <url type="donation">https://taishanglaojun.com/donate</url>
+  
+  <developer_name>TaishangLaojun Team</developer_name>
+  <developer_name xml:lang="zh-CN">太上老君团队</developer_name>
+  
+  <categories>
+    <category>Network</category>
+    <category>InstantMessaging</category>
+    <category>Chat</category>
+    <category>Office</category>
+    <category>ProjectManagement</category>
+  </categories>
+  
+  <keywords>
+    <keyword>chat</keyword>
+    <keyword>messaging</keyword>
+    <keyword>communication</keyword>
+    <keyword>collaboration</keyword>
+    <keyword>project</keyword>
+    <keyword>management</keyword>
+    <keyword>secure</keyword>
+    <keyword xml:lang="zh-CN">聊天</keyword>
+    <keyword xml:lang="zh-CN">消息</keyword>
+    <keyword xml:lang="zh-CN">通信</keyword>
+    <keyword xml:lang="zh-CN">协作</keyword>
+    <keyword xml:lang="zh-CN">项目</keyword>
+    <keyword xml:lang="zh-CN">管理</keyword>
+    <keyword xml:lang="zh-CN">安全</keyword>
+  </keywords>
+  
+  <provides>
+    <binary>taishang-laojun</binary>
+    <mediatype>application/x-taishang-project</mediatype>
+  </provides>
+  
+  <releases>
+    <release version="1.0.0" date="2024-01-15">
+      <description>
+        <p>Initial release of TaishangLaojun Desktop</p>
+        <p xml:lang="zh-CN">太上老君桌面版首次发布</p>
+        <ul>
+          <li>Complete messaging and collaboration platform</li>
+          <li>Cross-platform compatibility</li>
+          <li>Modern GTK4 interface</li>
+          <li>End-to-end encryption</li>
+          <li>Project management tools</li>
+        </ul>
+        <ul xml:lang="zh-CN">
+          <li>完整的消息传递和协作平台</li>
+          <li>跨平台兼容性</li>
+          <li>现代GTK4界面</li>
+          <li>端到端加密</li>
+          <li>项目管理工具</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+  
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="violence-desecration">none</content_attribute>
+    <content_attribute id="violence-slavery">none</content_attribute>
+    <content_attribute id="violence-worship">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="sex-homosexuality">none</content_attribute>
+    <content_attribute id="sex-prostitution">none</content_attribute>
+    <content_attribute id="sex-adultery">none</content_attribute>
+    <content_attribute id="sex-appearance">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-info">mild</content_attribute>
+    <content_attribute id="social-audio">intense</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">mild</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+  
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  
+  <requires>
+    <display_length compare="ge">768</display_length>
+    <memory compare="ge">512</memory>
+  </requires>
+  
+  <recommends>
+    <display_length compare="ge">1024</display_length>
+    <memory compare="ge">1024</memory>
+  </recommends>
+</component>

@@ -10,24 +10,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	"../permission"
+	"github.com/codetaoist/taishanglaojun/core-services/permission"
 )
 
-// PermissionMiddleware 权限中间件
+// PermissionMiddleware 权限中间�?
 type PermissionMiddleware struct {
 	service permission.PermissionService
 	logger  *zap.Logger
 	config  PermissionMiddlewareConfig
 }
 
-// PermissionMiddlewareConfig 权限中间件配置
+// PermissionMiddlewareConfig 权限中间件配�?
 type PermissionMiddlewareConfig struct {
 	// 基本配置
 	Enabled          bool     `json:"enabled"`
 	SkipPaths        []string `json:"skip_paths"`
 	SkipMethods      []string `json:"skip_methods"`
 	
-	// 权限检查配置
+	// 权限检查配�?
 	RequireAuth      bool   `json:"require_auth"`
 	DefaultResource  string `json:"default_resource"`
 	DefaultAction    string `json:"default_action"`
@@ -63,10 +63,10 @@ type PermissionRequirement struct {
 	Action      string                 `json:"action"`
 	Conditions  map[string]interface{} `json:"conditions,omitempty"`
 	AllowGuest  bool                   `json:"allow_guest,omitempty"`
-	RequireAll  bool                   `json:"require_all,omitempty"` // 是否需要所有权限
+	RequireAll  bool                   `json:"require_all,omitempty"` // 是否需要所有权�?
 }
 
-// NewPermissionMiddleware 创建权限中间件
+// NewPermissionMiddleware 创建权限中间�?
 func NewPermissionMiddleware(service permission.PermissionService, logger *zap.Logger, config PermissionMiddlewareConfig) *PermissionMiddleware {
 	// 设置默认配置
 	if config.UserIDHeader == "" {
@@ -123,7 +123,7 @@ func (m *PermissionMiddleware) RequirePermissions(requirements ...*PermissionReq
 			return
 		}
 
-		// 检查是否跳过
+		// 检查是否跳�?
 		if m.shouldSkip(c) {
 			c.Next()
 			return
@@ -136,20 +136,20 @@ func (m *PermissionMiddleware) RequirePermissions(requirements ...*PermissionReq
 			return
 		}
 
-		// 检查是否需要认证
+		// 检查是否需要认�?
 		if m.config.RequireAuth && userID == "" {
 			m.handleError(c, m.config.UnauthorizedCode, "Authentication required")
 			return
 		}
 
-		// 检查权限
+		// 检查权�?
 		for _, req := range requirements {
 			if !m.checkPermission(c, userID, tenantID, req) {
-				return // 权限检查失败，已处理错误响应
+				return // 权限检查失败，已处理错误响�?
 			}
 		}
 
-		// 权限检查通过，继续处理
+		// 权限检查通过，继续处�?
 		c.Next()
 	}
 }
@@ -162,7 +162,7 @@ func (m *PermissionMiddleware) RequireRole(roleCode string) gin.HandlerFunc {
 			return
 		}
 
-		// 检查是否跳过
+		// 检查是否跳�?
 		if m.shouldSkip(c) {
 			c.Next()
 			return
@@ -180,12 +180,12 @@ func (m *PermissionMiddleware) RequireRole(roleCode string) gin.HandlerFunc {
 			return
 		}
 
-		// 检查角色
+		// 检查角�?
 		if !m.checkRole(c, userID, tenantID, roleCode) {
-			return // 角色检查失败，已处理错误响应
+			return // 角色检查失败，已处理错误响�?
 		}
 
-		// 角色检查通过，继续处理
+		// 角色检查通过，继续处�?
 		c.Next()
 	}
 }
@@ -198,7 +198,7 @@ func (m *PermissionMiddleware) RequireAnyRole(roleCodes ...string) gin.HandlerFu
 			return
 		}
 
-		// 检查是否跳过
+		// 检查是否跳�?
 		if m.shouldSkip(c) {
 			c.Next()
 			return
@@ -216,7 +216,7 @@ func (m *PermissionMiddleware) RequireAnyRole(roleCodes ...string) gin.HandlerFu
 			return
 		}
 
-		// 检查是否拥有任意角色
+		// 检查是否拥有任意角�?
 		hasRole := false
 		for _, roleCode := range roleCodes {
 			if m.checkRole(c, userID, tenantID, roleCode) {
@@ -230,12 +230,12 @@ func (m *PermissionMiddleware) RequireAnyRole(roleCodes ...string) gin.HandlerFu
 			return
 		}
 
-		// 角色检查通过，继续处理
+		// 角色检查通过，继续处�?
 		c.Next()
 	}
 }
 
-// RequireResourceOwner 要求资源所有者权限的中间件
+// RequireResourceOwner 要求资源所有者权限的中间�?
 func (m *PermissionMiddleware) RequireResourceOwner(resourceType string, resourceIDParam string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !m.config.Enabled {
@@ -243,7 +243,7 @@ func (m *PermissionMiddleware) RequireResourceOwner(resourceType string, resourc
 			return
 		}
 
-		// 检查是否跳过
+		// 检查是否跳�?
 		if m.shouldSkip(c) {
 			c.Next()
 			return
@@ -274,27 +274,27 @@ func (m *PermissionMiddleware) RequireResourceOwner(resourceType string, resourc
 
 		// 检查资源所有权
 		if !m.checkResourceOwnership(c, userID, tenantID, resourceType, resourceID) {
-			return // 所有权检查失败，已处理错误响应
+			return // 所有权检查失败，已处理错误响�?
 		}
 
-		// 所有权检查通过，继续处理
+		// 所有权检查通过，继续处�?
 		c.Next()
 	}
 }
 
-// 检查是否应该跳过权限检查
+// 检查是否应该跳过权限检�?
 func (m *PermissionMiddleware) shouldSkip(c *gin.Context) bool {
 	path := c.Request.URL.Path
 	method := c.Request.Method
 
-	// 检查跳过路径
+	// 检查跳过路�?
 	for _, skipPath := range m.config.SkipPaths {
 		if strings.HasPrefix(path, skipPath) {
 			return true
 		}
 	}
 
-	// 检查跳过方法
+	// 检查跳过方�?
 	for _, skipMethod := range m.config.SkipMethods {
 		if method == skipMethod {
 			return true
@@ -347,14 +347,14 @@ func (m *PermissionMiddleware) extractUserInfo(c *gin.Context) (userID, tenantID
 	return userID, tenantID, nil
 }
 
-// 检查权限
+// 检查权�?
 func (m *PermissionMiddleware) checkPermission(c *gin.Context, userID, tenantID string, req *PermissionRequirement) bool {
 	// 如果允许访客且用户未认证，则通过
 	if req.AllowGuest && userID == "" {
 		return true
 	}
 
-	// 构建权限检查请求
+	// 构建权限检查请�?
 	checkReq := &permission.PermissionCheckRequest{
 		UserID:     userID,
 		TenantID:   tenantID,
@@ -369,7 +369,7 @@ func (m *PermissionMiddleware) checkPermission(c *gin.Context, userID, tenantID 
 		},
 	}
 
-	// 使用默认资源和动作
+	// 使用默认资源和动�?
 	if checkReq.Resource == "" {
 		checkReq.Resource = m.config.DefaultResource
 	}
@@ -377,11 +377,11 @@ func (m *PermissionMiddleware) checkPermission(c *gin.Context, userID, tenantID 
 		checkReq.Action = m.config.DefaultAction
 	}
 
-	// 创建超时上下文
+	// 创建超时上下�?
 	ctx, cancel := context.WithTimeout(c.Request.Context(), m.config.Timeout)
 	defer cancel()
 
-	// 执行权限检查
+	// 执行权限检�?
 	result, err := m.service.CheckPermission(ctx, checkReq)
 	if err != nil {
 		m.logger.Error("Permission check failed", 
@@ -394,26 +394,26 @@ func (m *PermissionMiddleware) checkPermission(c *gin.Context, userID, tenantID 
 		return false
 	}
 
-	// 记录权限检查结果
+	// 记录权限检查结�?
 	if m.config.EnableAuditLog {
 		m.logPermissionCheck(userID, tenantID, checkReq, result)
 	}
 
-	// 检查权限结果
+	// 检查权限结�?
 	if !result.Allowed {
 		m.handleError(c, m.config.ForbiddenCode, result.Reason)
 		return false
 	}
 
-	// 将权限检查结果存储到上下文
+	// 将权限检查结果存储到上下�?
 	c.Set("permission_check_result", result)
 
 	return true
 }
 
-// 检查角色
+// 检查角�?
 func (m *PermissionMiddleware) checkRole(c *gin.Context, userID, tenantID, roleCode string) bool {
-	// 创建超时上下文
+	// 创建超时上下�?
 	ctx, cancel := context.WithTimeout(c.Request.Context(), m.config.Timeout)
 	defer cancel()
 
@@ -431,7 +431,7 @@ func (m *PermissionMiddleware) checkRole(c *gin.Context, userID, tenantID, roleC
 		return false
 	}
 
-	// 检查是否拥有指定角色
+	// 检查是否拥有指定角�?
 	for _, role := range roles.Roles {
 		if role.Code == roleCode && role.IsActive {
 			return true
@@ -444,7 +444,7 @@ func (m *PermissionMiddleware) checkRole(c *gin.Context, userID, tenantID, roleC
 
 // 检查资源所有权
 func (m *PermissionMiddleware) checkResourceOwnership(c *gin.Context, userID, tenantID, resourceType, resourceID string) bool {
-	// 构建资源权限检查请求
+	// 构建资源权限检查请�?
 	checkReq := &permission.PermissionCheckRequest{
 		UserID:   userID,
 		TenantID: tenantID,
@@ -461,11 +461,11 @@ func (m *PermissionMiddleware) checkResourceOwnership(c *gin.Context, userID, te
 		},
 	}
 
-	// 创建超时上下文
+	// 创建超时上下�?
 	ctx, cancel := context.WithTimeout(c.Request.Context(), m.config.Timeout)
 	defer cancel()
 
-	// 执行权限检查
+	// 执行权限检�?
 	result, err := m.service.CheckPermission(ctx, checkReq)
 	if err != nil {
 		m.logger.Error("Resource ownership check failed", 
@@ -478,7 +478,7 @@ func (m *PermissionMiddleware) checkResourceOwnership(c *gin.Context, userID, te
 		return false
 	}
 
-	// 检查权限结果
+	// 检查权限结�?
 	if !result.Allowed {
 		m.handleError(c, m.config.ForbiddenCode, "Resource access denied")
 		return false
@@ -505,7 +505,7 @@ func (m *PermissionMiddleware) handleError(c *gin.Context, code int, message str
 	c.Abort()
 }
 
-// 记录权限检查日志
+// 记录权限检查日�?
 func (m *PermissionMiddleware) logPermissionCheck(userID, tenantID string, req *permission.PermissionCheckRequest, result *permission.PermissionCheckResult) {
 	fields := []zap.Field{
 		zap.String("user_id", userID),
@@ -534,7 +534,7 @@ func (m *PermissionMiddleware) logPermissionCheck(userID, tenantID string, req *
 	}
 }
 
-// GetUserPermissions 获取用户权限的辅助函数
+// GetUserPermissions 获取用户权限的辅助函�?
 func GetUserPermissions(c *gin.Context) ([]*permission.Permission, bool) {
 	if result, exists := c.Get("permission_check_result"); exists {
 		if checkResult, ok := result.(*permission.PermissionCheckResult); ok {
@@ -559,7 +559,7 @@ func HasPermission(c *gin.Context, resource, action string) bool {
 	return false
 }
 
-// GetUserID 获取用户ID的辅助函数
+// GetUserID 获取用户ID的辅助函�?
 func GetUserID(c *gin.Context) (string, bool) {
 	if userID, exists := c.Get("user_id"); exists {
 		if uid, ok := userID.(string); ok {
@@ -569,7 +569,7 @@ func GetUserID(c *gin.Context) (string, bool) {
 	return "", false
 }
 
-// GetTenantID 获取租户ID的辅助函数
+// GetTenantID 获取租户ID的辅助函�?
 func GetTenantID(c *gin.Context) (string, bool) {
 	if tenantID, exists := c.Get("tenant_id"); exists {
 		if tid, ok := tenantID.(string); ok {

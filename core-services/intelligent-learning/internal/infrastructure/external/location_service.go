@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	domainServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // MockLocationService 模拟位置服务
@@ -25,7 +25,7 @@ func (s *MockLocationService) GetLocation(ctx context.Context, userID string) (*
 		Address:     "北京市朝阳区",
 		City:        "北京",
 		Country:     "中国",
-		PlaceType:   "办公室",
+		PlaceType:   "办公�?,
 		Familiarity: 0.8,
 	}, nil
 }
@@ -43,7 +43,7 @@ func (s *MockLocationService) GetLocationHistory(ctx context.Context, userID str
 				Address:     "北京市朝阳区",
 				City:        "北京",
 				Country:     "中国",
-				PlaceType:   "办公室",
+				PlaceType:   "办公�?,
 				Familiarity: 0.8,
 			},
 			Duration: time.Hour,
@@ -57,7 +57,7 @@ func (s *MockLocationService) GetLocationHistory(ctx context.Context, userID str
 	return records, nil
 }
 
-// GetLocationContext 获取位置上下文
+// GetLocationContext 获取位置上下�?
 func (s *MockLocationService) GetLocationContext(ctx context.Context, location *domainServices.Location) (*domainServices.LocationContext, error) {
 	return &domainServices.LocationContext{
 		PlaceType:     location.PlaceType,
@@ -98,7 +98,7 @@ func (s *MockWeatherService) GetWeather(ctx context.Context, location *domainSer
 		AirQuality:     "良好",
 		Sunrise:        "06:30",
 		Sunset:         "18:45",
-		Comfort:        "舒适",
+		Comfort:        "舒�?,
 		LearningIndex:  8.5,
 	}, nil
 }
@@ -125,11 +125,11 @@ func (s *MockWeatherService) GetWeatherForecast(ctx context.Context, location *d
 			Visibility:     10.0,
 			UVIndex:        5,
 			Condition:      "晴朗",
-			Description:    fmt.Sprintf("第%d天天气晴朗", i+1),
+			Description:    fmt.Sprintf("�?d天天气晴�?, i+1),
 			AirQuality:     "良好",
 			Sunrise:        "06:30",
 			Sunset:         "18:45",
-			Comfort:        "舒适",
+			Comfort:        "舒�?,
 			LearningIndex:  8.5 - float64(i)*0.2,
 		}
 	}

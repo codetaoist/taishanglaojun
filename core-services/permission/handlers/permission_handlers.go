@@ -8,16 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	"../permission"
+	"github.com/codetaoist/taishanglaojun/core-services/permission"
 )
 
-// PermissionHandlers 权限处理器
+// PermissionHandlers 权限处理�?
 type PermissionHandlers struct {
 	service permission.PermissionService
 	logger  *zap.Logger
 }
 
-// NewPermissionHandlers 创建权限处理器
+// NewPermissionHandlers 创建权限处理�?
 func NewPermissionHandlers(service permission.PermissionService, logger *zap.Logger) *PermissionHandlers {
 	return &PermissionHandlers{
 		service: service,
@@ -25,7 +25,7 @@ func NewPermissionHandlers(service permission.PermissionService, logger *zap.Log
 	}
 }
 
-// CheckPermission 检查权限
+// CheckPermission 检查权�?
 func (h *PermissionHandlers) CheckPermission(c *gin.Context) {
 	var req permission.PermissionCheckRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -49,7 +49,7 @@ func (h *PermissionHandlers) CheckPermission(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// CheckPermissions 批量检查权限
+// CheckPermissions 批量检查权�?
 func (h *PermissionHandlers) CheckPermissions(c *gin.Context) {
 	var req permission.BatchPermissionCheckRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -87,7 +87,7 @@ func (h *PermissionHandlers) CreateRole(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role", "create") {
 		return
 	}
@@ -110,7 +110,7 @@ func (h *PermissionHandlers) GetRole(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role", "read") {
 		return
 	}
@@ -142,7 +142,7 @@ func (h *PermissionHandlers) UpdateRole(c *gin.Context) {
 
 	req.RoleID = roleID
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role", "update") {
 		return
 	}
@@ -165,7 +165,7 @@ func (h *PermissionHandlers) DeleteRole(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role", "delete") {
 		return
 	}
@@ -183,7 +183,7 @@ func (h *PermissionHandlers) DeleteRole(c *gin.Context) {
 
 // ListRoles 列出角色
 func (h *PermissionHandlers) ListRoles(c *gin.Context) {
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role", "list") {
 		return
 	}
@@ -220,7 +220,7 @@ func (h *PermissionHandlers) CreatePermission(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "permission", "create") {
 		return
 	}
@@ -243,7 +243,7 @@ func (h *PermissionHandlers) GetPermission(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "permission", "read") {
 		return
 	}
@@ -275,7 +275,7 @@ func (h *PermissionHandlers) UpdatePermission(c *gin.Context) {
 
 	req.PermissionID = permissionID
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "permission", "update") {
 		return
 	}
@@ -298,7 +298,7 @@ func (h *PermissionHandlers) DeletePermission(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "permission", "delete") {
 		return
 	}
@@ -316,7 +316,7 @@ func (h *PermissionHandlers) DeletePermission(c *gin.Context) {
 
 // ListPermissions 列出权限
 func (h *PermissionHandlers) ListPermissions(c *gin.Context) {
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "permission", "list") {
 		return
 	}
@@ -339,7 +339,7 @@ func (h *PermissionHandlers) ListPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// AssignPermissionToRole 分配权限给角色
+// AssignPermissionToRole 分配权限给角�?
 func (h *PermissionHandlers) AssignPermissionToRole(c *gin.Context) {
 	var req permission.AssignPermissionToRoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -353,7 +353,7 @@ func (h *PermissionHandlers) AssignPermissionToRole(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role_permission", "assign") {
 		return
 	}
@@ -382,7 +382,7 @@ func (h *PermissionHandlers) RevokePermissionFromRole(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role_permission", "revoke") {
 		return
 	}
@@ -405,7 +405,7 @@ func (h *PermissionHandlers) GetRolePermissions(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "role_permission", "read") {
 		return
 	}
@@ -421,7 +421,7 @@ func (h *PermissionHandlers) GetRolePermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// AssignRoleToUser 分配角色给用户
+// AssignRoleToUser 分配角色给用�?
 func (h *PermissionHandlers) AssignRoleToUser(c *gin.Context) {
 	var req permission.AssignRoleToUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -435,7 +435,7 @@ func (h *PermissionHandlers) AssignRoleToUser(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "user_role", "assign") {
 		return
 	}
@@ -464,7 +464,7 @@ func (h *PermissionHandlers) RevokeRoleFromUser(c *gin.Context) {
 		return
 	}
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "user_role", "revoke") {
 		return
 	}
@@ -489,7 +489,7 @@ func (h *PermissionHandlers) GetUserRoles(c *gin.Context) {
 
 	tenantID := c.Query("tenant_id")
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "user_role", "read") {
 		return
 	}
@@ -518,7 +518,7 @@ func (h *PermissionHandlers) GetUserPermissions(c *gin.Context) {
 
 	tenantID := c.Query("tenant_id")
 
-	// 检查权限
+	// 检查权�?
 	if !h.checkPermission(c, "user_permission", "read") {
 		return
 	}
@@ -537,7 +537,7 @@ func (h *PermissionHandlers) GetUserPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (h *PermissionHandlers) HealthCheck(c *gin.Context) {
 	err := h.service.HealthCheck(c.Request.Context())
 	if err != nil {
@@ -554,7 +554,7 @@ func (h *PermissionHandlers) HealthCheck(c *gin.Context) {
 	})
 }
 
-// 解析角色过滤器
+// 解析角色过滤�?
 func (h *PermissionHandlers) parseRoleFilter(c *gin.Context) (*permission.RoleFilter, error) {
 	filter := &permission.RoleFilter{
 		TenantID: c.Query("tenant_id"),
@@ -584,7 +584,7 @@ func (h *PermissionHandlers) parseRoleFilter(c *gin.Context) (*permission.RoleFi
 		filter.Type = &roleType
 	}
 
-	// 解析是否激活
+	// 解析是否激�?
 	if activeStr := c.Query("is_active"); activeStr != "" {
 		if active, err := strconv.ParseBool(activeStr); err == nil {
 			filter.IsActive = &active
@@ -606,7 +606,7 @@ func (h *PermissionHandlers) parseRoleFilter(c *gin.Context) (*permission.RoleFi
 	return filter, nil
 }
 
-// 解析权限过滤器
+// 解析权限过滤�?
 func (h *PermissionHandlers) parsePermissionFilter(c *gin.Context) (*permission.PermissionFilter, error) {
 	filter := &permission.PermissionFilter{
 		TenantID: c.Query("tenant_id"),
@@ -644,7 +644,7 @@ func (h *PermissionHandlers) parsePermissionFilter(c *gin.Context) (*permission.
 
 // 检查权限的辅助函数
 func (h *PermissionHandlers) checkPermission(c *gin.Context, resource, action string) bool {
-	// 这里应该从上下文中获取用户信息并检查权限
+	// 这里应该从上下文中获取用户信息并检查权�?
 	// 为了简化，这里假设权限检查通过
 	// 在实际应用中，应该使用权限中间件或在这里调用权限服务
 	
@@ -657,7 +657,7 @@ func (h *PermissionHandlers) checkPermission(c *gin.Context, resource, action st
 
 	tenantID, _ := c.Get("tenant_id")
 
-	// 构建权限检查请求
+	// 构建权限检查请�?
 	checkReq := &permission.PermissionCheckRequest{
 		UserID:   userID.(string),
 		TenantID: tenantID.(string),
@@ -665,7 +665,7 @@ func (h *PermissionHandlers) checkPermission(c *gin.Context, resource, action st
 		Action:   action,
 	}
 
-	// 执行权限检查
+	// 执行权限检�?
 	result, err := h.service.CheckPermission(c.Request.Context(), checkReq)
 	if err != nil {
 		h.logger.Error("Permission check failed", zap.Error(err))

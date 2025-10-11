@@ -7,13 +7,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/taishanglaojun/core-services/monitoring/alerting"
-	"github.com/taishanglaojun/core-services/monitoring/automation"
-	"github.com/taishanglaojun/core-services/monitoring/dashboard"
-	"github.com/taishanglaojun/core-services/monitoring/integration"
-	"github.com/taishanglaojun/core-services/monitoring/logging"
-	"github.com/taishanglaojun/core-services/monitoring/performance"
-	"github.com/taishanglaojun/core-services/monitoring/tracing"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/alerting"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/automation"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/dashboard"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/integration"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/logging"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/performance"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/tracing"
 )
 
 func TestTracingSystem(t *testing.T) {
@@ -50,7 +50,7 @@ func TestTracingSystem(t *testing.T) {
 	assert.NotEmpty(t, span.SpanID)
 	assert.NotEmpty(t, span.TraceID)
 
-	// 测试添加标签和日志
+	// 测试添加标签和日�?
 	span.SetTag("test.key", "test.value")
 	span.LogFields(map[string]interface{}{
 		"event": "test-event",
@@ -87,7 +87,7 @@ func TestLoggingSystem(t *testing.T) {
 	err = logManager.Start()
 	require.NoError(t, err)
 
-	// 测试添加收集器
+	// 测试添加收集�?
 	collectorConfig := logging.CollectorConfig{
 		Type:    "console",
 		Enabled: true,
@@ -102,7 +102,7 @@ func TestLoggingSystem(t *testing.T) {
 	err = logManager.AddCollector("test-collector", collector)
 	require.NoError(t, err)
 
-	// 测试添加处理器
+	// 测试添加处理�?
 	processorConfig := logging.ProcessorConfig{
 		Type:    "filter",
 		Enabled: true,
@@ -220,7 +220,7 @@ func TestPerformanceAnalyzer(t *testing.T) {
 	err = analyzer.Start()
 	require.NoError(t, err)
 
-	// 等待一些数据收集
+	// 等待一些数据收�?
 	time.Sleep(2 * time.Second)
 
 	// 测试获取系统指标
@@ -264,7 +264,7 @@ func TestAutomationOrchestrator(t *testing.T) {
 	err = orchestrator.Start()
 	require.NoError(t, err)
 
-	// 测试创建工作流
+	// 测试创建工作�?
 	workflow := &automation.Workflow{
 		ID:          "test-workflow-1",
 		Name:        "Test Workflow",
@@ -293,13 +293,13 @@ func TestAutomationOrchestrator(t *testing.T) {
 	err = orchestrator.CreateWorkflow(workflow)
 	require.NoError(t, err)
 
-	// 测试获取工作流
+	// 测试获取工作�?
 	retrievedWorkflow, err := orchestrator.GetWorkflow(workflow.ID)
 	require.NoError(t, err)
 	assert.Equal(t, workflow.ID, retrievedWorkflow.ID)
 	assert.Equal(t, workflow.Name, retrievedWorkflow.Name)
 
-	// 测试列出工作流
+	// 测试列出工作�?
 	workflows, err := orchestrator.ListWorkflows(automation.WorkflowFilter{})
 	require.NoError(t, err)
 	assert.Len(t, workflows, 1)
@@ -332,7 +332,7 @@ func TestDashboardSystem(t *testing.T) {
 	err = dashboardManager.Start()
 	require.NoError(t, err)
 
-	// 测试创建仪表板
+	// 测试创建仪表�?
 	dashboardDef := &dashboard.Dashboard{
 		ID:          "test-dashboard-1",
 		Name:        "Test Dashboard",
@@ -363,13 +363,13 @@ func TestDashboardSystem(t *testing.T) {
 	err = dashboardManager.CreateDashboard(dashboardDef)
 	require.NoError(t, err)
 
-	// 测试获取仪表板
+	// 测试获取仪表�?
 	retrievedDashboard, err := dashboardManager.GetDashboard(dashboardDef.ID)
 	require.NoError(t, err)
 	assert.Equal(t, dashboardDef.ID, retrievedDashboard.ID)
 	assert.Equal(t, dashboardDef.Name, retrievedDashboard.Name)
 
-	// 测试列出仪表板
+	// 测试列出仪表�?
 	dashboards, err := dashboardManager.ListDashboards()
 	require.NoError(t, err)
 	assert.Len(t, dashboards, 1)
@@ -473,10 +473,10 @@ func TestMonitoringSystemIntegration(t *testing.T) {
 	err = monitoringSystem.Start()
 	require.NoError(t, err)
 
-	// 等待系统初始化
+	// 等待系统初始�?
 	time.Sleep(2 * time.Second)
 
-	// 测试健康检查
+	// 测试健康检�?
 	err = monitoringSystem.HealthCheck()
 	assert.NoError(t, err)
 
@@ -515,7 +515,7 @@ func TestMonitoringSystemIntegration(t *testing.T) {
 }
 
 func TestExecutors(t *testing.T) {
-	// 测试Shell执行器
+	// 测试Shell执行�?
 	t.Run("ShellExecutor", func(t *testing.T) {
 		config := automation.ExecutorConfig{
 			Type:    "shell",
@@ -553,7 +553,7 @@ func TestExecutors(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	// 测试HTTP执行器
+	// 测试HTTP执行�?
 	t.Run("HTTPExecutor", func(t *testing.T) {
 		config := automation.ExecutorConfig{
 			Type:    "http",

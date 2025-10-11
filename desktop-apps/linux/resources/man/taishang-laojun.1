@@ -1,0 +1,165 @@
+.TH TAISHANG-LAOJUN 1 "January 2024" "TaishangLaojun Desktop 1.0.0" "User Commands"
+.SH NAME
+taishang-laojun \- Advanced communication and collaboration platform
+.SH SYNOPSIS
+.B taishang-laojun
+[\fIOPTION\fR]... [\fIFILE\fR]...
+.SH DESCRIPTION
+TaishangLaojun Desktop is a comprehensive communication and collaboration platform 
+designed for modern teams and individuals. It provides secure messaging, file 
+sharing, project management, and real-time collaboration tools in a unified interface.
+
+The application features end-to-end encrypted messaging, real-time file sharing, 
+integrated project management tools, cross-platform compatibility, and a modern 
+GTK4-based user interface with system integration capabilities.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Display help information and exit.
+.TP
+.BR \-v ", " \-\-version
+Display version information and exit.
+.TP
+.BR \-\-verbose
+Enable verbose logging output.
+.TP
+.BR \-\-debug
+Enable debug mode with detailed logging.
+.TP
+.BR \-\-background
+Start the application in background mode (minimized to system tray).
+.TP
+.BR \-\-no\-tray
+Disable system tray integration.
+.TP
+.BR \-\-new\-chat
+Open a new chat window on startup.
+.TP
+.BR \-\-new\-project
+Open the new project dialog on startup.
+.TP
+.BR \-\-settings
+Open the settings dialog on startup.
+.TP
+.BR \-\-config\-dir " " \fIDIRECTORY\fR
+Use the specified directory for configuration files instead of the default.
+.TP
+.BR \-\-data\-dir " " \fIDIRECTORY\fR
+Use the specified directory for application data instead of the default.
+.TP
+.BR \-\-theme " " \fITHEME\fR
+Set the application theme. Available themes: light, dark, auto.
+.TP
+.BR \-\-log\-file " " \fIFILE\fR
+Write log output to the specified file.
+.TP
+.BR \-\-no\-audio
+Disable audio functionality.
+.TP
+.BR \-\-no\-notifications
+Disable desktop notifications.
+.TP
+.BR \-\-fullscreen
+Start the application in fullscreen mode.
+.TP
+.BR \-\-geometry " " \fIWIDTHxHEIGHT\fR
+Set the initial window size.
+.TP
+.BR \-\-position " " \fIX,Y\fR
+Set the initial window position.
+.SH FILES
+.TP
+.I ~/.config/taishang-laojun/
+User configuration directory containing application settings and preferences.
+.TP
+.I ~/.local/share/taishang-laojun/
+User data directory containing chat history, project files, and cached data.
+.TP
+.I ~/.cache/taishang-laojun/
+User cache directory containing temporary files and thumbnails.
+.TP
+.I /usr/share/taishang-laojun/
+System-wide application data directory.
+.TP
+.I /etc/taishang-laojun/
+System-wide configuration directory.
+.SH ENVIRONMENT
+.TP
+.B TAISHANG_CONFIG_DIR
+Override the default configuration directory.
+.TP
+.B TAISHANG_DATA_DIR
+Override the default data directory.
+.TP
+.B TAISHANG_CACHE_DIR
+Override the default cache directory.
+.TP
+.B TAISHANG_LOG_LEVEL
+Set the logging level (DEBUG, INFO, WARNING, ERROR).
+.TP
+.B TAISHANG_THEME
+Set the default theme (light, dark, auto).
+.TP
+.B TAISHANG_NO_TRAY
+Disable system tray integration when set to any value.
+.TP
+.B TAISHANG_AUDIO_BACKEND
+Specify the audio backend to use (pulseaudio, alsa, auto).
+.SH EXAMPLES
+.TP
+Start the application normally:
+.B taishang-laojun
+.TP
+Start in background mode:
+.B taishang-laojun --background
+.TP
+Start with debug logging:
+.B taishang-laojun --debug --log-file ~/taishang-debug.log
+.TP
+Start with custom configuration directory:
+.B taishang-laojun --config-dir ~/.config/taishang-custom
+.TP
+Start with specific window size and position:
+.B taishang-laojun --geometry 1200x800 --position 100,100
+.TP
+Open a project file:
+.B taishang-laojun /path/to/project.tslj
+.SH EXIT STATUS
+.TP
+.B 0
+Successful program execution.
+.TP
+.B 1
+General error or invalid command line arguments.
+.TP
+.B 2
+Configuration error or missing dependencies.
+.TP
+.B 3
+Network or connection error.
+.TP
+.B 4
+File or permission error.
+.SH BUGS
+Report bugs to the TaishangLaojun issue tracker at:
+.UR https://github.com/taishanglaojun/desktop-apps/issues
+.UE
+
+For general support and documentation, visit:
+.UR https://docs.taishanglaojun.com
+.UE
+.SH AUTHOR
+TaishangLaojun Desktop was developed by the TaishangLaojun Team.
+.SH COPYRIGHT
+Copyright \(co 2024 TaishangLaojun Team. License MIT.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH SEE ALSO
+.BR gtk4 (7),
+.BR dbus (1),
+.BR pulseaudio (1),
+.BR alsa (7)
+
+Full documentation is available at:
+.UR https://docs.taishanglaojun.com
+.UE

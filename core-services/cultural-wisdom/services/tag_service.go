@@ -91,7 +91,7 @@ func (s *TagService) GetTagByName(ctx context.Context, name string) (*models.Wis
 
 // CreateTag 创建标签
 func (s *TagService) CreateTag(ctx context.Context, tag *models.WisdomTag) (*models.WisdomTag, error) {
-	// 检查标签名称是否重复
+	// 检查标签名称是否重�?
 	var count int64
 	if err := s.db.WithContext(ctx).Model(&models.WisdomTag{}).Where("name = ? AND is_active = ?", tag.Name, true).Count(&count).Error; err != nil {
 		return nil, fmt.Errorf("failed to check tag name: %w", err)
@@ -139,9 +139,9 @@ func (s *TagService) UpdateTag(ctx context.Context, id int, req interface{}) (*m
 	return tag, nil
 }
 
-// DeleteTag 删除标签（软删除）
+// DeleteTag 删除标签（软删除�?
 func (s *TagService) DeleteTag(ctx context.Context, id int) error {
-	// 检查是否有关联的智慧内容
+	// 检查是否有关联的智慧内�?
 	var relationCount int64
 	if err := s.db.WithContext(ctx).Model(&models.WisdomTagRelation{}).Where("tag_id = ?", id).Count(&relationCount).Error; err != nil {
 		return fmt.Errorf("failed to check tag relations: %w", err)
@@ -151,7 +151,7 @@ func (s *TagService) DeleteTag(ctx context.Context, id int) error {
 		return fmt.Errorf("cannot delete tag with associated wisdom content")
 	}
 	
-	// 执行软删除
+	// 执行软删�?
 	if err := s.db.WithContext(ctx).Model(&models.WisdomTag{}).Where("id = ?", id).Update("is_active", false).Error; err != nil {
 		return fmt.Errorf("failed to delete tag: %w", err)
 	}
@@ -186,7 +186,7 @@ func (s *TagService) GetTagStats(ctx context.Context, tagID int) (*models.TagSta
 		return nil, err
 	}
 	
-	// 获取关联的智慧内容数量
+	// 获取关联的智慧内容数�?
 	var wisdomCount int64
 	if err := s.db.WithContext(ctx).Model(&models.WisdomTagRelation{}).Where("tag_id = ?", tagID).Count(&wisdomCount).Error; err != nil {
 		return nil, fmt.Errorf("failed to get wisdom count: %w", err)
@@ -250,15 +250,15 @@ func (s *TagService) DecrementUsageCount(ctx context.Context, tagID int) error {
 	return nil
 }
 
-// GetOrCreateTag 获取或创建标签
+// GetOrCreateTag 获取或创建标�?
 func (s *TagService) GetOrCreateTag(ctx context.Context, name string) (*models.WisdomTag, error) {
-	// 先尝试获取现有标签
+	// 先尝试获取现有标�?
 	tag, err := s.GetTagByName(ctx, name)
 	if err == nil {
 		return tag, nil
 	}
 	
-	// 如果不存在，创建新标签
+	// 如果不存在，创建新标�?
 	newTag := &models.WisdomTag{
 		Name:        name,
 		Description: "",

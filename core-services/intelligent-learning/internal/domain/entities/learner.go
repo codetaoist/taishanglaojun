@@ -10,19 +10,19 @@ import (
 type LearningStyle string
 
 const (
-	LearningStyleVisual     LearningStyle = "visual"     // 视觉型
-	LearningStyleAuditory   LearningStyle = "auditory"   // 听觉型
-	LearningStyleKinesthetic LearningStyle = "kinesthetic" // 动觉型
-	LearningStyleReading    LearningStyle = "reading"    // 阅读型
+	LearningStyleVisual     LearningStyle = "visual"     // 视觉�?
+	LearningStyleAuditory   LearningStyle = "auditory"   // 听觉�?
+	LearningStyleKinesthetic LearningStyle = "kinesthetic" // 动觉�?
+	LearningStyleReading    LearningStyle = "reading"    // 阅读�?
 )
 
 // LearningPace 学习节奏
 type LearningPace string
 
 const (
-	LearningPaceSlow   LearningPace = "slow"   // 慢节奏
+	LearningPaceSlow   LearningPace = "slow"   // 慢节�?
 	LearningPaceMedium LearningPace = "medium" // 中等节奏
-	LearningPaceFast   LearningPace = "fast"   // 快节奏
+	LearningPaceFast   LearningPace = "fast"   // 快节�?
 )
 
 // LearningGoal 学习目标
@@ -30,11 +30,11 @@ type LearningGoal struct {
 	ID          uuid.UUID `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	TargetSkill string    `json:"target_skill"` // 目标技能
+	TargetSkill string    `json:"target_skill"` // 目标技�?
 	TargetDate  time.Time `json:"target_date"`
 	TargetLevel int       `json:"target_level"` // 目标等级 1-10
-	Priority    int       `json:"priority"`     // 1-10，10为最高优先级
-	IsActive    bool      `json:"is_active"`    // 是否激活
+	Priority    int       `json:"priority"`     // 1-10�?0为最高优先级
+	IsActive    bool      `json:"is_active"`    // 是否激�?
 	Achieved    bool      `json:"achieved"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -52,11 +52,11 @@ type LearningPreference struct {
 	MultimediaContent   bool          `json:"multimedia_content"`
 }
 
-// TimeSlot 时间段
+// TimeSlot 时间�?
 type TimeSlot struct {
 	StartHour int `json:"start_hour"` // 0-23
 	EndHour   int `json:"end_hour"`   // 0-23
-	DayOfWeek int `json:"day_of_week"` // 0-6，0为周日
+	DayOfWeek int `json:"day_of_week"` // 0-6�?为周�?
 }
 
 // LearningHistory 学习历史
@@ -79,25 +79,25 @@ type LearningHistory struct {
 	CreatedAt      time.Time              `json:"created_at" gorm:"autoCreateTime"`
 }
 
-// SkillLevel 技能水平
+// SkillLevel 技能水�?
 type SkillLevel struct {
 	SkillID     uuid.UUID `json:"skill_id"`
 	SkillName   string    `json:"skill_name"`
 	Level       int       `json:"level"`       // 1-10
-	Experience  int       `json:"experience"`  // 经验值
+	Experience  int       `json:"experience"`  // 经验�?
 	Confidence  float64   `json:"confidence"`  // 0.0-1.0
 	LastUpdated time.Time `json:"last_updated"`
 }
 
-// LearningStreak 学习连续性
+// LearningStreak 学习连续�?
 type LearningStreak struct {
 	CurrentStreak int       `json:"current_streak"` // 当前连续天数
-	LongestStreak int       `json:"longest_streak"` // 最长连续天数
+	LongestStreak int       `json:"longest_streak"` // 最长连续天�?
 	LastStudyDate time.Time `json:"last_study_date"`
-	TotalDays     int       `json:"total_days"` // 总学习天数
+	TotalDays     int       `json:"total_days"` // 总学习天�?
 }
 
-// Learner 学习者实体
+// Learner 学习者实�?
 type Learner struct {
 	ID               uuid.UUID            `json:"id"`
 	UserID           uuid.UUID            `json:"user_id"`
@@ -110,8 +110,8 @@ type Learner struct {
 	Bio              string               `json:"bio"`
 	Timezone         string               `json:"timezone"`
 	Language         string               `json:"language"`
-	Level            int                  `json:"level"`            // 学习者等级
-	Experience       int                  `json:"experience"`       // 总经验值
+	Level            int                  `json:"level"`            // 学习者等�?
+	Experience       int                  `json:"experience"`       // 总经验�?
 	ExperienceLevel  DifficultyLevel      `json:"experience_level"` // 经验等级
 	LearningGoals    []LearningGoal       `json:"learning_goals"`
 	Preferences      LearningPreference   `json:"preferences"`
@@ -121,13 +121,13 @@ type Learner struct {
 	Achievements     []uuid.UUID          `json:"achievements"`     // 成就ID列表
 	CurrentPaths     []uuid.UUID          `json:"current_paths"`    // 当前学习路径ID列表
 	CompletedPaths   []uuid.UUID          `json:"completed_paths"`  // 已完成学习路径ID列表
-	WeeklyGoalHours  int                  `json:"weekly_goal_hours"` // 每周学习目标小时数
+	WeeklyGoalHours  int                  `json:"weekly_goal_hours"` // 每周学习目标小时�?
 	TotalStudyHours  int                  `json:"total_study_hours"` // 总学习小时数
 	CreatedAt        time.Time            `json:"created_at"`
 	UpdatedAt        time.Time            `json:"updated_at"`
 }
 
-// NewLearner 创建新的学习者
+// NewLearner 创建新的学习�?
 func NewLearner(userID uuid.UUID, name, email string) *Learner {
 	now := time.Now()
 	return &Learner{
@@ -171,12 +171,12 @@ func getDefaultPreferences() LearningPreference {
 	}
 }
 
-// getDefaultTimeSlots 获取默认时间段
+// getDefaultTimeSlots 获取默认时间�?
 func getDefaultTimeSlots() []TimeSlot {
 	return []TimeSlot{
-		{StartHour: 9, EndHour: 11, DayOfWeek: 1}, // 周一 9-11点
-		{StartHour: 9, EndHour: 11, DayOfWeek: 3}, // 周三 9-11点
-		{StartHour: 9, EndHour: 11, DayOfWeek: 5}, // 周五 9-11点
+		{StartHour: 9, EndHour: 11, DayOfWeek: 1}, // 周一 9-11�?
+		{StartHour: 9, EndHour: 11, DayOfWeek: 3}, // 周三 9-11�?
+		{StartHour: 9, EndHour: 11, DayOfWeek: 5}, // 周五 9-11�?
 	}
 }
 
@@ -202,9 +202,9 @@ func (l *Learner) UpdatePreferences(preferences LearningPreference) {
 	l.UpdatedAt = time.Now()
 }
 
-// AddSkill 添加或更新技能
+// AddSkill 添加或更新技�?
 func (l *Learner) AddSkill(skillID uuid.UUID, skillName string, level int, experience int, confidence float64) {
-	// 查找是否已存在该技能
+	// 查找是否已存在该技�?
 	for i, skill := range l.Skills {
 		if skill.SkillID == skillID {
 			l.Skills[i].Level = level
@@ -216,7 +216,7 @@ func (l *Learner) AddSkill(skillID uuid.UUID, skillName string, level int, exper
 		}
 	}
 
-	// 添加新技能
+	// 添加新技�?
 	skill := SkillLevel{
 		SkillID:     skillID,
 		SkillName:   skillName,
@@ -252,18 +252,18 @@ func (l *Learner) AddLearningHistory(contentID uuid.UUID, contentType string, du
 	}
 
 	l.LearningHistory = append(l.LearningHistory, history)
-	l.TotalStudyHours += duration / 3600 // 转换为小时
+	l.TotalStudyHours += duration / 3600 // 转换为小�?
 	l.updateStreak()
 	l.UpdatedAt = time.Now()
 }
 
-// updateStreak 更新学习连续性
+// updateStreak 更新学习连续�?
 func (l *Learner) updateStreak() {
 	today := time.Now().Truncate(24 * time.Hour)
 	lastStudy := l.Streak.LastStudyDate.Truncate(24 * time.Hour)
 
 	if lastStudy.Equal(today) {
-		// 今天已经学习过了，不需要更新
+		// 今天已经学习过了，不需要更�?
 		return
 	}
 
@@ -271,11 +271,11 @@ func (l *Learner) updateStreak() {
 		// 昨天学习过，连续天数+1
 		l.Streak.CurrentStreak++
 	} else if lastStudy.Before(today.Add(-24 * time.Hour)) {
-		// 中断了，重新开始
+		// 中断了，重新开�?
 		l.Streak.CurrentStreak = 1
 	}
 
-	// 更新最长连续天数
+	// 更新最长连续天�?
 	if l.Streak.CurrentStreak > l.Streak.LongestStreak {
 		l.Streak.LongestStreak = l.Streak.CurrentStreak
 	}
@@ -284,11 +284,11 @@ func (l *Learner) updateStreak() {
 	l.Streak.TotalDays++
 }
 
-// AddExperience 增加经验值
+// AddExperience 增加经验�?
 func (l *Learner) AddExperience(exp int) {
 	l.Experience += exp
 	
-	// 检查是否升级
+	// 检查是否升�?
 	newLevel := l.calculateLevel(l.Experience)
 	if newLevel > l.Level {
 		l.Level = newLevel
@@ -298,9 +298,9 @@ func (l *Learner) AddExperience(exp int) {
 	l.UpdatedAt = time.Now()
 }
 
-// calculateLevel 根据经验值计算等级
+// calculateLevel 根据经验值计算等�?
 func (l *Learner) calculateLevel(experience int) int {
-	// 简单的等级计算公式：每1000经验值升一级
+	// 简单的等级计算公式：每1000经验值升一�?
 	return (experience / 1000) + 1
 }
 
@@ -345,7 +345,7 @@ func (l *Learner) CalculateWeeklyProgress() float64 {
 		return 0
 	}
 
-	// 获取本周开始时间
+	// 获取本周开始时�?
 	now := time.Now()
 	weekStart := now.AddDate(0, 0, -int(now.Weekday()))
 	weekStart = time.Date(weekStart.Year(), weekStart.Month(), weekStart.Day(), 0, 0, 0, 0, weekStart.Location())
@@ -361,13 +361,13 @@ func (l *Learner) CalculateWeeklyProgress() float64 {
 	return float64(weeklyHours) / float64(l.WeeklyGoalHours)
 }
 
-// Skill 技能定义
+// Skill 技能定�?
 type Skill struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	Level       int       `json:"level"`       // 1-10
-	Category    string    `json:"category"`    // 技能分类
-	Description string    `json:"description"` // 技能描述
+	Category    string    `json:"category"`    // 技能分�?
+	Description string    `json:"description"` // 技能描�?
 	AcquiredAt  time.Time `json:"acquired_at"` // 获得时间
 	UpdatedAt   time.Time `json:"updated_at"`  // 更新时间
 }

@@ -45,7 +45,7 @@ import dayjs from 'dayjs';
 
 const { Option } = Select;
 const { TextArea } = Input;
-const { TabPane } = Tabs;
+
 
 interface TeamMember {
   id: string;
@@ -553,26 +553,38 @@ const TeamCollaboration: React.FC = () => {
       <Row gutter={16}>
         <Col span={16}>
           <Card>
-            <Tabs activeKey={activeTab} onChange={setActiveTab}>
-              <TabPane tab={`团队成员 (${members.length})`} key="members">
-                <Table
-                  columns={memberColumns}
-                  dataSource={members}
-                  rowKey="id"
-                  loading={loading}
-                  pagination={false}
-                />
-              </TabPane>
-              <TabPane tab={`共享文档 (${documents.length})`} key="documents">
-                <Table
-                  columns={documentColumns}
-                  dataSource={documents}
-                  rowKey="id"
-                  loading={loading}
-                  pagination={false}
-                />
-              </TabPane>
-            </Tabs>
+            <Tabs 
+              activeKey={activeTab} 
+              onChange={setActiveTab}
+              items={[
+                {
+                  key: 'members',
+                  label: `团队成员 (${members.length})`,
+                  children: (
+                    <Table
+                      columns={memberColumns}
+                      dataSource={members}
+                      rowKey="id"
+                      loading={loading}
+                      pagination={false}
+                    />
+                  )
+                },
+                {
+                  key: 'documents',
+                  label: `共享文档 (${documents.length})`,
+                  children: (
+                    <Table
+                      columns={documentColumns}
+                      dataSource={documents}
+                      rowKey="id"
+                      loading={loading}
+                      pagination={false}
+                    />
+                  )
+                }
+              ]}
+            />
           </Card>
         </Col>
         

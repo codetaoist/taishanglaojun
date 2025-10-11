@@ -12,14 +12,14 @@ import (
 	"github.com/taishanglaojun/health-management/internal/domain"
 )
 
-// HealthDashboardService 健康仪表板服务
+// HealthDashboardService 健康仪表板服�?
 type HealthDashboardService struct {
 	healthDataRepo    domain.HealthDataRepository
 	healthProfileRepo domain.HealthProfileRepository
 	eventPublisher    EventPublisher
 }
 
-// NewHealthDashboardService 创建健康仪表板服务
+// NewHealthDashboardService 创建健康仪表板服�?
 func NewHealthDashboardService(
 	healthDataRepo domain.HealthDataRepository,
 	healthProfileRepo domain.HealthProfileRepository,
@@ -32,17 +32,17 @@ func NewHealthDashboardService(
 	}
 }
 
-// DashboardPeriod 仪表板时间周期
+// DashboardPeriod 仪表板时间周�?
 type DashboardPeriod string
 
 const (
-	DashboardPeriodDay   DashboardPeriod = "day"   // 日
-	DashboardPeriodWeek  DashboardPeriod = "week"  // 周
-	DashboardPeriodMonth DashboardPeriod = "month" // 月
-	DashboardPeriodYear  DashboardPeriod = "year"  // 年
+	DashboardPeriodDay   DashboardPeriod = "day"   // �?
+	DashboardPeriodWeek  DashboardPeriod = "week"  // �?
+	DashboardPeriodMonth DashboardPeriod = "month" // �?
+	DashboardPeriodYear  DashboardPeriod = "year"  // �?
 )
 
-// HealthDashboard 健康仪表板
+// HealthDashboard 健康仪表�?
 type HealthDashboard struct {
 	UserID           uuid.UUID                  `json:"user_id"`
 	Period           DashboardPeriod            `json:"period"`
@@ -100,7 +100,7 @@ type TrendChart struct {
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
-// ChartDataPoint 图表数据点
+// ChartDataPoint 图表数据�?
 type ChartDataPoint struct {
 	X     interface{} `json:"x"`
 	Y     float64     `json:"y"`
@@ -108,7 +108,7 @@ type ChartDataPoint struct {
 	Color string      `json:"color,omitempty"`
 }
 
-// ChartAxis 图表轴
+// ChartAxis 图表�?
 type ChartAxis struct {
 	Label  string `json:"label"`
 	Unit   string `json:"unit,omitempty"`
@@ -127,7 +127,7 @@ type HealthScore struct {
 	Factors      []ScoreFactor          `json:"factors"`
 }
 
-// ScoreHistoryPoint 评分历史点
+// ScoreHistoryPoint 评分历史�?
 type ScoreHistoryPoint struct {
 	Date  time.Time `json:"date"`
 	Score float64   `json:"score"`
@@ -142,7 +142,7 @@ type ScoreFactor struct {
 	Description string  `json:"description,omitempty"`
 }
 
-// DashboardRecommendation 仪表板建议
+// DashboardRecommendation 仪表板建�?
 type DashboardRecommendation struct {
 	ID          uuid.UUID `json:"id"`
 	Type        string    `json:"type"`
@@ -154,7 +154,7 @@ type DashboardRecommendation struct {
 	Color       string    `json:"color,omitempty"`
 }
 
-// DashboardAlert 仪表板警报
+// DashboardAlert 仪表板警�?
 type DashboardAlert struct {
 	ID          uuid.UUID `json:"id"`
 	Type        string    `json:"type"`
@@ -195,30 +195,30 @@ type HealthGoal struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-// GetDashboardRequest 获取仪表板请求
+// GetDashboardRequest 获取仪表板请�?
 type GetDashboardRequest struct {
 	UserID uuid.UUID       `json:"user_id" binding:"required"`
 	Period DashboardPeriod `json:"period,omitempty"`
 }
 
-// GetDashboardResponse 获取仪表板响应
+// GetDashboardResponse 获取仪表板响�?
 type GetDashboardResponse struct {
 	Dashboard HealthDashboard `json:"dashboard"`
 	Timestamp time.Time       `json:"timestamp"`
 }
 
-// GetDashboardSummaryRequest 获取仪表板摘要请求
+// GetDashboardSummaryRequest 获取仪表板摘要请�?
 type GetDashboardSummaryRequest struct {
 	UserID uuid.UUID `json:"user_id" binding:"required"`
 }
 
-// GetDashboardSummaryResponse 获取仪表板摘要响应
+// GetDashboardSummaryResponse 获取仪表板摘要响�?
 type GetDashboardSummaryResponse struct {
 	Summary   HealthOverview `json:"summary"`
 	Timestamp time.Time      `json:"timestamp"`
 }
 
-// GetDashboard 获取健康仪表板
+// GetDashboard 获取健康仪表�?
 func (s *HealthDashboardService) GetDashboard(ctx context.Context, req *GetDashboardRequest) (*GetDashboardResponse, error) {
 	// 设置默认周期
 	if req.Period == "" {
@@ -235,7 +235,7 @@ func (s *HealthDashboardService) GetDashboard(ctx context.Context, req *GetDashb
 	endTime := time.Now()
 	startTime := s.calculateStartTime(endTime, req.Period)
 
-	// 构建仪表板
+	// 构建仪表�?
 	dashboard := HealthDashboard{
 		UserID:      req.UserID,
 		Period:      req.Period,
@@ -258,7 +258,7 @@ func (s *HealthDashboardService) GetDashboard(ctx context.Context, req *GetDashb
 	}, nil
 }
 
-// GetDashboardSummary 获取仪表板摘要
+// GetDashboardSummary 获取仪表板摘�?
 func (s *HealthDashboardService) GetDashboardSummary(ctx context.Context, req *GetDashboardSummaryRequest) (*GetDashboardSummaryResponse, error) {
 	// 获取用户健康档案
 	profile, err := s.healthProfileRepo.GetByUserID(ctx, req.UserID)
@@ -266,7 +266,7 @@ func (s *HealthDashboardService) GetDashboardSummary(ctx context.Context, req *G
 		return nil, fmt.Errorf("failed to get health profile: %w", err)
 	}
 
-	// 计算时间范围（最近30天）
+	// 计算时间范围（最�?0天）
 	endTime := time.Now()
 	startTime := endTime.AddDate(0, 0, -30)
 
@@ -281,7 +281,7 @@ func (s *HealthDashboardService) GetDashboardSummary(ctx context.Context, req *G
 
 // generateOverview 生成健康概览
 func (s *HealthDashboardService) generateOverview(ctx context.Context, userID uuid.UUID, startTime, endTime time.Time, profile *domain.HealthProfile) HealthOverview {
-	// 获取所有健康数据
+	// 获取所有健康数�?
 	allData, _ := s.healthDataRepo.GetByUserID(ctx, userID, startTime, endTime)
 
 	// 计算活跃天数
@@ -342,7 +342,7 @@ func (s *HealthDashboardService) generateKeyMetrics(ctx context.Context, userID 
 			ID:          "steps",
 			Name:        "日均步数",
 			Value:       avgSteps,
-			Unit:        "步",
+			Unit:        "�?,
 			Change:      change,
 			ChangeType:  changeType,
 			Status:      status,
@@ -373,7 +373,7 @@ func (s *HealthDashboardService) generateKeyMetrics(ctx context.Context, userID 
 			Status:      status,
 			Icon:        "❤️",
 			Color:       s.getStatusColor(status),
-			Description: "静息心率平均值",
+			Description: "静息心率平均�?,
 		})
 	}
 
@@ -410,7 +410,7 @@ func (s *HealthDashboardService) generateKeyMetrics(ctx context.Context, userID 
 func (s *HealthDashboardService) generateTrendCharts(ctx context.Context, userID uuid.UUID, startTime, endTime time.Time, period DashboardPeriod) []TrendChart {
 	var charts []TrendChart
 
-	// 步数趋势图
+	// 步数趋势�?
 	stepsData, _ := s.healthDataRepo.GetByUserIDAndType(ctx, userID, "steps", startTime, endTime)
 	if len(stepsData) > 0 {
 		chartData := s.convertToChartData(stepsData, period)
@@ -421,11 +421,11 @@ func (s *HealthDashboardService) generateTrendCharts(ctx context.Context, userID
 			DataType: "steps",
 			Data:     chartData,
 			XAxis:    ChartAxis{Label: "时间", Format: s.getTimeFormat(period)},
-			YAxis:    ChartAxis{Label: "步数", Unit: "步"},
+			YAxis:    ChartAxis{Label: "步数", Unit: "�?},
 		})
 	}
 
-	// 心率趋势图
+	// 心率趋势�?
 	heartRateData, _ := s.healthDataRepo.GetByUserIDAndType(ctx, userID, "heart_rate", startTime, endTime)
 	if len(heartRateData) > 0 {
 		chartData := s.convertToChartData(heartRateData, period)
@@ -440,7 +440,7 @@ func (s *HealthDashboardService) generateTrendCharts(ctx context.Context, userID
 		})
 	}
 
-	// 睡眠趋势图
+	// 睡眠趋势�?
 	sleepData, _ := s.healthDataRepo.GetByUserIDAndType(ctx, userID, "sleep_duration", startTime, endTime)
 	if len(sleepData) > 0 {
 		chartData := s.convertToChartData(sleepData, period)
@@ -465,7 +465,7 @@ func (s *HealthDashboardService) generateHealthScore(ctx context.Context, userID
 	heartRateData, _ := s.healthDataRepo.GetByUserIDAndType(ctx, userID, "heart_rate", startTime, endTime)
 	sleepData, _ := s.healthDataRepo.GetByUserIDAndType(ctx, userID, "sleep_duration", startTime, endTime)
 
-	// 计算各类别评分
+	// 计算各类别评�?
 	categories := make(map[string]float64)
 	factors := []ScoreFactor{}
 
@@ -479,21 +479,21 @@ func (s *HealthDashboardService) generateHealthScore(ctx context.Context, userID
 			Weight:      0.3,
 			Score:       exerciseScore,
 			Impact:      s.getScoreImpact(exerciseScore),
-			Description: "基于日均步数的运动评分",
+			Description: "基于日均步数的运动评�?,
 		})
 	}
 
-	// 心血管评分
+	// 心血管评�?
 	if len(heartRateData) > 0 {
 		avgHeartRate := s.calculateAverage(heartRateData)
 		cardioScore := s.calculateCardioScore(avgHeartRate)
 		categories["cardiovascular"] = cardioScore
 		factors = append(factors, ScoreFactor{
-			Name:        "心血管健康",
+			Name:        "心血管健�?,
 			Weight:      0.25,
 			Score:       cardioScore,
 			Impact:      s.getScoreImpact(cardioScore),
-			Description: "基于心率的心血管健康评分",
+			Description: "基于心率的心血管健康评�?,
 		})
 	}
 
@@ -507,7 +507,7 @@ func (s *HealthDashboardService) generateHealthScore(ctx context.Context, userID
 			Weight:      0.25,
 			Score:       sleepScore,
 			Impact:      s.getScoreImpact(sleepScore),
-			Description: "基于睡眠时长的睡眠质量评分",
+			Description: "基于睡眠时长的睡眠质量评�?,
 		})
 	}
 
@@ -540,7 +540,7 @@ func (s *HealthDashboardService) generateHealthScore(ctx context.Context, userID
 	}
 }
 
-// generateDashboardRecommendations 生成仪表板建议
+// generateDashboardRecommendations 生成仪表板建�?
 func (s *HealthDashboardService) generateDashboardRecommendations(ctx context.Context, userID uuid.UUID, startTime, endTime time.Time) []DashboardRecommendation {
 	var recommendations []DashboardRecommendation
 
@@ -555,7 +555,7 @@ func (s *HealthDashboardService) generateDashboardRecommendations(ctx context.Co
 				Priority:    "high",
 				Title:       "增加日常活动",
 				Description: "您的日均步数较低，建议增加日常活动量",
-				Action:      "设定每日8000步目标",
+				Action:      "设定每日8000步目�?,
 				Icon:        "👟",
 				Color:       "#ff6b6b",
 			})
@@ -572,7 +572,7 @@ func (s *HealthDashboardService) generateDashboardRecommendations(ctx context.Co
 				Type:        "sleep",
 				Priority:    "medium",
 				Title:       "改善睡眠质量",
-				Description: "您的睡眠时间不足，建议调整作息",
+				Description: "您的睡眠时间不足，建议调整作�?,
 				Action:      "建立规律睡眠时间",
 				Icon:        "😴",
 				Color:       "#4ecdc4",
@@ -583,11 +583,11 @@ func (s *HealthDashboardService) generateDashboardRecommendations(ctx context.Co
 	return recommendations
 }
 
-// generateDashboardAlerts 生成仪表板警报
+// generateDashboardAlerts 生成仪表板警�?
 func (s *HealthDashboardService) generateDashboardAlerts(ctx context.Context, userID uuid.UUID, startTime, endTime time.Time) []DashboardAlert {
 	var alerts []DashboardAlert
 
-	// 检查心率异常
+	// 检查心率异�?
 	heartRateData, _ := s.healthDataRepo.GetByUserIDAndType(ctx, userID, "heart_rate", startTime, endTime)
 	for _, data := range heartRateData {
 		if data.Value > 120 {
@@ -596,7 +596,7 @@ func (s *HealthDashboardService) generateDashboardAlerts(ctx context.Context, us
 				Type:      "heart_rate",
 				Severity:  "warning",
 				Title:     "心率偏高",
-				Message:   fmt.Sprintf("检测到心率异常：%.0f bpm", data.Value),
+				Message:   fmt.Sprintf("检测到心率异常�?.0f bpm", data.Value),
 				Timestamp: data.RecordedAt,
 				IsRead:    false,
 				Icon:      "⚠️",
@@ -626,7 +626,7 @@ func (s *HealthDashboardService) generateAchievements(ctx context.Context, userI
 			achievements = append(achievements, Achievement{
 				ID:          uuid.New(),
 				Name:        "步行达人",
-				Description: "单日步数达到10000步",
+				Description: "单日步数达到10000�?,
 				Type:        "exercise",
 				Progress:    100,
 				Target:      10000,
@@ -648,10 +648,10 @@ func (s *HealthDashboardService) generateHealthGoals(ctx context.Context, userID
 	goals = append(goals, HealthGoal{
 		ID:          uuid.New(),
 		Name:        "每日步数目标",
-		Description: "每天走路10000步",
+		Description: "每天走路10000�?,
 		Type:        "exercise",
 		Target:      10000,
-		Current:     7500, // 示例值
+		Current:     7500, // 示例�?
 		Progress:    75,
 		Status:      "active",
 		CreatedAt:   time.Now().AddDate(0, 0, -30),
@@ -663,7 +663,7 @@ func (s *HealthDashboardService) generateHealthGoals(ctx context.Context, userID
 		Description: "每天睡眠8小时",
 		Type:        "sleep",
 		Target:      8,
-		Current:     7.2, // 示例值
+		Current:     7.2, // 示例�?
 		Progress:    90,
 		Status:      "active",
 		CreatedAt:   time.Now().AddDate(0, 0, -30),
@@ -733,7 +733,7 @@ func (s *HealthDashboardService) identifyRiskFactors(data []*domain.HealthData, 
 func (s *HealthDashboardService) calculateHealthCategories(data []*domain.HealthData) map[string]float64 {
 	categories := make(map[string]float64)
 	
-	// 按数据类型分组计算评分
+	// 按数据类型分组计算评�?
 	typeGroups := make(map[string][]*domain.HealthData)
 	for _, d := range data {
 		typeGroups[d.DataType] = append(typeGroups[d.DataType], d)
@@ -788,11 +788,11 @@ func (s *HealthDashboardService) calculateSleepScore(sleepHours float64) float64
 
 func (s *HealthDashboardService) generateHealthSummary(score float64, riskFactors []string, activeDays int) string {
 	if score >= 80 {
-		return fmt.Sprintf("您的健康状况良好，最近%d天保持了良好的活跃度", activeDays)
+		return fmt.Sprintf("您的健康状况良好，最�?d天保持了良好的活跃度", activeDays)
 	} else if score >= 60 {
-		return fmt.Sprintf("您的健康状况一般，建议关注%d个风险因素", len(riskFactors))
+		return fmt.Sprintf("您的健康状况一般，建议关注%d个风险因�?, len(riskFactors))
 	} else {
-		return "您的健康状况需要改善，建议咨询医生并调整生活方式"
+		return "您的健康状况需要改善，建议咨询医生并调整生活方�?
 	}
 }
 
@@ -836,7 +836,7 @@ func (s *HealthDashboardService) getStatusColor(status string) string {
 func (s *HealthDashboardService) convertToChartData(data []*domain.HealthData, period DashboardPeriod) []ChartDataPoint {
 	var chartData []ChartDataPoint
 
-	// 按时间排序
+	// 按时间排�?
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].RecordedAt.Before(data[j].RecordedAt)
 	})

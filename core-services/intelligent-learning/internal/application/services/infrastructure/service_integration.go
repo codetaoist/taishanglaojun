@@ -6,12 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation/content"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/adaptive"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/analytics/realtime"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/crossmodal"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/knowledge"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/application/services/recommendation/content"
 )
 
 // IntelligentLearningServiceIntegration 智能学习服务集成
@@ -25,7 +25,7 @@ type IntelligentLearningServiceIntegration struct {
 	learningAnalyticsReportingService    *analytics.LearningAnalyticsReportingService
 	intelligentContentRecommendationService *content.IntelligentContentRecommendationService
 
-	// 配置和状态
+	// 配置和状�?
 	config  *IntegrationConfig
 	cache   *IntegrationCache
 	metrics *IntegrationMetrics
@@ -105,7 +105,7 @@ type LearningLoadBalancingConfig struct {
 	MaxRetries        int
 }
 
-// CircuitBreakerConfig 熔断器配置
+// CircuitBreakerConfig 熔断器配�?
 type CircuitBreakerConfig struct {
 	FailureThreshold int
 	RecoveryTimeout  time.Duration
@@ -163,7 +163,7 @@ type IntegrationUserSession struct {
 	Context      map[string]interface{}
 }
 
-// SystemState 系统状态
+// SystemState 系统状�?
 type SystemState struct {
 	ServiceStates    map[string]*ServiceState
 	SystemHealth     *HealthStatus
@@ -171,7 +171,7 @@ type SystemState struct {
 	LastUpdated      time.Time
 }
 
-// ServiceState 服务状态
+// ServiceState 服务状�?
 type ServiceState struct {
 	ServiceID   string
 	Status      string
@@ -181,7 +181,7 @@ type ServiceState struct {
 	RequestCount int
 }
 
-// HealthStatus 健康状态
+// HealthStatus 健康状�?
 type HealthStatus struct {
 	Overall     string
 	Services    map[string]string
@@ -271,7 +271,7 @@ func NewIntelligentLearningServiceIntegration(
 		metrics: newIntegrationMetrics(),
 	}
 	
-	// 初始化服务依赖关系
+	// 初始化服务依赖关�?
 	integration.initializeServiceDependencies()
 	
 	return integration
@@ -305,7 +305,7 @@ func newIntegrationMetrics() *IntegrationMetrics {
 	}
 }
 
-// initializeServiceDependencies 初始化服务依赖关系
+// initializeServiceDependencies 初始化服务依赖关�?
 func (ils *IntelligentLearningServiceIntegration) initializeServiceDependencies() {
 	// 设置默认服务依赖关系
 	if ils.config.IntegrationSettings.ServiceDependencies == nil {
@@ -402,9 +402,9 @@ func (ils *IntelligentLearningServiceIntegration) validateLearningRequest(reques
 // processServicesInParallel 并行处理服务
 func (ils *IntelligentLearningServiceIntegration) processServicesInParallel(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
 	var wg sync.WaitGroup
-	errorChan := make(chan error, 7) // 7个服务
+	errorChan := make(chan error, 7) // 7个服�?
 	
-	// 跨模态服务
+	// 跨模态服�?
 	if ils.config.ServiceConfig.EnableCrossModalService {
 		wg.Add(1)
 		go func() {
@@ -448,7 +448,7 @@ func (ils *IntelligentLearningServiceIntegration) processServicesInParallel(ctx 
 		}()
 	}
 	
-	// 自动化知识图谱服务
+	// 自动化知识图谱服�?
 	if ils.config.ServiceConfig.EnableAutomatedKnowledgeGraphService {
 		wg.Add(1)
 		go func() {
@@ -481,11 +481,11 @@ func (ils *IntelligentLearningServiceIntegration) processServicesInParallel(ctx 
 		}()
 	}
 	
-	// 等待所有服务完成
+	// 等待所有服务完�?
 	wg.Wait()
 	close(errorChan)
 	
-	// 检查错误
+	// 检查错�?
 	var errors []error
 	for err := range errorChan {
 		errors = append(errors, err)
@@ -498,9 +498,9 @@ func (ils *IntelligentLearningServiceIntegration) processServicesInParallel(ctx 
 	return nil
 }
 
-// processCrossModalService 处理跨模态服务
+// processCrossModalService 处理跨模态服�?
 func (ils *IntelligentLearningServiceIntegration) processCrossModalService(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 简化实现
+	// 简化实�?
 	result := map[string]interface{}{
 		"service": "cross_modal",
 		"status":  "processed",
@@ -516,7 +516,7 @@ func (ils *IntelligentLearningServiceIntegration) processCrossModalService(ctx c
 
 // processRelationInferenceEngine 处理关系推理引擎
 func (ils *IntelligentLearningServiceIntegration) processRelationInferenceEngine(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 简化实现
+	// 简化实�?
 	result := map[string]interface{}{
 		"service": "relation_inference",
 		"status":  "processed",
@@ -532,7 +532,7 @@ func (ils *IntelligentLearningServiceIntegration) processRelationInferenceEngine
 
 // processAdaptiveLearningEngine 处理自适应学习引擎
 func (ils *IntelligentLearningServiceIntegration) processAdaptiveLearningEngine(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 简化实现
+	// 简化实�?
 	result := map[string]interface{}{
 		"service": "adaptive_learning",
 		"status":  "processed",
@@ -548,7 +548,7 @@ func (ils *IntelligentLearningServiceIntegration) processAdaptiveLearningEngine(
 
 // processRealtimeLearningAnalyticsService 处理实时学习分析服务
 func (ils *IntelligentLearningServiceIntegration) processRealtimeLearningAnalyticsService(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 简化实现
+	// 简化实�?
 	result := map[string]interface{}{
 		"service": "realtime_analytics",
 		"status":  "processed",
@@ -562,9 +562,9 @@ func (ils *IntelligentLearningServiceIntegration) processRealtimeLearningAnalyti
 	return nil
 }
 
-// processAutomatedKnowledgeGraphService 处理自动化知识图谱服务
+// processAutomatedKnowledgeGraphService 处理自动化知识图谱服�?
 func (ils *IntelligentLearningServiceIntegration) processAutomatedKnowledgeGraphService(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 简化实现
+	// 简化实�?
 	result := map[string]interface{}{
 		"service": "knowledge_graph",
 		"status":  "processed",
@@ -580,7 +580,7 @@ func (ils *IntelligentLearningServiceIntegration) processAutomatedKnowledgeGraph
 
 // processLearningAnalyticsReportingService 处理学习分析报告服务
 func (ils *IntelligentLearningServiceIntegration) processLearningAnalyticsReportingService(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 简化实现
+	// 简化实�?
 	result := map[string]interface{}{
 		"service": "analytics_reporting",
 		"status":  "processed",
@@ -596,7 +596,7 @@ func (ils *IntelligentLearningServiceIntegration) processLearningAnalyticsReport
 
 // processIntelligentContentRecommendationService 处理智能内容推荐服务
 func (ils *IntelligentLearningServiceIntegration) processIntelligentContentRecommendationService(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 简化实现
+	// 简化实�?
 	result := map[string]interface{}{
 		"service": "content_recommendation",
 		"status":  "processed",
@@ -612,7 +612,7 @@ func (ils *IntelligentLearningServiceIntegration) processIntelligentContentRecom
 
 // integrateResults 整合结果
 func (ils *IntelligentLearningServiceIntegration) integrateResults(ctx context.Context, request *LearningRequest, response *LearningResponse) error {
-	// 创建整合后的元数据
+	// 创建整合后的元数�?
 	response.Metadata = map[string]interface{}{
 		"integration_version": "1.0",
 		"processed_services":  len(response.Results),
@@ -625,7 +625,7 @@ func (ils *IntelligentLearningServiceIntegration) integrateResults(ctx context.C
 	return nil
 }
 
-// GetSystemHealth 获取系统健康状态
+// GetSystemHealth 获取系统健康状�?
 func (ils *IntelligentLearningServiceIntegration) GetSystemHealth(ctx context.Context) (*HealthStatus, error) {
 	ils.mu.RLock()
 	defer ils.mu.RUnlock()
@@ -636,7 +636,7 @@ func (ils *IntelligentLearningServiceIntegration) GetSystemHealth(ctx context.Co
 		LastCheck: time.Now(),
 	}
 	
-	// 检查各个服务的健康状态
+	// 检查各个服务的健康状�?
 	allHealthy := true
 	
 	services := []string{
@@ -664,7 +664,7 @@ func (ils *IntelligentLearningServiceIntegration) GetMetrics(ctx context.Context
 	ils.mu.RLock()
 	defer ils.mu.RUnlock()
 	
-	// 返回当前指标的副本
+	// 返回当前指标的副�?
 	metrics := &IntegrationMetrics{
 		TotalRequests:       ils.metrics.TotalRequests,
 		SuccessfulRequests:  ils.metrics.SuccessfulRequests,

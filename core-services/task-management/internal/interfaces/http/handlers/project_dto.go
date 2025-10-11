@@ -91,7 +91,7 @@ type UpdateProjectMemberRoleRequest struct {
 	UpdatedBy uuid.UUID `json:"updated_by" validate:"required"`
 }
 
-// AddProjectMilestoneRequest 添加项目里程碑请求
+// AddProjectMilestoneRequest 添加项目里程碑请�?
 type AddProjectMilestoneRequest struct {
 	Name        string     `json:"name" validate:"required,min=1,max=200"`
 	Description string     `json:"description,omitempty"`
@@ -99,7 +99,7 @@ type AddProjectMilestoneRequest struct {
 	CreatedBy   uuid.UUID  `json:"created_by" validate:"required"`
 }
 
-// CompleteProjectMilestoneRequest 完成项目里程碑请求
+// CompleteProjectMilestoneRequest 完成项目里程碑请�?
 type CompleteProjectMilestoneRequest struct {
 	CompletedBy uuid.UUID `json:"completed_by" validate:"required"`
 }
@@ -139,7 +139,7 @@ type ProjectMemberResponse struct {
 	JoinedAt  time.Time `json:"joined_at"`
 }
 
-// ProjectMilestoneResponse 项目里程碑响应
+// ProjectMilestoneResponse 项目里程碑响�?
 type ProjectMilestoneResponse struct {
 	ID          uuid.UUID  `json:"id"`
 	ProjectID   uuid.UUID  `json:"project_id"`

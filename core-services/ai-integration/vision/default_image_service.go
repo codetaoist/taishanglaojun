@@ -37,7 +37,7 @@ func NewDefaultImageService(config ImageConfig, cache ImageCache, logger *zap.Lo
 	}
 }
 
-// RegisterProvider 注册图像提供商
+// RegisterProvider 注册图像提供�?
 func (s *DefaultImageService) RegisterProvider(name string, provider ImageProvider) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -46,7 +46,7 @@ func (s *DefaultImageService) RegisterProvider(name string, provider ImageProvid
 
 // RecognizeObjects 物体识别
 func (s *DefaultImageService) RecognizeObjects(ctx context.Context, input ImageInput) (*ObjectRecognitionResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("objects:%s", s.generateCacheKey(input))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -92,7 +92,7 @@ func (s *DefaultImageService) RecognizeObjects(ctx context.Context, input ImageI
 
 // RecognizeFaces 人脸识别
 func (s *DefaultImageService) RecognizeFaces(ctx context.Context, input ImageInput) (*FaceRecognitionResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("faces:%s", s.generateCacheKey(input))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -137,7 +137,7 @@ func (s *DefaultImageService) RecognizeFaces(ctx context.Context, input ImageInp
 
 // RecognizeText 文本识别
 func (s *DefaultImageService) RecognizeText(ctx context.Context, input ImageInput) (*TextRecognitionResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("text:%s", s.generateCacheKey(input))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -183,7 +183,7 @@ func (s *DefaultImageService) RecognizeText(ctx context.Context, input ImageInpu
 
 // RecognizeScene 场景识别
 func (s *DefaultImageService) RecognizeScene(ctx context.Context, input ImageInput) (*SceneRecognitionResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("scene:%s", s.generateCacheKey(input))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -229,7 +229,7 @@ func (s *DefaultImageService) RecognizeScene(ctx context.Context, input ImageInp
 
 // AnalyzeImage 图像分析
 func (s *DefaultImageService) AnalyzeImage(ctx context.Context, input ImageInput) (*ImageAnalysisResult, error) {
-	// 检查缓存
+	// 检查缓�?
 	if s.config.EnableCache {
 		cacheKey := fmt.Sprintf("analysis:%s", s.generateCacheKey(input))
 		if cached, found := s.cache.Get(cacheKey); found {
@@ -272,7 +272,7 @@ func (s *DefaultImageService) AnalyzeImage(ctx context.Context, input ImageInput
 	return result, nil
 }
 
-// DetectAnomalies 异常检测
+// DetectAnomalies 异常检�?
 func (s *DefaultImageService) DetectAnomalies(ctx context.Context, input ImageInput) (*AnomalyDetectionResult, error) {
 	startTime := time.Now()
 
@@ -284,10 +284,10 @@ func (s *DefaultImageService) DetectAnomalies(ctx context.Context, input ImageIn
 		Metadata:  make(map[string]interface{}),
 	}
 
-	// 执行多种异常检测
+	// 执行多种异常检�?
 	anomalies := make([]DetectedAnomaly, 0)
 
-	// 1. 图像质量异常检测
+	// 1. 图像质量异常检�?
 	qualityAnomalies, err := s.detectQualityAnomalies(ctx, input)
 	if err != nil {
 		s.logger.Warn("Quality anomaly detection failed", zap.Error(err))
@@ -295,7 +295,7 @@ func (s *DefaultImageService) DetectAnomalies(ctx context.Context, input ImageIn
 		anomalies = append(anomalies, qualityAnomalies...)
 	}
 
-	// 2. 内容异常检测
+	// 2. 内容异常检�?
 	contentAnomalies, err := s.detectContentAnomalies(ctx, input)
 	if err != nil {
 		s.logger.Warn("Content anomaly detection failed", zap.Error(err))
@@ -303,7 +303,7 @@ func (s *DefaultImageService) DetectAnomalies(ctx context.Context, input ImageIn
 		anomalies = append(anomalies, contentAnomalies...)
 	}
 
-	// 3. 技术异常检测
+	// 3. 技术异常检�?
 	technicalAnomalies, err := s.detectTechnicalAnomalies(ctx, input)
 	if err != nil {
 		s.logger.Warn("Technical anomaly detection failed", zap.Error(err))
@@ -429,7 +429,7 @@ func (s *DefaultImageService) BatchProcess(ctx context.Context, inputs []ImageIn
 	}
 
 	resultChan := make(chan processResult, len(inputs))
-	semaphore := make(chan struct{}, 10) // 限制并发数
+	semaphore := make(chan struct{}, 10) // 限制并发�?
 
 	for i, input := range inputs {
 		go func(index int, img ImageInput) {
@@ -483,7 +483,7 @@ func (s *DefaultImageService) UpdateConfig(config ImageConfig) error {
 	return nil
 }
 
-// GetSupportedFormats 获取支持的格式
+// GetSupportedFormats 获取支持的格�?
 func (s *DefaultImageService) GetSupportedFormats() []ImageFormat {
 	formats := make(map[ImageFormat]bool)
 	
@@ -501,7 +501,7 @@ func (s *DefaultImageService) GetSupportedFormats() []ImageFormat {
 	return result
 }
 
-// GetSupportedOperations 获取支持的操作
+// GetSupportedOperations 获取支持的操�?
 func (s *DefaultImageService) GetSupportedOperations() []OperationType {
 	operations := make(map[OperationType]bool)
 	
@@ -521,7 +521,7 @@ func (s *DefaultImageService) GetSupportedOperations() []OperationType {
 
 // 私有方法
 
-// generateCacheKey 生成缓存键
+// generateCacheKey 生成缓存�?
 func (s *DefaultImageService) generateCacheKey(input ImageInput) string {
 	return fmt.Sprintf("%s-%d-%d-%d", input.ID, input.Width, input.Height, input.Size)
 }
@@ -541,7 +541,7 @@ func (s *DefaultImageService) getObjectDetectionProvider() (ImageProvider, error
 	return provider, nil
 }
 
-// getFaceRecognitionProvider 获取人脸识别提供商
+// getFaceRecognitionProvider 获取人脸识别提供�?
 func (s *DefaultImageService) getFaceRecognitionProvider() (ImageProvider, error) {
 	providerName := s.config.FaceRecognition.Provider
 	if providerName == "" {
@@ -556,7 +556,7 @@ func (s *DefaultImageService) getFaceRecognitionProvider() (ImageProvider, error
 	return provider, nil
 }
 
-// getTextRecognitionProvider 获取文本识别提供商
+// getTextRecognitionProvider 获取文本识别提供�?
 func (s *DefaultImageService) getTextRecognitionProvider() (ImageProvider, error) {
 	providerName := s.config.TextRecognition.Provider
 	if providerName == "" {
@@ -571,19 +571,19 @@ func (s *DefaultImageService) getTextRecognitionProvider() (ImageProvider, error
 	return provider, nil
 }
 
-// getSceneRecognitionProvider 获取场景识别提供商
+// getSceneRecognitionProvider 获取场景识别提供�?
 func (s *DefaultImageService) getSceneRecognitionProvider() (ImageProvider, error) {
-	// 使用物体检测提供商作为场景识别提供商
+	// 使用物体检测提供商作为场景识别提供�?
 	return s.getObjectDetectionProvider()
 }
 
-// getImageAnalysisProvider 获取图像分析提供商
+// getImageAnalysisProvider 获取图像分析提供�?
 func (s *DefaultImageService) getImageAnalysisProvider() (ImageProvider, error) {
-	// 使用物体检测提供商作为图像分析提供商
+	// 使用物体检测提供商作为图像分析提供�?
 	return s.getObjectDetectionProvider()
 }
 
-// getImageProcessingProvider 获取图像处理提供商
+// getImageProcessingProvider 获取图像处理提供�?
 func (s *DefaultImageService) getImageProcessingProvider() (ImageProvider, error) {
 	providerName := s.config.ImageProcessing.Provider
 	if providerName == "" {
@@ -598,13 +598,13 @@ func (s *DefaultImageService) getImageProcessingProvider() (ImageProvider, error
 	return provider, nil
 }
 
-// 异常检测相关方法
+// 异常检测相关方�?
 
-// detectQualityAnomalies 检测质量异常
+// detectQualityAnomalies 检测质量异�?
 func (s *DefaultImageService) detectQualityAnomalies(ctx context.Context, input ImageInput) ([]DetectedAnomaly, error) {
 	anomalies := make([]DetectedAnomaly, 0)
 
-	// 检测图像尺寸异常
+	// 检测图像尺寸异�?
 	if input.Width < 100 || input.Height < 100 {
 		anomalies = append(anomalies, DetectedAnomaly{
 			ID:          uuid.New().String(),
@@ -615,7 +615,7 @@ func (s *DefaultImageService) detectQualityAnomalies(ctx context.Context, input 
 		})
 	}
 
-	// 检测文件大小异常
+	// 检测文件大小异�?
 	if input.Size > s.config.MaxImageSize {
 		anomalies = append(anomalies, DetectedAnomaly{
 			ID:          uuid.New().String(),
@@ -629,17 +629,17 @@ func (s *DefaultImageService) detectQualityAnomalies(ctx context.Context, input 
 	return anomalies, nil
 }
 
-// detectContentAnomalies 检测内容异常
+// detectContentAnomalies 检测内容异�?
 func (s *DefaultImageService) detectContentAnomalies(ctx context.Context, input ImageInput) ([]DetectedAnomaly, error) {
 	// 这里可以实现更复杂的内容异常检测逻辑
 	return make([]DetectedAnomaly, 0), nil
 }
 
-// detectTechnicalAnomalies 检测技术异常
+// detectTechnicalAnomalies 检测技术异�?
 func (s *DefaultImageService) detectTechnicalAnomalies(ctx context.Context, input ImageInput) ([]DetectedAnomaly, error) {
 	anomalies := make([]DetectedAnomaly, 0)
 
-	// 检测不支持的格式
+	// 检测不支持的格�?
 	supportedFormats := s.GetSupportedFormats()
 	isSupported := false
 	for _, format := range supportedFormats {
@@ -685,7 +685,7 @@ func (s *DefaultImageService) calculateAnomalyScore(anomalies []DetectedAnomaly)
 
 // 图像比较相关方法
 
-// calculateImageSimilarity 计算图像相似度
+// calculateImageSimilarity 计算图像相似�?
 func (s *DefaultImageService) calculateImageSimilarity(ctx context.Context, image1, image2 ImageInput) (float64, error) {
 	// 简单的相似度计算（实际实现中可以使用更复杂的算法）
 	if image1.Width == image2.Width && image1.Height == image2.Height && image1.Size == image2.Size {
@@ -723,7 +723,7 @@ func (s *DefaultImageService) findImageDifferences(ctx context.Context, image1, 
 
 // findMatchedRegions 查找匹配区域
 func (s *DefaultImageService) findMatchedRegions(ctx context.Context, image1, image2 ImageInput) ([]MatchedRegion, error) {
-	// 简单的匹配区域检测
+	// 简单的匹配区域检�?
 	regions := make([]MatchedRegion, 0)
 
 	if image1.Width == image2.Width && image1.Height == image2.Height {

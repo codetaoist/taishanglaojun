@@ -11,7 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 
-	"../permission"
+	"github.com/codetaoist/taishanglaojun/core-services/permission"
 )
 
 // PermissionRepositoryImpl 权限仓储实现
@@ -23,7 +23,7 @@ type PermissionRepositoryImpl struct {
 
 // PermissionRepositoryConfig 权限仓储配置
 type PermissionRepositoryConfig struct {
-	// 数据库配置
+	// 数据库配�?
 	TablePrefix      string `json:"table_prefix"`
 	EnableSharding   bool   `json:"enable_sharding"`
 	ShardCount       int    `json:"shard_count"`
@@ -493,7 +493,7 @@ func (r *PermissionRepositoryImpl) ListPermissions(ctx context.Context, filter *
 	return permissions, total, nil
 }
 
-// AssignPermissionToRole 分配权限给角色
+// AssignPermissionToRole 分配权限给角�?
 func (r *PermissionRepositoryImpl) AssignPermissionToRole(ctx context.Context, roleID, permissionID string) error {
 	query := fmt.Sprintf(`
 		INSERT INTO %srole_permissions (role_id, permission_id, created_at)
@@ -573,7 +573,7 @@ func (r *PermissionRepositoryImpl) GetRolePermissions(ctx context.Context, roleI
 	return permissions, nil
 }
 
-// AssignRoleToUser 分配角色给用户
+// AssignRoleToUser 分配角色给用�?
 func (r *PermissionRepositoryImpl) AssignRoleToUser(ctx context.Context, userID, roleID string, tenantID string) error {
 	query := fmt.Sprintf(`
 		INSERT INTO %suser_roles (user_id, role_id, tenant_id, created_at)
@@ -676,7 +676,7 @@ func (r *PermissionRepositoryImpl) buildRoleWhereClause(filter *permission.RoleF
 		argIndex++
 	}
 
-	// 是否激活
+	// 是否激�?
 	if filter.IsActive != nil {
 		conditions = append(conditions, fmt.Sprintf("is_active = $%d", argIndex))
 		args = append(args, *filter.IsActive)
@@ -701,7 +701,7 @@ func (r *PermissionRepositoryImpl) buildRoleWhereClause(filter *permission.RoleF
 		}
 	}
 
-	// 搜索关键词
+	// 搜索关键�?
 	if filter.Search != "" {
 		conditions = append(conditions, fmt.Sprintf("(name ILIKE $%d OR code ILIKE $%d OR description ILIKE $%d)", argIndex, argIndex, argIndex))
 		args = append(args, "%"+filter.Search+"%")
@@ -755,7 +755,7 @@ func (r *PermissionRepositoryImpl) buildPermissionWhereClause(filter *permission
 		argIndex++
 	}
 
-	// 搜索关键词
+	// 搜索关键�?
 	if filter.Search != "" {
 		conditions = append(conditions, fmt.Sprintf("(name ILIKE $%d OR code ILIKE $%d OR description ILIKE $%d)", argIndex, argIndex, argIndex))
 		args = append(args, "%"+filter.Search+"%")
@@ -765,7 +765,7 @@ func (r *PermissionRepositoryImpl) buildPermissionWhereClause(filter *permission
 	return strings.Join(conditions, " AND "), args
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (r *PermissionRepositoryImpl) HealthCheck(ctx context.Context) error {
 	query := "SELECT 1"
 	var result int

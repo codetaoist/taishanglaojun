@@ -35,9 +35,9 @@ func NewHealthAlertService(
 type AlertType string
 
 const (
-	AlertTypeAbnormal   AlertType = "abnormal"   // 异常值
-	AlertTypeCritical   AlertType = "critical"   // 危险值
-	AlertTypeEmergency  AlertType = "emergency"  // 紧急情况
+	AlertTypeAbnormal   AlertType = "abnormal"   // 异常�?
+	AlertTypeCritical   AlertType = "critical"   // 危险�?
+	AlertTypeEmergency  AlertType = "emergency"  // 紧急情�?
 	AlertTypeTrend      AlertType = "trend"      // 趋势预警
 	AlertTypeReminder   AlertType = "reminder"   // 提醒
 )
@@ -46,9 +46,9 @@ const (
 type AlertSeverity string
 
 const (
-	AlertSeverityLow      AlertSeverity = "low"      // 低
-	AlertSeverityMedium   AlertSeverity = "medium"   // 中
-	AlertSeverityHigh     AlertSeverity = "high"     // 高
+	AlertSeverityLow      AlertSeverity = "low"      // �?
+	AlertSeverityMedium   AlertSeverity = "medium"   // �?
+	AlertSeverityHigh     AlertSeverity = "high"     // �?
 	AlertSeverityCritical AlertSeverity = "critical" // 危险
 )
 
@@ -71,14 +71,14 @@ type HealthAlert struct {
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
-// DetectAnomaliesRequest 异常检测请求
+// DetectAnomaliesRequest 异常检测请�?
 type DetectAnomaliesRequest struct {
 	UserID    uuid.UUID `json:"user_id" binding:"required"`
 	DataTypes []string  `json:"data_types,omitempty"`
 	Days      int       `json:"days,omitempty"`
 }
 
-// DetectAnomaliesResponse 异常检测响应
+// DetectAnomaliesResponse 异常检测响�?
 type DetectAnomaliesResponse struct {
 	Alerts    []HealthAlert `json:"alerts"`
 	Summary   string        `json:"summary"`
@@ -86,7 +86,7 @@ type DetectAnomaliesResponse struct {
 	Timestamp time.Time     `json:"timestamp"`
 }
 
-// CheckEmergencyRequest 紧急情况检查请求
+// CheckEmergencyRequest 紧急情况检查请�?
 type CheckEmergencyRequest struct {
 	UserID   uuid.UUID `json:"user_id" binding:"required"`
 	DataType string    `json:"data_type" binding:"required"`
@@ -94,7 +94,7 @@ type CheckEmergencyRequest struct {
 	Unit     string    `json:"unit,omitempty"`
 }
 
-// CheckEmergencyResponse 紧急情况检查响应
+// CheckEmergencyResponse 紧急情况检查响�?
 type CheckEmergencyResponse struct {
 	IsEmergency bool          `json:"is_emergency"`
 	Alert       *HealthAlert  `json:"alert,omitempty"`
@@ -120,9 +120,9 @@ type GetAlertsResponse struct {
 	Count  int           `json:"count"`
 }
 
-// DetectAnomalies 检测健康数据异常
+// DetectAnomalies 检测健康数据异�?
 func (s *HealthAlertService) DetectAnomalies(ctx context.Context, req *DetectAnomaliesRequest) (*DetectAnomaliesResponse, error) {
-	// 设置默认值
+	// 设置默认�?
 	if req.Days == 0 {
 		req.Days = 30
 	}
@@ -160,7 +160,7 @@ func (s *HealthAlertService) DetectAnomalies(ctx context.Context, req *DetectAno
 	}, nil
 }
 
-// CheckEmergency 检查紧急情况
+// CheckEmergency 检查紧急情�?
 func (s *HealthAlertService) CheckEmergency(ctx context.Context, req *CheckEmergencyRequest) (*CheckEmergencyResponse, error) {
 	// 获取用户健康档案
 	profile, err := s.healthProfileRepo.GetByUserID(ctx, req.UserID)
@@ -168,7 +168,7 @@ func (s *HealthAlertService) CheckEmergency(ctx context.Context, req *CheckEmerg
 		log.Printf("Failed to get health profile for user %s: %v", req.UserID, err)
 	}
 
-	// 检查是否为紧急情况
+	// 检查是否为紧急情�?
 	isEmergency, alert, actions := s.checkEmergencyCondition(req.UserID, req.DataType, req.Value, req.Unit, profile)
 
 	response := &CheckEmergencyResponse{
@@ -180,7 +180,7 @@ func (s *HealthAlertService) CheckEmergency(ctx context.Context, req *CheckEmerg
 	if isEmergency && alert != nil {
 		response.Alert = alert
 		
-		// 发布紧急预警事件
+		// 发布紧急预警事�?
 		if s.eventPublisher != nil {
 			event := map[string]interface{}{
 				"type":      "emergency_alert",
@@ -199,13 +199,13 @@ func (s *HealthAlertService) CheckEmergency(ctx context.Context, req *CheckEmerg
 
 // GetAlerts 获取用户预警
 func (s *HealthAlertService) GetAlerts(ctx context.Context, req *GetAlertsRequest) (*GetAlertsResponse, error) {
-	// 设置默认值
+	// 设置默认�?
 	if req.Limit == 0 {
 		req.Limit = 50
 	}
 
 	// 这里应该从数据库获取预警记录
-	// 由于没有预警表，我们模拟返回一些数据
+	// 由于没有预警表，我们模拟返回一些数�?
 	alerts := s.getMockAlerts(req.UserID, req.Limit)
 
 	// 根据条件过滤
@@ -238,7 +238,7 @@ func (s *HealthAlertService) detectDataTypeAnomalies(ctx context.Context, userID
 	// 获取正常范围
 	normalRange := s.getNormalRange(dataType, profile)
 	
-	// 检测异常值
+	// 检测异常�?
 	for _, data := range healthData {
 		if s.isAbnormalValue(data.Value, normalRange) {
 			severity := s.calculateSeverity(data.Value, normalRange)
@@ -260,7 +260,7 @@ func (s *HealthAlertService) detectDataTypeAnomalies(ctx context.Context, userID
 		}
 	}
 
-	// 检测趋势异常
+	// 检测趋势异�?
 	trendAlert := s.detectTrendAnomaly(userID, dataType, healthData, normalRange)
 	if trendAlert != nil {
 		alerts = append(alerts, *trendAlert)
@@ -269,7 +269,7 @@ func (s *HealthAlertService) detectDataTypeAnomalies(ctx context.Context, userID
 	return alerts, nil
 }
 
-// checkEmergencyCondition 检查紧急情况条件
+// checkEmergencyCondition 检查紧急情况条�?
 func (s *HealthAlertService) checkEmergencyCondition(userID uuid.UUID, dataType string, value float64, unit string, profile *domain.HealthProfile) (bool, *HealthAlert, []string) {
 	emergencyThresholds := s.getEmergencyThresholds(dataType, profile)
 	
@@ -293,7 +293,7 @@ func (s *HealthAlertService) checkEmergencyCondition(userID uuid.UUID, dataType 
 			isEmergency = true
 			actions = []string{
 				"立即就医",
-				"测量血压确认",
+				"测量血压确�?,
 				"联系医生",
 				"避免剧烈活动",
 			}
@@ -303,7 +303,7 @@ func (s *HealthAlertService) checkEmergencyCondition(userID uuid.UUID, dataType 
 			isEmergency = true
 			actions = []string{
 				"立即就医",
-				"检查血糖仪准确性",
+				"检查血糖仪准确�?,
 				"联系医生",
 				"准备急救药物",
 			}
@@ -377,7 +377,7 @@ func (s *HealthAlertService) getNormalRange(dataType string, profile *domain.Hea
 	return ranges[dataType]
 }
 
-// isAbnormalValue 判断是否为异常值
+// isAbnormalValue 判断是否为异常�?
 func (s *HealthAlertService) isAbnormalValue(value float64, normalRange map[string]float64) bool {
 	if normalRange == nil {
 		return false
@@ -412,7 +412,7 @@ func (s *HealthAlertService) calculateSeverity(value float64, normalRange map[st
 	return AlertSeverityLow
 }
 
-// detectTrendAnomaly 检测趋势异常
+// detectTrendAnomaly 检测趋势异�?
 func (s *HealthAlertService) detectTrendAnomaly(userID uuid.UUID, dataType string, data []*domain.HealthData, normalRange map[string]float64) *HealthAlert {
 	if len(data) < 3 {
 		return nil
@@ -433,7 +433,7 @@ func (s *HealthAlertService) detectTrendAnomaly(userID uuid.UUID, dataType strin
 			Type:      AlertTypeTrend,
 			Severity:  AlertSeverityMedium,
 			Title:     s.getAlertTitle(dataType, AlertTypeTrend),
-			Message:   fmt.Sprintf("%s连续异常，建议关注", s.getDataTypeDisplayName(dataType)),
+			Message:   fmt.Sprintf("%s连续异常，建议关�?, s.getDataTypeDisplayName(dataType)),
 			DataType:  dataType,
 			IsRead:    false,
 			IsHandled: false,
@@ -444,7 +444,7 @@ func (s *HealthAlertService) detectTrendAnomaly(userID uuid.UUID, dataType strin
 	return nil
 }
 
-// getEmergencyThresholds 获取紧急情况阈值
+// getEmergencyThresholds 获取紧急情况阈�?
 func (s *HealthAlertService) getEmergencyThresholds(dataType string, profile *domain.HealthProfile) map[string]float64 {
 	thresholds := map[string]map[string]float64{
 		"heart_rate": {
@@ -478,7 +478,7 @@ func (s *HealthAlertService) getAlertTitle(dataType string, alertType AlertType)
 	case AlertTypeCritical:
 		return fmt.Sprintf("%s危险", dataName)
 	case AlertTypeEmergency:
-		return fmt.Sprintf("%s紧急情况", dataName)
+		return fmt.Sprintf("%s紧急情�?, dataName)
 	case AlertTypeTrend:
 		return fmt.Sprintf("%s趋势异常", dataName)
 	case AlertTypeReminder:
@@ -493,14 +493,14 @@ func (s *HealthAlertService) getAlertMessage(dataType string, value float64, uni
 	dataName := s.getDataTypeDisplayName(dataType)
 	
 	if normalRange != nil {
-		return fmt.Sprintf("%s值为%.2f%s，超出正常范围(%.2f-%.2f%s)，建议关注", 
+		return fmt.Sprintf("%s值为%.2f%s，超出正常范�?%.2f-%.2f%s)，建议关�?, 
 			dataName, value, unit, normalRange["min"], normalRange["max"], unit)
 	}
 	
-	return fmt.Sprintf("%s值为%.2f%s，检测到异常，建议关注", dataName, value, unit)
+	return fmt.Sprintf("%s值为%.2f%s，检测到异常，建议关�?, dataName, value, unit)
 }
 
-// getEmergencyMessage 获取紧急情况消息
+// getEmergencyMessage 获取紧急情况消�?
 func (s *HealthAlertService) getEmergencyMessage(dataType string, value float64, unit string) string {
 	dataName := s.getDataTypeDisplayName(dataType)
 	return fmt.Sprintf("%s值为%.2f%s，达到危险水平，请立即就医！", dataName, value, unit)
@@ -510,8 +510,8 @@ func (s *HealthAlertService) getEmergencyMessage(dataType string, value float64,
 func (s *HealthAlertService) getDataTypeDisplayName(dataType string) string {
 	names := map[string]string{
 		"heart_rate":     "心率",
-		"blood_pressure": "血压",
-		"blood_sugar":    "血糖",
+		"blood_pressure": "血�?,
+		"blood_sugar":    "血�?,
 		"temperature":    "体温",
 		"steps":          "步数",
 		"sleep_duration": "睡眠时长",
@@ -548,18 +548,18 @@ func (s *HealthAlertService) generateAnomalySummary(alerts []HealthAlert) string
 		}
 	}
 
-	summary := fmt.Sprintf("检测到%d个健康异常", len(alerts))
+	summary := fmt.Sprintf("检测到%d个健康异�?, len(alerts))
 	if criticalCount > 0 {
-		summary += fmt.Sprintf("，其中%d个危险级", criticalCount)
+		summary += fmt.Sprintf("，其�?d个危险级", criticalCount)
 	}
 	if highCount > 0 {
-		summary += fmt.Sprintf("，%d个高风险", highCount)
+		summary += fmt.Sprintf("�?d个高风险", highCount)
 	}
 	if mediumCount > 0 {
-		summary += fmt.Sprintf("，%d个中风险", mediumCount)
+		summary += fmt.Sprintf("�?d个中风险", mediumCount)
 	}
 	if lowCount > 0 {
-		summary += fmt.Sprintf("，%d个低风险", lowCount)
+		summary += fmt.Sprintf("�?d个低风险", lowCount)
 	}
 
 	return summary
@@ -573,7 +573,7 @@ func (s *HealthAlertService) getMockAlerts(userID uuid.UUID, limit int) []Health
 			UserID:    userID,
 			Type:      AlertTypeAbnormal,
 			Severity:  AlertSeverityHigh,
-			Title:     "血压异常",
+			Title:     "血压异�?,
 			Message:   "血压值为150/95mmHg，超出正常范围，建议关注",
 			DataType:  "blood_pressure",
 			Value:     150,
@@ -588,7 +588,7 @@ func (s *HealthAlertService) getMockAlerts(userID uuid.UUID, limit int) []Health
 			Type:      AlertTypeTrend,
 			Severity:  AlertSeverityMedium,
 			Title:     "心率趋势异常",
-			Message:   "心率连续异常，建议关注",
+			Message:   "心率连续异常，建议关�?,
 			DataType:  "heart_rate",
 			IsRead:    true,
 			IsHandled: false,
@@ -635,12 +635,12 @@ func (s *HealthAlertService) filterAlerts(alerts []HealthAlert, req *GetAlertsRe
 			}
 		}
 
-		// 过滤已读状态
+		// 过滤已读状�?
 		if req.IsRead != nil && alert.IsRead != *req.IsRead {
 			continue
 		}
 
-		// 过滤处理状态
+		// 过滤处理状�?
 		if req.IsHandled != nil && alert.IsHandled != *req.IsHandled {
 			continue
 		}

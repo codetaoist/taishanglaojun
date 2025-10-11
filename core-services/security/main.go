@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/taishanglaojun/core-services/security"
-	"github.com/taishanglaojun/core-services/security/config"
+	"github.com/codetaoist/taishanglaojun/core-services/security"
+	"github.com/codetaoist/taishanglaojun/core-services/security/config"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 		log.Fatalf("Failed to start security module: %v", err)
 	}
 
-	// 创建HTTP服务器
+	// 创建HTTP服务�?
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Server.Port),
 		Handler:      securityModule.Router,
@@ -47,7 +47,7 @@ func main() {
 		IdleTimeout:  time.Duration(cfg.Server.IdleTimeout) * time.Second,
 	}
 
-	// 启动服务器
+	// 启动服务�?
 	go func() {
 		log.Printf("Security module server starting on port %d", cfg.Server.Port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -62,11 +62,11 @@ func main() {
 
 	log.Println("Shutting down security module...")
 
-	// 创建关闭上下文
+	// 创建关闭上下�?
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// 关闭HTTP服务器
+	// 关闭HTTP服务�?
 	if err := server.Shutdown(ctx); err != nil {
 		log.Printf("Server forced to shutdown: %v", err)
 	}

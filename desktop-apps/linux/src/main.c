@@ -1,166 +1,32 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <errno.h>
+#include <gtk/gtk.h>
+#include <adwaita.h>
+#include <glib/gi18n.h>
 #include <locale.h>
-#include <getopt.h>
-
 #include "application.h"
-#include "utils.h"
 
-// 全局变量
-static Application* g_app = NULL;
-static volatile sig_atomic_t g_running = 1;
-
-// 函数声明
-static void signal_handler(int sig);
-static bool setup_signal_handlers(void);
-static void print_usage(const char* program_name);
-static void print_version(void);
-static bool check_single_instance(void);
-static bool setup_directories(void);
-static void cleanup_and_exit(int exit_code);
-
-// 主函数
-int main(int argc, char* argv[])
-{
-    int opt;
-    bool daemon_mode = false;
-    bool verbose = false;
-    const char* config_file = NULL;
-    
-    // 命令行选项
-    static struct option long_options[] = {
-        {"daemon",    no_argument,       0, 'd'},
-        {"verbose",   no_argument,       0, 'v'},
-        {"config",    required_argument, 0, 'c'},
-        {"help",      no_argument,       0, 'h'},
-        {"version",   no_argument,       0, 'V'},
-        {0, 0, 0, 0}
-    };
-    
-    // 解析命令行参数
-    while ((opt = getopt_long(argc, argv, "dvc:hV", long_options, NULL)) != -1) {
-        switch (opt) {
-        case 'd':
-            daemon_mode = true;
-            break;
-        case 'v':
-            verbose = true;
-            break;
-        case 'c':
-            config_file = optarg;
-            break;
-        case 'h':
-            print_usage(argv[0]);
-            return EXIT_SUCCESS;
-        case 'V':
-            print_version();
-            return EXIT_SUCCESS;
-        default:
-            print_usage(argv[0]);
-            return EXIT_FAILURE;
-        }
-    }
+int main(int argc, char *argv[]) {
+    TaishangApplication *app;
+    int status;
     
     // 设置本地化
     setlocale(LC_ALL, "");
+    bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+    bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+    textdomain(GETTEXT_PACKAGE);
     
-    // 初始化日志系统
-    if (verbose) {
-        log_init(NULL, LOG_LEVEL_DEBUG);
-    } else {
-        log_init("taishanglaojun-desktop.log", LOG_LEVEL_INFO);
-    }
-    
-    LOG_INFO("太上老君AI平台桌面版启动 v%d.%d.%d", 
-             APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_PATCH);
-    
-    // 检查单实例运行
-    if (!check_single_instance()) {
-        LOG_ERROR("应用程序已在运行");
-        fprintf(stderr, "错误: 太上老君AI平台桌面版已在运行\n");
-        return EXIT_FAILURE;
-    }
-    
-    // 设置信号处理器
-    if (!setup_signal_handlers()) {
-        LOG_ERROR("设置信号处理器失败");
-        return EXIT_FAILURE;
-    }
-    
-    // 创建必要的目录
-    if (!setup_directories()) {
-        LOG_ERROR("创建应用目录失败");
-        return EXIT_FAILURE;
-    }
-    
-    // 如果是守护进程模式，进行守护进程化
-    if (daemon_mode) {
-        pid_t pid = fork();
-        if (pid < 0) {
-            LOG_ERROR("fork失败: %s", strerror(errno));
-            return EXIT_FAILURE;
-        }
-        if (pid > 0) {
-            // 父进程退出
-            return EXIT_SUCCESS;
-        }
-        
-        // 子进程继续
-        if (setsid() < 0) {
-            LOG_ERROR("setsid失败: %s", strerror(errno));
-            return EXIT_FAILURE;
-        }
-        
-        // 改变工作目录
-        if (chdir("/") < 0) {
-            LOG_ERROR("chdir失败: %s", strerror(errno));
-            return EXIT_FAILURE;
-        }
-        
-        // 关闭标准文件描述符
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
-    }
+    // 初始化Adwaita
+    adw_init();
     
     // 创建应用程序实例
-    g_app = application_create();
-    if (!g_app) {
-        LOG_ERROR("创建应用程序实例失败");
-        cleanup_and_exit(EXIT_FAILURE);
-    }
+    app = taishang_application_new();
     
-    // 初始化应用程序
-    if (!application_initialize(g_app, argc, argv, config_file)) {
-        LOG_ERROR("初始化应用程序失败");
-        cleanup_and_exit(EXIT_FAILURE);
-    }
+    // 运行应用程序
+    status = g_application_run(G_APPLICATION(app), argc, argv);
     
-    LOG_INFO("应用程序初始化完成");
+    // 清理
+    g_object_unref(app);
     
-    // 主循环
-    while (g_running && application_is_running(g_app)) {
-        if (!application_process_events(g_app)) {
-            LOG_WARN("处理事件时出现错误");
-        }
-        
-        // 处理应用程序逻辑
-        application_update(g_app);
-        
-        // 短暂休眠以避免CPU占用过高
-        usleep(1000); // 1ms
-    }
-    
-    LOG_INFO("应用程序正在退出");
-    cleanup_and_exit(EXIT_SUCCESS);
-    
-    return EXIT_SUCCESS; // 不会到达这里
+    return status;
 }
 
 // 信号处理器

@@ -57,7 +57,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
-const { TabPane } = Tabs;
+
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
@@ -694,52 +694,63 @@ const LearningPlan: React.FC = () => {
         </Col>
       </Row>
 
-      <Tabs defaultActiveKey="all">
-        <TabPane tab="全部计划" key="all">
-          {plans.length > 0 ? (
-            <Row gutter={[16, 16]}>
-              {plans.map(plan => (
-                <Col key={plan.id} xs={24} lg={12}>
-                  {renderPlanCard(plan)}
-                </Col>
-              ))}
-            </Row>
-          ) : (
-            <Empty
-              description="暂无学习计划"
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-            >
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setCreateModalVisible(true)}
+      <Tabs 
+        defaultActiveKey="all"
+        items={[
+          {
+            key: "all",
+            label: "全部计划",
+            children: plans.length > 0 ? (
+              <Row gutter={[16, 16]}>
+                {plans.map(plan => (
+                  <Col key={plan.id} xs={24} lg={12}>
+                    {renderPlanCard(plan)}
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <Empty
+                description="暂无学习计划"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
               >
-                创建第一个学习计划
-              </Button>
-            </Empty>
-          )}
-        </TabPane>
-        
-        <TabPane tab="进行中" key="active">
-          <Row gutter={[16, 16]}>
-            {plans.filter(p => p.status === 'active').map(plan => (
-              <Col key={plan.id} xs={24} lg={12}>
-                {renderPlanCard(plan)}
-              </Col>
-            ))}
-          </Row>
-        </TabPane>
-        
-        <TabPane tab="已完成" key="completed">
-          <Row gutter={[16, 16]}>
-            {plans.filter(p => p.status === 'completed').map(plan => (
-              <Col key={plan.id} xs={24} lg={12}>
-                {renderPlanCard(plan)}
-              </Col>
-            ))}
-          </Row>
-        </TabPane>
-      </Tabs>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => setCreateModalVisible(true)}
+                >
+                  创建第一个学习计划
+                </Button>
+              </Empty>
+            )
+          },
+          {
+            key: "active",
+            label: "进行中",
+            children: (
+              <Row gutter={[16, 16]}>
+                {plans.filter(p => p.status === 'active').map(plan => (
+                  <Col key={plan.id} xs={24} lg={12}>
+                    {renderPlanCard(plan)}
+                  </Col>
+                ))}
+              </Row>
+            )
+          },
+          {
+            key: "completed",
+            label: "已完成",
+            children: (
+              <Row gutter={[16, 16]}>
+                {plans.filter(p => p.status === 'completed').map(plan => (
+                  <Col key={plan.id} xs={24} lg={12}>
+                    {renderPlanCard(plan)}
+                  </Col>
+                ))}
+              </Row>
+            )
+          }
+        ]}
+      />
 
       {renderCreateModal()}
       {renderEditModal()}

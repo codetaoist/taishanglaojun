@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
-	domainServices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
+	domainServices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
 // EvidenceType 证据类型
@@ -28,10 +28,10 @@ type Evidence struct {
 	Type        EvidenceType           `json:"type"`        // 证据类型
 	Source      string                 `json:"source"`      // 来源
 	Content     interface{}            `json:"content"`     // 内容
-	Reliability float64               `json:"reliability"` // 可靠性
-	Confidence  float64               `json:"confidence"`  // 置信度
-	Timestamp   time.Time             `json:"timestamp"`   // 时间戳
-	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
+	Reliability float64               `json:"reliability"` // 可靠�?
+	Confidence  float64               `json:"confidence"`  // 置信�?
+	Timestamp   time.Time             `json:"timestamp"`   // 时间�?
+	Metadata    map[string]interface{} `json:"metadata"`    // 元数�?
 }
 
 // IntelligentRelationInferenceEngine 智能关系推理引擎
@@ -45,12 +45,12 @@ type IntelligentRelationInferenceEngine struct {
 
 // InferenceEngineConfig 推理引擎配置
 type InferenceEngineConfig struct {
-	MinConfidenceThreshold      float64 `json:"min_confidence_threshold"`      // 最小置信度阈值
-	MaxInferenceDepth          int     `json:"max_inference_depth"`           // 最大推理深度
-	EnableTransitiveInference  bool    `json:"enable_transitive_inference"`   // 启用传递推理
-	EnableContradictionCheck   bool    `json:"enable_contradiction_check"`    // 启用矛盾检查
-	EnableUncertaintyReasoning bool    `json:"enable_uncertainty_reasoning"`  // 启用不确定性推理
-	ContextWindowSize          int     `json:"context_window_size"`           // 上下文窗口大小
+	MinConfidenceThreshold      float64 `json:"min_confidence_threshold"`      // 最小置信度阈�?
+	MaxInferenceDepth          int     `json:"max_inference_depth"`           // 最大推理深�?
+	EnableTransitiveInference  bool    `json:"enable_transitive_inference"`   // 启用传递推�?
+	EnableContradictionCheck   bool    `json:"enable_contradiction_check"`    // 启用矛盾检�?
+	EnableUncertaintyReasoning bool    `json:"enable_uncertainty_reasoning"`  // 启用不确定性推�?
+	ContextWindowSize          int     `json:"context_window_size"`           // 上下文窗口大�?
 	ParallelProcessing         bool    `json:"parallel_processing"`           // 并行处理
 	CacheEnabled               bool    `json:"cache_enabled"`                 // 启用缓存
 }
@@ -58,22 +58,22 @@ type InferenceEngineConfig struct {
 // InferenceCache 推理缓存
 type InferenceCache struct {
 	RelationProbabilities map[string]float64                    `json:"relation_probabilities"` // 关系概率
-	InferenceChains      map[string][]*InferenceStep           `json:"inference_chains"`       // 推理链
-	ContextEmbeddings    map[string][]float64                  `json:"context_embeddings"`     // 上下文嵌入
+	InferenceChains      map[string][]*InferenceStep           `json:"inference_chains"`       // 推理�?
+	ContextEmbeddings    map[string][]float64                  `json:"context_embeddings"`     // 上下文嵌�?
 	CachedResults        map[string]*domainServices.CachedInferenceResult     `json:"cached_results"`         // 缓存结果
-	LastUpdated          time.Time                             `json:"last_updated"`           // 最后更新时间
+	LastUpdated          time.Time                             `json:"last_updated"`           // 最后更新时�?
 }
 
 // InferenceMetrics 推理指标
 type InferenceMetrics struct {
-	TotalInferences       int64     `json:"total_inferences"`       // 总推理次数
+	TotalInferences       int64     `json:"total_inferences"`       // 总推理次�?
 	SuccessfulInferences  int64     `json:"successful_inferences"`  // 成功推理次数
 	FailedInferences      int64     `json:"failed_inferences"`      // 失败推理次数
-	AverageConfidence     float64   `json:"average_confidence"`     // 平均置信度
+	AverageConfidence     float64   `json:"average_confidence"`     // 平均置信�?
 	AverageProcessingTime int64     `json:"average_processing_time"` // 平均处理时间
 	ContradictionsFound   int64     `json:"contradictions_found"`   // 发现的矛盾数
-	TransitiveInferences  int64     `json:"transitive_inferences"`  // 传递推理次数
-	LastInferenceTime     time.Time `json:"last_inference_time"`    // 最后推理时间
+	TransitiveInferences  int64     `json:"transitive_inferences"`  // 传递推理次�?
+	LastInferenceTime     time.Time `json:"last_inference_time"`    // 最后推理时�?
 }
 
 // AdvancedInferenceRule 高级推理规则
@@ -84,8 +84,8 @@ type AdvancedInferenceRule struct {
 	Type              InferenceRuleType         `json:"type"`              // 规则类型
 	Conditions        []*ComplexCondition       `json:"conditions"`        // 复杂条件
 	Conclusions       []*InferenceConclusion    `json:"conclusions"`       // 推理结论
-	Priority          int                       `json:"priority"`          // 优先级
-	Confidence        float64                   `json:"confidence"`        // 规则置信度
+	Priority          int                       `json:"priority"`          // 优先�?
+	Confidence        float64                   `json:"confidence"`        // 规则置信�?
 	Enabled           bool                      `json:"enabled"`           // 是否启用
 	ContextRequired   bool                      `json:"context_required"`  // 是否需要上下文
 	MetaReasoning     bool                      `json:"meta_reasoning"`    // 是否为元推理
@@ -99,7 +99,7 @@ const (
 	RuleTypeInductive    InferenceRuleType = "inductive"    // 归纳推理
 	RuleTypeAbductive    InferenceRuleType = "abductive"    // 溯因推理
 	RuleTypeAnalogical   InferenceRuleType = "analogical"   // 类比推理
-	RuleTypeTransitive   InferenceRuleType = "transitive"   // 传递推理
+	RuleTypeTransitive   InferenceRuleType = "transitive"   // 传递推�?
 	RuleTypeCausal       InferenceRuleType = "causal"       // 因果推理
 	RuleTypeStatistical  InferenceRuleType = "statistical"  // 统计推理
 	RuleTypeOntological  InferenceRuleType = "ontological"  // 本体推理
@@ -109,9 +109,9 @@ const (
 type ComplexCondition struct {
 	ID           string                 `json:"id"`           // 条件ID
 	Type         ConditionType          `json:"type"`         // 条件类型
-	Operator     LogicalOperator        `json:"operator"`     // 逻辑操作符
+	Operator     LogicalOperator        `json:"operator"`     // 逻辑操作�?
 	Predicates   []*Predicate          `json:"predicates"`   // 谓词
-	SubConditions []*ComplexCondition   `json:"sub_conditions"` // 子条件
+	SubConditions []*ComplexCondition   `json:"sub_conditions"` // 子条�?
 	Weight       float64               `json:"weight"`       // 权重
 	Negated      bool                  `json:"negated"`      // 是否否定
 }
@@ -122,11 +122,11 @@ type ConditionType string
 const (
 	ConditionTypeAtomic    ConditionType = "atomic"    // 原子条件
 	ConditionTypeComposite ConditionType = "composite" // 复合条件
-	ConditionTypeModal     ConditionType = "modal"     // 模态条件
+	ConditionTypeModal     ConditionType = "modal"     // 模态条�?
 	ConditionTypeTemporal  ConditionType = "temporal"  // 时间条件
 )
 
-// LogicalOperator 逻辑操作符
+// LogicalOperator 逻辑操作�?
 type LogicalOperator string
 
 const (
@@ -141,15 +141,15 @@ type Predicate struct {
 	Subject   *PredicateElement `json:"subject"`   // 主语
 	Predicate string           `json:"predicate"` // 谓语
 	Object    *PredicateElement `json:"object"`    // 宾语
-	Modality  string           `json:"modality"`  // 模态
-	Certainty float64          `json:"certainty"` // 确定性
+	Modality  string           `json:"modality"`  // 模�?
+	Certainty float64          `json:"certainty"` // 确定�?
 }
 
 // PredicateElement 谓词元素
 type PredicateElement struct {
 	Type       string      `json:"type"`       // 类型
-	Value      interface{} `json:"value"`      // 值
-	Variable   bool        `json:"variable"`   // 是否为变量
+	Value      interface{} `json:"value"`      // �?
+	Variable   bool        `json:"variable"`   // 是否为变�?
 	Quantifier string      `json:"quantifier"` // 量词
 }
 
@@ -157,10 +157,10 @@ type PredicateElement struct {
 type InferenceConclusion struct {
 	Type         ConclusionType         `json:"type"`         // 结论类型
 	Relation     *InferredRelation      `json:"relation"`     // 推理关系
-	Confidence   float64               `json:"confidence"`   // 置信度
+	Confidence   float64               `json:"confidence"`   // 置信�?
 	Evidence     []*domainServices.Evidence           `json:"evidence"`     // 证据
 	Explanation  string                `json:"explanation"`  // 解释
-	Metadata     map[string]interface{} `json:"metadata"`     // 元数据
+	Metadata     map[string]interface{} `json:"metadata"`     // 元数�?
 }
 
 // ConclusionType 结论类型
@@ -168,7 +168,7 @@ type ConclusionType string
 
 const (
 	ConclusionTypeRelation     ConclusionType = "relation"     // 关系结论
-	ConclusionTypeProperty     ConclusionType = "property"     // 属性结论
+	ConclusionTypeProperty     ConclusionType = "property"     // 属性结�?
 	ConclusionTypeClassification ConclusionType = "classification" // 分类结论
 	ConclusionTypeContradiction ConclusionType = "contradiction" // 矛盾结论
 )
@@ -179,8 +179,8 @@ type InferredRelation struct {
 	ToNodeID     uuid.UUID             `json:"to_node_id"`     // 目标节点ID
 	RelationType entities.RelationType `json:"relation_type"`  // 关系类型
 	Weight       float64               `json:"weight"`         // 权重
-	Certainty    float64               `json:"certainty"`      // 确定性
-	Confidence   float64               `json:"confidence"`     // 置信度
+	Certainty    float64               `json:"certainty"`      // 确定�?
+	Confidence   float64               `json:"confidence"`     // 置信�?
 	Evidence     []string              `json:"evidence"`       // 证据
 	Reasoning    []string              `json:"reasoning"`      // 推理过程
 	Temporal     *TemporalInfo         `json:"temporal"`       // 时间信息
@@ -188,7 +188,7 @@ type InferredRelation struct {
 
 // TemporalInfo 时间信息
 type TemporalInfo struct {
-	StartTime *time.Time `json:"start_time"` // 开始时间
+	StartTime *time.Time `json:"start_time"` // 开始时�?
 	EndTime   *time.Time `json:"end_time"`   // 结束时间
 	Duration  *int64     `json:"duration"`   // 持续时间
 	Frequency string     `json:"frequency"`  // 频率
@@ -202,7 +202,7 @@ const (
 	InferenceEvidenceTypeStatistical InferenceEvidenceType = "statistical" // 统计证据
 	InferenceEvidenceTypeLogical     InferenceEvidenceType = "logical"     // 逻辑证据
 	InferenceEvidenceTypeExpert      InferenceEvidenceType = "expert"      // 专家证据
-	InferenceEvidenceTypeContextual  InferenceEvidenceType = "contextual"  // 上下文证据
+	InferenceEvidenceTypeContextual  InferenceEvidenceType = "contextual"  // 上下文证�?
 )
 
 // InferenceStep 推理步骤
@@ -211,18 +211,18 @@ type InferenceStep struct {
 	RuleID      string                 `json:"rule_id"`     // 规则ID
 	Input       interface{}            `json:"input"`       // 输入
 	Output      interface{}            `json:"output"`      // 输出
-	Confidence  float64               `json:"confidence"`  // 置信度
+	Confidence  float64               `json:"confidence"`  // 置信�?
 	Explanation string                `json:"explanation"` // 解释
-	Timestamp   time.Time             `json:"timestamp"`   // 时间戳
-	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
+	Timestamp   time.Time             `json:"timestamp"`   // 时间�?
+	Metadata    map[string]interface{} `json:"metadata"`    // 元数�?
 }
 
 // CachedInferenceResult 缓存推理结果
 type RelationCachedInferenceResult struct {
 	Input       string                 `json:"input"`       // 输入哈希
 	Result      *InferenceResult       `json:"result"`      // 结果
-	Confidence  float64               `json:"confidence"`  // 置信度
-	Timestamp   time.Time             `json:"timestamp"`   // 时间戳
+	Confidence  float64               `json:"confidence"`  // 置信�?
+	Timestamp   time.Time             `json:"timestamp"`   // 时间�?
 	AccessCount int                   `json:"access_count"` // 访问次数
 }
 
@@ -230,22 +230,22 @@ type RelationCachedInferenceResult struct {
 type InferenceRequest struct {
 	Nodes           []*entities.KnowledgeNode     `json:"nodes"`           // 节点列表
 	ExistingRelations []*entities.KnowledgeRelation `json:"existing_relations"` // 现有关系
-	Context         *InferenceContext             `json:"context"`         // 推理上下文
+	Context         *InferenceContext             `json:"context"`         // 推理上下�?
 	Options         *InferenceOptions             `json:"options"`         // 推理选项
 	TargetRelations []entities.RelationType       `json:"target_relations"` // 目标关系类型
 }
 
-// InferenceContext 推理上下文
+// InferenceContext 推理上下�?
 type InferenceContext struct {
 	Domain          string                 `json:"domain"`          // 领域
 	Subject         string                 `json:"subject"`         // 主题
-	LearnerProfile  *LearnerProfile        `json:"learner_profile"` // 学习者档案
-	TemporalContext *TemporalContext       `json:"temporal_context"` // 时间上下文
-	SpatialContext  *SpatialContext        `json:"spatial_context"` // 空间上下文
-	Metadata        map[string]interface{} `json:"metadata"`        // 元数据
+	LearnerProfile  *LearnerProfile        `json:"learner_profile"` // 学习者档�?
+	TemporalContext *TemporalContext       `json:"temporal_context"` // 时间上下�?
+	SpatialContext  *SpatialContext        `json:"spatial_context"` // 空间上下�?
+	Metadata        map[string]interface{} `json:"metadata"`        // 元数�?
 }
 
-// LearnerProfile 学习者档案
+// LearnerProfile 学习者档�?
 type RelationLearnerProfile struct {
 	LearnerID      uuid.UUID              `json:"learner_id"`      // 学习者ID
 	LearningStyle  string                 `json:"learning_style"`  // 学习风格
@@ -254,36 +254,36 @@ type RelationLearnerProfile struct {
 	History        []string               `json:"history"`         // 历史记录
 }
 
-// TemporalContext 时间上下文
+// TemporalContext 时间上下�?
 type TemporalContext struct {
 	CurrentTime time.Time `json:"current_time"` // 当前时间
 	TimeWindow  int64     `json:"time_window"`  // 时间窗口
-	Seasonality string    `json:"seasonality"`  // 季节性
+	Seasonality string    `json:"seasonality"`  // 季节�?
 }
 
-// SpatialContext 空间上下文
+// SpatialContext 空间上下�?
 type SpatialContext struct {
 	Location    string                 `json:"location"`    // 位置
 	Environment string                 `json:"environment"` // 环境
-	Context     map[string]interface{} `json:"context"`     // 上下文
+	Context     map[string]interface{} `json:"context"`     // 上下�?
 }
 
 // InferenceOptions 推理选项
 type InferenceOptions struct {
-	MaxDepth            int     `json:"max_depth"`            // 最大深度
+	MaxDepth            int     `json:"max_depth"`            // 最大深�?
 	MinConfidence       float64 `json:"min_confidence"`       // 最小置信度
 	EnableExplanation   bool    `json:"enable_explanation"`   // 启用解释
-	EnableUncertainty   bool    `json:"enable_uncertainty"`   // 启用不确定性
-	EnableContradiction bool    `json:"enable_contradiction"` // 启用矛盾检查
+	EnableUncertainty   bool    `json:"enable_uncertainty"`   // 启用不确定�?
+	EnableContradiction bool    `json:"enable_contradiction"` // 启用矛盾检�?
 	ParallelProcessing  bool    `json:"parallel_processing"`  // 并行处理
 }
 
 // InferenceResponse 推理响应
 type InferenceResponse struct {
 	InferredRelations []*InferredRelation    `json:"inferred_relations"` // 推理关系
-	InferenceChain    []*InferenceStep       `json:"inference_chain"`    // 推理链
+	InferenceChain    []*InferenceStep       `json:"inference_chain"`    // 推理�?
 	Contradictions    []*Contradiction       `json:"contradictions"`     // 矛盾
-	Uncertainties     []*Uncertainty         `json:"uncertainties"`      // 不确定性
+	Uncertainties     []*Uncertainty         `json:"uncertainties"`      // 不确定�?
 	QualityMetrics    *InferenceQualityMetrics `json:"quality_metrics"`    // 质量指标
 	ProcessingTime    int64                  `json:"processing_time"`    // 处理时间
 	Explanations      []*Explanation         `json:"explanations"`       // 解释
@@ -313,10 +313,10 @@ const (
 type ResolutionSuggestion struct {
 	Type        InferenceResolutionType `json:"type"`        // 解决类型
 	Action      string                 `json:"action"`      // 行动
-	Priority    int                   `json:"priority"`    // 优先级
-	Confidence  float64               `json:"confidence"`  // 置信度
+	Priority    int                   `json:"priority"`    // 优先�?
+	Confidence  float64               `json:"confidence"`  // 置信�?
 	Explanation string                `json:"explanation"` // 解释
-	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
+	Metadata    map[string]interface{} `json:"metadata"`    // 元数�?
 }
 
 // InferenceResolutionType 解决类型
@@ -329,31 +329,31 @@ const (
 	InferenceResolutionTypeIgnore   InferenceResolutionType = "ignore"   // 忽略
 )
 
-// Uncertainty 不确定性
+// Uncertainty 不确定�?
 type Uncertainty struct {
 	ID          string                 `json:"id"`          // 不确定性ID
-	Type        UncertaintyType        `json:"type"`        // 不确定性类型
+	Type        UncertaintyType        `json:"type"`        // 不确定性类�?
 	Source      string                 `json:"source"`      // 来源
-	Level       float64               `json:"level"`       // 不确定性水平
+	Level       float64               `json:"level"`       // 不确定性水�?
 	Impact      float64               `json:"impact"`      // 影响
 	Mitigation  *MitigationStrategy    `json:"mitigation"`  // 缓解策略
 	Explanation string                `json:"explanation"` // 解释
 }
 
-// UncertaintyType 不确定性类型
+// UncertaintyType 不确定性类�?
 type UncertaintyType string
 
 const (
-	UncertaintyTypeEpistemic UncertaintyType = "epistemic" // 认知不确定性
-	UncertaintyTypeAleatory  UncertaintyType = "aleatory"  // 随机不确定性
-	UncertaintyTypeModel     UncertaintyType = "model"     // 模型不确定性
+	UncertaintyTypeEpistemic UncertaintyType = "epistemic" // 认知不确定�?
+	UncertaintyTypeAleatory  UncertaintyType = "aleatory"  // 随机不确定�?
+	UncertaintyTypeModel     UncertaintyType = "model"     // 模型不确定�?
 )
 
 // MitigationStrategy 缓解策略
 type MitigationStrategy struct {
 	Type        MitigationType         `json:"type"`        // 缓解类型
 	Action      string                 `json:"action"`      // 行动
-	Confidence  float64               `json:"confidence"`  // 置信度
+	Confidence  float64               `json:"confidence"`  // 置信�?
 	Cost        float64               `json:"cost"`        // 成本
 	Benefit     float64               `json:"benefit"`     // 收益
 	Explanation string                `json:"explanation"` // 解释
@@ -370,13 +370,13 @@ const (
 
 // InferenceQualityMetrics 推理质量指标
 type InferenceQualityMetrics struct {
-	Precision    float64 `json:"precision"`    // 精确度
-	Recall       float64 `json:"recall"`       // 召回率
+	Precision    float64 `json:"precision"`    // 精确�?
+	Recall       float64 `json:"recall"`       // 召回�?
 	F1Score      float64 `json:"f1_score"`     // F1分数
-	Consistency  float64 `json:"consistency"`  // 一致性
-	Completeness float64 `json:"completeness"` // 完整性
-	Novelty      float64 `json:"novelty"`      // 新颖性
-	Utility      float64 `json:"utility"`      // 实用性
+	Consistency  float64 `json:"consistency"`  // 一致�?
+	Completeness float64 `json:"completeness"` // 完整�?
+	Novelty      float64 `json:"novelty"`      // 新颖�?
+	Utility      float64 `json:"utility"`      // 实用�?
 }
 
 // Explanation 解释
@@ -384,10 +384,10 @@ type Explanation struct {
 	ID          string                 `json:"id"`          // 解释ID
 	Type        ExplanationType        `json:"type"`        // 解释类型
 	Content     string                 `json:"content"`     // 内容
-	Confidence  float64               `json:"confidence"`  // 置信度
+	Confidence  float64               `json:"confidence"`  // 置信�?
 	Evidence    []*Evidence           `json:"evidence"`    // 证据
 	Reasoning   string                `json:"reasoning"`   // 推理过程
-	Metadata    map[string]interface{} `json:"metadata"`    // 元数据
+	Metadata    map[string]interface{} `json:"metadata"`    // 元数�?
 }
 
 // ExplanationType 解释类型
@@ -398,7 +398,7 @@ const (
 	ExplanationTypeInductive   ExplanationType = "inductive"   // 归纳解释
 	ExplanationTypeAbductive   ExplanationType = "abductive"   // 溯因解释
 	ExplanationTypeContrastive ExplanationType = "contrastive" // 对比解释
-	ExplanationTypeCounterfactual ExplanationType = "counterfactual" // 反事实解释
+	ExplanationTypeCounterfactual ExplanationType = "counterfactual" // 反事实解�?
 )
 
 // NewIntelligentRelationInferenceEngine 创建智能关系推理引擎
@@ -434,7 +434,7 @@ func NewIntelligentRelationInferenceEngine(crossModalService CrossModalServiceIn
 		rules:            make([]*AdvancedInferenceRule, 0),
 	}
 
-	// 初始化默认推理规则
+	// 初始化默认推理规�?
 	engine.initializeDefaultRules()
 
 	return engine
@@ -457,7 +457,7 @@ func (e *IntelligentRelationInferenceEngine) ProcessInference(ctx context.Contex
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
-	// 2. 生成上下文嵌入
+	// 2. 生成上下文嵌�?
 	if err := e.generateContextEmbeddings(ctx, req); err != nil {
 		return nil, fmt.Errorf("failed to generate context embeddings: %w", err)
 	}
@@ -467,13 +467,13 @@ func (e *IntelligentRelationInferenceEngine) ProcessInference(ctx context.Contex
 	response.InferredRelations = inferredRelations
 	response.InferenceChain = inferenceChain
 
-	// 4. 检查矛盾
+	// 4. 检查矛�?
 	if e.config.EnableContradictionCheck {
 		contradictions := e.detectContradictions(inferredRelations, req.ExistingRelations)
 		response.Contradictions = contradictions
 	}
 
-	// 5. 分析不确定性
+	// 5. 分析不确定�?
 	if e.config.EnableUncertaintyReasoning {
 		uncertainties := e.analyzeUncertainties(inferredRelations, inferenceChain)
 		response.Uncertainties = uncertainties
@@ -486,7 +486,7 @@ func (e *IntelligentRelationInferenceEngine) ProcessInference(ctx context.Contex
 	// 7. 计算质量指标
 	response.QualityMetrics = e.calculateQualityMetrics(inferredRelations, req.ExistingRelations)
 
-	// 8. 更新指标和缓存
+	// 8. 更新指标和缓�?
 	e.updateMetrics(len(inferredRelations), time.Since(startTime))
 	e.updateCache(req, response)
 
@@ -494,9 +494,9 @@ func (e *IntelligentRelationInferenceEngine) ProcessInference(ctx context.Contex
 	return response, nil
 }
 
-// initializeDefaultRules 初始化默认推理规则
+// initializeDefaultRules 初始化默认推理规�?
 func (e *IntelligentRelationInferenceEngine) initializeDefaultRules() {
-	// 传递性规则
+	// 传递性规�?
 	transitiveRule := &AdvancedInferenceRule{
 		ID:          "transitive_prerequisite",
 		Name:        "Transitive Prerequisite Rule",
@@ -518,7 +518,7 @@ func (e *IntelligentRelationInferenceEngine) initializeDefaultRules() {
 		Enabled:     true,
 	}
 
-	// 相似性规则
+	// 相似性规�?
 	similarityRule := &AdvancedInferenceRule{
 		ID:          "similarity_related",
 		Name:        "Similarity Related Rule",
@@ -561,13 +561,13 @@ func (e *IntelligentRelationInferenceEngine) validateRequest(req *InferenceReque
 	return nil
 }
 
-// generateContextEmbeddings 生成上下文嵌入
+// generateContextEmbeddings 生成上下文嵌�?
 func (e *IntelligentRelationInferenceEngine) generateContextEmbeddings(ctx context.Context, req *InferenceRequest) error {
 	if req.Context == nil {
 		return nil
 	}
 
-	// 构建上下文文本
+	// 构建上下文文�?
 	contextText := fmt.Sprintf("Domain: %s, Subject: %s", req.Context.Domain, req.Context.Subject)
 	
 	// 使用跨模态AI生成嵌入
@@ -617,7 +617,7 @@ func (e *IntelligentRelationInferenceEngine) applyInferenceRules(ctx context.Con
 		inferenceChain = append(inferenceChain, steps...)
 	}
 
-	// 去重和过滤
+	// 去重和过�?
 	inferredRelations = e.deduplicateRelations(inferredRelations)
 	inferredRelations = e.filterByConfidence(inferredRelations, e.config.MinConfidenceThreshold)
 
@@ -651,12 +651,12 @@ func (e *IntelligentRelationInferenceEngine) applyRule(ctx context.Context, rule
 	return relations, steps
 }
 
-// applyTransitiveRule 应用传递规则
+// applyTransitiveRule 应用传递规�?
 func (e *IntelligentRelationInferenceEngine) applyTransitiveRule(rule *AdvancedInferenceRule, req *InferenceRequest) ([]*InferredRelation, []*InferenceStep) {
 	relations := make([]*InferredRelation, 0)
 	steps := make([]*InferenceStep, 0)
 
-	// 构建关系图
+	// 构建关系�?
 	relationMap := make(map[uuid.UUID]map[uuid.UUID]*entities.KnowledgeRelation)
 	for _, rel := range req.ExistingRelations {
 		if relationMap[rel.FromNodeID] == nil {
@@ -665,24 +665,24 @@ func (e *IntelligentRelationInferenceEngine) applyTransitiveRule(rule *AdvancedI
 		relationMap[rel.FromNodeID][rel.ToNodeID] = rel
 	}
 
-	// 查找传递关系
+	// 查找传递关�?
 	for _, nodeA := range req.Nodes {
 		for _, nodeB := range req.Nodes {
 			if nodeA.ID == nodeB.ID {
 				continue
 			}
 
-			// 查找A->B的直接关系
+			// 查找A->B的直接关�?
 			if relationMap[nodeA.ID] != nil {
 				if relAB, exists := relationMap[nodeA.ID][nodeB.ID]; exists {
-					// 查找B->C的关系
+					// 查找B->C的关�?
 					if relationMap[nodeB.ID] != nil {
 						for nodeC_ID, relBC := range relationMap[nodeB.ID] {
 							if nodeC_ID == nodeA.ID {
 								continue
 							}
 
-							// 检查是否已存在A->C的直接关系
+							// 检查是否已存在A->C的直接关�?
 							if relationMap[nodeA.ID][nodeC_ID] == nil {
 								// 创建传递关系A->C
 								confidence := math.Min(relAB.Confidence, relBC.Confidence) * rule.Confidence
@@ -690,7 +690,7 @@ func (e *IntelligentRelationInferenceEngine) applyTransitiveRule(rule *AdvancedI
 									inferredRel := &InferredRelation{
 										FromNodeID:   nodeA.ID,
 										ToNodeID:     nodeC_ID,
-										RelationType: relAB.Type, // 保持相同的关系类型
+										RelationType: relAB.Type, // 保持相同的关系类�?
 										Weight:       confidence,
 										Certainty:    confidence,
 									}
@@ -732,9 +732,9 @@ func (e *IntelligentRelationInferenceEngine) applyInductiveRule(ctx context.Cont
 				continue
 			}
 
-			// 计算节点相似性
+			// 计算节点相似�?
 			similarity := e.calculateNodeSimilarity(ctx, nodeA, nodeB)
-			if similarity > 0.7 { // 高相似性阈值
+			if similarity > 0.7 { // 高相似性阈�?
 				confidence := similarity * rule.Confidence
 				if confidence > e.config.MinConfidenceThreshold {
 					inferredRel := &InferredRelation{
@@ -824,8 +824,8 @@ func (e *IntelligentRelationInferenceEngine) applyAnalogicalRule(ctx context.Con
 			}
 
 			similarity := e.calculateNodeSimilarity(ctx, nodeA, nodeB)
-			if similarity > 0.8 { // 高相似性阈值用于类比
-				// 查找B的关系，推理A的类似关系
+			if similarity > 0.8 { // 高相似性阈值用于类�?
+				// 查找B的关系，推理A的类似关�?
 				for _, rel := range req.ExistingRelations {
 					if rel.FromNodeID == nodeB.ID {
 						confidence := similarity * rel.Confidence * rule.Confidence
@@ -861,34 +861,34 @@ func (e *IntelligentRelationInferenceEngine) applyAnalogicalRule(ctx context.Con
 	return relations, steps
 }
 
-// calculateNodeSimilarity 计算节点相似性
+// calculateNodeSimilarity 计算节点相似�?
 func (e *IntelligentRelationInferenceEngine) calculateNodeSimilarity(ctx context.Context, nodeA, nodeB *entities.KnowledgeNode) float64 {
 	similarity := 0.0
 
-	// 类型相似性
+	// 类型相似�?
 	if nodeA.Type == nodeB.Type {
 		similarity += 0.3
 	}
 
-	// 难度相似性
+	// 难度相似�?
 	diffA := int(nodeA.DifficultyLevel)
 	diffB := int(nodeB.DifficultyLevel)
 	diffSim := 1.0 - math.Abs(float64(diffA-diffB))/4.0
 	similarity += 0.2 * diffSim
 
-	// 主题相似性
+	// 主题相似�?
 	if nodeA.Subject == nodeB.Subject {
 		similarity += 0.3
 	}
 
-	// 标签相似性
+	// 标签相似�?
 	tagSim := e.calculateTagSimilarity(nodeA.Tags, nodeB.Tags)
 	similarity += 0.2 * tagSim
 
 	return similarity
 }
 
-// calculateTagSimilarity 计算标签相似性
+// calculateTagSimilarity 计算标签相似�?
 func (e *IntelligentRelationInferenceEngine) calculateTagSimilarity(tagsA, tagsB []string) float64 {
 	if len(tagsA) == 0 && len(tagsB) == 0 {
 		return 1.0
@@ -922,14 +922,14 @@ func (e *IntelligentRelationInferenceEngine) calculateTagSimilarity(tagsA, tagsB
 	return float64(intersection) / float64(union)
 }
 
-// hasCausalRelationship 检查是否存在因果关系
+// hasCausalRelationship 检查是否存在因果关�?
 func (e *IntelligentRelationInferenceEngine) hasCausalRelationship(nodeA, nodeB *entities.KnowledgeNode) bool {
-	// 基于难度级别的因果关系
+	// 基于难度级别的因果关�?
 	if int(nodeA.DifficultyLevel) < int(nodeB.DifficultyLevel) && nodeA.Subject == nodeB.Subject {
 		return true
 	}
 
-	// 基于节点类型的因果关系
+	// 基于节点类型的因果关�?
 	if nodeA.Type == entities.NodeTypeSkill && nodeB.Type == entities.NodeTypeSkill {
 		return true
 	}
@@ -937,11 +937,11 @@ func (e *IntelligentRelationInferenceEngine) hasCausalRelationship(nodeA, nodeB 
 	return false
 }
 
-// calculateCausalConfidence 计算因果置信度
+// calculateCausalConfidence 计算因果置信�?
 func (e *IntelligentRelationInferenceEngine) calculateCausalConfidence(nodeA, nodeB *entities.KnowledgeNode) float64 {
 	confidence := 0.5
 
-	// 难度差异越小，因果关系越强
+	// 难度差异越小，因果关系越�?
 	diffA := int(nodeA.DifficultyLevel)
 	diffB := int(nodeB.DifficultyLevel)
 	if diffB > diffA {
@@ -949,7 +949,7 @@ func (e *IntelligentRelationInferenceEngine) calculateCausalConfidence(nodeA, no
 		confidence += 0.3 * diffFactor
 	}
 
-	// 相同主题增加置信度
+	// 相同主题增加置信�?
 	if nodeA.Subject == nodeB.Subject {
 		confidence += 0.2
 	}
@@ -992,11 +992,11 @@ func (e *IntelligentRelationInferenceEngine) filterByConfidence(relations []*Inf
 	return result
 }
 
-// detectContradictions 检测矛盾
+// detectContradictions 检测矛�?
 func (e *IntelligentRelationInferenceEngine) detectContradictions(inferredRelations []*InferredRelation, existingRelations []*entities.KnowledgeRelation) []*Contradiction {
 	contradictions := make([]*Contradiction, 0)
 
-	// 检查推理关系与现有关系的矛盾
+	// 检查推理关系与现有关系的矛�?
 	for _, inferred := range inferredRelations {
 		for _, existing := range existingRelations {
 			if e.areContradictory(inferred, existing) {
@@ -1015,7 +1015,7 @@ func (e *IntelligentRelationInferenceEngine) detectContradictions(inferredRelati
 	return contradictions
 }
 
-// areContradictory 检查两个关系是否矛盾
+// areContradictory 检查两个关系是否矛�?
 func (e *IntelligentRelationInferenceEngine) areContradictory(inferred *InferredRelation, existing *entities.KnowledgeRelation) bool {
 	// 相同节点对但关系类型矛盾
 	if inferred.FromNodeID == existing.FromNodeID && inferred.ToNodeID == existing.ToNodeID {
@@ -1030,7 +1030,7 @@ func (e *IntelligentRelationInferenceEngine) areContradictory(inferred *Inferred
 	return false
 }
 
-// areRelationTypesContradictory 检查关系类型是否矛盾
+// areRelationTypesContradictory 检查关系类型是否矛�?
 func (e *IntelligentRelationInferenceEngine) areRelationTypesContradictory(type1, type2 entities.RelationType) bool {
 	// 定义矛盾的关系类型对
 	contradictoryPairs := map[entities.RelationType][]entities.RelationType{
@@ -1050,7 +1050,7 @@ func (e *IntelligentRelationInferenceEngine) areRelationTypesContradictory(type1
 	return false
 }
 
-// areReverseRelationsContradictory 检查反向关系是否矛盾
+// areReverseRelationsContradictory 检查反向关系是否矛�?
 func (e *IntelligentRelationInferenceEngine) areReverseRelationsContradictory(type1, type2 entities.RelationType) bool {
 	// 某些关系类型不应该有反向关系
 	asymmetricRelations := []entities.RelationType{
@@ -1070,7 +1070,7 @@ func (e *IntelligentRelationInferenceEngine) areReverseRelationsContradictory(ty
 
 // calculateContradictionSeverity 计算矛盾严重程度
 func (e *IntelligentRelationInferenceEngine) calculateContradictionSeverity(inferred *InferredRelation, existing *entities.KnowledgeRelation) float64 {
-	// 基于置信度差异计算严重程度
+	// 基于置信度差异计算严重程�?
 	confidenceDiff := math.Abs(inferred.Confidence - existing.Confidence)
 	severity := 0.5 + 0.5*confidenceDiff
 
@@ -1082,11 +1082,11 @@ func (e *IntelligentRelationInferenceEngine) calculateContradictionSeverity(infe
 	return math.Min(severity, 1.0)
 }
 
-// analyzeUncertainties 分析不确定性
+// analyzeUncertainties 分析不确定�?
 func (e *IntelligentRelationInferenceEngine) analyzeUncertainties(inferredRelations []*InferredRelation, inferenceChain []*InferenceStep) []*Uncertainty {
 	uncertainties := make([]*Uncertainty, 0)
 
-	// 分析低置信度关系的不确定性
+	// 分析低置信度关系的不确定�?
 	for _, rel := range inferredRelations {
 		if rel.Confidence < 0.8 {
 			uncertainty := &Uncertainty{
@@ -1104,12 +1104,12 @@ func (e *IntelligentRelationInferenceEngine) analyzeUncertainties(inferredRelati
 	return uncertainties
 }
 
-// calculateUncertaintyImpact 计算不确定性影响
+// calculateUncertaintyImpact 计算不确定性影�?
 func (e *IntelligentRelationInferenceEngine) calculateUncertaintyImpact(rel *InferredRelation) float64 {
-	// 基于关系类型和权重计算影响
+	// 基于关系类型和权重计算影�?
 	impact := rel.Weight
 
-	// 某些关系类型的不确定性影响更大
+	// 某些关系类型的不确定性影响更�?
 	if rel.RelationType == entities.RelationTypePrerequisite {
 		impact *= 1.2
 	}
@@ -1121,7 +1121,7 @@ func (e *IntelligentRelationInferenceEngine) calculateUncertaintyImpact(rel *Inf
 func (e *IntelligentRelationInferenceEngine) generateExplanations(inferredRelations []*InferredRelation, inferenceChain []*InferenceStep) []*Explanation {
 	explanations := make([]*Explanation, 0)
 
-	// 为每个推理步骤生成解释
+	// 为每个推理步骤生成解�?
 	for _, step := range inferenceChain {
 		explanation := &Explanation{
 			ID:         uuid.New().String(),
@@ -1148,7 +1148,7 @@ func (e *IntelligentRelationInferenceEngine) calculateQualityMetrics(inferredRel
 		return metrics
 	}
 
-	// 计算平均置信度作为精确度的代理
+	// 计算平均置信度作为精确度的代�?
 	totalConfidence := 0.0
 	for _, rel := range inferredRelations {
 		totalConfidence += rel.Confidence
@@ -1166,22 +1166,22 @@ func (e *IntelligentRelationInferenceEngine) calculateQualityMetrics(inferredRel
 		metrics.F1Score = 2 * (metrics.Precision * metrics.Recall) / (metrics.Precision + metrics.Recall)
 	}
 
-	// 计算一致性
+	// 计算一致�?
 	metrics.Consistency = e.calculateConsistencyScore(inferredRelations)
 
-	// 计算完整性
+	// 计算完整�?
 	metrics.Completeness = e.calculateCompletenessScore(inferredRelations, existingRelations)
 
-	// 计算新颖性
+	// 计算新颖�?
 	metrics.Novelty = e.calculateNoveltyScore(inferredRelations, existingRelations)
 
-	// 计算实用性
+	// 计算实用�?
 	metrics.Utility = e.calculateUtilityScore(inferredRelations)
 
 	return metrics
 }
 
-// calculateConsistencyScore 计算一致性分数
+// calculateConsistencyScore 计算一致性分�?
 func (e *IntelligentRelationInferenceEngine) calculateConsistencyScore(relations []*InferredRelation) float64 {
 	if len(relations) <= 1 {
 		return 1.0
@@ -1209,7 +1209,7 @@ func (e *IntelligentRelationInferenceEngine) calculateConsistencyScore(relations
 	return float64(consistentPairs) / float64(totalPairs)
 }
 
-// areInferredRelationsContradictory 检查推理关系是否矛盾
+// areInferredRelationsContradictory 检查推理关系是否矛�?
 func (e *IntelligentRelationInferenceEngine) areInferredRelationsContradictory(relA, relB *InferredRelation) bool {
 	// 相同节点对但关系类型矛盾
 	if relA.FromNodeID == relB.FromNodeID && relA.ToNodeID == relB.ToNodeID {
@@ -1224,7 +1224,7 @@ func (e *IntelligentRelationInferenceEngine) areInferredRelationsContradictory(r
 	return false
 }
 
-// calculateCompletenessScore 计算完整性分数
+// calculateCompletenessScore 计算完整性分�?
 func (e *IntelligentRelationInferenceEngine) calculateCompletenessScore(inferredRelations []*InferredRelation, existingRelations []*entities.KnowledgeRelation) float64 {
 	// 简化的完整性计算：推理关系数量与现有关系数量的比例
 	if len(existingRelations) == 0 {
@@ -1235,7 +1235,7 @@ func (e *IntelligentRelationInferenceEngine) calculateCompletenessScore(inferred
 	return math.Min(ratio, 1.0)
 }
 
-// calculateNoveltyScore 计算新颖性分数
+// calculateNoveltyScore 计算新颖性分�?
 func (e *IntelligentRelationInferenceEngine) calculateNoveltyScore(inferredRelations []*InferredRelation, existingRelations []*entities.KnowledgeRelation) float64 {
 	if len(inferredRelations) == 0 {
 		return 0.0
@@ -1250,7 +1250,7 @@ func (e *IntelligentRelationInferenceEngine) calculateNoveltyScore(inferredRelat
 		existingRelationSet[key] = true
 	}
 
-	// 检查推理关系的新颖性
+	// 检查推理关系的新颖�?
 	for _, rel := range inferredRelations {
 		key := fmt.Sprintf("%s-%s-%s", rel.FromNodeID, rel.ToNodeID, rel.RelationType)
 		if !existingRelationSet[key] {
@@ -1261,7 +1261,7 @@ func (e *IntelligentRelationInferenceEngine) calculateNoveltyScore(inferredRelat
 	return float64(novelRelations) / float64(len(inferredRelations))
 }
 
-// calculateUtilityScore 计算实用性分数
+// calculateUtilityScore 计算实用性分�?
 func (e *IntelligentRelationInferenceEngine) calculateUtilityScore(relations []*InferredRelation) float64 {
 	if len(relations) == 0 {
 		return 0.0
@@ -1269,10 +1269,10 @@ func (e *IntelligentRelationInferenceEngine) calculateUtilityScore(relations []*
 
 	totalUtility := 0.0
 	for _, rel := range relations {
-		// 基于关系类型和置信度计算实用性
+		// 基于关系类型和置信度计算实用�?
 		utility := rel.Confidence
 
-		// 某些关系类型更有用
+		// 某些关系类型更有�?
 		switch rel.RelationType {
 		case entities.RelationTypePrerequisite:
 			utility *= 1.2
@@ -1313,10 +1313,10 @@ func (e *IntelligentRelationInferenceEngine) updateCache(req *InferenceRequest, 
 	inputHash := e.generateInputHash(req)
 	cachedResult := &domainServices.CachedInferenceResult{
 		QueryID:    inputHash,
-		Result:     resp, // 完整的推理响应
+		Result:     resp, // 完整的推理响�?
 		Confidence: e.calculateAverageConfidence(resp.InferredRelations),
 		CachedAt:   time.Now(),
-		ExpiresAt:  time.Now().Add(24 * time.Hour), // 24小时后过期
+		ExpiresAt:  time.Now().Add(24 * time.Hour), // 24小时后过�?
 		Metadata:   make(map[string]interface{}),
 	}
 
@@ -1335,7 +1335,7 @@ func (e *IntelligentRelationInferenceEngine) generateInputHash(req *InferenceReq
 	return fmt.Sprintf("%x", nodeIDs)
 }
 
-// calculateAverageConfidence 计算平均置信度
+// calculateAverageConfidence 计算平均置信�?
 func (e *IntelligentRelationInferenceEngine) calculateAverageConfidence(relations []*InferredRelation) float64 {
 	if len(relations) == 0 {
 		return 0.0

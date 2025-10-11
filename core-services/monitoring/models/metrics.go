@@ -8,9 +8,9 @@ import (
 type MetricType string
 
 const (
-	MetricTypeCounter   MetricType = "counter"   // 计数器
-	MetricTypeGauge     MetricType = "gauge"     // 仪表盘
-	MetricTypeHistogram MetricType = "histogram" // 直方图
+	MetricTypeCounter   MetricType = "counter"   // 计数�?
+	MetricTypeGauge     MetricType = "gauge"     // 仪表�?
+	MetricTypeHistogram MetricType = "histogram" // 直方�?
 	MetricTypeSummary   MetricType = "summary"   // 摘要
 )
 
@@ -21,10 +21,10 @@ const (
 	CategorySystem      MetricCategory = "system"      // 系统指标
 	CategoryApplication MetricCategory = "application" // 应用指标
 	CategoryBusiness    MetricCategory = "business"    // 业务指标
-	CategoryDatabase    MetricCategory = "database"    // 数据库指标
+	CategoryDatabase    MetricCategory = "database"    // 数据库指�?
 	CategoryNetwork     MetricCategory = "network"     // 网络指标
 	CategorySecurity    MetricCategory = "security"    // 安全指标
-	CategoryCustom      MetricCategory = "custom"      // 自定义指标
+	CategoryCustom      MetricCategory = "custom"      // 自定义指�?
 )
 
 // Metric 指标基础结构
@@ -58,14 +58,14 @@ type MetricSeries struct {
 	Samples    []MetricSample    `json:"samples"`
 }
 
-// CounterMetric 计数器指标
+// CounterMetric 计数器指�?
 type CounterMetric struct {
 	Metric
 	Total float64 `json:"total"`
-	Rate  float64 `json:"rate"` // 每秒增长率
+	Rate  float64 `json:"rate"` // 每秒增长�?
 }
 
-// GaugeMetric 仪表盘指标
+// GaugeMetric 仪表盘指�?
 type GaugeMetric struct {
 	Metric
 	Current float64 `json:"current"`
@@ -74,13 +74,13 @@ type GaugeMetric struct {
 	Avg     float64 `json:"avg"`
 }
 
-// HistogramMetric 直方图指标
+// HistogramMetric 直方图指�?
 type HistogramMetric struct {
 	Metric
 	Buckets    []HistogramBucket `json:"buckets"`
 	Count      uint64            `json:"count"`
 	Sum        float64           `json:"sum"`
-	Quantiles  map[float64]float64 `json:"quantiles"` // 分位数
+	Quantiles  map[float64]float64 `json:"quantiles"` // 分位�?
 }
 
 // HistogramBucket 直方图桶
@@ -121,7 +121,7 @@ type NetworkIOMetrics struct {
 	DroppedSent      uint64 `json:"dropped_sent"`
 }
 
-// LoadAverageMetrics 负载平均值指标
+// LoadAverageMetrics 负载平均值指�?
 type LoadAverageMetrics struct {
 	Load1  float64 `json:"load_1"`
 	Load5  float64 `json:"load_5"`
@@ -167,7 +167,7 @@ type GRPCMetrics struct {
 	ErrorRate         float64           `json:"error_rate"`
 }
 
-// DatabaseMetrics 数据库指标
+// DatabaseMetrics 数据库指�?
 type DatabaseMetrics struct {
 	ConnectionsActive   int64   `json:"connections_active"`
 	ConnectionsIdle     int64   `json:"connections_idle"`
@@ -275,7 +275,7 @@ type MetricQueryResult struct {
 	Values     []MetricValue  `json:"values"`
 }
 
-// MetricValue 指标值
+// MetricValue 指标�?
 type MetricValue struct {
 	Timestamp time.Time `json:"timestamp"`
 	Value     float64   `json:"value"`
@@ -292,7 +292,7 @@ type AggregatedMetric struct {
 	EndTime     time.Time         `json:"end_time"`
 }
 
-// MetricThreshold 指标阈值
+// MetricThreshold 指标阈�?
 type MetricThreshold struct {
 	ID          string            `json:"id" gorm:"primaryKey"`
 	MetricName  string            `json:"metric_name" gorm:"not null;index"`
@@ -322,7 +322,7 @@ type MetricAnnotation struct {
 	UpdatedAt   time.Time         `json:"updated_at"`
 }
 
-// MetricMetadata 指标元数据
+// MetricMetadata 指标元数�?
 type MetricMetadata struct {
 	MetricName  string            `json:"metric_name" gorm:"primaryKey"`
 	Type        MetricType        `json:"type" gorm:"not null"`
@@ -356,7 +356,7 @@ type MetricExport struct {
 
 // Helper functions
 
-// NewMetric 创建新指标
+// NewMetric 创建新指�?
 func NewMetric(name string, metricType MetricType, category MetricCategory) *Metric {
 	return &Metric{
 		ID:        generateID(),
@@ -381,7 +381,7 @@ func (m *Metric) WithLabels(labels map[string]string) *Metric {
 	return m
 }
 
-// WithValue 设置值
+// WithValue 设置�?
 func (m *Metric) WithValue(value float64) *Metric {
 	m.Value = value
 	m.UpdatedAt = time.Now()
@@ -394,12 +394,12 @@ func (m *Metric) WithSource(source string) *Metric {
 	return m
 }
 
-// IsExpired 检查指标是否过期
+// IsExpired 检查指标是否过�?
 func (m *Metric) IsExpired(retention time.Duration) bool {
 	return time.Since(m.Timestamp) > retention
 }
 
-// GetLabelValue 获取标签值
+// GetLabelValue 获取标签�?
 func (m *Metric) GetLabelValue(key string) (string, bool) {
 	if m.Labels == nil {
 		return "", false
@@ -408,7 +408,7 @@ func (m *Metric) GetLabelValue(key string) (string, bool) {
 	return value, exists
 }
 
-// MatchesLabels 检查标签是否匹配
+// MatchesLabels 检查标签是否匹�?
 func (m *Metric) MatchesLabels(labels map[string]string) bool {
 	if m.Labels == nil && len(labels) == 0 {
 		return true
@@ -431,7 +431,7 @@ func generateID() string {
 	return time.Now().Format("20060102150405") + "-" + randomString(8)
 }
 
-// randomString 生成随机字符串
+// randomString 生成随机字符�?
 func randomString(length int) string {
 	// 实现随机字符串生成逻辑
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

@@ -91,7 +91,7 @@ type HealthAlertRepository interface {
 	CountUnreadByUserID(ctx context.Context, userID uuid.UUID) (int64, error)
 }
 
-// HealthReport 健康报告聚合根
+// HealthReport 健康报告聚合�?
 type HealthReport struct {
 	ID          uuid.UUID              `json:"id" gorm:"type:uuid;primary_key"`
 	UserID      uuid.UUID              `json:"user_id" gorm:"type:uuid;not null;index"`
@@ -110,7 +110,7 @@ type HealthReport struct {
 	events []DomainEvent
 }
 
-// HealthAlert 健康警报聚合根
+// HealthAlert 健康警报聚合�?
 type HealthAlert struct {
 	ID          uuid.UUID              `json:"id" gorm:"type:uuid;primary_key"`
 	UserID      uuid.UUID              `json:"user_id" gorm:"type:uuid;not null;index"`
@@ -180,7 +180,7 @@ func NewHealthAlert(userID uuid.UUID, alertType, severity, title, message string
 	return alert
 }
 
-// MarkAsRead 标记警报为已读
+// MarkAsRead 标记警报为已�?
 func (h *HealthAlert) MarkAsRead() {
 	if h.Status != "read" {
 		h.Status = "read"

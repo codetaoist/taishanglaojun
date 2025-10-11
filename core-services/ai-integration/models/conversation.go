@@ -25,7 +25,7 @@ type Message struct {
 	Metadata  map[string]string `json:"metadata" bson:"metadata"`
 }
 
-// Metadata 会话元数据
+// Metadata 会话元数�?
 type Metadata struct {
 	Source      string            `json:"source" bson:"source"`           // web, mobile, api
 	UserAgent   string            `json:"user_agent" bson:"user_agent"`

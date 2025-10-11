@@ -48,7 +48,7 @@ import {
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
-const { TabPane } = Tabs;
+
 const { Panel } = Collapse;
 
 interface HealthAdvice {

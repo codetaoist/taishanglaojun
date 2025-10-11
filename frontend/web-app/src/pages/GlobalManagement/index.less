@@ -1,0 +1,281 @@
+// 太上老君AI平台全球化管理界面样式
+.global-management {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .header-content {
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: #1890ff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .anticon {
+          font-size: 32px;
+        }
+      }
+
+      p {
+        margin: 8px 0 0 0;
+        color: #666;
+        font-size: 16px;
+      }
+    }
+
+    .header-actions {
+      .ant-btn {
+        height: 40px;
+        border-radius: 6px;
+      }
+    }
+  }
+
+  .ant-tabs {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .ant-tabs-nav {
+      margin: 0;
+      padding: 0 24px;
+
+      .ant-tabs-tab {
+        padding: 16px 24px;
+        font-size: 16px;
+        font-weight: 500;
+
+        .anticon {
+          margin-right: 8px;
+        }
+      }
+    }
+
+    .ant-tabs-content-holder {
+      padding: 24px;
+    }
+  }
+
+  .global-overview {
+    .ant-card {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .ant-statistic {
+        .ant-statistic-title {
+          font-size: 14px;
+          color: #666;
+          margin-bottom: 8px;
+        }
+
+        .ant-statistic-content {
+          .ant-statistic-content-value {
+            font-size: 24px;
+            font-weight: 600;
+          }
+
+          .ant-statistic-content-prefix {
+            margin-right: 8px;
+            font-size: 20px;
+          }
+        }
+      }
+    }
+
+    .ant-alert {
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+      .ant-alert-message {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .ant-alert-description {
+        font-size: 14px;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  // 响应式设计
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+
+      .header-content {
+        h1 {
+          font-size: 24px;
+
+          .anticon {
+            font-size: 28px;
+          }
+        }
+
+        p {
+          font-size: 14px;
+        }
+      }
+
+      .header-actions {
+        width: 100%;
+
+        .ant-space {
+          width: 100%;
+          justify-content: flex-end;
+        }
+      }
+    }
+
+    .ant-tabs {
+      .ant-tabs-nav {
+        padding: 0 16px;
+
+        .ant-tabs-tab {
+          padding: 12px 16px;
+          font-size: 14px;
+        }
+      }
+
+      .ant-tabs-content-holder {
+        padding: 16px;
+      }
+    }
+  }
+
+  @media (max-width: 576px) {
+    padding: 12px;
+
+    .page-header {
+      padding: 12px;
+
+      .header-content {
+        h1 {
+          font-size: 20px;
+
+          .anticon {
+            font-size: 24px;
+          }
+        }
+      }
+    }
+
+    .ant-tabs {
+      .ant-tabs-nav {
+        padding: 0 12px;
+
+        .ant-tabs-tab {
+          padding: 8px 12px;
+          font-size: 12px;
+
+          .anticon {
+            margin-right: 4px;
+          }
+        }
+      }
+
+      .ant-tabs-content-holder {
+        padding: 12px;
+      }
+    }
+
+    .global-overview {
+      .ant-card {
+        .ant-statistic {
+          .ant-statistic-content {
+            .ant-statistic-content-value {
+              font-size: 20px;
+            }
+
+            .ant-statistic-content-prefix {
+              font-size: 16px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// 动画效果
+.global-management {
+  .ant-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .ant-alert {
+    animation: fadeInDown 0.6s ease-out;
+  }
+
+  .ant-statistic {
+    animation: fadeIn 0.8s ease-out;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// 主题色彩
+.global-management {
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #f5222d;
+  --text-color: #262626;
+  --text-color-secondary: #8c8c8c;
+  --border-color: #d9d9d9;
+  --background-color: #f0f2f5;
+  --card-background: #ffffff;
+}

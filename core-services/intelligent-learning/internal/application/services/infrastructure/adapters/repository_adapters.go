@@ -6,17 +6,17 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
-	domainservices "github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/entities"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
+	domainservices "github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/services"
 )
 
-// ContentRepositoryAdapter 内容仓库适配器
+// ContentRepositoryAdapter 内容仓库适配�?
 type ContentRepositoryAdapter struct {
 	contentRepo repositories.LearningContentRepository
 }
 
-// NewContentRepositoryAdapter 创建内容仓库适配器
+// NewContentRepositoryAdapter 创建内容仓库适配�?
 func NewContentRepositoryAdapter(contentRepo repositories.LearningContentRepository) domainservices.ContentRepository {
 	return &ContentRepositoryAdapter{
 		contentRepo: contentRepo,
@@ -127,12 +127,12 @@ func (a *ContentRepositoryAdapter) GetContentsByTags(ctx context.Context, tags [
 	return result, nil
 }
 
-// UserRepositoryAdapter 用户仓库适配器
+// UserRepositoryAdapter 用户仓库适配�?
 type UserRepositoryAdapter struct {
 	learnerRepo repositories.LearnerRepository
 }
 
-// NewUserRepositoryAdapter 创建用户仓库适配器
+// NewUserRepositoryAdapter 创建用户仓库适配�?
 func NewUserRepositoryAdapter(learnerRepo repositories.LearnerRepository) domainservices.UserRepository {
 	return &UserRepositoryAdapter{
 		learnerRepo: learnerRepo,
@@ -151,7 +151,7 @@ func (a *UserRepositoryAdapter) GetUserProfile(ctx context.Context, userID strin
 		return nil, err
 	}
 
-	// 从技能等级构建技能映射
+	// 从技能等级构建技能映�?
 	skillLevels := make(map[string]float64)
 	for _, skill := range learner.Skills {
 		skillLevels[skill.SkillName] = float64(skill.Level)
@@ -165,7 +165,7 @@ func (a *UserRepositoryAdapter) GetUserProfile(ctx context.Context, userID strin
 		Keywords:      make(map[string]float64),
 		SkillLevels:   skillLevels,
 		LearningStyle: learner.LearningStyle,
-		Difficulty:    0.5, // 默认值
+		Difficulty:    0.5, // 默认�?
 		Duration:      int64(learner.WeeklyGoalHours * 3600),
 		UpdatedAt:     learner.UpdatedAt,
 	}, nil

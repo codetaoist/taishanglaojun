@@ -1,0 +1,157 @@
+# 太上老君AI平台 - Prometheus监控配置
+# Taishang Laojun AI Platform - Prometheus Monitoring Configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'taishang-laojun'
+    environment: 'development'
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus自身监控
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # 核心服务监控
+  - job_name: 'core-services'
+    static_configs:
+      - targets: ['core-services:8080']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+
+  # 本地化服务监控
+  - job_name: 'localization-service'
+    static_configs:
+      - targets: ['localization-service:8081']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+
+  # 合规性服务监控
+  - job_name: 'compliance-service'
+    static_configs:
+      - targets: ['compliance-service:8082']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+
+  # PostgreSQL监控
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgresql:5432']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Redis监控
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Nginx监控
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['frontend:8080']
+    scrape_interval: 30s
+    metrics_path: /nginx_status
+
+  # Node Exporter监控（如果部署）
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # cAdvisor容器监控（如果部署）
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Blackbox Exporter健康检查
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://core-services:8080/health
+        - http://localization-service:8081/health
+        - http://compliance-service:8082/health
+        - http://frontend:8080/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+# 记录规则
+recording_rules:
+  - name: taishang_laojun_rules
+    rules:
+      # HTTP请求速率
+      - record: taishang:http_requests_per_second
+        expr: rate(http_requests_total[5m])
+        labels:
+          job: "taishang-services"
+
+      # HTTP错误率
+      - record: taishang:http_error_rate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])
+        labels:
+          job: "taishang-services"
+
+      # 响应时间分位数
+      - record: taishang:http_request_duration_p95
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
+        labels:
+          job: "taishang-services"
+
+      - record: taishang:http_request_duration_p99
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
+        labels:
+          job: "taishang-services"
+
+      # 数据库连接数
+      - record: taishang:database_connections_active
+        expr: pg_stat_activity_count{state="active"}
+        labels:
+          job: "postgresql"
+
+      # Redis内存使用率
+      - record: taishang:redis_memory_usage_ratio
+        expr: redis_memory_used_bytes / redis_memory_max_bytes
+        labels:
+          job: "redis"
+
+      # 容器CPU使用率
+      - record: taishang:container_cpu_usage_rate
+        expr: rate(container_cpu_usage_seconds_total[5m])
+        labels:
+          job: "cadvisor"
+
+      # 容器内存使用率
+      - record: taishang:container_memory_usage_ratio
+        expr: container_memory_working_set_bytes / container_spec_memory_limit_bytes
+        labels:
+          job: "cadvisor"

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
+	"github.com/codetaoist/taishanglaojun/core-services/intelligent-learning/internal/domain/repositories"
 )
 
 // RealtimeAnalyticsService 实时学习分析服务
@@ -17,12 +17,12 @@ type RealtimeAnalyticsService struct {
 	contentRepo        repositories.LearningContentRepository
 	knowledgeGraphRepo repositories.KnowledgeGraphRepository
 	
-	// 实时数据流
+	// 实时数据�?
 	eventStream        chan *LearningEvent
 	subscribers        map[string]chan *AnalyticsUpdate
 	subscribersMutex   sync.RWMutex
 	
-	// 实时分析器
+	// 实时分析�?
 	analyzers          map[string]*RealtimeAnalyzer
 	analyzersMutex     sync.RWMutex
 	
@@ -70,7 +70,7 @@ type Alert struct {
 	ActionItems []string  `json:"action_items,omitempty"`
 }
 
-// RealtimeAnalyzer 实时分析器
+// RealtimeAnalyzer 实时分析�?
 type RealtimeAnalyzer struct {
 	ID              string
 	Type            string // "performance", "engagement", "progress", "behavior", "prediction"
@@ -79,7 +79,7 @@ type RealtimeAnalyzer struct {
 	LastUpdate      time.Time
 	IsActive        bool
 	
-	// 分析状态
+	// 分析状�?
 	EventCount      int64
 	ProcessingTime  time.Duration
 	Accuracy        float64
@@ -90,7 +90,7 @@ type RealtimeAnalyzer struct {
 	bufferMutex     sync.Mutex
 }
 
-// RealtimeLearnerData 实时学习者数据
+// RealtimeLearnerData 实时学习者数�?
 type RealtimeLearnerData struct {
 	LearnerID           uuid.UUID                  `json:"learner_id"`
 	LastActivity        time.Time                  `json:"last_activity"`
@@ -138,7 +138,7 @@ type BehaviorPatterns struct {
 	AttentionSpan        time.Duration      `json:"attention_span"`
 }
 
-// EngagementState 参与状态
+// EngagementState 参与状�?
 type EngagementState struct {
 	Level               string    `json:"level"` // "high", "medium", "low", "disengaged"
 	Score               float64   `json:"score"`
@@ -149,7 +149,7 @@ type EngagementState struct {
 	RiskFactors         []string  `json:"risk_factors"`
 }
 
-// PerformanceState 表现状态
+// PerformanceState 表现状�?
 type PerformanceState struct {
 	CurrentLevel        string             `json:"current_level"` // "excellent", "good", "average", "below_average", "poor"
 	Score               float64            `json:"score"`
@@ -279,7 +279,7 @@ func (s *RealtimeAnalyticsService) GetRealtimeData(learnerID uuid.UUID) (*Realti
 	return nil, fmt.Errorf("no realtime data found for learner %s", learnerID)
 }
 
-// CreateAnalyzer 创建分析器
+// CreateAnalyzer 创建分析�?
 func (s *RealtimeAnalyticsService) CreateAnalyzer(analyzerType string, learnerID uuid.UUID, config map[string]interface{}) (*RealtimeAnalyzer, error) {
 	s.analyzersMutex.Lock()
 	defer s.analyzersMutex.Unlock()
@@ -302,7 +302,7 @@ func (s *RealtimeAnalyticsService) CreateAnalyzer(analyzerType string, learnerID
 	return analyzer, nil
 }
 
-// processEventStream 处理事件流
+// processEventStream 处理事件�?
 func (s *RealtimeAnalyticsService) processEventStream() {
 	defer s.wg.Done()
 	
@@ -428,7 +428,7 @@ func (s *RealtimeAnalyticsService) generateRealtimeAnalysis(event *LearningEvent
 	insights = append(insights, s.generatePerformanceInsights(data)...)
 	insights = append(insights, s.generateBehaviorInsights(data)...)
 	
-	// 检查警报
+	// 检查警�?
 	alerts = append(alerts, s.checkEngagementAlerts(data)...)
 	alerts = append(alerts, s.checkPerformanceAlerts(data)...)
 	alerts = append(alerts, s.checkBehaviorAlerts(data)...)
@@ -453,7 +453,7 @@ func (s *RealtimeAnalyticsService) broadcastUpdate(update *AnalyticsUpdate) {
 		select {
 		case ch <- update:
 		default:
-			// 通道满了，跳过这个订阅者
+			// 通道满了，跳过这个订阅�?
 		}
 	}
 }
@@ -467,7 +467,7 @@ func (s *RealtimeAnalyticsService) updateProgressMetrics(data *RealtimeLearnerDa
 		
 		// 计算学习速度
 		if timeSpent, ok := event.Data["time_spent"].(float64); ok && timeSpent > 0 {
-			velocity := progress / (timeSpent / 3600) // 每小时进度
+			velocity := progress / (timeSpent / 3600) // 每小时进�?
 			data.RealtimeMetrics.LearningVelocity = velocity
 		}
 	}
@@ -485,19 +485,19 @@ func (s *RealtimeAnalyticsService) updateInteractionMetrics(data *RealtimeLearne
 		data.BehaviorPatterns.InteractionFrequency[interactionType]++
 	}
 	
-	// 计算专注度
+	// 计算专注�?
 	if duration, ok := event.Data["duration"].(float64); ok {
 		data.RealtimeMetrics.FocusScore = s.calculateFocusScore(duration, data.BehaviorPatterns)
 	}
 }
 
-// updateEngagementMetrics 更新参与度指标
+// updateEngagementMetrics 更新参与度指�?
 func (s *RealtimeAnalyticsService) updateEngagementMetrics(data *RealtimeLearnerData, event *LearningEvent) {
 	if engagementScore, ok := event.Data["engagement_score"].(float64); ok {
 		data.EngagementState.Score = engagementScore
 		data.EngagementState.LastInteraction = event.Timestamp
 		
-		// 更新参与度等级
+		// 更新参与度等�?
 		if engagementScore >= 0.8 {
 			data.EngagementState.Level = "high"
 		} else if engagementScore >= 0.6 {
@@ -556,18 +556,18 @@ func (s *RealtimeAnalyticsService) calculateRealtimeMetrics(data *RealtimeLearne
 	metrics.LastUpdated = time.Now()
 }
 
-// generateEngagementInsights 生成参与度洞察
+// generateEngagementInsights 生成参与度洞�?
 func (s *RealtimeAnalyticsService) generateEngagementInsights(data *RealtimeLearnerData) []string {
 	var insights []string
 	
 	engagement := data.EngagementState
 	
 	if engagement.Score > 0.8 {
-		insights = append(insights, "学习者表现出高度参与，建议继续当前学习策略")
+		insights = append(insights, "学习者表现出高度参与，建议继续当前学习策�?)
 	} else if engagement.Score < 0.3 {
 		insights = append(insights, "学习者参与度较低，建议调整学习内容或方式")
 		
-		// 分析可能的原因
+		// 分析可能的原�?
 		if data.RealtimeMetrics.CognitiveLoad > 0.8 {
 			insights = append(insights, "认知负荷过高可能是参与度低的原因")
 		}
@@ -599,14 +599,14 @@ func (s *RealtimeAnalyticsService) generatePerformanceInsights(data *RealtimeLea
 	case "excellent":
 		insights = append(insights, "表现优秀，可以尝试更具挑战性的内容")
 	case "poor", "below_average":
-		insights = append(insights, "表现需要改进，建议回顾基础知识或寻求帮助")
+		insights = append(insights, "表现需要改进，建议回顾基础知识或寻求帮�?)
 	}
 	
 	// 分析学习效率
 	if data.RealtimeMetrics.EfficiencyScore > 0.8 {
-		insights = append(insights, "学习效率很高，保持当前节奏")
+		insights = append(insights, "学习效率很高，保持当前节�?)
 	} else if data.RealtimeMetrics.EfficiencyScore < 0.3 {
-		insights = append(insights, "学习效率较低，建议调整学习方法")
+		insights = append(insights, "学习效率较低，建议调整学习方�?)
 	}
 	
 	return insights
@@ -621,14 +621,14 @@ func (s *RealtimeAnalyticsService) generateBehaviorInsights(data *RealtimeLearne
 	case "burst":
 		insights = append(insights, "倾向于集中学习，建议适当休息避免疲劳")
 	case "irregular":
-		insights = append(insights, "学习节奏不规律，建议制定固定的学习计划")
+		insights = append(insights, "学习节奏不规律，建议制定固定的学习计�?)
 	case "steady":
 		insights = append(insights, "学习节奏稳定，这是一个很好的学习习惯")
 	}
 	
-	// 分析注意力持续时间
+	// 分析注意力持续时�?
 	if data.BehaviorPatterns.AttentionSpan < 15*time.Minute {
-		insights = append(insights, "注意力持续时间较短，建议采用短时间高频率的学习方式")
+		insights = append(insights, "注意力持续时间较短，建议采用短时间高频率的学习方�?)
 	} else if data.BehaviorPatterns.AttentionSpan > 2*time.Hour {
 		insights = append(insights, "注意力持续时间很长，但要注意适当休息")
 	}
@@ -653,11 +653,11 @@ func (s *RealtimeAnalyticsService) checkEngagementAlerts(data *RealtimeLearnerDa
 		})
 	}
 	
-	// 检查长时间无活动
+	// 检查长时间无活�?
 	if time.Since(data.EngagementState.LastInteraction) > 10*time.Minute {
 		alerts = append(alerts, Alert{
 			Level:     "info",
-			Message:   "学习者长时间无活动",
+			Message:   "学习者长时间无活�?,
 			Timestamp: time.Now(),
 			ActionItems: []string{
 				"发送提醒通知",
@@ -669,7 +669,7 @@ func (s *RealtimeAnalyticsService) checkEngagementAlerts(data *RealtimeLearnerDa
 	return alerts
 }
 
-// checkPerformanceAlerts 检查表现警报
+// checkPerformanceAlerts 检查表现警�?
 func (s *RealtimeAnalyticsService) checkPerformanceAlerts(data *RealtimeLearnerData) []Alert {
 	var alerts []Alert
 	
@@ -689,7 +689,7 @@ func (s *RealtimeAnalyticsService) checkPerformanceAlerts(data *RealtimeLearnerD
 	return alerts
 }
 
-// checkBehaviorAlerts 检查行为警报
+// checkBehaviorAlerts 检查行为警�?
 func (s *RealtimeAnalyticsService) checkBehaviorAlerts(data *RealtimeLearnerData) []Alert {
 	var alerts []Alert
 	
@@ -709,7 +709,7 @@ func (s *RealtimeAnalyticsService) checkBehaviorAlerts(data *RealtimeLearnerData
 	if data.PredictiveInsights.RiskOfDropout > s.config.AlertThresholds["dropout_risk"] {
 		alerts = append(alerts, Alert{
 			Level:     "critical",
-			Message:   "高辍学风险",
+			Message:   "高辍学风�?,
 			Timestamp: time.Now(),
 			ActionItems: []string{
 				"立即干预",
@@ -736,7 +736,7 @@ func (s *RealtimeAnalyticsService) calculateFocusScore(duration float64, pattern
 		avgFreq /= float64(len(patterns.InteractionFrequency))
 	}
 	
-	// 适中的交互频率表示良好的专注度
+	// 适中的交互频率表示良好的专注�?
 	freqScore := 1.0 - math.Abs(avgFreq-0.5)*2
 	
 	return (baseScore + freqScore) / 2
@@ -752,7 +752,7 @@ func (s *RealtimeAnalyticsService) calculateCognitiveLoad(data *RealtimeLearnerD
 		for _, freq := range data.BehaviorPatterns.InteractionFrequency {
 			totalInteractions += freq
 		}
-		// 交互过于频繁可能表示认知负荷高
+		// 交互过于频繁可能表示认知负荷�?
 		if totalInteractions > 100 {
 			load += 0.3
 		}
@@ -763,7 +763,7 @@ func (s *RealtimeAnalyticsService) calculateCognitiveLoad(data *RealtimeLearnerD
 		load += 0.4
 	}
 	
-	// 基于参与度
+	// 基于参与�?
 	if data.EngagementState.Score < 0.4 {
 		load += 0.3
 	}
@@ -775,7 +775,7 @@ func (s *RealtimeAnalyticsService) calculateMotivationLevel(data *RealtimeLearne
 	// 基于多个指标计算动机水平
 	motivation := 0.0
 	
-	// 参与度贡献
+	// 参与度贡�?
 	motivation += data.EngagementState.Score * 0.4
 	
 	// 表现贡献
@@ -788,7 +788,7 @@ func (s *RealtimeAnalyticsService) calculateMotivationLevel(data *RealtimeLearne
 }
 
 func (s *RealtimeAnalyticsService) calculateEngagementTrend(data *RealtimeLearnerData) string {
-	// 简化的趋势计算，实际应该基于历史数据
+	// 简化的趋势计算，实际应该基于历史数�?
 	current := data.EngagementState.Score
 	
 	if current > 0.7 {
@@ -802,14 +802,14 @@ func (s *RealtimeAnalyticsService) calculateEngagementTrend(data *RealtimeLearne
 
 func (s *RealtimeAnalyticsService) calculateConfidence(data *RealtimeLearnerData) float64 {
 	// 基于数据完整性和时效性计算置信度
-	confidence := 0.5 // 基础置信度
+	confidence := 0.5 // 基础置信�?
 	
-	// 数据新鲜度
+	// 数据新鲜�?
 	if time.Since(data.LastActivity) < 5*time.Minute {
 		confidence += 0.3
 	}
 	
-	// 数据完整性
+	// 数据完整�?
 	if data.CurrentSession != nil && data.CurrentSession.InteractionCount > 5 {
 		confidence += 0.2
 	}
@@ -817,7 +817,7 @@ func (s *RealtimeAnalyticsService) calculateConfidence(data *RealtimeLearnerData
 	return math.Min(confidence, 1.0)
 }
 
-// runPeriodicAnalysis 运行周期性分析
+// runPeriodicAnalysis 运行周期性分�?
 func (s *RealtimeAnalyticsService) runPeriodicAnalysis() {
 	defer s.wg.Done()
 	
@@ -834,7 +834,7 @@ func (s *RealtimeAnalyticsService) runPeriodicAnalysis() {
 	}
 }
 
-// performPeriodicAnalysis 执行周期性分析
+// performPeriodicAnalysis 执行周期性分�?
 func (s *RealtimeAnalyticsService) performPeriodicAnalysis() {
 	s.cacheMutex.RLock()
 	learners := make([]uuid.UUID, 0, len(s.realtimeCache))
@@ -848,7 +848,7 @@ func (s *RealtimeAnalyticsService) performPeriodicAnalysis() {
 	}
 }
 
-// analyzelearnerPredictions 分析学习者预测
+// analyzelearnerPredictions 分析学习者预�?
 func (s *RealtimeAnalyticsService) analyzelearnerPredictions(learnerID uuid.UUID) {
 	s.cacheMutex.Lock()
 	data, exists := s.realtimeCache[learnerID]
@@ -885,7 +885,7 @@ func (s *RealtimeAnalyticsService) predictCompletionProbability(data *RealtimeLe
 	// 基于当前表现
 	score += data.PerformanceState.Score * 0.4
 	
-	// 基于参与度
+	// 基于参与�?
 	score += data.EngagementState.Score * 0.3
 	
 	// 基于学习效率
@@ -903,12 +903,12 @@ func (s *RealtimeAnalyticsService) predictDropoutRisk(data *RealtimeLearnerData)
 		risk += 0.4
 	}
 	
-	// 低表现增加风险
+	// 低表现增加风�?
 	if data.PerformanceState.Score < 0.4 {
 		risk += 0.3
 	}
 	
-	// 高认知负荷增加风险
+	// 高认知负荷增加风�?
 	if data.RealtimeMetrics.CognitiveLoad > 0.8 {
 		risk += 0.3
 	}
@@ -918,13 +918,13 @@ func (s *RealtimeAnalyticsService) predictDropoutRisk(data *RealtimeLearnerData)
 
 func (s *RealtimeAnalyticsService) estimateCompletionTime(data *RealtimeLearnerData) time.Time {
 	// 简化的完成时间估算
-	baseTime := time.Now().Add(30 * 24 * time.Hour) // 默认30天
+	baseTime := time.Now().Add(30 * 24 * time.Hour) // 默认30�?
 	
 	// 根据学习速度调整
 	if data.RealtimeMetrics.LearningVelocity > 0.5 {
-		baseTime = baseTime.Add(-10 * 24 * time.Hour) // 提前10天
+		baseTime = baseTime.Add(-10 * 24 * time.Hour) // 提前10�?
 	} else if data.RealtimeMetrics.LearningVelocity < 0.2 {
-		baseTime = baseTime.Add(20 * 24 * time.Hour) // 延后20天
+		baseTime = baseTime.Add(20 * 24 * time.Hour) // 延后20�?
 	}
 	
 	return baseTime
@@ -933,7 +933,7 @@ func (s *RealtimeAnalyticsService) estimateCompletionTime(data *RealtimeLearnerD
 func (s *RealtimeAnalyticsService) generateRecommendedActions(data *RealtimeLearnerData) []string {
 	var actions []string
 	
-	// 基于参与度
+	// 基于参与�?
 	if data.EngagementState.Score < 0.4 {
 		actions = append(actions, "增加互动内容", "调整学习节奏")
 	}

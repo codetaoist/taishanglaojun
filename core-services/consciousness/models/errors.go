@@ -38,13 +38,13 @@ var (
 	ErrAxisImbalance = errors.New("axis imbalance detected")
 	ErrCoordinationTimeout = errors.New("coordination process timeout")
 	
-	// 意识状态错误
+	// 意识状态错�?
 	ErrConsciousnessNotActive = errors.New("consciousness is not active")
 	ErrInvalidConsciousnessState = errors.New("invalid consciousness state")
 	ErrConsciousnessAnalysisFailed = errors.New("consciousness analysis failed")
 	ErrConsciousnessOverload = errors.New("consciousness system overload")
 	
-	// 数据库相关错误
+	// 数据库相关错�?
 	ErrDatabaseConnectionFailed = errors.New("database connection failed")
 	ErrRecordNotFound = errors.New("record not found")
 	ErrDuplicateRecord = errors.New("duplicate record")

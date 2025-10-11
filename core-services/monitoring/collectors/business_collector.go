@@ -7,18 +7,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
-	"github.com/taishanglaojun/core-services/monitoring/models"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/models"
 )
 
-// BusinessCollector 业务指标收集器
+// BusinessCollector 业务指标收集�?
 type BusinessCollector struct {
 	name     string
 	interval time.Duration
 	enabled  bool
 	labels   map[string]string
 	
-	// 数据库连接
+	// 数据库连�?
 	db *sql.DB
 	
 	// 配置选项
@@ -37,14 +37,14 @@ type BusinessCollector struct {
 	engagementMetrics *EngagementMetrics
 	performanceMetrics *PerformanceMetrics
 	
-	// 同步锁
+	// 同步�?
 	mutex sync.RWMutex
 	
-	// 最后收集时间
+	// 最后收集时�?
 	lastCollectTime time.Time
 }
 
-// BusinessCollectorConfig 业务收集器配置
+// BusinessCollectorConfig 业务收集器配�?
 type BusinessCollectorConfig struct {
 	Interval           time.Duration     `yaml:"interval"`
 	Enabled            bool              `yaml:"enabled"`
@@ -112,7 +112,7 @@ type ContentMetrics struct {
 	LastUpdated      time.Time         `json:"last_updated"`
 }
 
-// EngagementMetrics 用户参与度指标
+// EngagementMetrics 用户参与度指�?
 type EngagementMetrics struct {
 	PageViews        uint64            `json:"page_views"`
 	UniqueVisitors   uint64            `json:"unique_visitors"`
@@ -140,14 +140,14 @@ type PerformanceMetrics struct {
 	LastUpdated      time.Time         `json:"last_updated"`
 }
 
-// NewBusinessCollector 创建业务指标收集器
+// NewBusinessCollector 创建业务指标收集�?
 func NewBusinessCollector(config BusinessCollectorConfig, db *sql.DB) *BusinessCollector {
 	labels := map[string]string{
 		"collector": "business",
 		"service":   "core-services",
 	}
 	
-	// 添加自定义标签
+	// 添加自定义标�?
 	for k, v := range config.Labels {
 		labels[k] = v
 	}
@@ -174,12 +174,12 @@ func NewBusinessCollector(config BusinessCollectorConfig, db *sql.DB) *BusinessC
 	}
 }
 
-// GetName 获取收集器名称
+// GetName 获取收集器名�?
 func (c *BusinessCollector) GetName() string {
 	return c.name
 }
 
-// GetCategory 获取收集器分类
+// GetCategory 获取收集器分�?
 func (c *BusinessCollector) GetCategory() models.MetricCategory {
 	return models.CategoryBusiness
 }
@@ -189,12 +189,12 @@ func (c *BusinessCollector) GetInterval() time.Duration {
 	return c.interval
 }
 
-// IsEnabled 检查是否启用
+// IsEnabled 检查是否启�?
 func (c *BusinessCollector) IsEnabled() bool {
 	return c.enabled
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (c *BusinessCollector) Start(ctx context.Context) error {
 	if !c.enabled {
 		return nil
@@ -215,13 +215,13 @@ func (c *BusinessCollector) Start(ctx context.Context) error {
 	}
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (c *BusinessCollector) Stop() error {
 	c.enabled = false
 	return nil
 }
 
-// Health 健康检查
+// Health 健康检�?
 func (c *BusinessCollector) Health() error {
 	if !c.enabled {
 		return fmt.Errorf("business collector is disabled")
@@ -290,7 +290,7 @@ func (c *BusinessCollector) Collect(ctx context.Context) ([]models.Metric, error
 		metrics = append(metrics, contentMetrics...)
 	}
 	
-	// 收集用户参与度指标
+	// 收集用户参与度指�?
 	if c.collectEngagement {
 		engagementMetrics, err := c.collectEngagementMetrics(ctx, now)
 		if err != nil {
@@ -333,7 +333,7 @@ func (c *BusinessCollector) collectUserMetrics(ctx context.Context, timestamp ti
 	metric.Description = "Total number of users"
 	metrics = append(metrics, *metric)
 	
-	// 活跃用户数（最近30天登录）
+	// 活跃用户数（最�?0天登录）
 	var activeUsers uint64
 	err = c.db.QueryRowContext(ctx, 
 		"SELECT COUNT(DISTINCT user_id) FROM user_sessions WHERE created_at > NOW() - INTERVAL '30 days'").Scan(&activeUsers)
@@ -350,7 +350,7 @@ func (c *BusinessCollector) collectUserMetrics(ctx context.Context, timestamp ti
 		metrics = append(metrics, *metric)
 	}
 	
-	// 新用户数（最近24小时）
+	// 新用户数（最�?4小时�?
 	var newUsers uint64
 	err = c.db.QueryRowContext(ctx, 
 		"SELECT COUNT(*) FROM users WHERE created_at > NOW() - INTERVAL '24 hours'").Scan(&newUsers)
@@ -367,7 +367,7 @@ func (c *BusinessCollector) collectUserMetrics(ctx context.Context, timestamp ti
 		metrics = append(metrics, *metric)
 	}
 	
-	// 用户留存率
+	// 用户留存�?
 	if totalUsers > 0 && activeUsers > 0 {
 		retentionRate := float64(activeUsers) / float64(totalUsers) * 100
 		c.userMetrics.RetentionRate = retentionRate
@@ -382,7 +382,7 @@ func (c *BusinessCollector) collectUserMetrics(ctx context.Context, timestamp ti
 		metrics = append(metrics, *metric)
 	}
 	
-	// 按地区统计用户
+	// 按地区统计用�?
 	rows, err := c.db.QueryContext(ctx, 
 		"SELECT region, COUNT(*) FROM users WHERE region IS NOT NULL GROUP BY region")
 	if err == nil {
@@ -505,7 +505,7 @@ func (c *BusinessCollector) collectOrderMetrics(ctx context.Context, timestamp t
 		metrics = append(metrics, *metric)
 	}
 	
-	// 订单总价值
+	// 订单总价�?
 	var orderValue sql.NullFloat64
 	err = c.db.QueryRowContext(ctx, "SELECT SUM(total_amount) FROM orders WHERE status = 'completed'").Scan(&orderValue)
 	if err == nil && orderValue.Valid {
@@ -521,7 +521,7 @@ func (c *BusinessCollector) collectOrderMetrics(ctx context.Context, timestamp t
 		metrics = append(metrics, *metric)
 	}
 	
-	// 平均订单价值
+	// 平均订单价�?
 	if completedOrders > 0 && orderValue.Valid {
 		avgOrderValue := orderValue.Float64 / float64(completedOrders)
 		c.orderMetrics.AverageOrderValue = avgOrderValue
@@ -536,7 +536,7 @@ func (c *BusinessCollector) collectOrderMetrics(ctx context.Context, timestamp t
 		metrics = append(metrics, *metric)
 	}
 	
-	// 按状态统计订单
+	// 按状态统计订�?
 	rows, err := c.db.QueryContext(ctx, "SELECT status, COUNT(*) FROM orders GROUP BY status")
 	if err == nil {
 		defer rows.Close()
@@ -567,7 +567,7 @@ func (c *BusinessCollector) collectOrderMetrics(ctx context.Context, timestamp t
 		}
 	}
 	
-	// 转化率（完成订单数/总订单数）
+	// 转化率（完成订单�?总订单数�?
 	if totalOrders > 0 {
 		conversionRate := float64(completedOrders) / float64(totalOrders) * 100
 		c.orderMetrics.ConversionRate = conversionRate
@@ -607,7 +607,7 @@ func (c *BusinessCollector) collectPaymentMetrics(ctx context.Context, timestamp
 	metric.Description = "Total number of payments"
 	metrics = append(metrics, *metric)
 	
-	// 成功支付数
+	// 成功支付�?
 	var successfulPayments uint64
 	err = c.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM payments WHERE status = 'success'").Scan(&successfulPayments)
 	if err == nil {
@@ -623,7 +623,7 @@ func (c *BusinessCollector) collectPaymentMetrics(ctx context.Context, timestamp
 		metrics = append(metrics, *metric)
 	}
 	
-	// 失败支付数
+	// 失败支付�?
 	var failedPayments uint64
 	err = c.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM payments WHERE status = 'failed'").Scan(&failedPayments)
 	if err == nil {
@@ -639,7 +639,7 @@ func (c *BusinessCollector) collectPaymentMetrics(ctx context.Context, timestamp
 		metrics = append(metrics, *metric)
 	}
 	
-	// 支付成功率
+	// 支付成功�?
 	if totalPayments > 0 {
 		successRate := float64(successfulPayments) / float64(totalPayments) * 100
 		c.paymentMetrics.SuccessRate = successRate
@@ -654,7 +654,7 @@ func (c *BusinessCollector) collectPaymentMetrics(ctx context.Context, timestamp
 		metrics = append(metrics, *metric)
 	}
 	
-	// 支付总金额
+	// 支付总金�?
 	var paymentValue sql.NullFloat64
 	err = c.db.QueryRowContext(ctx, "SELECT SUM(amount) FROM payments WHERE status = 'success'").Scan(&paymentValue)
 	if err == nil && paymentValue.Valid {
@@ -670,7 +670,7 @@ func (c *BusinessCollector) collectPaymentMetrics(ctx context.Context, timestamp
 		metrics = append(metrics, *metric)
 	}
 	
-	// 按支付方式统计
+	// 按支付方式统�?
 	rows, err := c.db.QueryContext(ctx, "SELECT payment_method, COUNT(*) FROM payments GROUP BY payment_method")
 	if err == nil {
 		defer rows.Close()
@@ -742,7 +742,7 @@ func (c *BusinessCollector) collectContentMetrics(ctx context.Context, timestamp
 		metrics = append(metrics, *metric)
 	}
 	
-	// 草稿内容数
+	// 草稿内容�?
 	var draftContent uint64
 	err = c.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM content WHERE status = 'draft'").Scan(&draftContent)
 	if err == nil {
@@ -790,7 +790,7 @@ func (c *BusinessCollector) collectContentMetrics(ctx context.Context, timestamp
 		metrics = append(metrics, *metric)
 	}
 	
-	// 按内容类型统计
+	// 按内容类型统�?
 	rows, err := c.db.QueryContext(ctx, "SELECT content_type, COUNT(*) FROM content GROUP BY content_type")
 	if err == nil {
 		defer rows.Close()
@@ -825,11 +825,11 @@ func (c *BusinessCollector) collectContentMetrics(ctx context.Context, timestamp
 	return metrics, nil
 }
 
-// collectEngagementMetrics 收集用户参与度指标
+// collectEngagementMetrics 收集用户参与度指�?
 func (c *BusinessCollector) collectEngagementMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
-	// 页面浏览数（最近24小时）
+	// 页面浏览数（最�?4小时�?
 	var pageViews uint64
 	err := c.db.QueryRowContext(ctx, 
 		"SELECT COUNT(*) FROM page_views WHERE created_at > NOW() - INTERVAL '24 hours'").Scan(&pageViews)
@@ -846,7 +846,7 @@ func (c *BusinessCollector) collectEngagementMetrics(ctx context.Context, timest
 		metrics = append(metrics, *metric)
 	}
 	
-	// 独立访客数（最近24小时）
+	// 独立访客数（最�?4小时�?
 	var uniqueVisitors uint64
 	err = c.db.QueryRowContext(ctx, 
 		"SELECT COUNT(DISTINCT user_id) FROM page_views WHERE created_at > NOW() - INTERVAL '24 hours'").Scan(&uniqueVisitors)
@@ -863,7 +863,7 @@ func (c *BusinessCollector) collectEngagementMetrics(ctx context.Context, timest
 		metrics = append(metrics, *metric)
 	}
 	
-	// 跳出率
+	// 跳出�?
 	if pageViews > 0 && uniqueVisitors > 0 {
 		// 简化计算：单页面会话数 / 总会话数
 		var singlePageSessions uint64
@@ -907,7 +907,7 @@ func (c *BusinessCollector) collectEngagementMetrics(ctx context.Context, timest
 func (c *BusinessCollector) collectPerformanceMetrics(ctx context.Context, timestamp time.Time) ([]models.Metric, error) {
 	var metrics []models.Metric
 	
-	// 收入（最近30天）
+	// 收入（最�?0天）
 	var revenue sql.NullFloat64
 	err := c.db.QueryRowContext(ctx, 
 		"SELECT SUM(amount) FROM payments WHERE status = 'success' AND created_at > NOW() - INTERVAL '30 days'").Scan(&revenue)
@@ -924,7 +924,7 @@ func (c *BusinessCollector) collectPerformanceMetrics(ctx context.Context, times
 		metrics = append(metrics, *metric)
 	}
 	
-	// 月度经常性收入（MRR）
+	// 月度经常性收入（MRR�?
 	var mrr sql.NullFloat64
 	err = c.db.QueryRowContext(ctx, 
 		"SELECT SUM(amount) FROM subscriptions WHERE status = 'active' AND billing_cycle = 'monthly'").Scan(&mrr)
@@ -983,7 +983,7 @@ func (c *BusinessCollector) RecordUserAction(userID string, action string, metad
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	
-	// 这里可以记录用户行为到缓存或数据库
+	// 这里可以记录用户行为到缓存或数据�?
 	// 实际实现应该根据具体需求来设计
 }
 
@@ -992,7 +992,7 @@ func (c *BusinessCollector) RecordBusinessEvent(eventType string, value float64,
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	
-	// 这里可以记录业务事件到缓存或数据库
+	// 这里可以记录业务事件到缓存或数据�?
 	// 实际实现应该根据具体需求来设计
 }
 
@@ -1024,7 +1024,7 @@ func (c *BusinessCollector) GetContentMetrics() *ContentMetrics {
 	return c.contentMetrics
 }
 
-// GetEngagementMetrics 获取用户参与度指标
+// GetEngagementMetrics 获取用户参与度指�?
 func (c *BusinessCollector) GetEngagementMetrics() *EngagementMetrics {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
@@ -1038,5 +1038,5 @@ func (c *BusinessCollector) GetPerformanceMetrics() *PerformanceMetrics {
 	return c.performanceMetrics
 }
 
-// 确保实现了接口
+// 确保实现了接�?
 var _ interfaces.MetricCollector = (*BusinessCollector)(nil)

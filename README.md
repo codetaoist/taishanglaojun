@@ -4,12 +4,13 @@
 
 ![太上老君AI平台](https://img.shields.io/badge/太上老君AI平台-v1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
-![Coverage](https://img.shields.io/badge/coverage-85%25-yellow.svg)
+![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)
+![Node Version](https://img.shields.io/badge/node-18+-green.svg)
+![Kubernetes](https://img.shields.io/badge/kubernetes-1.24+-blue.svg)
 
-**一个集成了先进人工智能技术的综合性平台**
+**一个现代化的AI驱动平台，提供智能对话、文档处理、知识管理等服务**
 
-[快速开始](#快速开始) • [功能特性](#功能特性) • [架构设计](#架构设计) • [部署指南](#部署指南) • [API文档](#api文档) • [贡献指南](#贡献指南)
+[🚀 快速开始](#快速开始) • [📖 文档](#文档) • [🛠️ 部署](#部署) • [🤝 贡献](#贡献)
 
 </div>
 
@@ -372,7 +373,7 @@ Made with ❤️ by the Taishanglaojun Team
 | 📍 位置跟踪服务 | ✅ 已完成 | 75% | 2024-12 |
 | 📊 监控服务 | ✅ 已完成 | 90% | 2024-12 |
 | 📋 任务管理服务 | ✅ 已完成 | 85% | 2024-12 |
-| 🔐 安全服务 | 🚧 开发中 | 60% | 2024-12 |
+| 🔐 安全服务 | ✅ 已完成 | 95% | 2024-12 |
 | 🌐 Web应用 | ✅ 已完成 | 80% | 2024-12 |
 | 📱 移动应用 | 🚧 开发中 | 70% | 2024-12 |
 | 🖥️ 桌面应用 | 🚧 开发中 | 60% | 2024-12 |

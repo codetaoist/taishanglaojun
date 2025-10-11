@@ -16,12 +16,12 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"taishanglaojun/core-services/ai-integration/handlers"
-	"taishanglaojun/core-services/ai-integration/providers"
-	"taishanglaojun/core-services/ai-integration/services"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/handlers"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/providers"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/services"
 )
 
-// MockCrossModalService 模拟跨模态推理服务
+// MockCrossModalService 模拟跨模态推理服�?
 type MockCrossModalService struct {
 	mock.Mock
 }
@@ -31,9 +31,9 @@ func (m *MockCrossModalService) ProcessCrossModalInference(ctx context.Context, 
 	return args.Get(0).(*services.CrossModalResponse), args.Error(1)
 }
 
-// setupCrossModalTest 设置跨模态推理测试环境
+// setupCrossModalTest 设置跨模态推理测试环�?
 func setupCrossModalTest(t *testing.T) (*gin.Engine, *gorm.DB, *handlers.CrossModalHandler) {
-	// 设置测试数据库
+	// 设置测试数据�?
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	assert.NoError(t, err)
 
@@ -44,7 +44,7 @@ func setupCrossModalTest(t *testing.T) (*gin.Engine, *gorm.DB, *handlers.CrossMo
 	// 创建模拟服务
 	mockService := &MockCrossModalService{}
 	
-	// 创建处理器
+	// 创建处理�?
 	crossModalHandler := handlers.NewCrossModalHandler(mockService)
 
 	// 设置路由
@@ -88,7 +88,7 @@ func setupCrossModalTest(t *testing.T) (*gin.Engine, *gorm.DB, *handlers.CrossMo
 	return router, db, crossModalHandler
 }
 
-// TestCrossModalInference 测试跨模态推理
+// TestCrossModalInference 测试跨模态推�?
 func TestCrossModalInference(t *testing.T) {
 	router, db, _ := setupCrossModalTest(t)
 	defer func() {
@@ -106,11 +106,11 @@ func TestCrossModalInference(t *testing.T) {
 			name: "语义搜索成功",
 			request: services.CrossModalRequest{
 				Type:  services.InferenceTypeSemanticSearch,
-				Query: "寻找与猫相关的图片",
+				Query: "寻找与猫相关的图�?,
 				Inputs: []services.CrossModalInput{
 					{
 						Type:    "text",
-						Content: "一只可爱的小猫在花园里玩耍",
+						Content: "一只可爱的小猫在花园里玩�?,
 					},
 					{
 						Type: "image",
@@ -134,7 +134,7 @@ func TestCrossModalInference(t *testing.T) {
 							{
 								ID:         "result-1",
 								Type:       "semantic_match",
-								Content:    "找到与猫相关的内容匹配",
+								Content:    "找到与猫相关的内容匹�?,
 								Confidence: 0.85,
 								Metadata: map[string]interface{}{
 									"similarity_score": 0.85,
@@ -154,7 +154,7 @@ func TestCrossModalInference(t *testing.T) {
 				Inputs: []services.CrossModalInput{
 					{
 						Type:    "text",
-						Content: "美丽的日落景色",
+						Content: "美丽的日落景�?,
 					},
 					{
 						Type: "image",
@@ -178,7 +178,7 @@ func TestCrossModalInference(t *testing.T) {
 							{
 								ID:         "result-2",
 								Type:       "content_match",
-								Content:    "文本和图片内容高度匹配",
+								Content:    "文本和图片内容高度匹�?,
 								Confidence: 0.92,
 								Metadata: map[string]interface{}{
 									"match_type":       "semantic_visual",
@@ -192,7 +192,7 @@ func TestCrossModalInference(t *testing.T) {
 			},
 		},
 		{
-			name: "多模态问答成功",
+			name: "多模态问答成�?,
 			request: services.CrossModalRequest{
 				Type:  services.InferenceTypeMultiModalQA,
 				Query: "这张图片中的动物是什么？",
@@ -219,7 +219,7 @@ func TestCrossModalInference(t *testing.T) {
 							{
 								ID:         "result-3",
 								Type:       "qa_answer",
-								Content:    "这是一只金毛犬，看起来很友好和活泼。",
+								Content:    "这是一只金毛犬，看起来很友好和活泼�?,
 								Confidence: 0.88,
 								Metadata: map[string]interface{}{
 									"detected_objects": []string{"dog", "golden_retriever"},
@@ -279,7 +279,7 @@ func TestSemanticSearch(t *testing.T) {
 	inputs := []services.CrossModalInput{
 		{
 			Type:    "text",
-			Content: "寻找关于人工智能的内容",
+			Content: "寻找关于人工智能的内�?,
 		},
 		{
 			Type: "image",
@@ -308,7 +308,7 @@ func TestContentMatching(t *testing.T) {
 	inputs := []services.CrossModalInput{
 		{
 			Type:    "text",
-			Content: "美丽的风景",
+			Content: "美丽的风�?,
 		},
 		{
 			Type: "image",
@@ -326,7 +326,7 @@ func TestContentMatching(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
-// TestMultiModalQA 测试多模态问答
+// TestMultiModalQA 测试多模态问�?
 func TestMultiModalQA(t *testing.T) {
 	router, db, _ := setupCrossModalTest(t)
 	defer func() {
@@ -391,7 +391,7 @@ func TestEmotionAnalysis(t *testing.T) {
 	inputs := []services.CrossModalInput{
 		{
 			Type:    "text",
-			Content: "今天心情很好，阳光明媚",
+			Content: "今天心情很好，阳光明�?,
 		},
 		{
 			Type: "audio",
@@ -493,7 +493,7 @@ func TestInvalidRequests(t *testing.T) {
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
-			name:           "多模态问答缺少查询",
+			name:           "多模态问答缺少查�?,
 			method:         "POST",
 			url:            "/api/v1/crossmodal/qa",
 			body:           "[]",

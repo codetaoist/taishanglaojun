@@ -11,13 +11,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/alerting"
-	"github.com/taishanglaojun/core-services/monitoring/automation"
-	"github.com/taishanglaojun/core-services/monitoring/dashboard"
-	"github.com/taishanglaojun/core-services/monitoring/integration"
-	"github.com/taishanglaojun/core-services/monitoring/logging"
-	"github.com/taishanglaojun/core-services/monitoring/performance"
-	"github.com/taishanglaojun/core-services/monitoring/tracing"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/alerting"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/automation"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/dashboard"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/integration"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/logging"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/performance"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/tracing"
 	"gopkg.in/yaml.v2"
 )
 
@@ -74,7 +74,7 @@ func loadConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("解析配置文件失败: %v", err)
 	}
 
-	// 设置默认值
+	// 设置默认�?
 	setDefaultConfig(&config)
 
 	return &config, nil
@@ -92,14 +92,14 @@ func createDefaultConfig(configPath string) error {
 
 	data, err := yaml.Marshal(config)
 	if err != nil {
-		return fmt.Errorf("序列化配置失败: %v", err)
+		return fmt.Errorf("序列化配置失�? %v", err)
 	}
 
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 
-	log.Printf("默认配置已创建: %s", configPath)
+	log.Printf("默认配置已创�? %s", configPath)
 	return nil
 }
 
@@ -236,7 +236,7 @@ func getDefaultConfig() Config {
 	}
 }
 
-// setDefaultConfig 设置默认配置值
+// setDefaultConfig 设置默认配置�?
 func setDefaultConfig(config *Config) {
 	if config.Service.Name == "" {
 		config.Service.Name = ServiceName
@@ -254,7 +254,7 @@ func setDefaultConfig(config *Config) {
 		config.Service.LogLevel = "info"
 	}
 
-	// 设置追踪配置默认值
+	// 设置追踪配置默认�?
 	config.Tracing.ServiceName = config.Service.Name
 	config.Tracing.ServiceVersion = config.Service.Version
 	config.Tracing.Environment = config.Service.Environment
@@ -285,7 +285,7 @@ func setupSignalHandling(ctx context.Context, cancel context.CancelFunc) {
 	go func() {
 		select {
 		case sig := <-sigChan:
-			log.Printf("收到信号 %v，开始优雅关闭...", sig)
+			log.Printf("收到信号 %v，开始优雅关�?..", sig)
 			cancel()
 		case <-ctx.Done():
 			return
@@ -323,7 +323,7 @@ func main() {
 	log.Printf("配置文件: %s", *configFile)
 	log.Printf("日志级别: %s", config.Service.LogLevel)
 
-	// 创建上下文
+	// 创建上下�?
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -344,21 +344,21 @@ func main() {
 	}
 
 	log.Printf("监控系统已启动，仪表板地址: http://localhost:%d", config.Dashboard.Port)
-	log.Println("按 Ctrl+C 停止服务")
+	log.Println("�?Ctrl+C 停止服务")
 
 	// 定期打印统计信息
 	statsTicker := time.NewTicker(30 * time.Second)
 	defer statsTicker.Stop()
 
-	// 定期健康检查
+	// 定期健康检�?
 	healthTicker := time.NewTicker(time.Minute)
 	defer healthTicker.Stop()
 
-	// 主循环
+	// 主循�?
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("收到停止信号，开始关闭监控系统...")
+			log.Println("收到停止信号，开始关闭监控系�?..")
 			
 			// 优雅关闭
 			shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -372,12 +372,12 @@ func main() {
 			select {
 			case err := <-done:
 				if err != nil {
-					log.Printf("关闭监控系统时出错: %v", err)
+					log.Printf("关闭监控系统时出�? %v", err)
 				} else {
-					log.Println("监控系统已成功关闭")
+					log.Println("监控系统已成功关�?)
 				}
 			case <-shutdownCtx.Done():
-				log.Println("关闭超时，强制退出")
+				log.Println("关闭超时，强制退�?)
 			}
 
 			return
@@ -385,16 +385,16 @@ func main() {
 		case <-statsTicker.C:
 			// 打印统计信息
 			stats := monitoringSystem.GetStats()
-			log.Printf("系统统计 - 追踪: %d spans, 日志: %d entries, 告警: %d alerts, 工作流: %d workflows",
+			log.Printf("系统统计 - 追踪: %d spans, 日志: %d entries, 告警: %d alerts, 工作�? %d workflows",
 				stats.TracingStats.SpansCreated,
 				stats.LoggingStats.ProcessedLogs,
 				stats.AlertingStats.TotalAlerts,
 				stats.AutomationStats.TotalWorkflows)
 
 		case <-healthTicker.C:
-			// 健康检查
+			// 健康检�?
 			if err := monitoringSystem.HealthCheck(); err != nil {
-				log.Printf("健康检查失败: %v", err)
+				log.Printf("健康检查失�? %v", err)
 			} else {
 				log.Println("健康检查通过")
 			}

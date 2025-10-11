@@ -88,7 +88,7 @@ type ProjectRepository interface {
 	FindByTeamID(ctx context.Context, teamID uuid.UUID, limit, offset int) ([]*Project, error)
 
 	// 复合查询
-	FindByUserID(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*Project, error) // 用户参与的项目
+	FindByUserID(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*Project, error) // 用户参与的项�?
 	FindByDateRange(ctx context.Context, startDate, endDate time.Time, limit, offset int) ([]*Project, error)
 	FindOverdueProjects(ctx context.Context, limit, offset int) ([]*Project, error)
 
@@ -110,7 +110,7 @@ type ProjectRepository interface {
 	RemoveMember(ctx context.Context, projectID, userID uuid.UUID) error
 	FindMembersByRole(ctx context.Context, projectID uuid.UUID, role string) ([]*ProjectMember, error)
 
-	// 里程碑操作
+	// 里程碑操�?
 	FindMilestones(ctx context.Context, projectID uuid.UUID) ([]*ProjectMilestone, error)
 	AddMilestone(ctx context.Context, milestone *ProjectMilestone) error
 	UpdateMilestone(ctx context.Context, milestone *ProjectMilestone) error
@@ -133,7 +133,7 @@ type TeamRepository interface {
 	FindByParentTeamID(ctx context.Context, parentTeamID uuid.UUID, limit, offset int) ([]*Team, error)
 
 	// 复合查询
-	FindByUserID(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*Team, error) // 用户参与的团队
+	FindByUserID(ctx context.Context, userID uuid.UUID, limit, offset int) ([]*Team, error) // 用户参与的团�?
 	FindTeamsWithSkill(ctx context.Context, skill string, limit, offset int) ([]*Team, error)
 
 	// 搜索操作
@@ -154,7 +154,7 @@ type TeamRepository interface {
 	FindMembersByRole(ctx context.Context, teamID uuid.UUID, role TeamMemberRole) ([]*TeamMember, error)
 	FindAvailableMembers(ctx context.Context, teamID uuid.UUID, timeSlot string) ([]*TeamMember, error)
 
-	// 技能操作
+	// 技能操�?
 	FindTeamSkills(ctx context.Context, teamID uuid.UUID) ([]*TeamSkill, error)
 	UpdateTeamSkills(ctx context.Context, teamID uuid.UUID, skills []*TeamSkill) error
 	FindTeamsBySkills(ctx context.Context, skills []string, minLevel string) ([]*Team, error)
@@ -176,7 +176,7 @@ type EventRepository interface {
 	FindEventsByType(ctx context.Context, eventType string, limit, offset int) ([]DomainEvent, error)
 	FindEventsByTimeRange(ctx context.Context, startTime, endTime time.Time, limit, offset int) ([]DomainEvent, error)
 
-	// 事件流
+	// 事件�?
 	GetEventStream(ctx context.Context, aggregateID uuid.UUID, fromVersion int) ([]DomainEvent, error)
 	GetLastEventVersion(ctx context.Context, aggregateID uuid.UUID) (int, error)
 
@@ -229,7 +229,7 @@ type TeamStatistics struct {
 	SkillCoverage      map[string]int             `json:"skill_coverage"`
 	TeamProductivity   float64                    `json:"team_productivity"`
 	CollaborationScore float64                    `json:"collaboration_score"`
-	TaskDistribution   map[uuid.UUID]int          `json:"task_distribution"` // 成员ID -> 任务数
+	TaskDistribution   map[uuid.UUID]int          `json:"task_distribution"` // 成员ID -> 任务�?
 	PerformanceMetrics map[string]interface{}     `json:"performance_metrics"`
 }
 
@@ -242,9 +242,9 @@ type EventSnapshot struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-// ========== 查询过滤器 ==========
+// ========== 查询过滤�?==========
 
-// TaskFilter 任务查询过滤器
+// TaskFilter 任务查询过滤�?
 type TaskFilter struct {
 	ProjectID    *uuid.UUID     `json:"project_id,omitempty"`
 	AssigneeID   *uuid.UUID     `json:"assignee_id,omitempty"`
@@ -266,7 +266,7 @@ type TaskFilter struct {
 	ProgressMax  *float64       `json:"progress_max,omitempty"`
 }
 
-// ProjectFilter 项目查询过滤器
+// ProjectFilter 项目查询过滤�?
 type ProjectFilter struct {
 	OwnerID        *uuid.UUID       `json:"owner_id,omitempty"`
 	OrganizationID *uuid.UUID       `json:"organization_id,omitempty"`
@@ -287,7 +287,7 @@ type ProjectFilter struct {
 	ProgressMax    *float64         `json:"progress_max,omitempty"`
 }
 
-// TeamFilter 团队查询过滤器
+// TeamFilter 团队查询过滤�?
 type TeamFilter struct {
 	LeaderID       *uuid.UUID    `json:"leader_id,omitempty"`
 	OrganizationID *uuid.UUID    `json:"organization_id,omitempty"`
@@ -317,7 +317,7 @@ type PaginationOption struct {
 type QueryOptions struct {
 	Pagination *PaginationOption `json:"pagination,omitempty"`
 	Sort       []SortOption      `json:"sort,omitempty"`
-	Include    []string          `json:"include,omitempty"` // 包含的关联数据
+	Include    []string          `json:"include,omitempty"` // 包含的关联数�?
 }
 
 // ========== 仓储工厂接口 ==========

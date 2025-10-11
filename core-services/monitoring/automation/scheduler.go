@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// NewScheduler 创建调度器
+// NewScheduler 创建调度�?
 func NewScheduler(config SchedulerConfig) *Scheduler {
 	ctx, cancel := context.WithCancel(context.Background())
 	
@@ -24,7 +24,7 @@ func NewScheduler(config SchedulerConfig) *Scheduler {
 		cancel: cancel,
 	}
 	
-	// 创建工作器
+	// 创建工作�?
 	for i := 0; i < config.MaxConcurrent; i++ {
 		worker := &Worker{
 			id:        i,
@@ -36,9 +36,9 @@ func NewScheduler(config SchedulerConfig) *Scheduler {
 	return scheduler
 }
 
-// Start 启动调度器
+// Start 启动调度�?
 func (s *Scheduler) Start() error {
-	// 启动工作器
+	// 启动工作�?
 	for _, worker := range s.workers {
 		s.wg.Add(1)
 		go worker.run()
@@ -51,7 +51,7 @@ func (s *Scheduler) Start() error {
 	return nil
 }
 
-// Stop 停止调度器
+// Stop 停止调度�?
 func (s *Scheduler) Stop() error {
 	s.cancel()
 	s.wg.Wait()
@@ -59,7 +59,7 @@ func (s *Scheduler) Stop() error {
 	return nil
 }
 
-// ScheduleWorkflow 调度工作流
+// ScheduleWorkflow 调度工作�?
 func (s *Scheduler) ScheduleWorkflow(workflow *Workflow) error {
 	select {
 	case s.workflows <- workflow:
@@ -98,7 +98,7 @@ func (s *Scheduler) scheduleLoop() {
 	}
 }
 
-// updateActiveWorkers 更新活跃工作器数量
+// updateActiveWorkers 更新活跃工作器数�?
 func (s *Scheduler) updateActiveWorkers() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -112,7 +112,7 @@ func (s *Scheduler) updateActiveWorkers() {
 	s.stats.ActiveWorkers = activeCount
 }
 
-// run 工作器运行
+// run 工作器运�?
 func (w *Worker) run() {
 	defer w.scheduler.wg.Done()
 	
@@ -132,7 +132,7 @@ func (w *Worker) run() {
 	}
 }
 
-// processWorkflow 处理工作流
+// processWorkflow 处理工作�?
 func (w *Worker) processWorkflow(workflow *Workflow) {
 	workflow.mutex.Lock()
 	workflow.Status = WorkflowStatusRunning
@@ -144,10 +144,10 @@ func (w *Worker) processWorkflow(workflow *Workflow) {
 	w.scheduler.stats.ProcessedWorkflows++
 	w.scheduler.mutex.Unlock()
 	
-	// 执行工作流任务
+	// 执行工作流任�?
 	err := w.executeWorkflowTasks(workflow)
 	
-	// 更新工作流状态
+	// 更新工作流状�?
 	workflow.mutex.Lock()
 	workflow.CompletedAt = time.Now()
 	if err != nil {
@@ -159,9 +159,9 @@ func (w *Worker) processWorkflow(workflow *Workflow) {
 	workflow.mutex.Unlock()
 }
 
-// executeWorkflowTasks 执行工作流任务
+// executeWorkflowTasks 执行工作流任�?
 func (w *Worker) executeWorkflowTasks(workflow *Workflow) error {
-	// 按依赖关系排序任务
+	// 按依赖关系排序任�?
 	sortedTasks, err := w.sortTasksByDependencies(workflow)
 	if err != nil {
 		return fmt.Errorf("failed to sort tasks: %w", err)
@@ -177,7 +177,7 @@ func (w *Worker) executeWorkflowTasks(workflow *Workflow) error {
 	return nil
 }
 
-// sortTasksByDependencies 按依赖关系排序任务
+// sortTasksByDependencies 按依赖关系排序任�?
 func (w *Worker) sortTasksByDependencies(workflow *Workflow) ([]*Task, error) {
 	var sortedTasks []*Task
 	visited := make(map[string]bool)
@@ -213,7 +213,7 @@ func (w *Worker) sortTasksByDependencies(workflow *Workflow) ([]*Task, error) {
 		return nil
 	}
 	
-	// 访问所有任务
+	// 访问所有任�?
 	for taskName := range workflow.Tasks {
 		if err := visit(taskName); err != nil {
 			return nil, err
@@ -230,7 +230,7 @@ func (w *Worker) executeTask(task *Task) error {
 	task.StartedAt = time.Now()
 	task.mutex.Unlock()
 	
-	// 检查条件
+	// 检查条�?
 	if !w.checkTaskConditions(task) {
 		task.mutex.Lock()
 		task.Status = TaskStatusSkipped
@@ -242,7 +242,7 @@ func (w *Worker) executeTask(task *Task) error {
 	// 执行任务（这里需要与执行器集成）
 	err := w.executeTaskWithExecutor(task)
 	
-	// 更新任务状态
+	// 更新任务状�?
 	task.mutex.Lock()
 	task.CompletedAt = time.Now()
 	if err != nil {
@@ -256,7 +256,7 @@ func (w *Worker) executeTask(task *Task) error {
 	return err
 }
 
-// checkTaskConditions 检查任务条件
+// checkTaskConditions 检查任务条�?
 func (w *Worker) checkTaskConditions(task *Task) bool {
 	for _, condition := range task.Definition.Conditions {
 		if !w.evaluateCondition(condition) {
@@ -271,7 +271,7 @@ func (w *Worker) evaluateCondition(condition ConditionDefinition) bool {
 	// 简单的条件评估实现
 	switch condition.Type {
 	case "expression":
-		// 这里可以集成表达式引擎
+		// 这里可以集成表达式引�?
 		return true
 	case "script":
 		// 这里可以执行脚本
@@ -284,9 +284,9 @@ func (w *Worker) evaluateCondition(condition ConditionDefinition) bool {
 	}
 }
 
-// executeTaskWithExecutor 使用执行器执行任务
+// executeTaskWithExecutor 使用执行器执行任�?
 func (w *Worker) executeTaskWithExecutor(task *Task) error {
-	// 创建执行器
+	// 创建执行�?
 	executorConfig := ExecutorConfig{
 		Type:     task.Type,
 		Enabled:  true,
@@ -298,7 +298,7 @@ func (w *Worker) executeTaskWithExecutor(task *Task) error {
 		return fmt.Errorf("failed to create executor: %w", err)
 	}
 	
-	// 启动执行器
+	// 启动执行�?
 	if err := executor.Start(); err != nil {
 		return fmt.Errorf("failed to start executor: %w", err)
 	}
@@ -328,7 +328,7 @@ func NewAutoScaler(config AutoScalerConfig) *AutoScaler {
 	}
 }
 
-// Scale 执行扩缩容
+// Scale 执行扩缩�?
 func (a *AutoScaler) Scale(currentMetrics map[string]float64) error {
 	if !a.config.Enabled {
 		return nil
@@ -337,7 +337,7 @@ func (a *AutoScaler) Scale(currentMetrics map[string]float64) error {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 	
-	// 计算目标副本数
+	// 计算目标副本�?
 	desiredReplicas := a.calculateDesiredReplicas(currentMetrics)
 	
 	// 检查是否需要扩缩容
@@ -345,7 +345,7 @@ func (a *AutoScaler) Scale(currentMetrics map[string]float64) error {
 		return nil
 	}
 	
-	// 检查冷却时间
+	// 检查冷却时�?
 	now := time.Now()
 	if desiredReplicas > a.stats.CurrentReplicas {
 		// 扩容
@@ -363,25 +363,25 @@ func (a *AutoScaler) Scale(currentMetrics map[string]float64) error {
 		a.stats.ScaleDownCount++
 	}
 	
-	// 更新副本数
+	// 更新副本�?
 	a.stats.DesiredReplicas = desiredReplicas
 	a.stats.CurrentReplicas = desiredReplicas
 	
 	return nil
 }
 
-// calculateDesiredReplicas 计算目标副本数
+// calculateDesiredReplicas 计算目标副本�?
 func (a *AutoScaler) calculateDesiredReplicas(metrics map[string]float64) int {
 	cpuUsage := metrics["cpu"]
 	memoryUsage := metrics["memory"]
 	
-	// 基于CPU使用率计算
+	// 基于CPU使用率计�?
 	cpuReplicas := int(float64(a.stats.CurrentReplicas) * cpuUsage / a.config.TargetCPU)
 	
-	// 基于内存使用率计算
+	// 基于内存使用率计�?
 	memoryReplicas := int(float64(a.stats.CurrentReplicas) * memoryUsage / a.config.TargetMemory)
 	
-	// 取最大值
+	// 取最大�?
 	desiredReplicas := cpuReplicas
 	if memoryReplicas > desiredReplicas {
 		desiredReplicas = memoryReplicas

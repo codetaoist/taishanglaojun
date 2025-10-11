@@ -5,14 +5,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// RecommendationItem 推荐项
+// RecommendationItem 推荐�?
 type RecommendationItem struct {
 	ID          string                 `json:"id"`
 	Type        string                 `json:"type"`        // content, path, skill, etc.
 	Title       string                 `json:"title"`
 	Description string                 `json:"description"`
 	Score       float64                `json:"score"`       // 推荐分数 0.0-1.0
-	Confidence  float64                `json:"confidence"`  // 置信度 0.0-1.0
+	Confidence  float64                `json:"confidence"`  // 置信�?0.0-1.0
 	Reason      string                 `json:"reason"`      // 推荐原因
 	Category    string                 `json:"category"`    // 分类
 	Tags        []string               `json:"tags"`
@@ -23,7 +23,7 @@ type RecommendationItem struct {
 	CreatedAt   time.Time              `json:"created_at"`
 }
 
-// ContentItem 内容项
+// ContentItem 内容�?
 type ContentItem struct {
 	ID          string                 `json:"id"`
 	Type        string                 `json:"type"`        // video, text, audio, interactive, etc.
@@ -39,7 +39,7 @@ type ContentItem struct {
 	ViewCount   int                    `json:"view_count"`  // 观看次数
 	Language    string                 `json:"language"`    // 语言
 	AuthorID    string                 `json:"author_id"`   // 作者ID
-	AuthorName  string                 `json:"author_name"` // 作者名称
+	AuthorName  string                 `json:"author_name"` // 作者名�?
 	Thumbnail   string                 `json:"thumbnail"`   // 缩略图URL
 	URL         string                 `json:"url"`         // 内容URL
 	Metadata    map[string]interface{} `json:"metadata"`
@@ -54,11 +54,11 @@ type UserFeedback struct {
 	ItemID    string                 `json:"item_id"`
 	ItemType  string                 `json:"item_type"`  // content, recommendation, path, etc.
 	Type      string                 `json:"type"`       // like, dislike, rating, comment, bookmark, share
-	Value     interface{}            `json:"value"`      // 反馈值（如评分数值、布尔值等）
+	Value     interface{}            `json:"value"`      // 反馈值（如评分数值、布尔值等�?
 	Rating    *float64               `json:"rating,omitempty"`    // 评分 1.0-5.0
 	Comment   string                 `json:"comment"`             // 评论
 	Sentiment string                 `json:"sentiment"`           // positive, negative, neutral
-	Context   map[string]interface{} `json:"context"`             // 反馈上下文
+	Context   map[string]interface{} `json:"context"`             // 反馈上下�?
 	Metadata  map[string]interface{} `json:"metadata"`
 	Timestamp time.Time              `json:"timestamp"`
 	CreatedAt time.Time              `json:"created_at"`
@@ -71,11 +71,11 @@ type RecommendationExplanation struct {
 	ItemID      string    `json:"item_id"`
 	ItemType    string    `json:"item_type"`
 	Reasons     []string  `json:"reasons"`     // 推荐原因列表
-	Confidence  float64   `json:"confidence"`  // 解释置信度 0.0-1.0
+	Confidence  float64   `json:"confidence"`  // 解释置信�?0.0-1.0
 	Evidence    []string  `json:"evidence"`    // 支持证据
 	Explanation string    `json:"explanation"` // 详细解释
-	Algorithm   string    `json:"algorithm"`   // 使用的算法
-	Factors     map[string]float64 `json:"factors"` // 影响因素及权重
+	Algorithm   string    `json:"algorithm"`   // 使用的算�?
+	Factors     map[string]float64 `json:"factors"` // 影响因素及权�?
 	CreatedAt   time.Time `json:"created_at"`
 }
 
@@ -84,7 +84,7 @@ type RecommendationSession struct {
 	ID            uuid.UUID                      `json:"id"`
 	UserID        string                         `json:"user_id"`
 	SessionType   string                         `json:"session_type"`   // browse, search, learn, etc.
-	Context       map[string]interface{}         `json:"context"`        // 会话上下文
+	Context       map[string]interface{}         `json:"context"`        // 会话上下�?
 	Recommendations []*RecommendationItem        `json:"recommendations"`
 	Interactions  []*RecommendationInteraction   `json:"interactions"`
 	StartTime     time.Time                      `json:"start_time"`
@@ -100,7 +100,7 @@ type RecommendationInteraction struct {
 	UserID        string                 `json:"user_id"`
 	ItemID        string                 `json:"item_id"`
 	Action        string                 `json:"action"`        // view, click, like, dislike, bookmark, share, skip
-	Position      int                    `json:"position"`      // 在推荐列表中的位置
+	Position      int                    `json:"position"`      // 在推荐列表中的位�?
 	Duration      time.Duration          `json:"duration"`      // 交互持续时间
 	Context       map[string]interface{} `json:"context"`
 	Timestamp     time.Time              `json:"timestamp"`
@@ -111,9 +111,9 @@ type UserPreference struct {
 	ID            uuid.UUID              `json:"id"`
 	UserID        string                 `json:"user_id"`
 	Category      string                 `json:"category"`      // content_type, subject, difficulty, etc.
-	Preference    string                 `json:"preference"`    // 偏好值
+	Preference    string                 `json:"preference"`    // 偏好�?
 	Weight        float64                `json:"weight"`        // 权重 0.0-1.0
-	Confidence    float64                `json:"confidence"`    // 置信度 0.0-1.0
+	Confidence    float64                `json:"confidence"`    // 置信�?0.0-1.0
 	Source        string                 `json:"source"`        // explicit, implicit, inferred
 	Context       map[string]interface{} `json:"context"`
 	LastUpdated   time.Time              `json:"last_updated"`
@@ -136,7 +136,7 @@ type RecommendationMetrics struct {
 	Timestamp       time.Time `json:"timestamp"`
 }
 
-// NewRecommendationItem 创建新的推荐项
+// NewRecommendationItem 创建新的推荐�?
 func NewRecommendationItem(itemType, title, description string, score, confidence float64) *RecommendationItem {
 	return &RecommendationItem{
 		ID:          uuid.New().String(),

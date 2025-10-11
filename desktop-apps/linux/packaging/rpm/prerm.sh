@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# RPM package pre-removal script for TaishangLaojun Desktop
+
+set -e
+
+# Stop any running instances of the application
+if command -v pkill >/dev/null 2>&1; then
+    pkill -f taishang-laojun || true
+fi
+
+# Stop systemd user service if it exists
+if command -v systemctl >/dev/null 2>&1; then
+    # Stop for all users
+    for user_home in /home/*; do
+        if [ -d "$user_home" ]; then
+            user=$(basename "$user_home")
+            if id "$user" >/dev/null 2>&1; then
+                sudo -u "$user" systemctl --user stop taishang-laojun.service 2>/dev/null || true
+                sudo -u "$user" systemctl --user disable taishang-laojun.service 2>/dev/null || true
+            fi
+        fi
+    done
+fi
+
+# Remove from autostart for all users
+for user_home in /home/*; do
+    if [ -d "$user_home/.config/autostart" ]; then
+        rm -f "$user_home/.config/autostart/taishang-laojun.desktop" 2>/dev/null || true
+    fi
+done
+
+# Clean up temporary files
+rm -rf /tmp/taishang-laojun-* 2>/dev/null || true
+
+# Remove application from system tray if running
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send "TaishangLaojun" "Application is being removed..." 2>/dev/null || true
+fi
+
+echo "Preparing to remove TaishangLaojun Desktop..."
+
+exit 0

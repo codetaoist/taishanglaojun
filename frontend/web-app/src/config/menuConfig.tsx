@@ -51,7 +51,11 @@ import {
   ThunderboltOutlined,
   FireOutlined,
   RocketOutlined,
-  AuditOutlined
+  AuditOutlined,
+  AppstoreOutlined,
+  KeyOutlined,
+  LinkOutlined,
+  SendOutlined
 } from '@ant-design/icons';
 
 export interface MenuItem {
@@ -543,7 +547,70 @@ export const mainMenuConfig: MenuItem[] = [
     ]
   },
 
-  // 9. 系统管理
+  // 9. 第三方集成
+  {
+    key: 'third-party-integration',
+    icon: <AppstoreOutlined />,
+    label: '第三方集成',
+    status: 'completed',
+    description: 'API管理、插件系统、服务集成、OAuth认证',
+    priority: 'high',
+    requiredRole: ['admin', 'developer'],
+    children: [
+      {
+        key: 'api-keys',
+        icon: <KeyOutlined />,
+        label: 'API密钥管理',
+        path: '/integration',
+        status: 'completed',
+        description: 'API密钥创建、管理、使用统计',
+        priority: 'high',
+        requiredRole: ['admin', 'developer']
+      },
+      {
+        key: 'plugins',
+        icon: <AppstoreOutlined />,
+        label: '插件管理',
+        path: '/integration',
+        status: 'completed',
+        description: '插件安装、配置、启用、禁用',
+        priority: 'high',
+        requiredRole: ['admin']
+      },
+      {
+        key: 'service-integration',
+        icon: <LinkOutlined />,
+        label: '服务集成',
+        path: '/integration',
+        status: 'completed',
+        description: '第三方服务集成配置和管理',
+        priority: 'high',
+        requiredRole: ['admin']
+      },
+      {
+        key: 'webhooks',
+        icon: <SendOutlined />,
+        label: 'Webhook管理',
+        path: '/integration',
+        status: 'completed',
+        description: 'Webhook创建、测试、日志查看',
+        priority: 'medium',
+        requiredRole: ['admin', 'developer']
+      },
+      {
+         key: 'oauth-apps',
+         icon: <SafetyCertificateOutlined />,
+         label: 'OAuth应用',
+         path: '/integration',
+         status: 'completed',
+         description: 'OAuth应用管理、令牌管理',
+         priority: 'medium',
+         requiredRole: ['admin']
+       }
+    ]
+  },
+
+  // 10. 系统管理
   {
     key: 'system-management',
     icon: <SettingOutlined />,

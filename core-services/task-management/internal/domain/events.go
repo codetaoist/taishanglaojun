@@ -71,7 +71,7 @@ type TaskUnassignedEvent struct {
 	TaskID uuid.UUID `json:"task_id"`
 }
 
-// TaskStartedEvent 任务开始事件
+// TaskStartedEvent 任务开始事�?
 type TaskStartedEvent struct {
 	BaseDomainEvent
 	TaskID uuid.UUID `json:"task_id"`
@@ -103,7 +103,7 @@ type TaskProgressUpdatedEvent struct {
 	NewProgress float64   `json:"new_progress"`
 }
 
-// TaskPriorityUpdatedEvent 任务优先级更新事件
+// TaskPriorityUpdatedEvent 任务优先级更新事�?
 type TaskPriorityUpdatedEvent struct {
 	BaseDomainEvent
 	TaskID      uuid.UUID    `json:"task_id"`
@@ -267,9 +267,9 @@ type TaskAutoAssignedEvent struct {
 	BaseDomainEvent
 	TaskID       uuid.UUID `json:"task_id"`
 	AssigneeID   uuid.UUID `json:"assignee_id"`
-	Algorithm    string    `json:"algorithm"`    // 使用的分配算法
-	Confidence   float64   `json:"confidence"`   // 分配置信度
-	Factors      []string  `json:"factors"`      // 影响分配的因素
+	Algorithm    string    `json:"algorithm"`    // 使用的分配算�?
+	Confidence   float64   `json:"confidence"`   // 分配置信�?
+	Factors      []string  `json:"factors"`      // 影响分配的因�?
 }
 
 // WorkloadBalancedEvent 工作负载平衡事件
@@ -287,7 +287,7 @@ type WorkloadAdjustment struct {
 	TasksChanged []uuid.UUID `json:"tasks_changed"`
 }
 
-// SkillMatchFoundEvent 技能匹配发现事件
+// SkillMatchFoundEvent 技能匹配发现事�?
 type SkillMatchFoundEvent struct {
 	BaseDomainEvent
 	TaskID         uuid.UUID `json:"task_id"`
@@ -389,7 +389,7 @@ type AuditLogCreatedEvent struct {
 	UserAgent  string                 `json:"user_agent"`
 }
 
-// SecurityEventDetectedEvent 安全事件检测事件
+// SecurityEventDetectedEvent 安全事件检测事�?
 type SecurityEventDetectedEvent struct {
 	BaseDomainEvent
 	EventType   string                 `json:"event_type"`
@@ -402,7 +402,7 @@ type SecurityEventDetectedEvent struct {
 
 // ========== 系统相关事件 ==========
 
-// SystemHealthCheckEvent 系统健康检查事件
+// SystemHealthCheckEvent 系统健康检查事�?
 type SystemHealthCheckEvent struct {
 	BaseDomainEvent
 	Component string                 `json:"component"`

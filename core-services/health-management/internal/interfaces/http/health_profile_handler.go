@@ -12,12 +12,12 @@ import (
 	"github.com/taishanglaojun/health-management/internal/domain"
 )
 
-// HealthProfileHandler 健康档案HTTP处理器
+// HealthProfileHandler 健康档案HTTP处理�?
 type HealthProfileHandler struct {
 	healthProfileService *application.HealthProfileService
 }
 
-// NewHealthProfileHandler 创建健康档案HTTP处理器
+// NewHealthProfileHandler 创建健康档案HTTP处理�?
 func NewHealthProfileHandler(healthProfileService *application.HealthProfileService) *HealthProfileHandler {
 	return &HealthProfileHandler{
 		healthProfileService: healthProfileService,
@@ -56,7 +56,7 @@ type AddMedicalHistoryRequest struct {
 	Condition string `json:"condition" binding:"required"`
 }
 
-// AddAllergyRequest 添加过敏史请求
+// AddAllergyRequest 添加过敏史请�?
 type AddAllergyRequest struct {
 	Allergen string `json:"allergen" binding:"required"`
 }
@@ -201,7 +201,7 @@ func (h *HealthProfileHandler) GetHealthProfile(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -209,8 +209,8 @@ func (h *HealthProfileHandler) GetHealthProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, h.toHealthProfileResponse(resp))
 }
 
-// GetHealthProfileByUser 获取用户的健康档案
-// @Summary 获取用户的健康档案
+// GetHealthProfileByUser 获取用户的健康档�?
+// @Summary 获取用户的健康档�?
 // @Description 根据用户ID获取健康档案
 // @Tags health-profile
 // @Produce json
@@ -244,7 +244,7 @@ func (h *HealthProfileHandler) GetHealthProfileByUser(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -310,7 +310,7 @@ func (h *HealthProfileHandler) UpdateHealthProfile(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -354,7 +354,7 @@ func (h *HealthProfileHandler) DeleteHealthProfile(c *gin.Context) {
 
 // AddMedicalHistory 添加病史
 // @Summary 添加病史
-// @Description 为健康档案添加病史记录
+// @Description 为健康档案添加病史记�?
 // @Tags health-profile
 // @Accept json
 // @Produce json
@@ -404,7 +404,7 @@ func (h *HealthProfileHandler) AddMedicalHistory(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -455,7 +455,7 @@ func (h *HealthProfileHandler) RemoveMedicalHistory(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -463,14 +463,14 @@ func (h *HealthProfileHandler) RemoveMedicalHistory(c *gin.Context) {
 	c.JSON(http.StatusOK, h.toHealthProfileResponse(resp))
 }
 
-// AddAllergy 添加过敏史
-// @Summary 添加过敏史
+// AddAllergy 添加过敏�?
+// @Summary 添加过敏�?
 // @Description 为健康档案添加过敏史记录
 // @Tags health-profile
 // @Accept json
 // @Produce json
 // @Param id path string true "健康档案ID"
-// @Param request body AddAllergyRequest true "添加过敏史请求"
+// @Param request body AddAllergyRequest true "添加过敏史请�?
 // @Success 200 {object} HealthProfileResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
@@ -506,7 +506,7 @@ func (h *HealthProfileHandler) AddAllergy(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Code:    "ADD_ALLERGY_FAILED",
-			Message: "添加过敏史失败",
+			Message: "添加过敏史失�?,
 			Details: err.Error(),
 		})
 		return
@@ -515,7 +515,7 @@ func (h *HealthProfileHandler) AddAllergy(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -523,13 +523,13 @@ func (h *HealthProfileHandler) AddAllergy(c *gin.Context) {
 	c.JSON(http.StatusOK, h.toHealthProfileResponse(resp))
 }
 
-// RemoveAllergy 删除过敏史
-// @Summary 删除过敏史
-// @Description 从健康档案中删除过敏史记录
+// RemoveAllergy 删除过敏�?
+// @Summary 删除过敏�?
+// @Description 从健康档案中删除过敏史记�?
 // @Tags health-profile
 // @Produce json
 // @Param id path string true "健康档案ID"
-// @Param allergen path string true "过敏原"
+// @Param allergen path string true "过敏�?
 // @Success 200 {object} HealthProfileResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
@@ -557,7 +557,7 @@ func (h *HealthProfileHandler) RemoveAllergy(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
 			Code:    "REMOVE_ALLERGY_FAILED",
-			Message: "删除过敏史失败",
+			Message: "删除过敏史失�?,
 			Details: err.Error(),
 		})
 		return
@@ -566,7 +566,7 @@ func (h *HealthProfileHandler) RemoveAllergy(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -576,7 +576,7 @@ func (h *HealthProfileHandler) RemoveAllergy(c *gin.Context) {
 
 // SetHealthGoals 设置健康目标
 // @Summary 设置健康目标
-// @Description 为健康档案设置健康目标
+// @Description 为健康档案设置健康目�?
 // @Tags health-profile
 // @Accept json
 // @Produce json
@@ -626,7 +626,7 @@ func (h *HealthProfileHandler) SetHealthGoals(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}
@@ -693,7 +693,7 @@ func (h *HealthProfileHandler) CalculateBMI(c *gin.Context) {
 	if resp == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{
 			Code:    "NOT_FOUND",
-			Message: "健康档案不存在",
+			Message: "健康档案不存�?,
 		})
 		return
 	}

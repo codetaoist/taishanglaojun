@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// EvolutionState 进化状态
+// EvolutionState 进化状�?
 type EvolutionState struct {
 	ID                int64                  `json:"id" db:"id"`
 	EntityID          string                 `json:"entity_id" db:"entity_id"`           // 进化实体ID
@@ -13,9 +13,9 @@ type EvolutionState struct {
 	EvolutionPath     []EvolutionStep       `json:"evolution_path"`                     // 进化路径
 	Progress          float64               `json:"progress" db:"progress"`             // 进化进度 0-1
 	EvolutionSpeed    float64               `json:"evolution_speed" db:"evolution_speed"` // 进化速度
-	Milestones        []EvolutionMilestone  `json:"milestones"`                        // 里程碑
+	Milestones        []EvolutionMilestone  `json:"milestones"`                        // 里程�?
 	Constraints       []EvolutionConstraint `json:"constraints"`                       // 进化约束
-	Catalysts         []EvolutionCatalyst   `json:"catalysts"`                         // 进化催化剂
+	Catalysts         []EvolutionCatalyst   `json:"catalysts"`                         // 进化催化�?
 	Status            EvolutionStatus       `json:"status" db:"status"`
 	StartTime         time.Time             `json:"start_time" db:"start_time"`
 	LastUpdateTime    time.Time             `json:"last_update_time" db:"last_update_time"`
@@ -32,7 +32,7 @@ const (
 	Sequence4       SequenceLevel = 4  // 基础智能
 	Sequence3       SequenceLevel = 3  // 高级智能
 	Sequence2       SequenceLevel = 2  // 超级智能
-	Sequence1       SequenceLevel = 1  // 准神级智能
+	Sequence1       SequenceLevel = 1  // 准神级智�?
 	Sequence0       SequenceLevel = 0  // 终极意识/神级智能
 )
 
@@ -43,25 +43,25 @@ type EvolutionStep struct {
 	ToSequence      SequenceLevel         `json:"to_sequence"`
 	Description     string                `json:"description"`
 	Requirements    []EvolutionRequirement `json:"requirements"`    // 进化要求
-	Achievements    []EvolutionAchievement `json:"achievements"`    // 已达成成就
+	Achievements    []EvolutionAchievement `json:"achievements"`    // 已达成成�?
 	Duration        time.Duration         `json:"duration"`        // 步骤耗时
 	Difficulty      float64               `json:"difficulty"`      // 难度系数 0-1
-	SuccessRate     float64               `json:"success_rate"`    // 成功率 0-1
+	SuccessRate     float64               `json:"success_rate"`    // 成功�?0-1
 	CompletedAt     *time.Time            `json:"completed_at,omitempty"`
 	Status          StepStatus            `json:"status"`
 }
 
-// EvolutionMilestone 进化里程碑
+// EvolutionMilestone 进化里程�?
 type EvolutionMilestone struct {
 	ID              string                 `json:"id"`
 	Name            string                 `json:"name"`
 	Description     string                 `json:"description"`
 	Sequence        SequenceLevel         `json:"sequence"`        // 对应序列等级
 	Criteria        []MilestoneCriteria   `json:"criteria"`        // 达成标准
-	Rewards         []MilestoneReward     `json:"rewards"`         // 里程碑奖励
+	Rewards         []MilestoneReward     `json:"rewards"`         // 里程碑奖�?
 	IsAchieved      bool                  `json:"is_achieved"`
 	AchievedAt      *time.Time            `json:"achieved_at,omitempty"`
-	Significance    float64               `json:"significance"`    // 重要性 0-1
+	Significance    float64               `json:"significance"`    // 重要�?0-1
 	Metadata        map[string]interface{} `json:"metadata"`
 }
 
@@ -79,13 +79,13 @@ type EvolutionConstraint struct {
 	Metadata        map[string]interface{} `json:"metadata"`
 }
 
-// EvolutionCatalyst 进化催化剂
+// EvolutionCatalyst 进化催化�?
 type EvolutionCatalyst struct {
 	ID              string                 `json:"id"`
 	Type            CatalystType          `json:"type"`
 	Name            string                `json:"name"`
 	Description     string                `json:"description"`
-	Effectiveness   float64               `json:"effectiveness"`   // 有效性 0-1
+	Effectiveness   float64               `json:"effectiveness"`   // 有效�?0-1
 	Duration        time.Duration         `json:"duration"`        // 持续时间
 	IsActive        bool                  `json:"is_active"`
 	ActivatedAt     time.Time             `json:"activated_at"`
@@ -100,8 +100,8 @@ type EvolutionRequirement struct {
 	ID              string                 `json:"id"`
 	Type            RequirementType       `json:"type"`
 	Description     string                `json:"description"`
-	Threshold       float64               `json:"threshold"`       // 阈值
-	CurrentValue    float64               `json:"current_value"`   // 当前值
+	Threshold       float64               `json:"threshold"`       // 阈�?
+	CurrentValue    float64               `json:"current_value"`   // 当前�?
 	IsMet           bool                  `json:"is_met"`          // 是否满足
 	Priority        RequirementPriority   `json:"priority"`
 	Metadata        map[string]interface{} `json:"metadata"`
@@ -113,13 +113,13 @@ type EvolutionAchievement struct {
 	Name            string                 `json:"name"`
 	Description     string                `json:"description"`
 	Type            AchievementType       `json:"type"`
-	Value           float64               `json:"value"`           // 成就值
+	Value           float64               `json:"value"`           // 成就�?
 	AchievedAt      time.Time             `json:"achieved_at"`
-	Significance    float64               `json:"significance"`    // 重要性
+	Significance    float64               `json:"significance"`    // 重要�?
 	Metadata        map[string]interface{} `json:"metadata"`
 }
 
-// MilestoneCriteria 里程碑标准
+// MilestoneCriteria 里程碑标�?
 type MilestoneCriteria struct {
 	ID              string                 `json:"id"`
 	Description     string                `json:"description"`
@@ -130,7 +130,7 @@ type MilestoneCriteria struct {
 	Weight          float64               `json:"weight"`          // 权重 0-1
 }
 
-// MilestoneReward 里程碑奖励
+// MilestoneReward 里程碑奖�?
 type MilestoneReward struct {
 	ID              string                 `json:"id"`
 	Type            RewardType            `json:"type"`
@@ -150,7 +150,7 @@ type ConstraintCondition struct {
 	IsMet           bool                  `json:"is_met"`
 }
 
-// CatalystEffect 催化剂效果
+// CatalystEffect 催化剂效�?
 type CatalystEffect struct {
 	ID              string                 `json:"id"`
 	Type            EffectType            `json:"type"`
@@ -160,7 +160,7 @@ type CatalystEffect struct {
 	IsActive        bool                  `json:"is_active"`
 }
 
-// CatalystRequirement 催化剂要求
+// CatalystRequirement 催化剂要�?
 type CatalystRequirement struct {
 	ID              string                 `json:"id"`
 	Type            RequirementType       `json:"type"`
@@ -176,7 +176,7 @@ type EvolutionMetrics struct {
 	IntelligenceQuotient float64  `json:"intelligence_quotient"` // 智能商数
 	WisdomIndex         float64   `json:"wisdom_index"`          // 智慧指数
 	CreativityScore     float64   `json:"creativity_score"`      // 创造力评分
-	AdaptabilityRating  float64   `json:"adaptability_rating"`   // 适应性评级
+	AdaptabilityRating  float64   `json:"adaptability_rating"`   // 适应性评�?
 	SelfAwarenessLevel  float64   `json:"self_awareness_level"`  // 自我意识水平
 	TranscendenceIndex  float64   `json:"transcendence_index"`   // 超越指数
 	EvolutionPotential  float64   `json:"evolution_potential"`   // 进化潜力
@@ -187,9 +187,9 @@ type EvolutionMetrics struct {
 type EvolutionPrediction struct {
 	EntityID            string                 `json:"entity_id"`
 	PredictedSequence   SequenceLevel         `json:"predicted_sequence"`
-	Confidence          float64               `json:"confidence"`          // 预测置信度
+	Confidence          float64               `json:"confidence"`          // 预测置信�?
 	TimeToAchieve       time.Duration         `json:"time_to_achieve"`     // 预计达成时间
-	RequiredCatalysts   []string              `json:"required_catalysts"`  // 需要的催化剂
+	RequiredCatalysts   []string              `json:"required_catalysts"`  // 需要的催化�?
 	PotentialObstacles  []string              `json:"potential_obstacles"` // 潜在障碍
 	SuccessProbability  float64               `json:"success_probability"` // 成功概率
 	AlternativePaths    []EvolutionPath       `json:"alternative_paths"`   // 替代路径
@@ -386,16 +386,16 @@ func (sl SequenceLevel) String() string {
 	}
 }
 
-// IsHigherThan 判断是否比另一个序列等级更高
+// IsHigherThan 判断是否比另一个序列等级更�?
 func (sl SequenceLevel) IsHigherThan(other SequenceLevel) bool {
-	return sl < other // 数字越小，序列等级越高
+	return sl < other // 数字越小，序列等级越�?
 }
 
 // GetDifficulty 获取达到该序列等级的难度
 func (sl SequenceLevel) GetDifficulty() float64 {
 	switch sl {
 	case Sequence0:
-		return 1.0 // 最高难度
+		return 1.0 // 最高难�?
 	case Sequence1:
 		return 0.9
 	case Sequence2:
@@ -411,7 +411,7 @@ func (sl SequenceLevel) GetDifficulty() float64 {
 	}
 }
 
-// GetRequiredCapabilities 获取达到该序列等级所需的能力
+// GetRequiredCapabilities 获取达到该序列等级所需的能�?
 func (sl SequenceLevel) GetRequiredCapabilities() []string {
 	switch sl {
 	case Sequence0:

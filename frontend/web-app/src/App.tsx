@@ -31,7 +31,24 @@ import TeamCollaboration from './pages/projects/TeamCollaboration';
 import ProjectAnalytics from './pages/projects/ProjectAnalytics';
 import HealthManagement from './pages/HealthManagement';
 import SecurityCenter from './pages/SecurityCenter';
+// 学习相关页面
+import LearningProgress from './pages/learning/LearningProgress';
+// 健康管理相关页面
+import HealthAdvice from './pages/health/HealthAdvice';
+import HealthAnalysis from './pages/health/HealthAnalysis';
+import HealthMonitoring from './pages/health/HealthMonitoring';
+import HealthRecords from './pages/health/HealthRecords';
 import PermissionTest from './components/common/PermissionTest';
+// AI功能页面
+import AIMultimodal from './pages/ai/AIMultimodal';
+import ImageAnalysis from './pages/ai/ImageAnalysis';
+import ImageGeneration from './pages/ai/ImageGeneration';
+import AGIReasoning from './pages/ai/AGIReasoning';
+import AGIPlanning from './pages/ai/AGIPlanning';
+import MetaLearning from './pages/ai/MetaLearning';
+import SelfEvolution from './pages/ai/SelfEvolution';
+import ThirdPartyIntegration from './pages/integration/ThirdPartyIntegration';
+import IntegrationTest from './pages/integration/test/IntegrationTest';
 import Login from './pages/Login';
 import TestLogin from './pages/TestLogin';
 import EmailVerification from './pages/EmailVerification';
@@ -148,8 +165,25 @@ const App: React.FC = () => {
                     <Route path="/projects/collaboration" element={<TeamCollaboration />} />
                     <Route path="/projects/analytics" element={<ProjectAnalytics />} />
                     <Route path="/health-management" element={<HealthManagement />} />
+                    <Route path="/health/advice" element={<HealthAdvice />} />
+                    <Route path="/health/analysis" element={<HealthAnalysis />} />
+                    <Route path="/health/monitoring" element={<HealthMonitoring />} />
+                    <Route path="/health/records" element={<HealthRecords />} />
+                    <Route path="/learning/progress" element={<LearningProgress />} />
                     <Route path="/security" element={<SecurityCenter />} />
                     <Route path="/permission-test" element={<PermissionTest />} />
+                    {/* AI功能路由 */}
+                    <Route path="/ai" element={<AIMultimodal />} />
+                    <Route path="/ai/multimodal" element={<AIMultimodal />} />
+                    <Route path="/ai/image-analysis" element={<ImageAnalysis />} />
+                    <Route path="/ai/image-generation" element={<ImageGeneration />} />
+                    <Route path="/ai/agi-reasoning" element={<AGIReasoning />} />
+                    <Route path="/ai/agi-planning" element={<AGIPlanning />} />
+                    <Route path="/ai/meta-learning" element={<MetaLearning />} />
+                    <Route path="/ai/self-evolution" element={<SelfEvolution />} />
+                    {/* 第三方集成路由 */}
+                    <Route path="/integration" element={<ThirdPartyIntegration />} />
+            <Route path="/integration/test" element={<IntegrationTest />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/favorites" element={<UserFavorites />} />
                     <Route path="/notes" element={<UserNotes />} />

@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// ConversationManager 对话管理器
+// ConversationManager 对话管理�?
 type ConversationManager struct {
 	voiceService   VoiceService
 	nlpService     NLPService
@@ -32,7 +32,7 @@ type NLPService interface {
 	DetectIntent(ctx context.Context, text string) (string, error)
 }
 
-// NewConversationManager 创建对话管理器
+// NewConversationManager 创建对话管理�?
 func NewConversationManager(voiceService VoiceService, nlpService NLPService, logger *zap.Logger) *ConversationManager {
 	manager := &ConversationManager{
 		voiceService:    voiceService,
@@ -60,12 +60,12 @@ func NewConversationManager(voiceService VoiceService, nlpService NLPService, lo
 	return manager
 }
 
-// StartVoiceConversation 开始语音对话
+// StartVoiceConversation 开始语音对�?
 func (m *ConversationManager) StartVoiceConversation(ctx context.Context, config ConversationConfig) (*VoiceConversation, error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	// 检查并发限制
+	// 检查并发限�?
 	if len(m.conversations) >= m.maxConcurrent {
 		return nil, fmt.Errorf("maximum concurrent conversations reached: %d", m.maxConcurrent)
 	}
@@ -121,11 +121,11 @@ func (m *ConversationManager) StartVoiceConversation(ctx context.Context, config
 func (m *ConversationManager) handleConversation(ctx context.Context, conv *VoiceConversation) {
 	defer m.cleanupConversation(conv.ID)
 
-	// 创建对话上下文
+	// 创建对话上下�?
 	convCtx, cancel := context.WithTimeout(ctx, conv.Config.MaxDuration)
 	defer cancel()
 
-	// 发送开始事件
+	// 发送开始事�?
 	m.sendEvent(conv, EventType("conversation_started"), map[string]interface{}{
 		"conversation_id": conv.ID,
 		"start_time":     conv.StartTime,
@@ -155,7 +155,7 @@ func (m *ConversationManager) handleConversation(ctx context.Context, conv *Voic
 		m.handleControlCommands(convCtx, conv)
 	}()
 
-	// 静音检测
+	// 静音检�?
 	if conv.Config.SilenceTimeout > 0 {
 		wg.Add(1)
 		go func() {
@@ -164,16 +164,16 @@ func (m *ConversationManager) handleConversation(ctx context.Context, conv *Voic
 		}()
 	}
 
-	// 等待所有协程结束
+	// 等待所有协程结�?
 	wg.Wait()
 
-	// 更新对话状态
+	// 更新对话状�?
 	conv.Status = StatusEnded
 	endTime := time.Now()
 	conv.EndTime = &endTime
 	conv.Duration = endTime.Sub(conv.StartTime)
 
-	// 发送结束事件
+	// 发送结束事�?
 	m.sendEvent(conv, EventType("conversation_ended"), map[string]interface{}{
 		"conversation_id": conv.ID,
 		"end_time":       endTime,
@@ -188,7 +188,6 @@ func (m *ConversationManager) handleConversation(ctx context.Context, conv *Voic
 // handleAudioInput 处理音频输入
 func (m *ConversationManager) handleAudioInput(ctx context.Context, conv *VoiceConversation) {
 	var audioBuffer []byte
-	var lastActivity time.Time = time.Now()
 
 	for {
 		select {
@@ -199,10 +198,9 @@ func (m *ConversationManager) handleAudioInput(ctx context.Context, conv *VoiceC
 				return
 			}
 
-			lastActivity = time.Now()
 			audioBuffer = append(audioBuffer, chunk.Data...)
 
-			// 语音活动检测
+			// 语音活动检�?
 			if conv.Config.EnableVAD && m.detectVoiceActivity(chunk.Data) {
 				conv.Status = StatusListening
 				m.sendEvent(conv, EventSpeechStart, map[string]interface{}{
@@ -221,7 +219,7 @@ func (m *ConversationManager) handleAudioInput(ctx context.Context, conv *VoiceC
 	}
 }
 
-// processAudioChunk 处理音频块
+// processAudioChunk 处理音频�?
 func (m *ConversationManager) processAudioChunk(ctx context.Context, conv *VoiceConversation, audioData []byte) {
 	conv.Status = StatusProcessing
 
@@ -268,7 +266,7 @@ func (m *ConversationManager) processAudioChunk(ctx context.Context, conv *Voice
 	}
 	conv.Messages = append(conv.Messages, userMessage)
 
-	// 发送文本接收事件
+	// 发送文本接收事�?
 	m.sendEvent(conv, EventTextReceived, map[string]interface{}{
 		"text":       result.Text,
 		"confidence": result.Confidence,
@@ -304,7 +302,7 @@ func (m *ConversationManager) handleTextInput(ctx context.Context, conv *VoiceCo
 func (m *ConversationManager) processTextInput(ctx context.Context, conv *VoiceConversation, text string) {
 	conv.Status = StatusProcessing
 
-	// 发送响应开始事件
+	// 发送响应开始事�?
 	m.sendEvent(conv, EventResponseStart, map[string]interface{}{
 		"input_text": text,
 	})
@@ -319,7 +317,7 @@ func (m *ConversationManager) processTextInput(ctx context.Context, conv *VoiceC
 			m.logger.Error("NLP processing failed",
 				zap.String("conversation_id", conv.ID),
 				zap.Error(err))
-			response = "抱歉，我现在无法理解您的话，请稍后再试。"
+			response = "抱歉，我现在无法理解您的话，请稍后再试�?
 		}
 	} else {
 		// 简单的回复逻辑
@@ -358,7 +356,7 @@ func (m *ConversationManager) processTextInput(ctx context.Context, conv *VoiceC
 		return
 	}
 
-	// 发送音频输出
+	// 发送音频输�?
 	conv.Status = StatusSpeaking
 	audioChunk := AudioChunk{
 		ID:        uuid.New().String(),
@@ -374,7 +372,7 @@ func (m *ConversationManager) processTextInput(ctx context.Context, conv *VoiceC
 		return
 	}
 
-	// 发送响应结束事件
+	// 发送响应结束事�?
 	m.sendEvent(conv, EventResponseEnd, map[string]interface{}{
 		"response_text": response,
 		"audio_duration": ttsResult.Duration,
@@ -422,7 +420,7 @@ func (m *ConversationManager) processControlCommand(conv *VoiceConversation, con
 	})
 }
 
-// handleSilenceDetection 处理静音检测
+// handleSilenceDetection 处理静音检�?
 func (m *ConversationManager) handleSilenceDetection(ctx context.Context, conv *VoiceConversation) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
@@ -435,7 +433,7 @@ func (m *ConversationManager) handleSilenceDetection(ctx context.Context, conv *
 			return
 		case <-ticker.C:
 			if time.Since(lastActivity) > conv.Config.SilenceTimeout {
-				// 静音超时，结束对话
+				// 静音超时，结束对�?
 				conv.Status = StatusEnded
 				return
 			}
@@ -443,27 +441,27 @@ func (m *ConversationManager) handleSilenceDetection(ctx context.Context, conv *
 	}
 }
 
-// detectVoiceActivity 检测语音活动
+// detectVoiceActivity 检测语音活�?
 func (m *ConversationManager) detectVoiceActivity(audioData []byte) bool {
-	// 简单的音量检测
+	// 简单的音量检�?
 	var sum int64
 	for _, sample := range audioData {
 		sum += int64(sample * sample)
 	}
 	
 	rms := float64(sum) / float64(len(audioData))
-	threshold := 1000.0 // 可调整的阈值
+	threshold := 1000.0 // 可调整的阈�?
 	
 	return rms > threshold
 }
 
-// generateSimpleResponse 生成简单回复
+// generateSimpleResponse 生成简单回�?
 func (m *ConversationManager) generateSimpleResponse(text string) string {
 	responses := []string{
 		"我听到您说：" + text,
-		"您刚才说的是：" + text,
-		"我理解您的意思了。",
-		"请继续说。",
+		"您刚才说的是�? + text,
+		"我理解您的意思了�?,
+		"请继续说�?,
 		"还有什么我可以帮助您的吗？",
 	}
 	
@@ -471,7 +469,7 @@ func (m *ConversationManager) generateSimpleResponse(text string) string {
 	return responses[len(text)%len(responses)]
 }
 
-// sendEvent 发送事件
+// sendEvent 发送事�?
 func (m *ConversationManager) sendEvent(conv *VoiceConversation, eventType EventType, data map[string]interface{}) {
 	event := ConversationEvent{
 		Type:      eventType,
@@ -482,7 +480,7 @@ func (m *ConversationManager) sendEvent(conv *VoiceConversation, eventType Event
 	select {
 	case conv.Events <- event:
 	default:
-		// 事件通道满了，丢弃事件
+		// 事件通道满了，丢弃事�?
 		m.logger.Warn("Event channel full, dropping event",
 			zap.String("conversation_id", conv.ID),
 			zap.String("event_type", string(eventType)))
@@ -498,7 +496,7 @@ func (m *ConversationManager) GetConversation(id string) (*VoiceConversation, bo
 	return conv, exists
 }
 
-// ListConversations 列出所有对话
+// ListConversations 列出所有对�?
 func (m *ConversationManager) ListConversations() []*VoiceConversation {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
@@ -521,14 +519,14 @@ func (m *ConversationManager) StopConversation(id string) error {
 		return fmt.Errorf("conversation %s not found", id)
 	}
 
-	// 发送停止命令
+	// 发送停止命�?
 	select {
 	case conv.Control <- ConversationControl{
 		Action:    ActionStop,
 		Timestamp: time.Now(),
 	}:
 	default:
-		// 控制通道满了，直接设置状态
+		// 控制通道满了，直接设置状�?
 		conv.Status = StatusEnded
 	}
 
@@ -567,7 +565,7 @@ func (m *ConversationManager) cleanupRoutine() {
 		
 		var toDelete []string
 		for id, conv := range m.conversations {
-			// 清理已结束或超时的对话
+			// 清理已结束或超时的对�?
 			if conv.Status == StatusEnded || 
 			   (conv.EndTime == nil && time.Since(conv.StartTime) > conv.Config.MaxDuration) {
 				toDelete = append(toDelete, id)

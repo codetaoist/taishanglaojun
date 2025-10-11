@@ -1,0 +1,240 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: database
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: POSTGRES_DB
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: postgres-password
+        - name: POSTGRES_INITDB_ARGS
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: POSTGRES_INITDB_ARGS
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -d
+            - taishanglaojun
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -d
+            - taishanglaojun
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: init-scripts
+        configMap:
+          name: postgres-init-scripts
+          defaultMode: 0755
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: database
+data:
+  init-db.sql: |
+    -- 太上老君AI平台 - 数据库初始化脚本
+    -- 版本: 1.0.0
+    -- 创建时间: 2024-01-01
+
+    -- 设置数据库编码
+    SET client_encoding = 'UTF8';
+    SET standard_conforming_strings = on;
+
+    -- 创建扩展
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+    CREATE EXTENSION IF NOT EXISTS "vector";
+
+    -- 创建用户表
+    CREATE TABLE IF NOT EXISTS users (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        username VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        full_name VARCHAR(100),
+        avatar_url TEXT,
+        phone VARCHAR(20),
+        status VARCHAR(20) DEFAULT 'active',
+        role VARCHAR(20) DEFAULT 'user',
+        preferences JSONB DEFAULT '{}',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        last_login_at TIMESTAMP WITH TIME ZONE,
+        email_verified BOOLEAN DEFAULT FALSE,
+        phone_verified BOOLEAN DEFAULT FALSE
+    );
+
+    -- 创建文化智慧表
+    CREATE TABLE IF NOT EXISTS cultural_wisdom (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        category VARCHAR(100),
+        tags TEXT[],
+        source VARCHAR(255),
+        author VARCHAR(100),
+        dynasty VARCHAR(50),
+        difficulty_level INTEGER DEFAULT 1,
+        popularity_score FLOAT DEFAULT 0.0,
+        embedding vector(1536),
+        metadata JSONB DEFAULT '{}',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_by UUID REFERENCES users(id),
+        status VARCHAR(20) DEFAULT 'active'
+    );
+
+    -- 创建AI对话表
+    CREATE TABLE IF NOT EXISTS conversations (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID REFERENCES users(id),
+        title VARCHAR(255),
+        model VARCHAR(100),
+        provider VARCHAR(50),
+        context JSONB DEFAULT '{}',
+        metadata JSONB DEFAULT '{}',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        status VARCHAR(20) DEFAULT 'active'
+    );
+
+    -- 创建消息表
+    CREATE TABLE IF NOT EXISTS messages (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
+        role VARCHAR(20) NOT NULL,
+        content TEXT NOT NULL,
+        content_type VARCHAR(50) DEFAULT 'text',
+        metadata JSONB DEFAULT '{}',
+        tokens_used INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        parent_message_id UUID REFERENCES messages(id)
+    );
+
+    -- 创建索引
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+    CREATE INDEX IF NOT EXISTS idx_cultural_wisdom_category ON cultural_wisdom(category);
+    CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
+    CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+
+    -- 插入示例数据
+    INSERT INTO users (username, email, password_hash, full_name, role) VALUES
+    ('admin', 'admin@taishanglaojun.com', crypt('admin123', gen_salt('bf')), '系统管理员', 'admin'),
+    ('demo', 'demo@taishanglaojun.com', crypt('demo123', gen_salt('bf')), '演示用户', 'user')
+    ON CONFLICT (email) DO NOTHING;
+
+    -- 插入示例文化智慧数据
+    INSERT INTO cultural_wisdom (title, content, category, tags, source, author, dynasty) VALUES
+    ('道德经第一章', '道可道，非常道；名可名，非常名。无名天地之始，有名万物之母。', '道德经', ARRAY['道德经', '老子', '哲学'], '道德经', '老子', '春秋'),
+    ('论语学而篇', '学而时习之，不亦说乎？有朋自远方来，不亦乐乎？', '论语', ARRAY['论语', '孔子', '教育'], '论语', '孔子', '春秋')
+    ON CONFLICT DO NOTHING;
+
+    SELECT 'Database initialization completed successfully!' as status;

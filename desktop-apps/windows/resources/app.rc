@@ -1,0 +1,120 @@
+#include <windows.h>
+#include "resource.h"
+
+// 版本信息
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0x0L
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "CompanyName",      "太上老君AI平台团队"
+            VALUE "FileDescription", "太上老君AI平台桌面应用"
+            VALUE "FileVersion",     "1.0.0.0"
+            VALUE "InternalName",    "TaishangLaojunDesktop"
+            VALUE "LegalCopyright",  "Copyright (C) 2024 太上老君AI平台团队"
+            VALUE "OriginalFilename","TaishangLaojunDesktop.exe"
+            VALUE "ProductName",     "太上老君AI平台"
+            VALUE "ProductVersion",  "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+// 应用程序图标
+IDI_MAIN_ICON   ICON    "icon.ico"
+IDI_TRAY_ICON   ICON    "tray_icon.ico"
+
+// 菜单资源
+IDR_MAIN_MENU MENU
+BEGIN
+    POPUP "文件(&F)"
+    BEGIN
+        MENUITEM "新建项目(&N)\tCtrl+N",     ID_FILE_NEW
+        MENUITEM "打开项目(&O)\tCtrl+O",     ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "退出(&X)\tAlt+F4",        ID_FILE_EXIT
+    END
+    POPUP "工具(&T)"
+    BEGIN
+        MENUITEM "桌面宠物(&P)",            ID_TOOLS_PET
+        MENUITEM "文件传输(&F)",            ID_TOOLS_TRANSFER
+        MENUITEM "数据同步(&S)",            ID_TOOLS_SYNC
+        MENUITEM SEPARATOR
+        MENUITEM "设置(&S)\tCtrl+,",        ID_TOOLS_SETTINGS
+    END
+    POPUP "帮助(&H)"
+    BEGIN
+        MENUITEM "关于(&A)",               ID_HELP_ABOUT
+    END
+END
+
+// 加速键
+IDR_MAIN_ACCELERATOR ACCELERATORS
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    VK_F4,          ID_FILE_EXIT,           VIRTKEY, ALT
+    ",",            ID_TOOLS_SETTINGS,      VIRTKEY, CONTROL
+    VK_F1,          ID_HELP_ABOUT,          VIRTKEY
+END
+
+// 对话框资源
+IDD_ABOUT DIALOGEX 0, 0, 300, 200
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "关于太上老君AI平台"
+FONT 9, "Microsoft YaHei UI"
+BEGIN
+    ICON            IDI_MAIN_ICON, IDC_STATIC, 14, 14, 20, 20
+    LTEXT           "太上老君AI平台", IDC_STATIC, 42, 14, 114, 8, SS_NOPREFIX
+    LTEXT           "版本 1.0.0", IDC_STATIC, 42, 26, 114, 8
+    LTEXT           "Copyright (C) 2024 太上老君AI平台团队", IDC_STATIC, 42, 38, 200, 8
+    DEFPUSHBUTTON   "确定", IDOK, 243, 179, 50, 14, WS_GROUP
+END
+
+IDD_SETTINGS DIALOGEX 0, 0, 400, 300
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "设置"
+FONT 9, "Microsoft YaHei UI"
+BEGIN
+    GROUPBOX        "常规设置", IDC_STATIC, 7, 7, 386, 80
+    CONTROL         "开机自启动", IDC_CHECK_AUTOSTART, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 21, 60, 10
+    CONTROL         "最小化到系统托盘", IDC_CHECK_MINIMIZE_TO_TRAY, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 35, 80, 10
+    CONTROL         "关闭时最小化到托盘", IDC_CHECK_CLOSE_TO_TRAY, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 49, 90, 10
+    
+    GROUPBOX        "桌面宠物", IDC_STATIC, 7, 95, 386, 80
+    CONTROL         "启用桌面宠物", IDC_CHECK_ENABLE_PET, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 109, 70, 10
+    LTEXT           "宠物皮肤:", IDC_STATIC, 14, 125, 40, 8
+    COMBOBOX        IDC_COMBO_PET_SKIN, 60, 123, 100, 60, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    
+    GROUPBOX        "网络设置", IDC_STATIC, 7, 183, 386, 80
+    LTEXT           "服务器地址:", IDC_STATIC, 14, 197, 50, 8
+    EDITTEXT        IDC_EDIT_SERVER_URL, 70, 195, 200, 14, ES_AUTOHSCROLL
+    LTEXT           "端口:", IDC_STATIC, 14, 215, 25, 8
+    EDITTEXT        IDC_EDIT_SERVER_PORT, 45, 213, 50, 14, ES_AUTOHSCROLL | ES_NUMBER
+    
+    DEFPUSHBUTTON   "确定", IDOK, 289, 279, 50, 14
+    PUSHBUTTON      "取消", IDCANCEL, 343, 279, 50, 14
+END
+
+// 字符串表
+STRINGTABLE
+BEGIN
+    IDS_APP_TITLE           "太上老君AI平台"
+    IDS_TRAY_TOOLTIP        "太上老君AI平台 - 桌面应用"
+    IDS_CONFIRM_EXIT        "确定要退出太上老君AI平台吗？"
+    IDS_PET_GREETING        "你好！我是你的AI助手"
+    IDS_TRANSFER_COMPLETE   "文件传输完成"
+    IDS_SYNC_SUCCESS        "数据同步成功"
+    IDS_CONNECTION_ERROR    "连接服务器失败"
+END

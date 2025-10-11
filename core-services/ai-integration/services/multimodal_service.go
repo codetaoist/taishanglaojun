@@ -2,30 +2,28 @@ package services
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/taishanglaojun/core-services/ai-integration/models"
-	"github.com/taishanglaojun/core-services/ai-integration/providers"
-	"github.com/taishanglaojun/infrastructure/database-layer/repositories"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/models"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/providers"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/repositories"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 // MultimodalService 多模态AI服务
 type MultimodalService struct {
-	aiProviders    map[string]providers.AIProvider
-	aiProvider     providers.AIProvider // 默认AI提供商
-	repository     repositories.Repository
-	fileService    FileService
-	audioService   AudioService
-	imageService   ImageService
-	videoService   VideoService
+	aiProviders  map[string]providers.AIProvider
+	aiProvider   providers.AIProvider // 默认AI提供�?
+	repository   repositories.Repository
+	fileService  FileService
+	audioService AudioService
+	imageService ImageService
+	videoService VideoService
 }
 
 // NewMultimodalService 创建多模态AI服务
@@ -49,20 +47,20 @@ func NewMultimodalService(
 	}
 }
 
-// ProcessMultimodalRequest 处理多模态请求
+// ProcessMultimodalRequest 处理多模态请�?
 func (s *MultimodalService) ProcessMultimodalRequest(ctx context.Context, req *models.MultimodalRequest) (*models.MultimodalResponse, error) {
 	// 验证请求
 	if err := s.validateRequest(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
-	// 预处理输入
+	// 预处理输�?
 	processedInputs, err := s.preprocessInputs(ctx, req.Inputs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to preprocess inputs: %w", err)
 	}
 
-	// 获取AI提供商
+	// 获取AI提供�?
 	provider, exists := s.aiProviders[req.Config.Provider]
 	if !exists {
 		return nil, fmt.Errorf("unsupported provider: %s", req.Config.Provider)
@@ -74,7 +72,7 @@ func (s *MultimodalService) ProcessMultimodalRequest(ctx context.Context, req *m
 		return nil, fmt.Errorf("AI provider call failed: %w", err)
 	}
 
-	// 后处理输出
+	// 后处理输�?
 	processedOutputs, err := s.postprocessOutputs(ctx, outputs, req.Outputs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to postprocess outputs: %w", err)
@@ -91,15 +89,15 @@ func (s *MultimodalService) ProcessMultimodalRequest(ctx context.Context, req *m
 		CreatedAt: time.Now(),
 		Status:    "completed",
 		Metadata: models.ResponseMetadata{
-			Provider:     req.Config.Provider,
-			Model:        req.Config.Model,
-			TokensUsed:   calculateTokenUsage(processedInputs, processedOutputs),
-			ProcessingTime: time.Since(req.CreatedAt).Milliseconds(),
+			Provider:       req.Config.Provider,
+			Model:          req.Config.Model,
+			TokensUsed:     calculateTokenUsage(processedInputs, processedOutputs),
+			ProcessingTime: time.Since(req.CreatedAt),
 			Quality: models.QualityMetrics{
-				Accuracy:   0.95,
-				Relevance:  0.92,
-				Coherence:  0.88,
-				Fluency:    0.90,
+				Accuracy:     0.95,
+				Relevance:    0.92,
+				Coherence:    0.88,
+				Completeness: 0.90,
 			},
 		},
 	}
@@ -128,7 +126,7 @@ func (s *MultimodalService) ProcessFileUpload(ctx *gin.Context) (*models.Multimo
 
 	// 确定文件类型
 	inputType := s.determineInputType(header.Header.Get("Content-Type"))
-	
+
 	// 创建输入对象
 	input := &models.MultimodalInput{
 		Type: inputType,
@@ -188,17 +186,17 @@ func (s *MultimodalService) ProcessFileUpload(ctx *gin.Context) (*models.Multimo
 	return input, nil
 }
 
-// StreamMultimodalResponse 流式处理多模态响应
+// StreamMultimodalResponse 流式处理多模态响�?
 func (s *MultimodalService) StreamMultimodalResponse(ctx context.Context, req *models.MultimodalRequest, outputChan chan<- *models.MultimodalOutput) error {
 	defer close(outputChan)
 
-	// 预处理输入
+	// 预处理输�?
 	processedInputs, err := s.preprocessInputs(ctx, req.Inputs)
 	if err != nil {
 		return fmt.Errorf("failed to preprocess inputs: %w", err)
 	}
 
-	// 获取AI提供商
+	// 获取AI提供�?
 	provider, exists := s.aiProviders[req.Config.Provider]
 	if !exists {
 		return fmt.Errorf("unsupported provider: %s", req.Config.Provider)
@@ -228,24 +226,24 @@ func (s *MultimodalService) validateRequest(req *models.MultimodalRequest) error
 	return nil
 }
 
-// preprocessInputs 预处理输入
+// preprocessInputs 预处理输�?
 func (s *MultimodalService) preprocessInputs(ctx context.Context, inputs []models.MultimodalInput) ([]models.MultimodalInput, error) {
 	processed := make([]models.MultimodalInput, len(inputs))
-	
+
 	for i, input := range inputs {
 		switch input.Type {
 		case models.InputTypeText:
 			// 文本预处理：清理、格式化
 			processed[i] = s.preprocessTextInput(input)
 		case models.InputTypeAudio:
-			// 音频预处理：格式转换、降噪
+			// 音频预处理：格式转换、降�?
 			processedInput, err := s.preprocessAudioInput(ctx, input)
 			if err != nil {
 				return nil, fmt.Errorf("failed to preprocess audio input: %w", err)
 			}
 			processed[i] = processedInput
 		case models.InputTypeImage:
-			// 图像预处理：压缩、格式转换
+			// 图像预处理：压缩、格式转�?
 			processedInput, err := s.preprocessImageInput(ctx, input)
 			if err != nil {
 				return nil, fmt.Errorf("failed to preprocess image input: %w", err)
@@ -262,66 +260,66 @@ func (s *MultimodalService) preprocessInputs(ctx context.Context, inputs []model
 			processed[i] = input
 		}
 	}
-	
+
 	return processed, nil
 }
 
-// preprocessTextInput 预处理文本输入
+// preprocessTextInput 预处理文本输�?
 func (s *MultimodalService) preprocessTextInput(input models.MultimodalInput) models.MultimodalInput {
 	textInput := input.Content.(models.TextInput)
-	
+
 	// 清理文本
 	textInput.Content = strings.TrimSpace(textInput.Content)
-	
+
 	// 检测语言
 	if textInput.Language == "" {
 		textInput.Language = s.detectLanguage(textInput.Content)
 	}
-	
+
 	input.Content = textInput
 	return input
 }
 
-// preprocessAudioInput 预处理音频输入
+// preprocessAudioInput 预处理音频输�?
 func (s *MultimodalService) preprocessAudioInput(ctx context.Context, input models.MultimodalInput) (models.MultimodalInput, error) {
 	audioInput := input.Content.(models.AudioInput)
-	
-	// 音频格式转换和优化
+
+	// 音频格式转换和优�?
 	if processedData, err := s.audioService.ProcessAudio(audioInput.Data, audioInput.Format); err == nil {
 		audioInput.Data = processedData
 	}
-	
+
 	input.Content = audioInput
 	return input, nil
 }
 
-// preprocessImageInput 预处理图像输入
+// preprocessImageInput 预处理图像输�?
 func (s *MultimodalService) preprocessImageInput(ctx context.Context, input models.MultimodalInput) (models.MultimodalInput, error) {
 	imageInput := input.Content.(models.ImageInput)
-	
-	// 图像压缩和优化
+
+	// 图像压缩和优�?
 	if processedData, err := s.imageService.ProcessImage(imageInput.Data, imageInput.Format); err == nil {
 		imageInput.Data = processedData
 	}
-	
+
 	input.Content = imageInput
 	return input, nil
 }
 
-// preprocessVideoInput 预处理视频输入
+// preprocessVideoInput 预处理视频输�?
 func (s *MultimodalService) preprocessVideoInput(ctx context.Context, input models.MultimodalInput) (models.MultimodalInput, error) {
 	videoInput := input.Content.(models.VideoInput)
-	
+
 	// 视频压缩和关键帧提取
 	if processedData, err := s.videoService.ProcessVideo(videoInput.Data, videoInput.Format); err == nil {
 		videoInput.Data = processedData
 	}
-	
+
 	input.Content = videoInput
 	return input, nil
 }
 
-// callAIProvider 调用AI提供商
+// callAIProvider 调用AI提供�?
 func (s *MultimodalService) callAIProvider(ctx context.Context, provider providers.AIProvider, reqType models.MultimodalType, inputs []models.MultimodalInput, config models.MultimodalConfig) ([]models.MultimodalOutput, error) {
 	// 根据请求类型调用不同的AI服务
 	switch reqType {
@@ -340,19 +338,19 @@ func (s *MultimodalService) callAIProvider(ctx context.Context, provider provide
 	}
 }
 
-// postprocessOutputs 后处理输出
+// postprocessOutputs 后处理输�?
 func (s *MultimodalService) postprocessOutputs(ctx context.Context, outputs []models.MultimodalOutput, requestedTypes []models.MultimodalOutputType) ([]models.MultimodalOutput, error) {
 	processed := make([]models.MultimodalOutput, 0)
-	
+
 	for _, output := range outputs {
-		// 根据请求的输出类型进行转换
+		// 根据请求的输出类型进行转�?
 		for _, requestedType := range requestedTypes {
 			if convertedOutput, err := s.convertOutput(ctx, output, requestedType); err == nil {
 				processed = append(processed, convertedOutput)
 			}
 		}
 	}
-	
+
 	return processed, nil
 }
 
@@ -385,21 +383,21 @@ func (s *MultimodalService) detectLanguage(text string) string {
 	if len(text) == 0 {
 		return "unknown"
 	}
-	
-	// 检测中文字符
+
+	// 检测中文字�?
 	for _, r := range text {
 		if r >= 0x4e00 && r <= 0x9fff {
 			return "zh"
 		}
 	}
-	
+
 	return "en"
 }
 
 func calculateTokenUsage(inputs []models.MultimodalInput, outputs []models.MultimodalOutput) int {
 	// 简化的token计算逻辑
 	tokens := 0
-	
+
 	for _, input := range inputs {
 		switch input.Type {
 		case models.InputTypeText:
@@ -407,14 +405,14 @@ func calculateTokenUsage(inputs []models.MultimodalInput, outputs []models.Multi
 				tokens += len(strings.Fields(textInput.Content))
 			}
 		case models.InputTypeImage:
-			tokens += 85 // 图像固定token消耗
+			tokens += 85 // 图像固定token消�?
 		case models.InputTypeAudio:
 			if audioInput, ok := input.Content.(models.AudioInput); ok {
 				tokens += int(audioInput.Duration * 10) // 每秒10个token
 			}
 		}
 	}
-	
+
 	for _, output := range outputs {
 		switch output.Type {
 		case models.OutputTypeText:
@@ -422,14 +420,14 @@ func calculateTokenUsage(inputs []models.MultimodalInput, outputs []models.Multi
 				tokens += len(strings.Fields(textOutput.Content))
 			}
 		case models.OutputTypeImage:
-			tokens += 170 // 图像生成固定token消耗
+			tokens += 170 // 图像生成固定token消�?
 		case models.OutputTypeAudio:
 			if audioOutput, ok := output.Content.(models.AudioOutput); ok {
 				tokens += int(audioOutput.Duration * 15) // 每秒15个token
 			}
 		}
 	}
-	
+
 	return tokens
 }
 
@@ -460,29 +458,29 @@ type VideoInfo struct {
 	FrameRate  float64
 }
 
-// 占位符方法，需要具体实现
+// 占位符方法，需要具体实�?
 func (s *MultimodalService) callMultimodalChat(ctx context.Context, provider providers.AIProvider, inputs []models.MultimodalInput, config models.MultimodalConfig) ([]models.MultimodalOutput, error) {
-	// TODO: 实现多模态对话
+	// TODO: 实现多模态对�?
 	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *MultimodalService) callMultimodalAnalysis(ctx context.Context, provider providers.AIProvider, inputs []models.MultimodalInput, config models.MultimodalConfig) ([]models.MultimodalOutput, error) {
-	// TODO: 实现多模态分析
+	// TODO: 实现多模态分�?
 	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *MultimodalService) callMultimodalGeneration(ctx context.Context, provider providers.AIProvider, inputs []models.MultimodalInput, config models.MultimodalConfig) ([]models.MultimodalOutput, error) {
-	// TODO: 实现多模态生成
+	// TODO: 实现多模态生�?
 	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *MultimodalService) callMultimodalTranslation(ctx context.Context, provider providers.AIProvider, inputs []models.MultimodalInput, config models.MultimodalConfig) ([]models.MultimodalOutput, error) {
-	// TODO: 实现多模态翻译
+	// TODO: 实现多模态翻�?
 	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *MultimodalService) callMultimodalSearch(ctx context.Context, provider providers.AIProvider, inputs []models.MultimodalInput, config models.MultimodalConfig) ([]models.MultimodalOutput, error) {
-	// TODO: 实现多模态搜索
+	// TODO: 实现多模态搜�?
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -497,35 +495,35 @@ func (s *MultimodalService) convertOutput(ctx context.Context, output models.Mul
 }
 
 // GenerateImage 生成图像
-func (s *MultimodalService) GenerateImage(ctx context.Context, req *ImageGenerateRequest) (*ImageGenerateResponse, error) {
+func (s *MultimodalService) GenerateImage(ctx context.Context, req *providers.ImageGenerateRequest) (*providers.ImageGenerateResponse, error) {
 	// 验证请求
 	if err := s.validateImageGenerateRequest(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
-	// 构建AI提供商请求
-	providerReq := &ImageGenerateRequest{
+	// 构建AI提供商请�?
+	providerReq := &providers.ImageGenerateRequest{
 		Prompt:         req.Prompt,
 		NegativePrompt: req.NegativePrompt,
 		Size:           req.Size,
 		Quality:        req.Quality,
 		Style:          req.Style,
-		N:              req.N,
+		Count:          req.Count,
 	}
 
-	// 设置默认值
+	// 设置默认�?
 	if providerReq.Size == "" {
 		providerReq.Size = "1024x1024"
 	}
 	if providerReq.Quality == "" {
 		providerReq.Quality = "standard"
 	}
-	if providerReq.N == 0 {
-		providerReq.N = 1
+	if providerReq.Count == 0 {
+		providerReq.Count = 1
 	}
 
-	// 调用AI提供商
-	response, err := s.aiProvider.GenerateImage(ctx, providerReq)
+	// 调用AI提供�?
+	response, err := s.aiProvider.GenerateImage(ctx, *providerReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate image: %w", err)
 	}
@@ -539,19 +537,19 @@ func (s *MultimodalService) GenerateImage(ctx context.Context, req *ImageGenerat
 }
 
 // AnalyzeImage 分析图像
-func (s *MultimodalService) AnalyzeImage(ctx context.Context, req *ImageAnalyzeRequest) (*ImageAnalyzeResponse, error) {
+func (s *MultimodalService) AnalyzeImage(ctx context.Context, req *providers.ImageAnalyzeRequest) (*providers.ImageAnalyzeResponse, error) {
 	// 验证请求
 	if err := s.validateImageAnalyzeRequest(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
-	// 预处理图像数据
+	// 预处理图像数�?
 	if err := s.preprocessImageData(req); err != nil {
 		return nil, fmt.Errorf("failed to preprocess image: %w", err)
 	}
 
-	// 构建AI提供商请求
-	providerReq := &ImageAnalyzeRequest{
+	// 构建AI提供商请�?
+	providerReq := &providers.ImageAnalyzeRequest{
 		ImageURL:  req.ImageURL,
 		ImageData: req.ImageData,
 		Prompt:    req.Prompt,
@@ -559,7 +557,7 @@ func (s *MultimodalService) AnalyzeImage(ctx context.Context, req *ImageAnalyzeR
 		Features:  req.Features,
 	}
 
-	// 设置默认值
+	// 设置默认�?
 	if providerReq.Detail == "" {
 		providerReq.Detail = "auto"
 	}
@@ -567,8 +565,8 @@ func (s *MultimodalService) AnalyzeImage(ctx context.Context, req *ImageAnalyzeR
 		providerReq.Prompt = "请详细描述这张图片的内容"
 	}
 
-	// 调用AI提供商
-	response, err := s.aiProvider.AnalyzeImage(ctx, providerReq)
+	// 调用AI提供�?
+	response, err := s.aiProvider.AnalyzeImage(ctx, *providerReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to analyze image: %w", err)
 	}
@@ -582,38 +580,38 @@ func (s *MultimodalService) AnalyzeImage(ctx context.Context, req *ImageAnalyzeR
 }
 
 // EditImage 编辑图像
-func (s *MultimodalService) EditImage(ctx context.Context, req *ImageEditRequest) (*ImageEditResponse, error) {
+func (s *MultimodalService) EditImage(ctx context.Context, req *providers.ImageEditRequest) (*providers.ImageEditResponse, error) {
 	// 验证请求
 	if err := s.validateImageEditRequest(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
-	// 预处理图像数据
+	// 预处理图像数�?
 	if err := s.preprocessImageEditData(req); err != nil {
 		return nil, fmt.Errorf("failed to preprocess image: %w", err)
 	}
 
-	// 构建AI提供商请求
-	providerReq := &ImageEditRequest{
+	// 构建AI提供商请�?
+	providerReq := &providers.ImageEditRequest{
 		ImageURL:  req.ImageURL,
 		ImageData: req.ImageData,
 		MaskURL:   req.MaskURL,
 		MaskData:  req.MaskData,
 		Prompt:    req.Prompt,
 		Size:      req.Size,
-		N:         req.N,
+		Count:     req.Count,
 	}
 
-	// 设置默认值
+	// 设置默认�?
 	if providerReq.Size == "" {
 		providerReq.Size = "1024x1024"
 	}
-	if providerReq.N == 0 {
-		providerReq.N = 1
+	if providerReq.Count == 0 {
+		providerReq.Count = 1
 	}
 
-	// 调用AI提供商
-	response, err := s.aiProvider.EditImage(ctx, providerReq)
+	// 调用AI提供�?
+	response, err := s.aiProvider.EditImage(ctx, *providerReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to edit image: %w", err)
 	}
@@ -627,11 +625,11 @@ func (s *MultimodalService) EditImage(ctx context.Context, req *ImageEditRequest
 }
 
 // 验证图像生成请求
-func (s *MultimodalService) validateImageGenerateRequest(req *ImageGenerateRequest) error {
+func (s *MultimodalService) validateImageGenerateRequest(req *providers.ImageGenerateRequest) error {
 	if req.Prompt == "" {
 		return fmt.Errorf("prompt is required")
 	}
-	
+
 	if len(req.Prompt) > 4000 {
 		return fmt.Errorf("prompt too long, maximum 4000 characters")
 	}
@@ -662,15 +660,15 @@ func (s *MultimodalService) validateImageGenerateRequest(req *ImageGenerateReque
 	}
 
 	// 验证数量
-	if req.N < 0 || req.N > 10 {
-		return fmt.Errorf("invalid n, must be between 1 and 10")
+	if req.Count < 0 || req.Count > 10 {
+		return fmt.Errorf("invalid count, must be between 1 and 10")
 	}
 
 	return nil
 }
 
 // 验证图像分析请求
-func (s *MultimodalService) validateImageAnalyzeRequest(req *ImageAnalyzeRequest) error {
+func (s *MultimodalService) validateImageAnalyzeRequest(req *providers.ImageAnalyzeRequest) error {
 	if req.ImageURL == "" && len(req.ImageData) == 0 {
 		return fmt.Errorf("either image_url or image_data is required")
 	}
@@ -693,7 +691,7 @@ func (s *MultimodalService) validateImageAnalyzeRequest(req *ImageAnalyzeRequest
 }
 
 // 验证图像编辑请求
-func (s *MultimodalService) validateImageEditRequest(req *ImageEditRequest) error {
+func (s *MultimodalService) validateImageEditRequest(req *providers.ImageEditRequest) error {
 	if req.ImageURL == "" && len(req.ImageData) == 0 {
 		return fmt.Errorf("either image_url or image_data is required")
 	}
@@ -732,24 +730,24 @@ func (s *MultimodalService) validateImageEditRequest(req *ImageEditRequest) erro
 	}
 
 	// 验证数量
-	if req.N < 0 || req.N > 10 {
-		return fmt.Errorf("invalid n, must be between 1 and 10")
+	if req.Count < 0 || req.Count > 10 {
+		return fmt.Errorf("invalid count, must be between 1 and 10")
 	}
 
 	return nil
 }
 
-// 预处理图像数据
-func (s *MultimodalService) preprocessImageData(req *ImageAnalyzeRequest) error {
+// 预处理图像数�?
+func (s *MultimodalService) preprocessImageData(req *providers.ImageAnalyzeRequest) error {
 	// 如果有图像数据，验证格式
 	if len(req.ImageData) > 0 {
-		// 检查图像格式
+		// 检查图像格�?
 		contentType := http.DetectContentType(req.ImageData)
 		if !strings.HasPrefix(contentType, "image/") {
 			return fmt.Errorf("invalid image format: %s", contentType)
 		}
 
-		// 支持的格式
+		// 支持的格�?
 		supportedTypes := []string{"image/jpeg", "image/png", "image/gif", "image/webp"}
 		supported := false
 		for _, t := range supportedTypes {
@@ -766,9 +764,9 @@ func (s *MultimodalService) preprocessImageData(req *ImageAnalyzeRequest) error 
 	return nil
 }
 
-// 预处理图像编辑数据
-func (s *MultimodalService) preprocessImageEditData(req *ImageEditRequest) error {
-	// 验证原图像格式
+// 预处理图像编辑数�?
+func (s *MultimodalService) preprocessImageEditData(req *providers.ImageEditRequest) error {
+	// 验证原图像格�?
 	if len(req.ImageData) > 0 {
 		contentType := http.DetectContentType(req.ImageData)
 		if contentType != "image/png" {
@@ -788,98 +786,21 @@ func (s *MultimodalService) preprocessImageEditData(req *ImageEditRequest) error
 }
 
 // 记录图像生成历史
-func (s *MultimodalService) logImageGeneration(ctx context.Context, userID, prompt string, response *ImageGenerateResponse) {
+func (s *MultimodalService) logImageGeneration(ctx context.Context, userID, prompt string, response *providers.ImageGenerateResponse) {
 	// TODO: 实现记录到数据库
-	// 可以记录用户ID、提示词、生成的图像URL、时间戳等
+	// 可以记录用户ID、提示词、生成的图像URL、时间戳�?
 }
 
 // 记录图像分析历史
-func (s *MultimodalService) logImageAnalysis(ctx context.Context, userID, prompt string, response *ImageAnalyzeResponse) {
+func (s *MultimodalService) logImageAnalysis(ctx context.Context, userID, prompt string, response *providers.ImageAnalyzeResponse) {
 	// TODO: 实现记录到数据库
-	// 可以记录用户ID、分析提示、分析结果、时间戳等
+	// 可以记录用户ID、分析提示、分析结果、时间戳�?
 }
 
 // 记录图像编辑历史
-func (s *MultimodalService) logImageEdit(ctx context.Context, userID, prompt string, response *ImageEditResponse) {
+func (s *MultimodalService) logImageEdit(ctx context.Context, userID, prompt string, response *providers.ImageEditResponse) {
 	// TODO: 实现记录到数据库
-	// 可以记录用户ID、编辑提示、编辑结果、时间戳等
+	// 可以记录用户ID、编辑提示、编辑结果、时间戳�?
 }
 
-// 图像处理相关类型定义
-type ImageGenerateRequest struct {
-	UserID         string            `json:"user_id,omitempty"`
-	Prompt         string            `json:"prompt" binding:"required"`
-	NegativePrompt string            `json:"negative_prompt,omitempty"`
-	Size           string            `json:"size,omitempty"`
-	Quality        string            `json:"quality,omitempty"`
-	Style          string            `json:"style,omitempty"`
-	N              int               `json:"n,omitempty"`
-	Metadata       map[string]string `json:"metadata,omitempty"`
-}
-
-type ImageGenerateResponse struct {
-	ID        string            `json:"id"`
-	Images    []GeneratedImage  `json:"images"`
-	CreatedAt time.Time         `json:"created_at"`
-	Metadata  map[string]string `json:"metadata,omitempty"`
-}
-
-type GeneratedImage struct {
-	URL           string `json:"url,omitempty"`
-	B64JSON       string `json:"b64_json,omitempty"`
-	RevisedPrompt string `json:"revised_prompt,omitempty"`
-}
-
-type ImageAnalyzeRequest struct {
-	UserID    string            `json:"user_id,omitempty"`
-	ImageURL  string            `json:"image_url,omitempty"`
-	ImageData []byte            `json:"image_data,omitempty"`
-	Prompt    string            `json:"prompt,omitempty"`
-	Detail    string            `json:"detail,omitempty"`
-	Features  []string          `json:"features,omitempty"`
-	Metadata  map[string]string `json:"metadata,omitempty"`
-}
-
-type ImageAnalyzeResponse struct {
-	ID          string            `json:"id"`
-	Description string            `json:"description"`
-	Objects     []DetectedObject  `json:"objects,omitempty"`
-	Text        string            `json:"text,omitempty"`
-	Tags        []string          `json:"tags,omitempty"`
-	Colors      []string          `json:"colors,omitempty"`
-	Confidence  float64           `json:"confidence"`
-	CreatedAt   time.Time         `json:"created_at"`
-	Metadata    map[string]string `json:"metadata,omitempty"`
-}
-
-type DetectedObject struct {
-	Name        string       `json:"name"`
-	Confidence  float64      `json:"confidence"`
-	BoundingBox *BoundingBox `json:"bounding_box,omitempty"`
-}
-
-type BoundingBox struct {
-	X      int `json:"x"`
-	Y      int `json:"y"`
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
-type ImageEditRequest struct {
-	UserID    string            `json:"user_id,omitempty"`
-	ImageURL  string            `json:"image_url,omitempty"`
-	ImageData []byte            `json:"image_data,omitempty"`
-	MaskURL   string            `json:"mask_url,omitempty"`
-	MaskData  []byte            `json:"mask_data,omitempty"`
-	Prompt    string            `json:"prompt" binding:"required"`
-	Size      string            `json:"size,omitempty"`
-	N         int               `json:"n,omitempty"`
-	Metadata  map[string]string `json:"metadata,omitempty"`
-}
-
-type ImageEditResponse struct {
-	ID        string            `json:"id"`
-	Images    []GeneratedImage  `json:"images"`
-	CreatedAt time.Time         `json:"created_at"`
-	Metadata  map[string]string `json:"metadata,omitempty"`
-}
+// 使用provider包中的类型定义，避免重复定义

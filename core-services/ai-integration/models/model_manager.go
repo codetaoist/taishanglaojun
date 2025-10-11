@@ -6,11 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
-// DefaultModelManager 默认模型管理器实现
+// DefaultModelManager 默认模型管理器实�?
 type DefaultModelManager struct {
 	models    map[string]AIModel
 	configs   map[string]*ModelConfig
@@ -22,7 +21,7 @@ type DefaultModelManager struct {
 	metricsMu sync.RWMutex
 }
 
-// NewDefaultModelManager 创建默认模型管理器
+// NewDefaultModelManager 创建默认模型管理�?
 func NewDefaultModelManager(registry ModelRegistry, factory ModelFactory, logger *zap.Logger) *DefaultModelManager {
 	return &DefaultModelManager{
 		models:   make(map[string]AIModel),
@@ -55,7 +54,7 @@ func (m *DefaultModelManager) LoadModel(ctx context.Context, config ModelConfig)
 		return fmt.Errorf("failed to create model: %w", err)
 	}
 
-	// 初始化模型
+	// 初始化模�?
 	if err := model.Initialize(ctx, config); err != nil {
 		return fmt.Errorf("failed to initialize model: %w", err)
 	}
@@ -71,11 +70,11 @@ func (m *DefaultModelManager) LoadModel(ctx context.Context, config ModelConfig)
 		return fmt.Errorf("failed to register model: %w", err)
 	}
 
-	// 保存模型和配置
+	// 保存模型和配�?
 	m.models[config.ID] = model
 	m.configs[config.ID] = &config
 
-	// 初始化指标
+	// 初始化指�?
 	m.metricsMu.Lock()
 	m.metrics[config.ID] = &ModelMetrics{
 		TotalRequests:     0,
@@ -110,7 +109,7 @@ func (m *DefaultModelManager) UnloadModel(ctx context.Context, modelID string) e
 			zap.Error(err))
 	}
 
-	// 从注册表中移除
+	// 从注册表中移�?
 	if err := m.registry.Unregister(modelID); err != nil {
 		m.logger.Warn("Failed to unregister model", 
 			zap.String("model_id", modelID), 
@@ -211,7 +210,7 @@ func (m *DefaultModelManager) BatchProcess(ctx context.Context, modelID string, 
 
 	// 并发处理
 	var wg sync.WaitGroup
-	semaphore := make(chan struct{}, 10) // 限制并发数
+	semaphore := make(chan struct{}, 10) // 限制并发�?
 
 	for i, input := range inputs {
 		wg.Add(1)
@@ -254,7 +253,7 @@ func (m *DefaultModelManager) StreamProcess(ctx context.Context, modelID string,
 		return nil, fmt.Errorf("model %s not found", modelID)
 	}
 
-	// 检查模型是否支持流式处理
+	// 检查模型是否支持流式处�?
 	capabilities := model.GetCapabilities()
 	if !capabilities.SupportsStreaming {
 		return nil, fmt.Errorf("model %s does not support streaming", modelID)
@@ -266,11 +265,11 @@ func (m *DefaultModelManager) StreamProcess(ctx context.Context, modelID string,
 	go func() {
 		defer close(outputChan)
 
-		// 这里应该调用模型的流式处理方法
+		// 这里应该调用模型的流式处理方�?
 		// 由于接口中没有定义，这里模拟实现
 		output, err := model.Process(ctx, input)
 		if err != nil {
-			// 发送错误
+			// 发送错�?
 			outputChan <- &ModelOutput{
 				Error: &ModelError{
 					Code:    "PROCESSING_ERROR",
@@ -301,7 +300,7 @@ func (m *DefaultModelManager) GetModelMetrics(modelID string) (*ModelMetrics, er
 	return &metricsCopy, nil
 }
 
-// GetAllMetrics 获取所有模型指标
+// GetAllMetrics 获取所有模型指�?
 func (m *DefaultModelManager) GetAllMetrics() (map[string]*ModelMetrics, error) {
 	m.metricsMu.RLock()
 	defer m.metricsMu.RUnlock()
@@ -315,7 +314,7 @@ func (m *DefaultModelManager) GetAllMetrics() (map[string]*ModelMetrics, error) 
 	return result, nil
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (m *DefaultModelManager) HealthCheck(ctx context.Context, modelID string) error {
 	m.mutex.RLock()
 	model, exists := m.models[modelID]
@@ -327,7 +326,7 @@ func (m *DefaultModelManager) HealthCheck(ctx context.Context, modelID string) e
 
 	err := model.HealthCheck(ctx)
 	
-	// 更新健康检查时间
+	// 更新健康检查时�?
 	m.updateMetrics(modelID, func(metrics *ModelMetrics) {
 		metrics.LastHealthCheck = time.Now()
 	})
@@ -345,7 +344,7 @@ func (m *DefaultModelManager) UpdateModelConfig(modelID string, config ModelConf
 		return fmt.Errorf("model %s not found", modelID)
 	}
 
-	// 验证新配置
+	// 验证新配�?
 	if err := config.Validate(); err != nil {
 		return fmt.Errorf("invalid config: %w", err)
 	}
@@ -377,7 +376,7 @@ func (m *DefaultModelManager) GetModelConfig(modelID string) (*ModelConfig, erro
 	return &configCopy, nil
 }
 
-// ListModels 列出所有模型
+// ListModels 列出所有模�?
 func (m *DefaultModelManager) ListModels() ([]*ModelConfig, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
@@ -391,7 +390,7 @@ func (m *DefaultModelManager) ListModels() ([]*ModelConfig, error) {
 	return configs, nil
 }
 
-// updateMetrics 更新指标的辅助方法
+// updateMetrics 更新指标的辅助方�?
 func (m *DefaultModelManager) updateMetrics(modelID string, updateFunc func(*ModelMetrics)) {
 	m.metricsMu.Lock()
 	defer m.metricsMu.Unlock()
@@ -426,7 +425,7 @@ func (m *DefaultModelManager) collectMetrics(ctx context.Context) {
 	m.mutex.RUnlock()
 
 	for modelID, model := range models {
-		// 执行健康检查
+		// 执行健康检�?
 		if err := model.HealthCheck(ctx); err != nil {
 			m.logger.Warn("Model health check failed", 
 				zap.String("model_id", modelID), 

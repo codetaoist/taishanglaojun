@@ -61,7 +61,6 @@ import moment from 'moment';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
-const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
 
 interface HealthRecord {
@@ -677,132 +676,151 @@ const HealthRecords: React.FC = () => {
       </Card>
 
       {/* 主要内容 */}
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="健康记录" key="records">
-          {/* 筛选和操作栏 */}
-          <Card style={{ marginBottom: '16px' }}>
-            <Row justify="space-between" align="middle">
-              <Col>
-                <Space>
-                  <Select
-                    value={selectedType}
-                    onChange={setSelectedType}
-                    style={{ width: 150 }}
-                    placeholder="选择类型"
-                  >
-                    {recordTypes.map(type => (
-                      <Select.Option key={type.key} value={type.key}>
-                        <Space>
-                          {type.icon}
-                          {type.name}
-                        </Space>
-                      </Select.Option>
-                    ))}
-                  </Select>
-                  
-                  <RangePicker
-                    value={dateRange}
-                    onChange={setDateRange}
-                    placeholder={['开始日期', '结束日期']}
+      <Tabs 
+        activeKey={activeTab} 
+        onChange={setActiveTab}
+        items={[
+          {
+            key: 'records',
+            label: '健康记录',
+            children: (
+              <>
+                {/* 筛选和操作栏 */}
+                <Card style={{ marginBottom: '16px' }}>
+                  <Row justify="space-between" align="middle">
+                    <Col>
+                      <Space>
+                        <Select
+                          value={selectedType}
+                          onChange={setSelectedType}
+                          style={{ width: 150 }}
+                          placeholder="选择类型"
+                        >
+                          {recordTypes.map(type => (
+                            <Select.Option key={type.key} value={type.key}>
+                              <Space>
+                                {type.icon}
+                                {type.name}
+                              </Space>
+                            </Select.Option>
+                          ))}
+                        </Select>
+                        
+                        <RangePicker
+                          value={dateRange}
+                          onChange={setDateRange}
+                          placeholder={['开始日期', '结束日期']}
+                        />
+                      </Space>
+                    </Col>
+                    <Col>
+                      <Space>
+                        <Button icon={<PlusOutlined />} type="primary" onClick={() => setRecordModalVisible(true)}>
+                          添加记录
+                        </Button>
+                        <Button icon={<UploadOutlined />}>
+                          导入记录
+                        </Button>
+                        <Button icon={<DownloadOutlined />}>
+                          导出记录
+                        </Button>
+                      </Space>
+                    </Col>
+                  </Row>
+                </Card>
+
+                {/* 记录表格 */}
+                <Card>
+                  <Table
+                    columns={recordColumns}
+                    dataSource={filteredRecords}
+                    rowKey="id"
+                    loading={loading}
+                    pagination={{
+                      pageSize: 10,
+                      showSizeChanger: true,
+                      showQuickJumper: true,
+                      showTotal: (total) => `共 ${total} 条记录`
+                    }}
                   />
-                </Space>
-              </Col>
-              <Col>
-                <Space>
-                  <Button icon={<PlusOutlined />} type="primary" onClick={() => setRecordModalVisible(true)}>
-                    添加记录
-                  </Button>
-                  <Button icon={<UploadOutlined />}>
-                    导入记录
-                  </Button>
-                  <Button icon={<DownloadOutlined />}>
-                    导出记录
-                  </Button>
-                </Space>
-              </Col>
-            </Row>
-          </Card>
-
-          {/* 记录表格 */}
-          <Card>
-            <Table
-              columns={recordColumns}
-              dataSource={filteredRecords}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`
-              }}
-            />
-          </Card>
-        </TabPane>
-
-        <TabPane tab="生命体征" key="vitals">
-          <Card title="最新生命体征">
-            {renderVitalSigns()}
-          </Card>
-        </TabPane>
-
-        <TabPane tab="检验结果" key="lab_results">
-          <Card>
-            <Table
-              columns={labColumns}
-              dataSource={labResults}
-              rowKey="id"
-              loading={loading}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: (total) => `共 ${total} 条结果`
-              }}
-            />
-          </Card>
-        </TabPane>
-
-        <TabPane tab="健康时间线" key="timeline">
-          <Card>
-            <Timeline mode="left">
-              {healthRecords
-                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                .map(record => {
-                  const typeInfo = recordTypes.find(t => t.key === record.type);
-                  return (
-                    <Timeline.Item
-                      key={record.id}
-                      color={typeInfo?.color}
-                      dot={typeInfo?.icon}
-                      label={moment(record.date).format('YYYY-MM-DD')}
-                    >
-                      <Card size="small" style={{ marginBottom: '8px' }}>
-                        <Space direction="vertical" style={{ width: '100%' }}>
-                          <div>
-                            <Text strong>{record.title}</Text>
-                            {record.isImportant && <StarOutlined style={{ color: '#faad14', marginLeft: '8px' }} />}
-                          </div>
-                          <Text type="secondary">{record.description}</Text>
-                          {record.hospital && (
-                            <Text type="secondary">
-                              <MedicineBoxOutlined /> {record.hospital}
-                              {record.doctor && ` - ${record.doctor}`}
-                            </Text>
-                          )}
-                          <Space wrap>
-                            {record.tags.map((tag, index) => (
-                              <Tag key={index} size="small">{tag}</Tag>
-                            ))}
-                          </Space>
-                        </Space>
-                      </Card>
-                    </Timeline.Item>
-                  );
-                })}
-            </Timeline>
-          </Card>
-        </TabPane>
-      </Tabs>
+                </Card>
+              </>
+            )
+          },
+          {
+            key: 'vitals',
+            label: '生命体征',
+            children: (
+              <Card title="最新生命体征">
+                {renderVitalSigns()}
+              </Card>
+            )
+          },
+          {
+            key: 'lab_results',
+            label: '检验结果',
+            children: (
+              <Card>
+                <Table
+                  columns={labColumns}
+                  dataSource={labResults}
+                  rowKey="id"
+                  loading={loading}
+                  pagination={{
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `共 ${total} 条结果`
+                  }}
+                />
+              </Card>
+            )
+          },
+          {
+            key: 'timeline',
+            label: '健康时间线',
+            children: (
+              <Card>
+                <Timeline mode="left">
+                  {healthRecords
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map(record => {
+                      const typeInfo = recordTypes.find(t => t.key === record.type);
+                      return (
+                        <Timeline.Item
+                          key={record.id}
+                          color={typeInfo?.color}
+                          dot={typeInfo?.icon}
+                          label={moment(record.date).format('YYYY-MM-DD')}
+                        >
+                          <Card size="small" style={{ marginBottom: '8px' }}>
+                            <Space direction="vertical" style={{ width: '100%' }}>
+                              <div>
+                                <Text strong>{record.title}</Text>
+                                {record.isImportant && <StarOutlined style={{ color: '#faad14', marginLeft: '8px' }} />}
+                              </div>
+                              <Text type="secondary">{record.description}</Text>
+                              {record.hospital && (
+                                <Text type="secondary">
+                                  <MedicineBoxOutlined /> {record.hospital}
+                                  {record.doctor && ` - ${record.doctor}`}
+                                </Text>
+                              )}
+                              <Space wrap>
+                                {record.tags.map((tag, index) => (
+                                  <Tag key={index} size="small">{tag}</Tag>
+                                ))}
+                              </Space>
+                            </Space>
+                          </Card>
+                        </Timeline.Item>
+                      );
+                    })}
+                </Timeline>
+              </Card>
+            )
+          }
+        ]}
+      />
 
       {/* 添加/编辑记录模态框 */}
       <Modal

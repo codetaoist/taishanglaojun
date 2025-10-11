@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/taishanglaojun/core-services/ai-integration/nlp"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/nlp"
 	"go.uber.org/zap"
 )
 
-// OpenAINLPProvider OpenAI NLP服务提供商
+// OpenAINLPProvider OpenAI NLP服务提供�?
 type OpenAINLPProvider struct {
 	config     OpenAINLPConfig
 	httpClient *http.Client
@@ -78,7 +78,7 @@ type OpenAIUsage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-// NewOpenAINLPProvider 创建OpenAI NLP提供商
+// NewOpenAINLPProvider 创建OpenAI NLP提供�?
 func NewOpenAINLPProvider(config OpenAINLPConfig, logger *zap.Logger) *OpenAINLPProvider {
 	if config.BaseURL == "" {
 		config.BaseURL = "https://api.openai.com/v1"
@@ -118,13 +118,25 @@ func (p *OpenAINLPProvider) TokenizeText(ctx context.Context, input nlp.TextInpu
 	}
 
 	// 解析响应
-	tokens := strings.Fields(response) // 简化实现
+	tokenStrings := strings.Fields(response) // 简化实�?
+	
+	// 转换为Token结构�?
+	tokens := make([]nlp.Token, len(tokenStrings))
+	for i, tokenStr := range tokenStrings {
+		tokens[i] = nlp.Token{
+			ID:   fmt.Sprintf("token_%d", i),
+			Text: tokenStr,
+			POS:  "UNKNOWN", // 简化实�?
+			Start: 0,        // 简化实�?
+			End:   len(tokenStr),
+		}
+	}
 	
 	return &nlp.TokenizationResult{
 		ID:          input.ID,
+		RequestID:   input.ID,
 		Tokens:      tokens,
 		TotalTokens: len(tokens),
-		Language:    input.Language,
 		Metadata:    make(map[string]interface{}),
 	}, nil
 }
@@ -144,15 +156,10 @@ Text: %s`, input.Text)
 	
 	return &nlp.SentimentAnalysisResult{
 		ID:               input.ID,
+		RequestID:        input.ID,
 		OverallSentiment: sentiment,
-		Confidence:       0.85, // 简化实现
-		DetailedScores: nlp.SentimentScores{
-			Positive: 0.7,
-			Negative: 0.2,
-			Neutral:  0.1,
-		},
-		Language: input.Language,
-		Metadata: make(map[string]interface{}),
+		Confidence:       0.85, // 简化实�?
+		Metadata:         make(map[string]interface{}),
 	}, nil
 }
 
@@ -171,9 +178,9 @@ Text: %s`, input.Text)
 	
 	return &nlp.EntityExtractionResult{
 		ID:            input.ID,
+		RequestID:     input.ID,
 		Entities:      entities,
 		TotalEntities: len(entities),
-		Language:      input.Language,
 		Metadata:      make(map[string]interface{}),
 	}, nil
 }
@@ -191,11 +198,16 @@ Text: %s`, input.Text)
 	// 简化的分类结果解析
 	categories := p.parseCategories(response)
 	
+	var topCategory nlp.Category
+	if len(categories) > 0 {
+		topCategory = categories[0] // 假设第一个是最高分
+	}
+	
 	return &nlp.TextClassificationResult{
 		ID:          input.ID,
+		RequestID:   input.ID,
 		Categories:  categories,
-		TopCategory: categories[0], // 假设第一个是最高分
-		Language:    input.Language,
+		TopCategory: topCategory,
 		Metadata:    make(map[string]interface{}),
 	}, nil
 }
@@ -205,7 +217,7 @@ func (p *OpenAINLPProvider) AnalyzeSemantics(ctx context.Context, input nlp.Text
 	prompt := fmt.Sprintf(`Perform semantic analysis on the following text and provide complexity, coherence, and semantic relationships:
 Text: %s`, input.Text)
 	
-	response, err := p.callOpenAI(ctx, prompt)
+	_, err := p.callOpenAI(ctx, prompt)
 	if err != nil {
 		return nil, err
 	}
@@ -213,17 +225,16 @@ Text: %s`, input.Text)
 	// 简化的语义分析结果
 	return &nlp.SemanticAnalysisResult{
 		ID:         input.ID,
+		RequestID:  input.ID,
 		Complexity: 0.6,
 		Coherence:  0.8,
-		Topics:     []string{"general", "informative"},
-		Concepts:   []nlp.Concept{{Name: "main_concept", Confidence: 0.9}},
-		Relations:  []nlp.SemanticRelation{{Subject: "text", Predicate: "contains", Object: "information"}},
-		Language:   input.Language,
+		Concepts:   []nlp.Concept{{ID: "concept_1", Text: "main_concept", Type: "general", Confidence: 0.9}},
+		Relations:  []nlp.Relation{{ID: "relation_1", Subject: "text", Predicate: "contains", Object: "information", Confidence: 0.8}},
 		Metadata:   make(map[string]interface{}),
 	}, nil
 }
 
-// ExtractKeywords 关键词提取
+// ExtractKeywords 关键词提�?
 func (p *OpenAINLPProvider) ExtractKeywords(ctx context.Context, input nlp.TextInput) (*nlp.KeywordExtractionResult, error) {
 	prompt := fmt.Sprintf(`Extract the most important keywords from the following text with relevance scores:
 Text: %s`, input.Text)
@@ -233,14 +244,14 @@ Text: %s`, input.Text)
 		return nil, err
 	}
 
-	// 简化的关键词提取结果
+	// 简化的关键词提取结�?
 	keywords := p.parseKeywords(response)
 	
 	return &nlp.KeywordExtractionResult{
 		ID:            input.ID,
+		RequestID:     input.ID,
 		Keywords:      keywords,
 		TotalKeywords: len(keywords),
-		Language:      input.Language,
 		Metadata:      make(map[string]interface{}),
 	}, nil
 }
@@ -257,11 +268,10 @@ Text: %s`, input.Text)
 
 	return &nlp.TextSummarizationResult{
 		ID:               input.ID,
+		RequestID:        input.ID,
 		Summary:          summary,
 		CompressionRatio: float64(len(summary)) / float64(len(input.Text)),
 		Relevance:        0.9,
-		KeyPoints:        []string{summary}, // 简化实现
-		Language:         input.Language,
 		Metadata:         make(map[string]interface{}),
 	}, nil
 }
@@ -281,10 +291,10 @@ Text: %s`, input.Text)
 	
 	return &nlp.IntentAnalysisResult{
 		ID:         input.ID,
+		RequestID:  input.ID,
 		Intent:     intent,
 		Confidence: 0.85,
-		Entities:   []nlp.IntentEntity{},
-		Language:   input.Language,
+		Entities:   []nlp.Entity{},
 		Metadata:   make(map[string]interface{}),
 	}, nil
 }
@@ -292,9 +302,6 @@ Text: %s`, input.Text)
 // GenerateText 文本生成
 func (p *OpenAINLPProvider) GenerateText(ctx context.Context, input nlp.TextGenerationInput) (*nlp.TextGenerationResult, error) {
 	prompt := input.Prompt
-	if input.Context != "" {
-		prompt = fmt.Sprintf("Context: %s\nPrompt: %s", input.Context, input.Prompt)
-	}
 	
 	generatedText, err := p.callOpenAI(ctx, prompt)
 	if err != nil {
@@ -303,11 +310,11 @@ func (p *OpenAINLPProvider) GenerateText(ctx context.Context, input nlp.TextGene
 
 	return &nlp.TextGenerationResult{
 		ID:            input.ID,
+		RequestID:     input.ID,
 		GeneratedText: generatedText,
+		Alternatives:  []string{},
 		Quality:       0.9,
-		Creativity:    0.8,
 		Coherence:     0.9,
-		Language:      input.Language,
 		Metadata:      make(map[string]interface{}),
 	}, nil
 }
@@ -324,11 +331,13 @@ Text: %s`, input.SourceLang, input.TargetLang, input.Text)
 
 	return &nlp.TranslationResult{
 		ID:             input.ID,
+		RequestID:      input.ID,
 		TranslatedText: translatedText,
-		SourceLang:     input.SourceLang,
-		TargetLang:     input.TargetLang,
 		Confidence:     0.9,
 		Alternatives:   []string{},
+		Quality:        0.9,
+		ProcessingTime: 0,
+		Timestamp:      time.Now(),
 		Metadata:       make(map[string]interface{}),
 	}, nil
 }
@@ -344,15 +353,18 @@ Text: %s`, input.Text)
 	}
 
 	// 简化的改写结果
-	paraphrases := []string{response} // 实际中应该解析多个改写版本
+	paraphrases := []string{response} // 实际中应该解析多个改写版�?
 	
 	return &nlp.ParaphraseResult{
-		ID:           input.ID,
-		Paraphrases:  paraphrases,
-		Similarity:   0.85,
-		Diversity:    0.7,
-		Language:     input.Language,
-		Metadata:     make(map[string]interface{}),
+		ID:             input.ID,
+		RequestID:      input.ID,
+		Paraphrases:    paraphrases,
+		BestParaphrase: response,
+		Similarity:     0.85,
+		Quality:        0.9,
+		ProcessingTime: 0,
+		Timestamp:      time.Now(),
+		Metadata:       make(map[string]interface{}),
 	}, nil
 }
 
@@ -360,10 +372,10 @@ Text: %s`, input.Text)
 func (p *OpenAINLPProvider) ProcessConversation(ctx context.Context, input nlp.ConversationInput) (*nlp.ConversationResult, error) {
 	// 构建对话历史
 	messages := make([]OpenAIMessage, 0)
-	for _, msg := range input.History {
+	for _, turn := range input.Context {
 		messages = append(messages, OpenAIMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
+			Role:    turn.Role,
+			Content: turn.Message,
 		})
 	}
 	
@@ -379,14 +391,17 @@ func (p *OpenAINLPProvider) ProcessConversation(ctx context.Context, input nlp.C
 	}
 
 	return &nlp.ConversationResult{
-		ID:         input.ID,
-		Response:   response,
-		Confidence: 0.9,
-		Intent:     nlp.Intent{Name: "conversation", Confidence: 0.8},
-		Entities:   []nlp.IntentEntity{},
-		Context:    make(map[string]interface{}),
-		Language:   input.Language,
-		Metadata:   make(map[string]interface{}),
+		ID:             input.ID,
+		RequestID:      input.ID,
+		Response:       response,
+		Intent:         nlp.Intent{Name: "conversation", Confidence: 0.8},
+		Entities:       []nlp.Entity{},
+		Sentiment:      nlp.Sentiment{Label: "neutral", Score: 0.5},
+		Confidence:     0.9,
+		NextActions:    []string{},
+		ProcessingTime: 0,
+		Timestamp:      time.Now(),
+		Metadata:       make(map[string]interface{}),
 	}, nil
 }
 
@@ -402,12 +417,15 @@ Question: %s`, input.Context, input.Question)
 	}
 
 	return &nlp.QuestionAnsweringResult{
-		ID:         input.ID,
-		Answer:     answer,
-		Confidence: 0.9,
-		Sources:    []nlp.AnswerSource{{Text: input.Context, Confidence: 0.9}},
-		Language:   input.Language,
-		Metadata:   make(map[string]interface{}),
+		ID:             input.ID,
+		RequestID:      input.ID,
+		Answer:         answer,
+		Alternatives:   []nlp.Answer{},
+		Confidence:     0.9,
+		Sources:        []nlp.Source{{ID: "1", DocumentID: "doc1", Title: "Context", Snippet: input.Context, Relevance: 0.9, URL: ""}},
+		ProcessingTime: time.Since(time.Now()),
+		Timestamp:      time.Now(),
+		Metadata:       make(map[string]interface{}),
 	}, nil
 }
 
@@ -425,7 +443,7 @@ func (p *OpenAINLPProvider) GetSupportedLanguages() []nlp.Language {
 	}
 }
 
-// GetSupportedOperations 获取支持的操作
+// GetSupportedOperations 获取支持的操�?
 func (p *OpenAINLPProvider) GetSupportedOperations() []nlp.OperationType {
 	return []nlp.OperationType{
 		nlp.OpTokenization,
@@ -444,7 +462,7 @@ func (p *OpenAINLPProvider) GetSupportedOperations() []nlp.OperationType {
 	}
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (p *OpenAINLPProvider) HealthCheck(ctx context.Context) error {
 	_, err := p.callOpenAI(ctx, "Hello")
 	return err
@@ -517,20 +535,22 @@ func (p *OpenAINLPProvider) parseSentiment(response string) nlp.Sentiment {
 }
 
 func (p *OpenAINLPProvider) parseEntities(response, text string) []nlp.Entity {
-	// 简化实现 - 实际中需要更复杂的解析
+	// 简化实�?- 实际中需要更复杂的解�?
 	return []nlp.Entity{
 		{
+			ID:         "1",
 			Text:       "example",
-			Type:       "MISC",
-			StartIndex: 0,
-			EndIndex:   7,
+			Label:      "MISC",
+			Start:      0,
+			End:        7,
 			Confidence: 0.9,
+			Properties: make(map[string]interface{}),
 		},
 	}
 }
 
 func (p *OpenAINLPProvider) parseCategories(response string) []nlp.Category {
-	// 简化实现
+	// 简化实�?
 	return []nlp.Category{
 		{Name: "general", Confidence: 0.8},
 		{Name: "informative", Confidence: 0.6},
@@ -538,27 +558,32 @@ func (p *OpenAINLPProvider) parseCategories(response string) []nlp.Category {
 }
 
 func (p *OpenAINLPProvider) parseKeywords(response string) []nlp.Keyword {
-	// 简化实现
+	// 简化实�?
 	words := strings.Fields(response)
 	keywords := make([]nlp.Keyword, 0)
 	for i, word := range words {
-		if i >= 5 { // 限制关键词数量
+		if i >= 5 { // 限制关键词数�?
 			break
 		}
 		keywords = append(keywords, nlp.Keyword{
-			Text:      word,
-			Relevance: 0.8 - float64(i)*0.1,
-			Type:      "general",
+			ID:         fmt.Sprintf("kw_%d", i),
+			Text:       word,
+			Score:      0.8 - float64(i)*0.1,
+			Frequency:  1,
+			Relevance:  0.8 - float64(i)*0.1,
+			Properties: make(map[string]interface{}),
 		})
 	}
 	return keywords
 }
 
 func (p *OpenAINLPProvider) parseIntent(response string) nlp.Intent {
-	// 简化实现
+	// 简化实�?
 	return nlp.Intent{
+		ID:          "intent_1",
 		Name:        "general_inquiry",
+		Category:    "general",
 		Confidence:  0.8,
-		Description: "General information request",
+		Parameters:  make(map[string]interface{}),
 	}
 }

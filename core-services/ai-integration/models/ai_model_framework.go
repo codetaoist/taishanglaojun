@@ -23,7 +23,7 @@ const (
 	ModelTypeGenerator   ModelType = "generator"
 )
 
-// ModelProvider 模型提供商
+// ModelProvider 模型提供�?
 type ModelProvider string
 
 const (
@@ -37,7 +37,7 @@ const (
 	ProviderLocal      ModelProvider = "local"
 )
 
-// ModelStatus 模型状态
+// ModelStatus 模型状�?
 type ModelStatus string
 
 const (
@@ -195,7 +195,7 @@ type ResourceUsage struct {
 	NetworkIO   int64   `json:"network_io"`
 }
 
-// ModelRegistry 模型注册表接口
+// ModelRegistry 模型注册表接�?
 type ModelRegistry interface {
 	Register(model AIModel) error
 	Unregister(modelID string) error
@@ -207,7 +207,7 @@ type ModelRegistry interface {
 	GetModelConfig(modelID string) (*ModelConfig, error)
 }
 
-// ModelManager 模型管理器接口
+// ModelManager 模型管理器接�?
 type ModelManager interface {
 	// 模型生命周期管理
 	LoadModel(ctx context.Context, config ModelConfig) error
@@ -268,7 +268,7 @@ func (m *BaseModel) GetType() ModelType {
 	return m.Type
 }
 
-// GetProvider 获取模型提供商
+// GetProvider 获取模型提供�?
 func (m *BaseModel) GetProvider() ModelProvider {
 	return m.Provider
 }
@@ -278,7 +278,7 @@ func (m *BaseModel) GetVersion() string {
 	return m.Version
 }
 
-// GetStatus 获取模型状态
+// GetStatus 获取模型状�?
 func (m *BaseModel) GetStatus() ModelStatus {
 	return m.Status
 }

@@ -1,0 +1,505 @@
+# 太上老君AI平台多区域Kubernetes集群配置
+
+# 亚太区域主集群 (香港)
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taishanglaojun-ap-east-1
+  labels:
+    region: ap-east-1
+    environment: production
+    compliance: pdpo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: taishanglaojun-ap-east-1
+  labels:
+    app: api-gateway
+    region: ap-east-1
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        region: ap-east-1
+    spec:
+      containers:
+      - name: api-gateway
+        image: taishanglaojun/api-gateway:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: REGION
+          value: "ap-east-1"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        node.kubernetes.io/instance-type: c5.2xlarge
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-service
+  namespace: taishanglaojun-ap-east-1
+spec:
+  selector:
+    app: api-gateway
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+---
+# 水平自动扩缩器
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-gateway-hpa
+  namespace: taishanglaojun-ap-east-1
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-gateway
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+---
+# AI服务部署
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+  namespace: taishanglaojun-ap-east-1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+        region: ap-east-1
+    spec:
+      containers:
+      - name: ai-service
+        image: taishanglaojun/ai-service:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: REGION
+          value: "ap-east-1"
+        - name: MODEL_PATH
+          value: "/models"
+        - name: GPU_ENABLED
+          value: "true"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+            nvidia.com/gpu: 1
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: ai-model-pvc
+      nodeSelector:
+        accelerator: nvidia-tesla-v100
+---
+# 持久化存储声明
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-model-pvc
+  namespace: taishanglaojun-ap-east-1
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: gp3-encrypted
+---
+# 数据库配置
+apiVersion: v1
+kind: Secret
+metadata:
+  name: database-secret
+  namespace: taishanglaojun-ap-east-1
+type: Opaque
+data:
+  url: cG9zdGdyZXNxbDovL3VzZXI6cGFzc3dvcmRAcG9zdGdyZXMtYXAtZWFzdC0xOjU0MzIvdGFpc2hhbmdsYW9qdW4=
+  username: dXNlcg==
+  password: cGFzc3dvcmQ=
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: taishanglaojun-ap-east-1
+type: Opaque
+data:
+  url: cmVkaXM6Ly9yZWRpcy1hcC1lYXN0LTE6NjM3OS8w
+---
+# 配置映射
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: taishanglaojun-ap-east-1
+data:
+  region: "ap-east-1"
+  timezone: "Asia/Hong_Kong"
+  currency: "HKD"
+  language: "zh-CN"
+  compliance: "PDPO"
+  log_level: "INFO"
+  max_request_size: "10MB"
+  rate_limit: "1000"
+---
+# 网络策略
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: taishanglaojun-ap-east-1
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-gateway
+  namespace: taishanglaojun-ap-east-1
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: ai-service
+    ports:
+    - protocol: TCP
+      port: 8081
+  - to:
+    - podSelector:
+        matchLabels:
+          app: user-service
+    ports:
+    - protocol: TCP
+      port: 8082
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+---
+# 服务监控
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: api-gateway-monitor
+  namespace: taishanglaojun-ap-east-1
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+---
+# Ingress配置
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+  namespace: taishanglaojun-ap-east-1
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - api-ap-east-1.taishanglaojun.com
+    secretName: api-tls-secret
+  rules:
+  - host: api-ap-east-1.taishanglaojun.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway-service
+            port:
+              number: 80
+---
+# 欧洲区域集群配置 (爱尔兰)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taishanglaojun-eu-west-1
+  labels:
+    region: eu-west-1
+    environment: production
+    compliance: gdpr
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: taishanglaojun-eu-west-1
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        region: eu-west-1
+    spec:
+      containers:
+      - name: api-gateway
+        image: taishanglaojun/api-gateway:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: REGION
+          value: "eu-west-1"
+        - name: TIMEZONE
+          value: "Europe/Dublin"
+        - name: CURRENCY
+          value: "EUR"
+        - name: COMPLIANCE_MODE
+          value: "GDPR"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        node.kubernetes.io/instance-type: c5.2xlarge
+---
+# 北美区域集群配置 (弗吉尼亚)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taishanglaojun-us-east-1
+  labels:
+    region: us-east-1
+    environment: production
+    compliance: ccpa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: taishanglaojun-us-east-1
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        region: us-east-1
+    spec:
+      containers:
+      - name: api-gateway
+        image: taishanglaojun/api-gateway:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: REGION
+          value: "us-east-1"
+        - name: TIMEZONE
+          value: "America/New_York"
+        - name: CURRENCY
+          value: "USD"
+        - name: COMPLIANCE_MODE
+          value: "CCPA"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        node.kubernetes.io/instance-type: c5.2xlarge
+---
+# 集群间通信配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cross-region-config
+data:
+  regions.yaml: |
+    regions:
+      ap-east-1:
+        endpoint: "https://api-ap-east-1.taishanglaojun.com"
+        weight: 30
+        latency_threshold: 50
+      eu-west-1:
+        endpoint: "https://api-eu-west-1.taishanglaojun.com"
+        weight: 25
+        latency_threshold: 60
+      us-east-1:
+        endpoint: "https://api-us-east-1.taishanglaojun.com"
+        weight: 45
+        latency_threshold: 70
+    
+    failover:
+      enabled: true
+      timeout: 30s
+      retries: 3
+      circuit_breaker:
+        failure_threshold: 5
+        recovery_timeout: 60s
+---
+# 全局服务发现
+apiVersion: v1
+kind: Service
+metadata:
+  name: global-discovery
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  clusterIP: None
+  ports:
+  - port: 8080
+    name: http
+  selector:
+    app: api-gateway
+---
+# 跨区域数据同步作业
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cross-region-sync
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: sync-job
+            image: taishanglaojun/data-sync:latest
+            env:
+            - name: SOURCE_REGION
+              value: "ap-east-1"
+            - name: TARGET_REGIONS
+              value: "eu-west-1,us-east-1"
+            - name: SYNC_TYPE
+              value: "incremental"
+          restartPolicy: OnFailure

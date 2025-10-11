@@ -13,7 +13,7 @@ import (
 // RequestIDKey 请求ID上下文键
 type RequestIDKey struct{}
 
-// LoggingMiddleware 日志中间件
+// LoggingMiddleware 日志中间�?
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -37,7 +37,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// RecoveryMiddleware 恢复中间件
+// RecoveryMiddleware 恢复中间�?
 func RecoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -51,7 +51,7 @@ func RecoveryMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// RequestIDMiddleware 请求ID中间件
+// RequestIDMiddleware 请求ID中间�?
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 生成请求ID
@@ -68,18 +68,18 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// AuthMiddleware 认证中间件
+// AuthMiddleware 认证中间�?
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 获取Authorization头
+		// 获取Authorization�?
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			http.Error(w, "Authorization header required", http.StatusUnauthorized)
 			return
 		}
 
-		// 这里应该验证JWT token或其他认证方式
-		// 为了演示，我们简单检查是否以"Bearer "开头
+		// 这里应该验证JWT token或其他认证方�?
+		// 为了演示，我们简单检查是否以"Bearer "开�?
 		if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
 			http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
 			return
@@ -101,10 +101,10 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// CORSMiddleware CORS中间件
+// CORSMiddleware CORS中间�?
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 设置CORS头
+		// 设置CORS�?
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
@@ -120,7 +120,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// RateLimitMiddleware 限流中间件
+// RateLimitMiddleware 限流中间�?
 func RateLimitMiddleware(requestsPerMinute int) func(http.Handler) http.Handler {
 	// 简单的内存限流器（生产环境应使用Redis等）
 	clients := make(map[string][]time.Time)
@@ -132,7 +132,7 @@ func RateLimitMiddleware(requestsPerMinute int) func(http.Handler) http.Handler 
 			now := time.Now()
 			windowStart := now.Add(-time.Minute)
 
-			// 清理过期的请求记录
+			// 清理过期的请求记�?
 			if requests, exists := clients[clientIP]; exists {
 				validRequests := make([]time.Time, 0)
 				for _, reqTime := range requests {
@@ -143,7 +143,7 @@ func RateLimitMiddleware(requestsPerMinute int) func(http.Handler) http.Handler 
 				clients[clientIP] = validRequests
 			}
 
-			// 检查是否超过限制
+			// 检查是否超过限�?
 			if len(clients[clientIP]) >= requestsPerMinute {
 				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 				return
@@ -157,7 +157,7 @@ func RateLimitMiddleware(requestsPerMinute int) func(http.Handler) http.Handler 
 	}
 }
 
-// ValidationMiddleware 验证中间件
+// ValidationMiddleware 验证中间�?
 func ValidationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 检查Content-Type

@@ -11,14 +11,14 @@ import (
 	"task-management/internal/interfaces/http/middleware"
 )
 
-// Router HTTP路由器
+// Router HTTP路由�?
 type Router struct {
 	taskHandler    *handlers.TaskHandler
 	projectHandler *handlers.ProjectHandler
 	teamHandler    *handlers.TeamHandler
 }
 
-// NewRouter 创建新的路由器
+// NewRouter 创建新的路由�?
 func NewRouter(
 	taskService *application.TaskService,
 	projectService *application.ProjectService,
@@ -35,7 +35,7 @@ func NewRouter(
 func (r *Router) SetupRoutes() http.Handler {
 	router := mux.NewRouter()
 
-	// 添加中间件
+	// 添加中间�?
 	router.Use(middleware.LoggingMiddleware)
 	router.Use(middleware.RecoveryMiddleware)
 	router.Use(middleware.RequestIDMiddleware)
@@ -52,7 +52,7 @@ func (r *Router) SetupRoutes() http.Handler {
 	// 团队路由
 	r.setupTeamRoutes(api)
 
-	// 健康检查
+	// 健康检�?
 	router.HandleFunc("/health", r.healthCheck).Methods("GET")
 
 	// 设置CORS
@@ -86,7 +86,7 @@ func (r *Router) setupTaskRoutes(api *mux.Router) {
 	// 任务统计
 	tasks.HandleFunc("/statistics", r.taskHandler.GetTaskStatistics).Methods("GET")
 
-	// 任务评论和时间记录
+	// 任务评论和时间记�?
 	tasks.HandleFunc("/{id}/comments", r.taskHandler.AddTaskComment).Methods("POST")
 	tasks.HandleFunc("/{id}/time-logs", r.taskHandler.AddTimeLog).Methods("POST")
 }
@@ -108,7 +108,7 @@ func (r *Router) setupProjectRoutes(api *mux.Router) {
 	projects.HandleFunc("/{id}/members/{user_id}", r.projectHandler.RemoveProjectMember).Methods("DELETE")
 	projects.HandleFunc("/{id}/members/{user_id}/role", r.projectHandler.UpdateProjectMemberRole).Methods("PUT")
 
-	// 项目统计和分析
+	// 项目统计和分�?
 	projects.HandleFunc("/{id}/statistics", r.projectHandler.GetProjectStatistics).Methods("GET")
 	projects.HandleFunc("/{id}/schedule", r.projectHandler.GenerateProjectSchedule).Methods("GET")
 	projects.HandleFunc("/{id}/performance", r.projectHandler.GetProjectPerformance).Methods("GET")
@@ -131,14 +131,14 @@ func (r *Router) setupTeamRoutes(api *mux.Router) {
 	teams.HandleFunc("/{id}/members/{user_id}", r.teamHandler.RemoveTeamMember).Methods("DELETE")
 	teams.HandleFunc("/{id}/members/{user_id}", r.teamHandler.UpdateTeamMember).Methods("PUT")
 
-	// 团队统计和分析
+	// 团队统计和分�?
 	teams.HandleFunc("/{id}/statistics", r.teamHandler.GetTeamStatistics).Methods("GET")
 	teams.HandleFunc("/{id}/performance", r.teamHandler.GetTeamPerformance).Methods("GET")
 	teams.HandleFunc("/{id}/workload", r.teamHandler.GetTeamWorkload).Methods("GET")
 	teams.HandleFunc("/{id}/workload/optimize", r.teamHandler.OptimizeTeamWorkload).Methods("POST")
 }
 
-// healthCheck 健康检查
+// healthCheck 健康检�?
 func (r *Router) healthCheck(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

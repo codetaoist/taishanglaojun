@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/taishanglaojun/core-services/monitoring/interfaces"
+	"github.com/codetaoist/taishanglaojun/core-services/monitoring/interfaces"
 )
 
-// BaseCollector 基础收集器
+// BaseCollector 基础收集�?
 type BaseCollector struct {
 	config CollectorConfig
 	stats  *CollectorStats
@@ -19,7 +19,7 @@ type BaseCollector struct {
 	cancel context.CancelFunc
 }
 
-// NewBaseCollector 创建基础收集器
+// NewBaseCollector 创建基础收集�?
 func NewBaseCollector(config CollectorConfig) *BaseCollector {
 	ctx, cancel := context.WithCancel(context.Background())
 	
@@ -40,7 +40,7 @@ func (bc *BaseCollector) GetStats() *CollectorStats {
 	return &stats
 }
 
-// HealthCheck 健康检查
+// HealthCheck 健康检�?
 func (bc *BaseCollector) HealthCheck() error {
 	return nil
 }
@@ -63,13 +63,13 @@ func (bc *BaseCollector) recordError() {
 	bc.stats.Errors++
 }
 
-// CPUCollector CPU指标收集器
+// CPUCollector CPU指标收集�?
 type CPUCollector struct {
 	*BaseCollector
 	lastCPUTimes map[string]uint64
 }
 
-// NewCPUCollector 创建CPU收集器
+// NewCPUCollector 创建CPU收集�?
 func NewCPUCollector(config CollectorConfig) *CPUCollector {
 	return &CPUCollector{
 		BaseCollector: NewBaseCollector(config),
@@ -77,12 +77,12 @@ func NewCPUCollector(config CollectorConfig) *CPUCollector {
 	}
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (cc *CPUCollector) Start() error {
 	return nil
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (cc *CPUCollector) Stop() error {
 	cc.cancel()
 	return nil
@@ -98,7 +98,7 @@ func (cc *CPUCollector) Collect() ([]interfaces.Metric, error) {
 	metrics := make([]interfaces.Metric, 0)
 	timestamp := time.Now()
 	
-	// 获取CPU使用率
+	// 获取CPU使用�?
 	cpuUsage := cc.getCPUUsage()
 	metrics = append(metrics, interfaces.Metric{
 		Name:      "cpu_usage_percent",
@@ -107,7 +107,7 @@ func (cc *CPUCollector) Collect() ([]interfaces.Metric, error) {
 		Labels:    map[string]string{"type": "total"},
 	})
 	
-	// 获取负载平均值
+	// 获取负载平均�?
 	load1, load5, load15 := cc.getLoadAverage()
 	metrics = append(metrics, 
 		interfaces.Metric{
@@ -130,7 +130,7 @@ func (cc *CPUCollector) Collect() ([]interfaces.Metric, error) {
 		},
 	)
 	
-	// 获取CPU核心数
+	// 获取CPU核心�?
 	cores := runtime.NumCPU()
 	metrics = append(metrics, interfaces.Metric{
 		Name:      "cpu_cores",
@@ -151,18 +151,18 @@ func (cc *CPUCollector) GetMetrics() *CPUMetrics {
 	}
 }
 
-// getCPUUsage 获取CPU使用率
+// getCPUUsage 获取CPU使用�?
 func (cc *CPUCollector) getCPUUsage() float64 {
 	// 简化实现，实际应该读取 /proc/stat 或使用系统API
 	runtime.GC()
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	
-	// 模拟CPU使用率计算
+	// 模拟CPU使用率计�?
 	return float64(runtime.NumGoroutine()) / float64(runtime.NumCPU()) * 10.0
 }
 
-// getLoadAverage 获取负载平均值
+// getLoadAverage 获取负载平均�?
 func (cc *CPUCollector) getLoadAverage() (float64, float64, float64) {
 	// 简化实现，实际应该读取 /proc/loadavg
 	goroutines := float64(runtime.NumGoroutine())
@@ -184,24 +184,24 @@ func (cc *CPUCollector) getPerCoreUsage() map[string]float64 {
 	return usage
 }
 
-// MemoryCollector 内存指标收集器
+// MemoryCollector 内存指标收集�?
 type MemoryCollector struct {
 	*BaseCollector
 }
 
-// NewMemoryCollector 创建内存收集器
+// NewMemoryCollector 创建内存收集�?
 func NewMemoryCollector(config CollectorConfig) *MemoryCollector {
 	return &MemoryCollector{
 		BaseCollector: NewBaseCollector(config),
 	}
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (mc *MemoryCollector) Start() error {
 	return nil
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (mc *MemoryCollector) Stop() error {
 	mc.cancel()
 	return nil
@@ -220,7 +220,7 @@ func (mc *MemoryCollector) Collect() ([]interfaces.Metric, error) {
 	metrics := make([]interfaces.Metric, 0)
 	timestamp := time.Now()
 	
-	// 堆内存指标
+	// 堆内存指�?
 	metrics = append(metrics,
 		interfaces.Metric{
 			Name:      "memory_heap_bytes",
@@ -264,7 +264,7 @@ func (mc *MemoryCollector) Collect() ([]interfaces.Metric, error) {
 		},
 	)
 	
-	// 栈内存指标
+	// 栈内存指�?
 	metrics = append(metrics,
 		interfaces.Metric{
 			Name:      "memory_stack_bytes",
@@ -307,7 +307,7 @@ func (mc *MemoryCollector) GetMetrics() *MemoryMetrics {
 	}
 }
 
-// DiskCollector 磁盘指标收集器
+// DiskCollector 磁盘指标收集�?
 type DiskCollector struct {
 	*BaseCollector
 	lastIOStats map[string]*DiskIOStats
@@ -322,7 +322,7 @@ type DiskIOStats struct {
 	Timestamp  time.Time
 }
 
-// NewDiskCollector 创建磁盘收集器
+// NewDiskCollector 创建磁盘收集�?
 func NewDiskCollector(config CollectorConfig) *DiskCollector {
 	return &DiskCollector{
 		BaseCollector: NewBaseCollector(config),
@@ -330,12 +330,12 @@ func NewDiskCollector(config CollectorConfig) *DiskCollector {
 	}
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (dc *DiskCollector) Start() error {
 	return nil
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (dc *DiskCollector) Stop() error {
 	dc.cancel()
 	return nil
@@ -459,7 +459,7 @@ func (dc *DiskCollector) GetMetrics() *DiskMetrics {
 	}
 }
 
-// NetworkCollector 网络指标收集器
+// NetworkCollector 网络指标收集�?
 type NetworkCollector struct {
 	*BaseCollector
 	lastNetStats map[string]*NetworkStats
@@ -474,7 +474,7 @@ type NetworkStats struct {
 	Timestamp       time.Time
 }
 
-// NewNetworkCollector 创建网络收集器
+// NewNetworkCollector 创建网络收集�?
 func NewNetworkCollector(config CollectorConfig) *NetworkCollector {
 	return &NetworkCollector{
 		BaseCollector: NewBaseCollector(config),
@@ -482,12 +482,12 @@ func NewNetworkCollector(config CollectorConfig) *NetworkCollector {
 	}
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (nc *NetworkCollector) Start() error {
 	return nil
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (nc *NetworkCollector) Stop() error {
 	nc.cancel()
 	return nil
@@ -540,7 +540,7 @@ func (nc *NetworkCollector) Collect() ([]interfaces.Metric, error) {
 			},
 		)
 		
-		// 错误和丢包指标
+		// 错误和丢包指�?
 		errorsReceived := uint64(10)
 		errorsSent := uint64(5)
 		droppedReceived := uint64(2)
@@ -607,24 +607,24 @@ func (nc *NetworkCollector) GetMetrics() *NetworkMetrics {
 	}
 }
 
-// ProcessCollector 进程指标收集器
+// ProcessCollector 进程指标收集�?
 type ProcessCollector struct {
 	*BaseCollector
 }
 
-// NewProcessCollector 创建进程收集器
+// NewProcessCollector 创建进程收集�?
 func NewProcessCollector(config CollectorConfig) *ProcessCollector {
 	return &ProcessCollector{
 		BaseCollector: NewBaseCollector(config),
 	}
 }
 
-// Start 启动收集器
+// Start 启动收集�?
 func (pc *ProcessCollector) Start() error {
 	return nil
 }
 
-// Stop 停止收集器
+// Stop 停止收集�?
 func (pc *ProcessCollector) Stop() error {
 	pc.cancel()
 	return nil
@@ -722,7 +722,7 @@ func (pc *ProcessCollector) GetMetrics() *ProcessMetrics {
 	}
 }
 
-// CreateMetricCollector 创建指标收集器
+// CreateMetricCollector 创建指标收集�?
 func CreateMetricCollector(config CollectorConfig) (MetricCollector, error) {
 	switch config.Type {
 	case "cpu":

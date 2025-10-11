@@ -67,7 +67,7 @@ import moment from 'moment';
 const { Title, Paragraph, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
-const { TabPane } = Tabs;
+
 const { Meta } = Card;
 
 interface Course {
@@ -978,14 +978,36 @@ const CourseCenter: React.FC = () => {
 
       {/* 课程分类标签 */}
       <Card style={{ marginBottom: '24px' }}>
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="全部课程" key="all" />
-          <TabPane tab={<Badge count={courses.filter(c => c.isFeatured).length}><span>精选课程</span></Badge>} key="featured" />
-          <TabPane tab={<Badge count={courses.filter(c => c.isNew).length}><span>最新课程</span></Badge>} key="new" />
-          <TabPane tab={<Badge count={courses.filter(c => c.isHot).length}><span>热门课程</span></Badge>} key="hot" />
-          <TabPane tab={<Badge count={courses.filter(c => c.isFree).length}><span>免费课程</span></Badge>} key="free" />
-          <TabPane tab={<Badge count={courses.filter(c => c.enrollmentStatus === 'enrolled').length}><span>我的课程</span></Badge>} key="enrolled" />
-        </Tabs>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'all',
+              label: '全部课程'
+            },
+            {
+              key: 'featured',
+              label: <Badge count={courses.filter(c => c.isFeatured).length}><span>精选课程</span></Badge>
+            },
+            {
+              key: 'new',
+              label: <Badge count={courses.filter(c => c.isNew).length}><span>最新课程</span></Badge>
+            },
+            {
+              key: 'hot',
+              label: <Badge count={courses.filter(c => c.isHot).length}><span>热门课程</span></Badge>
+            },
+            {
+              key: 'free',
+              label: <Badge count={courses.filter(c => c.isFree).length}><span>免费课程</span></Badge>
+            },
+            {
+              key: 'enrolled',
+              label: <Badge count={courses.filter(c => c.enrollmentStatus === 'enrolled').length}><span>我的课程</span></Badge>
+            }
+          ]}
+        />
       </Card>
 
       <Row gutter={24}>
@@ -1304,133 +1326,149 @@ const CourseCenter: React.FC = () => {
 
             <Divider />
 
-            <Tabs defaultActiveKey="1">
-              <TabPane tab="课程介绍" key="1">
-                <div>
-                  <Title level={4}>学习成果</Title>
-                  <List
-                    dataSource={selectedCourse.learningOutcomes}
-                    renderItem={item => (
-                      <List.Item>
-                        <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                        {item}
-                      </List.Item>
-                    )}
-                  />
-
-                  {selectedCourse.prerequisites.length > 0 && (
-                    <>
-                      <Title level={4}>前置要求</Title>
+            <Tabs 
+              defaultActiveKey="1"
+              items={[
+                {
+                  key: '1',
+                  label: '课程介绍',
+                  children: (
+                    <div>
+                      <Title level={4}>学习成果</Title>
                       <List
-                        dataSource={selectedCourse.prerequisites}
+                        dataSource={selectedCourse.learningOutcomes}
                         renderItem={item => (
                           <List.Item>
-                            <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: '8px' }} />
+                            <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
                             {item}
                           </List.Item>
                         )}
                       />
-                    </>
-                  )}
 
-                  <Title level={4}>课程标签</Title>
-                  <Space wrap>
-                    {selectedCourse.tags.map((tag, index) => (
-                      <Tag key={index}>{tag}</Tag>
-                    ))}
-                  </Space>
-                </div>
-              </TabPane>
-
-              <TabPane tab="课程目录" key="2">
-                <List
-                  dataSource={selectedCourse.chapters}
-                  renderItem={(chapter, index) => (
-                    <List.Item>
-                      <List.Item.Meta
-                        title={`第${index + 1}章 ${chapter.title}`}
-                        description={
-                          <Space>
-                            <Text type="secondary">
-                              <ClockCircleOutlined /> {formatDuration(chapter.duration)}
-                            </Text>
-                            <Text type="secondary">
-                              <BookOutlined /> {chapter.lessonsCount} 课时
-                            </Text>
-                            {chapter.isFree && (
-                              <Tag color="green" size="small">免费试看</Tag>
+                      {selectedCourse.prerequisites.length > 0 && (
+                        <>
+                          <Title level={4}>前置要求</Title>
+                          <List
+                            dataSource={selectedCourse.prerequisites}
+                            renderItem={item => (
+                              <List.Item>
+                                <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: '8px' }} />
+                                {item}
+                              </List.Item>
                             )}
-                          </Space>
-                        }
-                      />
-                      <Button type="link" icon={<PlayCircleOutlined />}>
-                        {chapter.isFree ? '免费试看' : '开始学习'}
-                      </Button>
-                    </List.Item>
-                  )}
-                />
-              </TabPane>
+                          />
+                        </>
+                      )}
 
-              <TabPane tab="讲师介绍" key="3">
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Avatar size={64} src={selectedCourse.instructor.avatar} />
-                    <div style={{ marginLeft: '16px' }}>
-                      <Title level={4} style={{ marginBottom: '4px' }}>
-                        {selectedCourse.instructor.name}
-                      </Title>
-                      <Text type="secondary">{selectedCourse.instructor.title}</Text>
-                      <br />
-                      <Rate disabled value={selectedCourse.instructor.rating} style={{ fontSize: '14px' }} />
+                      <Title level={4}>课程标签</Title>
+                      <Space wrap>
+                        {selectedCourse.tags.map((tag, index) => (
+                          <Tag key={index}>{tag}</Tag>
+                        ))}
+                      </Space>
                     </div>
-                  </div>
-                  
-                  <Row gutter={16}>
-                    <Col span={8}>
-                      <Statistic title="学生数量" value={selectedCourse.instructor.studentsCount} />
-                    </Col>
-                    <Col span={8}>
-                      <Statistic title="课程数量" value={selectedCourse.instructor.coursesCount} />
-                    </Col>
-                    <Col span={8}>
-                      <Statistic title="评分" value={selectedCourse.instructor.rating} precision={1} />
-                    </Col>
-                  </Row>
-                </Space>
-              </TabPane>
-
-              <TabPane tab="学员评价" key="4">
-                {selectedCourse.reviews.length > 0 ? (
-                  <List
-                    dataSource={selectedCourse.reviews}
-                    renderItem={review => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={<Avatar src={review.user.avatar} />}
-                          title={
-                            <Space>
-                              <Text strong>{review.user.name}</Text>
-                              <Rate disabled value={review.rating} style={{ fontSize: '12px' }} />
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
-                                {moment(review.date).format('YYYY-MM-DD')}
-                              </Text>
-                            </Space>
-                          }
-                          description={review.comment}
-                        />
-                        <div>
-                          <Button type="link" size="small" icon={<LikeOutlined />}>
-                            有用 ({review.helpful})
+                  )
+                },
+                {
+                  key: '2',
+                  label: '课程目录',
+                  children: (
+                    <List
+                      dataSource={selectedCourse.chapters}
+                      renderItem={(chapter, index) => (
+                        <List.Item>
+                          <List.Item.Meta
+                            title={`第${index + 1}章 ${chapter.title}`}
+                            description={
+                              <Space>
+                                <Text type="secondary">
+                                  <ClockCircleOutlined /> {formatDuration(chapter.duration)}
+                                </Text>
+                                <Text type="secondary">
+                                  <BookOutlined /> {chapter.lessonsCount} 课时
+                                </Text>
+                                {chapter.isFree && (
+                                  <Tag color="green" size="small">免费试看</Tag>
+                                )}
+                              </Space>
+                            }
+                          />
+                          <Button type="link" icon={<PlayCircleOutlined />}>
+                            {chapter.isFree ? '免费试看' : '开始学习'}
                           </Button>
+                        </List.Item>
+                      )}
+                    />
+                  )
+                },
+                {
+                  key: '3',
+                  label: '讲师介绍',
+                  children: (
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar size={64} src={selectedCourse.instructor.avatar} />
+                        <div style={{ marginLeft: '16px' }}>
+                          <Title level={4} style={{ marginBottom: '4px' }}>
+                            {selectedCourse.instructor.name}
+                          </Title>
+                          <Text type="secondary">{selectedCourse.instructor.title}</Text>
+                          <br />
+                          <Rate disabled value={selectedCourse.instructor.rating} style={{ fontSize: '14px' }} />
                         </div>
-                      </List.Item>
-                    )}
-                  />
-                ) : (
-                  <Empty description="暂无评价" />
-                )}
-              </TabPane>
-            </Tabs>
+                      </div>
+                      
+                      <Row gutter={16}>
+                        <Col span={8}>
+                          <Statistic title="学生数量" value={selectedCourse.instructor.studentsCount} />
+                        </Col>
+                        <Col span={8}>
+                          <Statistic title="课程数量" value={selectedCourse.instructor.coursesCount} />
+                        </Col>
+                        <Col span={8}>
+                          <Statistic title="评分" value={selectedCourse.instructor.rating} precision={1} />
+                        </Col>
+                      </Row>
+                    </Space>
+                  )
+                },
+                {
+                  key: '4',
+                  label: '学员评价',
+                  children: (
+                    selectedCourse.reviews.length > 0 ? (
+                      <List
+                        dataSource={selectedCourse.reviews}
+                        renderItem={review => (
+                          <List.Item>
+                            <List.Item.Meta
+                              avatar={<Avatar src={review.user.avatar} />}
+                              title={
+                                <Space>
+                                  <Text strong>{review.user.name}</Text>
+                                  <Rate disabled value={review.rating} style={{ fontSize: '12px' }} />
+                                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                                    {moment(review.date).format('YYYY-MM-DD')}
+                                  </Text>
+                                </Space>
+                              }
+                              description={review.comment}
+                            />
+                            <div>
+                              <Button type="link" size="small" icon={<LikeOutlined />}>
+                                有用 ({review.helpful})
+                              </Button>
+                            </div>
+                          </List.Item>
+                        )}
+                      />
+                    ) : (
+                      <Empty description="暂无评价" />
+                    )
+                  )
+                }
+              ]}
+            />
           </div>
         )}
       </Modal>

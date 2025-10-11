@@ -11,7 +11,7 @@ type Comment struct {
 	ID        string         `json:"id" gorm:"primaryKey;type:varchar(36)"`
 	PostID    string         `json:"post_id" gorm:"type:varchar(36);not null;index"`
 	AuthorID  string         `json:"author_id" gorm:"type:varchar(36);not null;index"`
-	ParentID  *string        `json:"parent_id" gorm:"type:varchar(36);index"` // 父评论ID，用于回复
+	ParentID  *string        `json:"parent_id" gorm:"type:varchar(36);index"` // 父评论ID，用于回�?
 	Content   string         `json:"content" gorm:"type:text;not null"`
 	LikeCount int            `json:"like_count" gorm:"default:0"`
 	Status    CommentStatus  `json:"status" gorm:"type:varchar(20);default:'published';index"`
@@ -27,15 +27,15 @@ type Comment struct {
 	Likes    []Like       `json:"likes,omitempty" gorm:"foreignKey:CommentID"`
 }
 
-// CommentStatus 评论状态
+// CommentStatus 评论状�?
 type CommentStatus string
 
 const (
-	CommentStatusPending   CommentStatus = "pending"   // 待审核
-	CommentStatusPublished CommentStatus = "published" // 已发布
-	CommentStatusRejected  CommentStatus = "rejected"  // 已拒绝
+	CommentStatusPending   CommentStatus = "pending"   // 待审�?
+	CommentStatusPublished CommentStatus = "published" // 已发�?
+	CommentStatusRejected  CommentStatus = "rejected"  // 已拒�?
 	CommentStatusHidden    CommentStatus = "hidden"    // 隐藏
-	CommentStatusDeleted   CommentStatus = "deleted"   // 已删除
+	CommentStatusDeleted   CommentStatus = "deleted"   // 已删�?
 )
 
 // CommentCreateRequest 创建评论请求
@@ -98,16 +98,16 @@ func (Comment) TableName() string {
 	return "community_comments"
 }
 
-// BeforeCreate 创建前钩子
+// BeforeCreate 创建前钩�?
 func (c *Comment) BeforeCreate(tx *gorm.DB) error {
 	if c.ID == "" {
-		// 这里可以使用UUID生成器
+		// 这里可以使用UUID生成�?
 		// c.ID = uuid.New().String()
 	}
 	return nil
 }
 
-// ToResponse 转换为响应格式
+// ToResponse 转换为响应格�?
 func (c *Comment) ToResponse() CommentResponse {
 	response := CommentResponse{
 		ID:        c.ID,
@@ -135,7 +135,7 @@ func (c *Comment) ToResponse() CommentResponse {
 	return response
 }
 
-// IsReply 判断是否为回复评论
+// IsReply 判断是否为回复评�?
 func (c *Comment) IsReply() bool {
 	return c.ParentID != nil
 }
@@ -146,6 +146,6 @@ func (c *Comment) GetDepth() int {
 		return 0
 	}
 	// 这里需要递归查询父评论来计算深度
-	// 简化处理，返回1表示是回复
+	// 简化处理，返回1表示是回�?
 	return 1
 }

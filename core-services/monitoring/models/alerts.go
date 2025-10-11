@@ -4,15 +4,15 @@ import (
 	"time"
 )
 
-// AlertStatus 告警状态
+// AlertStatus 告警状�?
 type AlertStatus string
 
 const (
-	AlertStatusPending   AlertStatus = "pending"   // 待处理
-	AlertStatusFiring    AlertStatus = "firing"    // 触发中
-	AlertStatusResolved  AlertStatus = "resolved"  // 已解决
-	AlertStatusSuppressed AlertStatus = "suppressed" // 已抑制
-	AlertStatusAcknowledged AlertStatus = "acknowledged" // 已确认
+	AlertStatusPending   AlertStatus = "pending"   // 待处�?
+	AlertStatusFiring    AlertStatus = "firing"    // 触发�?
+	AlertStatusResolved  AlertStatus = "resolved"  // 已解�?
+	AlertStatusSuppressed AlertStatus = "suppressed" // 已抑�?
+	AlertStatusAcknowledged AlertStatus = "acknowledged" // 已确�?
 )
 
 // AlertSeverity 告警严重程度
@@ -22,7 +22,7 @@ const (
 	SeverityInfo      AlertSeverity = "info"      // 信息
 	SeverityWarning   AlertSeverity = "warning"   // 警告
 	SeverityCritical  AlertSeverity = "critical"  // 严重
-	SeverityEmergency AlertSeverity = "emergency" // 紧急
+	SeverityEmergency AlertSeverity = "emergency" // 紧�?
 )
 
 // AlertRule 告警规则
@@ -30,11 +30,11 @@ type AlertRule struct {
 	ID          string            `json:"id" gorm:"primaryKey"`
 	Name        string            `json:"name" gorm:"not null;uniqueIndex"`
 	Description string            `json:"description"`
-	Expression  string            `json:"expression" gorm:"not null"` // PromQL表达式
+	Expression  string            `json:"expression" gorm:"not null"` // PromQL表达�?
 	Labels      map[string]string `json:"labels" gorm:"type:jsonb"`
 	Annotations map[string]string `json:"annotations" gorm:"type:jsonb"`
 	Severity    AlertSeverity     `json:"severity" gorm:"not null;index"`
-	Duration    time.Duration     `json:"duration"` // 持续时间阈值
+	Duration    time.Duration     `json:"duration"` // 持续时间阈�?
 	Interval    time.Duration     `json:"interval"` // 评估间隔
 	Enabled     bool              `json:"enabled" gorm:"default:true;index"`
 	GroupBy     []string          `json:"group_by" gorm:"type:jsonb"`
@@ -137,7 +137,7 @@ type Silence struct {
 	Status      string            `json:"status" gorm:"index"` // active, expired, pending
 }
 
-// SilenceMatcher 静默匹配器
+// SilenceMatcher 静默匹配�?
 type SilenceMatcher struct {
 	Name    string `json:"name"`
 	Value   string `json:"value"`
@@ -157,7 +157,7 @@ type Inhibition struct {
 	UpdatedAt        time.Time         `json:"updated_at"`
 }
 
-// InhibitMatcher 抑制匹配器
+// InhibitMatcher 抑制匹配�?
 type InhibitMatcher struct {
 	Name    string `json:"name"`
 	Value   string `json:"value"`
@@ -325,7 +325,7 @@ type AlertConfiguration struct {
 
 // Helper functions
 
-// NewAlertRule 创建新告警规则
+// NewAlertRule 创建新告警规�?
 func NewAlertRule(name, expression string, severity AlertSeverity) *AlertRule {
 	return &AlertRule{
 		ID:          generateID(),
@@ -342,7 +342,7 @@ func NewAlertRule(name, expression string, severity AlertSeverity) *AlertRule {
 	}
 }
 
-// NewAlert 创建新告警
+// NewAlert 创建新告�?
 func NewAlert(ruleID, ruleName string, severity AlertSeverity) *Alert {
 	now := time.Now()
 	return &Alert{
@@ -394,7 +394,7 @@ func (a *Alert) Suppress(silenceID string) {
 	a.SilenceID = silenceID
 }
 
-// IsActive 检查告警是否活跃
+// IsActive 检查告警是否活�?
 func (a *Alert) IsActive() bool {
 	return a.Status == AlertStatusFiring || a.Status == AlertStatusPending
 }
@@ -412,7 +412,7 @@ func (a *Alert) Duration() time.Duration {
 	return time.Since(a.StartsAt)
 }
 
-// MatchesLabels 检查告警是否匹配标签
+// MatchesLabels 检查告警是否匹配标�?
 func (a *Alert) MatchesLabels(labels map[string]string) bool {
 	if a.Labels == nil && len(labels) == 0 {
 		return true
@@ -441,7 +441,7 @@ func hashLabels(labels map[string]string) string {
 	return "hash-" + randomString(8)
 }
 
-// NewSilence 创建新静默
+// NewSilence 创建新静�?
 func NewSilence(matchers []SilenceMatcher, startsAt, endsAt time.Time, comment, createdBy string) *Silence {
 	return &Silence{
 		ID:        generateID(),
@@ -456,18 +456,18 @@ func NewSilence(matchers []SilenceMatcher, startsAt, endsAt time.Time, comment, 
 	}
 }
 
-// IsActive 检查静默是否活跃
+// IsActive 检查静默是否活�?
 func (s *Silence) IsActive() bool {
 	now := time.Now()
 	return s.Status == "active" && now.After(s.StartsAt) && now.Before(s.EndsAt)
 }
 
-// IsExpired 检查静默是否过期
+// IsExpired 检查静默是否过�?
 func (s *Silence) IsExpired() bool {
 	return time.Now().After(s.EndsAt)
 }
 
-// Matches 检查静默是否匹配告警
+// Matches 检查静默是否匹配告�?
 func (s *Silence) Matches(alert *Alert) bool {
 	for _, matcher := range s.Matchers {
 		if !s.matchLabel(alert.Labels, matcher) {
@@ -485,8 +485,8 @@ func (s *Silence) matchLabel(labels map[string]string, matcher SilenceMatcher) b
 	}
 	
 	if matcher.IsRegex {
-		// 实现正则表达式匹配
-		return true // 简化实现
+		// 实现正则表达式匹�?
+		return true // 简化实�?
 	}
 	
 	if matcher.IsEqual {

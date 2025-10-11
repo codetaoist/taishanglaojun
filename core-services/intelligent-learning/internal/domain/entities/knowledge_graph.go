@@ -11,7 +11,7 @@ type NodeType string
 
 const (
 	NodeTypeConcept    NodeType = "concept"    // 概念
-	NodeTypeSkill      NodeType = "skill"      // 技能
+	NodeTypeSkill      NodeType = "skill"      // 技�?
 	NodeTypeTopic      NodeType = "topic"      // 主题
 	NodeTypeSubject    NodeType = "subject"    // 学科
 	NodeTypeLearningPath NodeType = "learning_path" // 学习路径
@@ -36,7 +36,7 @@ const (
 type DifficultyLevel int
 
 const (
-	DifficultyBeginner     DifficultyLevel = 1 // 初学者
+	DifficultyBeginner     DifficultyLevel = 1 // 初学�?
 	DifficultyElementary   DifficultyLevel = 2 // 基础
 	DifficultyIntermediate DifficultyLevel = 3 // 中级
 	DifficultyAdvanced     DifficultyLevel = 4 // 高级
@@ -49,14 +49,14 @@ type KnowledgeNode struct {
 	Name            string          `json:"name"`
 	Description     string          `json:"description"`
 	Type            NodeType        `json:"type"`
-	Subject         string          `json:"subject"`         // 所属学科
+	Subject         string          `json:"subject"`         // 所属学�?
 	DifficultyLevel DifficultyLevel `json:"difficulty_level"`
 	EstimatedHours  float64         `json:"estimated_hours"` // 预估学习时间
 	Prerequisites   []uuid.UUID     `json:"prerequisites"`   // 前置知识点ID
-	Skills          []string        `json:"skills"`          // 相关技能
-	Keywords        []string        `json:"keywords"`        // 关键词
+	Skills          []string        `json:"skills"`          // 相关技�?
+	Keywords        []string        `json:"keywords"`        // 关键�?
 	Tags            []string        `json:"tags"`            // 标签
-	Metadata        map[string]interface{} `json:"metadata"` // 元数据
+	Metadata        map[string]interface{} `json:"metadata"` // 元数�?
 	LearningObjectives []string     `json:"learning_objectives"` // 学习目标
 	AssessmentCriteria []string     `json:"assessment_criteria"` // 评估标准
 	CreatedAt       time.Time       `json:"created_at"`
@@ -70,9 +70,9 @@ type KnowledgeRelation struct {
 	ToNodeID    uuid.UUID    `json:"to_node_id"`
 	Type        RelationType `json:"type"`
 	Weight      float64      `json:"weight"`      // 关系权重 0.0-1.0
-	Confidence  float64      `json:"confidence"`  // 置信度 0.0-1.0
+	Confidence  float64      `json:"confidence"`  // 置信�?0.0-1.0
 	Description string       `json:"description"` // 关系描述
-	Metadata    map[string]interface{} `json:"metadata"` // 元数据
+	Metadata    map[string]interface{} `json:"metadata"` // 元数�?
 	CreatedAt   time.Time    `json:"created_at"`
 	UpdatedAt   time.Time    `json:"updated_at"`
 }
@@ -86,14 +86,14 @@ func NewKnowledgeRelation(fromNodeID, toNodeID uuid.UUID, relationType RelationT
 		ToNodeID:    toNodeID,
 		Type:        relationType,
 		Weight:      weight,
-		Confidence:  0.8, // 默认置信度
+		Confidence:  0.8, // 默认置信�?
 		Metadata:    make(map[string]interface{}),
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
 }
 
-// ConceptMap 概念图
+// ConceptMap 概念�?
 type ConceptMap struct {
 	ID          uuid.UUID           `json:"id"`
 	Name        string              `json:"name"`
@@ -117,15 +117,15 @@ type LearningPath struct {
 	Subject         string          `json:"subject"`
 	DifficultyLevel DifficultyLevel `json:"difficulty_level"`
 	EstimatedHours  float64         `json:"estimated_hours"`
-	Prerequisites   []uuid.UUID     `json:"prerequisites"`   // 前置技能/知识点
+	Prerequisites   []uuid.UUID     `json:"prerequisites"`   // 前置技�?知识�?
 	LearningGoals   []string        `json:"learning_goals"`  // 学习目标
 	Nodes           []PathNode      `json:"nodes"`           // 路径节点
-	Milestones      []Milestone     `json:"milestones"`      // 里程碑
+	Milestones      []Milestone     `json:"milestones"`      // 里程�?
 	Tags            []string        `json:"tags"`
 	IsPublic        bool            `json:"is_public"`
 	CreatedBy       uuid.UUID       `json:"created_by"`
 	EnrollmentCount int             `json:"enrollment_count"` // 注册人数
-	CompletionRate  float64         `json:"completion_rate"`  // 完成率
+	CompletionRate  float64         `json:"completion_rate"`  // 完成�?
 	Rating          float64         `json:"rating"`           // 评分
 	CreatedAt       time.Time       `json:"created_at"`
 	UpdatedAt       time.Time       `json:"updated_at"`
@@ -136,12 +136,12 @@ type PathNode struct {
 	ID           uuid.UUID   `json:"id"`
 	KnowledgeID  uuid.UUID   `json:"knowledge_id"`  // 关联的知识点ID
 	Order        int         `json:"order"`         // 顺序
-	IsOptional   bool        `json:"is_optional"`   // 是否可选
-	Dependencies []uuid.UUID `json:"dependencies"`  // 依赖的其他节点
+	IsOptional   bool        `json:"is_optional"`   // 是否可�?
+	Dependencies []uuid.UUID `json:"dependencies"`  // 依赖的其他节�?
 	Metadata     map[string]interface{} `json:"metadata"`
 }
 
-// Milestone 里程碑
+// Milestone 里程�?
 type Milestone struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
@@ -240,7 +240,7 @@ func (kg *KnowledgeGraph) GetNodesByType(nodeType NodeType) []KnowledgeNode {
 	return nodes
 }
 
-// GetRelations 获取节点的所有关系
+// GetRelations 获取节点的所有关�?
 func (kg *KnowledgeGraph) GetRelations(nodeID uuid.UUID) []KnowledgeRelation {
 	var relations []KnowledgeRelation
 	for _, relation := range kg.Relations {
@@ -277,9 +277,9 @@ func (kg *KnowledgeGraph) GetDependents(nodeID uuid.UUID) []KnowledgeNode {
 	return dependents
 }
 
-// FindShortestPath 查找两个节点间的最短路径
+// FindShortestPath 查找两个节点间的最短路�?
 func (kg *KnowledgeGraph) FindShortestPath(fromID, toID uuid.UUID) []uuid.UUID {
-	// 使用BFS算法查找最短路径
+	// 使用BFS算法查找最短路�?
 	if fromID == toID {
 		return []uuid.UUID{fromID}
 	}
@@ -293,7 +293,7 @@ func (kg *KnowledgeGraph) FindShortestPath(fromID, toID uuid.UUID) []uuid.UUID {
 		queue = queue[1:]
 		currentNode := path[len(path)-1]
 
-		// 获取当前节点的所有邻居
+		// 获取当前节点的所有邻�?
 		for _, relation := range kg.Relations {
 			var nextNode uuid.UUID
 			if relation.FromNodeID == currentNode {
@@ -327,7 +327,7 @@ func (kg *KnowledgeGraph) updateStatistics() {
 	kg.Statistics.RelationCount = len(kg.Relations)
 	kg.Statistics.PathCount = len(kg.Paths)
 
-	// 重置计数器
+	// 重置计数�?
 	kg.Statistics.NodesByType = make(map[NodeType]int)
 	kg.Statistics.RelationsByType = make(map[RelationType]int)
 
@@ -394,7 +394,7 @@ func (lp *LearningPath) AddPathNode(knowledgeID uuid.UUID, order int, isOptional
 	lp.UpdatedAt = time.Now()
 }
 
-// AddMilestone 添加里程碑
+// AddMilestone 添加里程�?
 func (lp *LearningPath) AddMilestone(name, description string, order int, nodeIDs []uuid.UUID, criteria []string) {
 	milestone := Milestone{
 		ID:          uuid.New(),
@@ -425,20 +425,20 @@ func (lp *LearningPath) GetOrderedNodes() []PathNode {
 	return nodes
 }
 
-// ValidatePath 验证路径的有效性
+// ValidatePath 验证路径的有效�?
 func (lp *LearningPath) ValidatePath() []string {
 	var errors []string
 
-	// 检查节点顺序
+	// 检查节点顺�?
 	orders := make(map[int]bool)
 	for _, node := range lp.Nodes {
 		if orders[node.Order] {
-			errors = append(errors, "重复的节点顺序")
+			errors = append(errors, "重复的节点顺�?)
 		}
 		orders[node.Order] = true
 	}
 
-	// 检查依赖关系
+	// 检查依赖关�?
 	nodeIDs := make(map[uuid.UUID]bool)
 	for _, node := range lp.Nodes {
 		nodeIDs[node.ID] = true

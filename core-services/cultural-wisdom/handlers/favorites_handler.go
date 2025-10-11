@@ -29,7 +29,7 @@ func NewFavoritesHandler(favoritesService *services.FavoritesService, logger *za
 func (h *FavoritesHandler) AddFavorite(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -57,7 +57,7 @@ func (h *FavoritesHandler) AddFavorite(c *gin.Context) {
 func (h *FavoritesHandler) RemoveFavorite(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *FavoritesHandler) RemoveFavorite(c *gin.Context) {
 func (h *FavoritesHandler) GetUserFavorites(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -114,11 +114,11 @@ func (h *FavoritesHandler) GetUserFavorites(c *gin.Context) {
 	})
 }
 
-// CheckFavoriteStatus 检查收藏状态
+// CheckFavoriteStatus 检查收藏状�?
 func (h *FavoritesHandler) CheckFavoriteStatus(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -144,7 +144,7 @@ func (h *FavoritesHandler) CheckFavoriteStatus(c *gin.Context) {
 func (h *FavoritesHandler) CreateNote(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -172,7 +172,7 @@ func (h *FavoritesHandler) CreateNote(c *gin.Context) {
 func (h *FavoritesHandler) UpdateNote(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -206,7 +206,7 @@ func (h *FavoritesHandler) UpdateNote(c *gin.Context) {
 func (h *FavoritesHandler) GetNote(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -232,7 +232,7 @@ func (h *FavoritesHandler) GetNote(c *gin.Context) {
 func (h *FavoritesHandler) GetUserNotes(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 
@@ -269,7 +269,7 @@ func (h *FavoritesHandler) GetUserNotes(c *gin.Context) {
 func (h *FavoritesHandler) DeleteNote(c *gin.Context) {
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认证"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未认�?})
 		return
 	}
 

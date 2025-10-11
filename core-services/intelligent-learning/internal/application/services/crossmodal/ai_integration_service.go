@@ -40,7 +40,7 @@ type QualityMetrics struct {
 	Metadata    map[string]interface{} `json:"metadata"`
 }
 
-// QualityCheck 质量检查
+// QualityCheck 质量检�?
 type QualityCheck struct {
 	CheckID     string                 `json:"check_id"`
 	CheckType   string                 `json:"check_type"`
@@ -136,7 +136,7 @@ type ResourceUsage struct {
 	Metadata     map[string]interface{} `json:"metadata"`
 }
 
-// 简化的结构体定义
+// 简化的结构体定�?
 type InputSpecification struct{}
 type OutputSpecification struct{}
 type ResourceRequirements struct{}
@@ -181,10 +181,10 @@ type SimilarityResult struct {
 	Metadata          map[string]interface{} `json:"metadata"`
 }
 
-// 其他必要的类型定义
+// 其他必要的类型定�?
 type ModalityType string
 
-// CrossModalServiceInterface 跨模态服务接口
+// CrossModalServiceInterface 跨模态服务接�?
 type CrossModalServiceInterface interface {
 	ProcessCrossModalInference(ctx context.Context, request *CrossModalInferenceRequest) (*CrossModalInferenceResponse, error)
 }

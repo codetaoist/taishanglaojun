@@ -79,7 +79,7 @@ import moment from 'moment';
 
 const { Title, Paragraph, Text } = Typography;
 const { Step } = Steps;
-const { TabPane } = Tabs;
+
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -1141,264 +1141,278 @@ const AbilityAssessment: React.FC = () => {
 
       {/* 主要内容 */}
       {!assessmentStarted && !assessmentCompleted && (
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="可用评估" key="available">
-            <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-              <Col span={12}>
-                <Select
-                  value={selectedCategory}
-                  onChange={setSelectedCategory}
-                  style={{ width: '100%' }}
-                  placeholder="选择分类"
-                >
-                  <Option value="all">全部分类</Option>
-                  {categories.map(category => (
-                    <Option key={category} value={category}>
-                      {category}
-                    </Option>
-                  ))}
-                </Select>
-              </Col>
-              <Col span={12}>
-                <Select
-                  value={selectedDifficulty}
-                  onChange={setSelectedDifficulty}
-                  style={{ width: '100%' }}
-                  placeholder="选择难度"
-                >
-                  <Option value="all">全部难度</Option>
-                  <Option value="beginner">初级</Option>
-                  <Option value="intermediate">中级</Option>
-                  <Option value="advanced">高级</Option>
-                </Select>
-              </Col>
-            </Row>
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'available',
+              label: '可用评估',
+              children: (
+                <>
+                  <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+                    <Col span={12}>
+                      <Select
+                        value={selectedCategory}
+                        onChange={setSelectedCategory}
+                        style={{ width: '100%' }}
+                        placeholder="选择分类"
+                      >
+                        <Option value="all">全部分类</Option>
+                        {categories.map(category => (
+                          <Option key={category} value={category}>
+                            {category}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Col>
+                    <Col span={12}>
+                      <Select
+                        value={selectedDifficulty}
+                        onChange={setSelectedDifficulty}
+                        style={{ width: '100%' }}
+                        placeholder="选择难度"
+                      >
+                        <Option value="all">全部难度</Option>
+                        <Option value="beginner">初级</Option>
+                        <Option value="intermediate">中级</Option>
+                        <Option value="advanced">高级</Option>
+                      </Select>
+                    </Col>
+                  </Row>
 
-            <Row gutter={[16, 16]}>
-              {filteredAssessments.map(assessment => (
-                <Col xs={24} sm={12} lg={8} key={assessment.id}>
-                  {renderAssessmentCard(assessment)}
-                </Col>
-              ))}
-            </Row>
-          </TabPane>
-
-          <TabPane tab="我的成绩" key="results">
-            <Card>
-              <Table
-                columns={resultColumns}
-                dataSource={results}
-                rowKey="id"
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showTotal: (total) => `共 ${total} 条记录`
-                }}
-              />
-            </Card>
-          </TabPane>
-
-          <TabPane tab="能力档案" key="profile">
-            {abilityProfile && (
-              <div>
-                {/* 总体能力概览 */}
-                <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-                  <Col xs={24} sm={6}>
-                    <Card>
-                      <Statistic
-                        title="总体评分"
-                        value={abilityProfile.overallScore}
-                        suffix="/ 100"
-                        valueStyle={{ color: getLevelColor(abilityProfile.level) }}
-                      />
-                      <Tag color={getLevelColor(abilityProfile.level)} style={{ marginTop: '8px' }}>
-                        {abilityProfile.level === 'beginner' ? '初学者' :
-                         abilityProfile.level === 'intermediate' ? '中级' :
-                         abilityProfile.level === 'advanced' ? '高级' : '专家'}
-                      </Tag>
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={6}>
-                    <Card>
-                      <Statistic
-                        title="评估次数"
-                        value={abilityProfile.totalAssessments}
-                        prefix={<BookOutlined />}
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={6}>
-                    <Card>
-                      <Statistic
-                        title="平均分数"
-                        value={abilityProfile.averageScore}
-                        suffix="分"
-                        prefix={<StarOutlined />}
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} sm={6}>
-                    <Card>
-                      <Statistic
-                        title="提升幅度"
-                        value={abilityProfile.improvementRate}
-                        suffix="%"
-                        prefix={<RocketOutlined />}
-                        valueStyle={{ color: '#52c41a' }}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-
-                <Row gutter={[16, 16]}>
-                  {/* 能力雷达图 */}
-                  <Col xs={24} lg={12}>
-                    <Card title="能力雷达图" extra={<RadarChartOutlined />}>
-                      <Radar
-                        data={getRadarData()}
-                        xField="category"
-                        yField="score"
-                        height={300}
-                        area={{}}
-                        point={{
-                          size: 3
-                        }}
-                      />
-                    </Card>
-                  </Col>
-
-                  {/* 成绩趋势 */}
-                  <Col xs={24} lg={12}>
-                    <Card title="成绩趋势" extra={<LineChartOutlined />}>
-                      <Line
-                        data={getTrendData()}
-                        xField="assessment"
-                        yField="score"
-                        height={300}
-                        smooth
-                        point={{
-                          size: 3,
-                          shape: 'circle'
-                        }}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-
-                {/* 分类能力详情 */}
-                <Card title="分类能力详情" style={{ marginTop: '16px' }}>
                   <Row gutter={[16, 16]}>
-                    {abilityProfile.categories.map(category => (
-                      <Col xs={24} sm={12} lg={6} key={category.category}>
-                        <Card size="small">
-                          <div style={{ textAlign: 'center' }}>
-                            <Title level={5}>{category.category}</Title>
-                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: getLevelColor(category.level) }}>
-                              {category.score}
+                    {filteredAssessments.map(assessment => (
+                      <Col xs={24} sm={12} lg={8} key={assessment.id}>
+                        {renderAssessmentCard(assessment)}
+                      </Col>
+                    ))}
+                  </Row>
+                </>
+              )
+            },
+            {
+              key: 'results',
+              label: '我的成绩',
+              children: (
+                <Card>
+                  <Table
+                    columns={resultColumns}
+                    dataSource={results}
+                    rowKey="id"
+                    pagination={{
+                      pageSize: 10,
+                      showSizeChanger: true,
+                      showTotal: (total) => `共 ${total} 条记录`
+                    }}
+                  />
+                </Card>
+              )
+            },
+            {
+              key: 'profile',
+              label: '能力档案',
+              children: abilityProfile && (
+                <div>
+                  {/* 总体能力概览 */}
+                  <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+                    <Col xs={24} sm={6}>
+                      <Card>
+                        <Statistic
+                          title="总体评分"
+                          value={abilityProfile.overallScore}
+                          suffix="/ 100"
+                          valueStyle={{ color: getLevelColor(abilityProfile.level) }}
+                        />
+                        <Tag color={getLevelColor(abilityProfile.level)} style={{ marginTop: '8px' }}>
+                          {abilityProfile.level === 'beginner' ? '初学者' :
+                           abilityProfile.level === 'intermediate' ? '中级' :
+                           abilityProfile.level === 'advanced' ? '高级' : '专家'}
+                        </Tag>
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={6}>
+                      <Card>
+                        <Statistic
+                          title="评估次数"
+                          value={abilityProfile.totalAssessments}
+                          prefix={<BookOutlined />}
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={6}>
+                      <Card>
+                        <Statistic
+                          title="平均分数"
+                          value={abilityProfile.averageScore}
+                          suffix="分"
+                          prefix={<StarOutlined />}
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={6}>
+                      <Card>
+                        <Statistic
+                          title="提升幅度"
+                          value={abilityProfile.improvementRate}
+                          suffix="%"
+                          prefix={<RocketOutlined />}
+                          valueStyle={{ color: '#52c41a' }}
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+
+                  <Row gutter={[16, 16]}>
+                    {/* 能力雷达图 */}
+                    <Col xs={24} lg={12}>
+                      <Card title="能力雷达图" extra={<RadarChartOutlined />}>
+                        <Radar
+                          data={getRadarData()}
+                          xField="category"
+                          yField="score"
+                          height={300}
+                          area={{}}
+                          point={{
+                            size: 3
+                          }}
+                        />
+                      </Card>
+                    </Col>
+
+                    {/* 成绩趋势 */}
+                    <Col xs={24} lg={12}>
+                      <Card title="成绩趋势" extra={<LineChartOutlined />}>
+                        <Line
+                          data={getTrendData()}
+                          xField="assessment"
+                          yField="score"
+                          height={300}
+                          smooth
+                          point={{
+                            size: 3,
+                            shape: 'circle'
+                          }}
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+
+                  {/* 分类能力详情 */}
+                  <Card title="分类能力详情" style={{ marginTop: '16px' }}>
+                    <Row gutter={[16, 16]}>
+                      {abilityProfile.categories.map(category => (
+                        <Col xs={24} sm={12} lg={6} key={category.category}>
+                          <Card size="small">
+                            <div style={{ textAlign: 'center' }}>
+                              <Title level={5}>{category.category}</Title>
+                              <div style={{ fontSize: '24px', fontWeight: 'bold', color: getLevelColor(category.level) }}>
+                                {category.score}
+                              </div>
+                              <Tag color={getLevelColor(category.level)} style={{ marginTop: '8px' }}>
+                                {category.level === 'beginner' ? '初级' :
+                                 category.level === 'intermediate' ? '中级' :
+                                 category.level === 'advanced' ? '高级' : '专家'}
+                              </Tag>
+                              <div style={{ marginTop: '8px' }}>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                  {category.assessmentsCount} 次评估
+                                </Text>
+                                <br />
+                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                  {moment(category.lastAssessment).format('MM-DD')}
+                                </Text>
+                              </div>
                             </div>
-                            <Tag color={getLevelColor(category.level)} style={{ marginTop: '8px' }}>
-                              {category.level === 'beginner' ? '初级' :
-                               category.level === 'intermediate' ? '中级' :
-                               category.level === 'advanced' ? '高级' : '专家'}
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  </Card>
+
+                  {/* 优势与建议 */}
+                  <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+                    <Col xs={24} lg={8}>
+                      <Card title="优势领域" extra={<StarOutlined style={{ color: '#faad14' }} />}>
+                        <List
+                          dataSource={abilityProfile.strengths}
+                          renderItem={item => (
+                            <List.Item>
+                              <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
+                              {item}
+                            </List.Item>
+                          )}
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} lg={8}>
+                      <Card title="待提升" extra={<ExclamationCircleOutlined style={{ color: '#faad14' }} />}>
+                        <List
+                          dataSource={abilityProfile.weaknesses}
+                          renderItem={item => (
+                            <List.Item>
+                              <InfoCircleOutlined style={{ color: '#faad14', marginRight: '8px' }} />
+                              {item}
+                            </List.Item>
+                          )}
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} lg={8}>
+                      <Card title="学习建议" extra={<BulbOutlined style={{ color: '#1890ff' }} />}>
+                        <List
+                          dataSource={abilityProfile.recommendations}
+                          renderItem={item => (
+                            <List.Item>
+                              <BulbOutlined style={{ color: '#1890ff', marginRight: '8px' }} />
+                              {item}
+                            </List.Item>
+                          )}
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+
+                  {/* 成就徽章 */}
+                  <Card title="成就徽章" style={{ marginTop: '16px' }}>
+                    <Row gutter={[16, 16]}>
+                      {abilityProfile.achievements.map(achievement => (
+                        <Col xs={12} sm={8} md={6} lg={4} key={achievement.id}>
+                          <Card size="small" style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '32px', marginBottom: '8px' }}>
+                              {achievement.icon}
+                            </div>
+                            <Text strong style={{ fontSize: '12px' }}>
+                              {achievement.title}
+                            </Text>
+                            <br />
+                            <Text type="secondary" style={{ fontSize: '10px' }}>
+                              {achievement.description}
+                            </Text>
+                            <br />
+                            <Tag 
+                              size="small" 
+                              color={
+                                achievement.rarity === 'common' ? 'default' :
+                                achievement.rarity === 'rare' ? 'blue' :
+                                achievement.rarity === 'epic' ? 'purple' : 'gold'
+                              }
+                              style={{ marginTop: '4px' }}
+                            >
+                              {achievement.rarity === 'common' ? '普通' :
+                               achievement.rarity === 'rare' ? '稀有' :
+                               achievement.rarity === 'epic' ? '史诗' : '传说'}
                             </Tag>
-                            <div style={{ marginTop: '8px' }}>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
-                                {category.assessmentsCount} 次评估
-                              </Text>
-                              <br />
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
-                                {moment(category.lastAssessment).format('MM-DD')}
-                              </Text>
-                            </div>
-                          </div>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                </Card>
-
-                {/* 优势与建议 */}
-                <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-                  <Col xs={24} lg={8}>
-                    <Card title="优势领域" extra={<StarOutlined style={{ color: '#faad14' }} />}>
-                      <List
-                        dataSource={abilityProfile.strengths}
-                        renderItem={item => (
-                          <List.Item>
-                            <CheckCircleOutlined style={{ color: '#52c41a', marginRight: '8px' }} />
-                            {item}
-                          </List.Item>
-                        )}
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} lg={8}>
-                    <Card title="待提升" extra={<ExclamationCircleOutlined style={{ color: '#faad14' }} />}>
-                      <List
-                        dataSource={abilityProfile.weaknesses}
-                        renderItem={item => (
-                          <List.Item>
-                            <InfoCircleOutlined style={{ color: '#faad14', marginRight: '8px' }} />
-                            {item}
-                          </List.Item>
-                        )}
-                      />
-                    </Card>
-                  </Col>
-                  <Col xs={24} lg={8}>
-                    <Card title="学习建议" extra={<BulbOutlined style={{ color: '#1890ff' }} />}>
-                      <List
-                        dataSource={abilityProfile.recommendations}
-                        renderItem={item => (
-                          <List.Item>
-                            <BulbOutlined style={{ color: '#1890ff', marginRight: '8px' }} />
-                            {item}
-                          </List.Item>
-                        )}
-                      />
-                    </Card>
-                  </Col>
-                </Row>
-
-                {/* 成就徽章 */}
-                <Card title="成就徽章" style={{ marginTop: '16px' }}>
-                  <Row gutter={[16, 16]}>
-                    {abilityProfile.achievements.map(achievement => (
-                      <Col xs={12} sm={8} md={6} lg={4} key={achievement.id}>
-                        <Card size="small" style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '32px', marginBottom: '8px' }}>
-                            {achievement.icon}
-                          </div>
-                          <Text strong style={{ fontSize: '12px' }}>
-                            {achievement.title}
-                          </Text>
-                          <br />
-                          <Text type="secondary" style={{ fontSize: '10px' }}>
-                            {achievement.description}
-                          </Text>
-                          <br />
-                          <Tag 
-                            size="small" 
-                            color={
-                              achievement.rarity === 'common' ? 'default' :
-                              achievement.rarity === 'rare' ? 'blue' :
-                              achievement.rarity === 'epic' ? 'purple' : 'gold'
-                            }
-                            style={{ marginTop: '4px' }}
-                          >
-                            {achievement.rarity === 'common' ? '普通' :
-                             achievement.rarity === 'rare' ? '稀有' :
-                             achievement.rarity === 'epic' ? '史诗' : '传说'}
-                          </Tag>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                </Card>
-              </div>
-            )}
-          </TabPane>
-        </Tabs>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  </Card>
+                </div>
+              )
+            }
+          ]}
+        />
       )}
 
       {/* 详情抽屉 */}

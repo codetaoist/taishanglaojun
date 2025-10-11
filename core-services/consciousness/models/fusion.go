@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// FusionState 融合状态
+// FusionState 融合状�?
 type FusionState struct {
 	ID              int64                  `json:"id" db:"id"`
 	SessionID       string                 `json:"session_id" db:"session_id"`
@@ -19,7 +19,7 @@ type FusionState struct {
 	Metadata        map[string]interface{} `json:"metadata" db:"metadata"`
 }
 
-// CarbonInput 碳基输入（人类智慧、文化、直觉等）
+// CarbonInput 碳基输入（人类智慧、文化、直觉等�?
 type CarbonInput struct {
 	Type            CarbonInputType  `json:"type"`
 	Content         string           `json:"content"`
@@ -51,18 +51,18 @@ type FusionResult struct {
 	SiliconContribution float64                `json:"silicon_contribution"` // 硅基贡献 0-1
 	SynergyScore        float64                `json:"synergy_score"`        // 协同效应评分 0-1
 	QualityMetrics      *QualityMetrics        `json:"quality_metrics"`
-	EmergentProperties  []EmergentProperty     `json:"emergent_properties"` // 涌现属性
+	EmergentProperties  []EmergentProperty     `json:"emergent_properties"` // 涌现属�?
 	Insights            []string               `json:"insights"`            // 洞察
 	Recommendations     []string               `json:"recommendations"`     // 建议
-	Metadata            map[string]interface{} `json:"metadata"`            // 元数据
+	Metadata            map[string]interface{} `json:"metadata"`            // 元数�?
 }
 
-// EmotionalState 情感状态
+// EmotionalState 情感状�?
 type EmotionalState struct {
 	Primary    string   `json:"primary"`    // 主要情感
 	Secondary  []string `json:"secondary"`  // 次要情感
 	Intensity  float64  `json:"intensity"`  // 强度 0-1
-	Valence    float64  `json:"valence"`    // 效价 -1到1
+	Valence    float64  `json:"valence"`    // 效价 -1�?
 	Arousal    float64  `json:"arousal"`    // 唤醒 0-1
 	Confidence float64  `json:"confidence"` // 置信 0-1
 }
@@ -82,7 +82,7 @@ type IntuitionData struct {
 	Type       string   `json:"type"`       // 直觉类型
 	Strength   float64  `json:"strength"`   // 直觉强度 0-1
 	Direction  string   `json:"direction"`  // 直觉方向
-	Patterns   []string `json:"patterns"`   // 识别的模式
+	Patterns   []string `json:"patterns"`   // 识别的模�?
 	Hunches    []string `json:"hunches"`    // 预感
 	Confidence float64  `json:"confidence"` // 置信 0-1
 }
@@ -143,7 +143,7 @@ type DataProcessing struct {
 // AlgorithmicAnalysis 算法分析
 type AlgorithmicAnalysis struct {
 	Algorithm    string              `json:"algorithm"`    // 算法名称
-	Complexity   string              `json:"complexity"`   // 复杂度 0-1
+	Complexity   string              `json:"complexity"`   // 复杂�?0-1
 	Performance  *PerformanceMetrics `json:"performance"`  // 性能指标 0-1
 	Optimization []string            `json:"optimization"` // 优化建议
 	Limitations  []string            `json:"limitations"`  // 限制
@@ -156,12 +156,12 @@ type QualityMetrics struct {
 	Relevance    float64 `json:"relevance"`    // 相关 0-1
 	Completeness float64 `json:"completeness"` // 完整 0-1
 	Coherence    float64 `json:"coherence"`    // 连贯 0-1
-	Creativity   float64 `json:"creativity"`   // 创造 0-1
+	Creativity   float64 `json:"creativity"`   // 创�?0-1
 	Practicality float64 `json:"practicality"` // 实用 0-1
 	Overall      float64 `json:"overall"`      // 整体质量 0-1
 }
 
-// EmergentProperty 涌现特性
+// EmergentProperty 涌现特�?
 type EmergentProperty struct {
 	Name        string               `json:"name"`        // 特性名 0-1
 	Description string               `json:"description"` // 描述 0-1

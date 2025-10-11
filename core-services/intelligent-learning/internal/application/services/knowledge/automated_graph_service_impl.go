@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// AutomatedKnowledgeGraphServiceConfig 自动化知识图谱服务配置
+// AutomatedKnowledgeGraphServiceConfig 自动化知识图谱服务配�?
 type AutomatedKnowledgeGraphServiceConfig struct {
 	MaxNodes                int                    `json:"max_nodes"`
 	MaxEdges                int                    `json:"max_edges"`
@@ -69,7 +69,7 @@ type KnowledgeGraph struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
-// AutomatedKnowledgeGraphServiceImpl 自动化知识图谱服务实现
+// AutomatedKnowledgeGraphServiceImpl 自动化知识图谱服务实�?
 type AutomatedKnowledgeGraphServiceImpl struct {
 	config              *AutomatedKnowledgeGraphServiceConfig
 	knowledgeExtractor  *KnowledgeExtractor
@@ -85,7 +85,7 @@ type AutomatedKnowledgeGraphServiceImpl struct {
 	mu                 sync.RWMutex
 }
 
-// KnowledgeExtractor 知识抽取器
+// KnowledgeExtractor 知识抽取�?
 type KnowledgeExtractor struct {
 	extractors      map[string]*Extractor
 	processors      map[string]*TextProcessor
@@ -96,7 +96,7 @@ type KnowledgeExtractor struct {
 	mu             sync.RWMutex
 }
 
-// ExtractedEntity 抽取的实体
+// ExtractedEntity 抽取的实�?
 type ExtractedEntity struct {
 	EntityID    string                 `json:"entity_id"`
 	Name        string                 `json:"name"`
@@ -107,7 +107,7 @@ type ExtractedEntity struct {
 	Source      string                 `json:"source"`
 }
 
-// ExtractedRelation 抽取的关系
+// ExtractedRelation 抽取的关�?
 type ExtractedRelation struct {
 	RelationID  string                 `json:"relation_id"`
 	Type        string                 `json:"type"`
@@ -118,7 +118,7 @@ type ExtractedRelation struct {
 	Position    *TextPosition          `json:"position"`
 }
 
-// ExtractedConcept 抽取的概念
+// ExtractedConcept 抽取的概�?
 type ExtractedConcept struct {
 	ConceptID   string                 `json:"concept_id"`
 	Name        string                 `json:"name"`
@@ -137,7 +137,7 @@ type TextPosition struct {
 	Column int `json:"column"`
 }
 
-// AutomatedKnowledgeGraph 自动化知识图谱
+// AutomatedKnowledgeGraph 自动化知识图�?
 type AutomatedKnowledgeGraph struct {
 	GraphID     string                 `json:"graph_id"`
 	Name        string                 `json:"name"`
@@ -162,7 +162,7 @@ type GraphNode struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
-// GraphEdge 图谱边
+// GraphEdge 图谱�?
 type GraphEdge struct {
 	EdgeID      string                 `json:"edge_id"`
 	Type        string                 `json:"type"`
@@ -175,7 +175,7 @@ type GraphEdge struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
-// AutomatedInferredRelation 自动化推理关系
+// AutomatedInferredRelation 自动化推理关�?
 type AutomatedInferredRelation struct {
 	RelationID  string                 `json:"relation_id"`
 	Type        string                 `json:"type"`
@@ -370,7 +370,7 @@ func newGraphMetrics() *GraphMetrics {
 
 // 实现核心方法的占位符
 func (ke *KnowledgeExtractor) preprocessText(content map[string]interface{}) (map[string]interface{}, error) {
-	// 文本预处理实现
+	// 文本预处理实�?
 	return content, nil
 }
 
@@ -390,7 +390,7 @@ func (ke *KnowledgeExtractor) extractConcepts(content map[string]interface{}) ([
 }
 
 func (akgs *AutomatedKnowledgeGraphServiceImpl) calculateExtractionConfidence(entities []*ExtractedEntity, relations []*ExtractedRelation, concepts []*ExtractedConcept) float64 {
-	// 计算抽取置信度
+	// 计算抽取置信�?
 	return 0.85
 }
 
@@ -405,7 +405,7 @@ func (akgs *AutomatedKnowledgeGraphServiceImpl) buildNodes(graph *AutomatedKnowl
 }
 
 func (akgs *AutomatedKnowledgeGraphServiceImpl) buildEdges(graph *AutomatedKnowledgeGraph, result *KnowledgeExtractionResult) error {
-	// 构建边
+	// 构建�?
 	return nil
 }
 
@@ -444,7 +444,7 @@ func (ce *ClusteringEngine) clusterEntities(graph *AutomatedKnowledgeGraph) ([]*
 }
 
 func (akgs *AutomatedKnowledgeGraphServiceImpl) filterAndRankInferredRelations(relations []*AutomatedInferredRelation) []*AutomatedInferredRelation {
-	// 过滤和排序推理关系
+	// 过滤和排序推理关�?
 	return relations
 }
 
@@ -469,7 +469,7 @@ func (te *TemporalEngine) performTemporalReasoning(graph *AutomatedKnowledgeGrap
 }
 
 func (akgs *AutomatedKnowledgeGraphServiceImpl) calculateReasoningConfidence(logic []*LogicResult, rule []*RuleResult, prob []*ProbabilisticResult, temp []*TemporalResult) float64 {
-	// 计算推理置信度
+	// 计算推理置信�?
 	return 0.80
 }
 
@@ -522,7 +522,7 @@ func (vm *VersionManager) recordVersion(version *GraphVersion) error {
 }
 
 func (gc *GraphCache) saveToStorage() error {
-	// 保存缓存到存储
+	// 保存缓存到存�?
 	return nil
 }
 
@@ -536,9 +536,9 @@ func (gs *GraphStorage) shutdown() error {
 	return nil
 }
 
-// 缺失的数据结构定义
+// 缺失的数据结构定�?
 
-// KnowledgeGraphIndexBuilder 知识图谱索引构建器
+// KnowledgeGraphIndexBuilder 知识图谱索引构建�?
 type KnowledgeGraphIndexBuilder struct {
 	BuilderID   string                 `json:"builder_id"`
 	Type        string                 `json:"type"`
@@ -605,7 +605,7 @@ type BasicBuilderPerformance struct {
 	LastBuilt       time.Time     `json:"last_built"`
 }
 
-// KnowledgeGraphProcessor 知识图谱处理器
+// KnowledgeGraphProcessor 知识图谱处理�?
 type KnowledgeGraphProcessor struct {
 	ProcessorID string                 `json:"processor_id"`
 	Type        string                 `json:"type"`
@@ -624,7 +624,7 @@ type BasicNLPPipeline struct {
 	Performance *AlgorithmPerformance  `json:"performance"`
 }
 
-// Extractor 抽取器
+// Extractor 抽取�?
 type Extractor struct {
 	ExtractorID string                 `json:"extractor_id"`
 	Type        string                 `json:"type"`
@@ -643,7 +643,7 @@ type ExtractorPerformance struct {
 	LastUpdated  time.Time `json:"last_updated"`
 }
 
-// TextProcessor 文本处理器
+// TextProcessor 文本处理�?
 type TextProcessor struct {
 	ProcessorID string                 `json:"processor_id"`
 	Type        string                 `json:"type"`
@@ -682,7 +682,7 @@ type NLPComponent struct {
 	IsEnabled   bool                   `json:"is_enabled"`
 }
 
-// EntityRecognizer 实体识别器
+// EntityRecognizer 实体识别�?
 type EntityRecognizer struct {
 	RecognizerID string                 `json:"recognizer_id"`
 	Type         string                 `json:"type"`
@@ -736,7 +736,7 @@ type DictEntry struct {
 	Confidence  float64                `json:"confidence"`
 }
 
-// RelationExtractor 关系抽取器
+// RelationExtractor 关系抽取�?
 type RelationExtractor struct {
 	ExtractorID string                 `json:"extractor_id"`
 	Type        string                 `json:"type"`
@@ -780,7 +780,7 @@ type RelationRule struct {
 	IsEnabled    bool                   `json:"is_enabled"`
 }
 
-// ConceptExtractor 概念抽取器
+// ConceptExtractor 概念抽取�?
 type ConceptExtractor struct {
 	ExtractorID string                 `json:"extractor_id"`
 	Type        string                 `json:"type"`
@@ -816,7 +816,7 @@ type HierarchyLevel struct {
 	Relations []string               `json:"relations"`
 }
 
-// GraphBuilder 图谱构建器
+// GraphBuilder 图谱构建�?
 type GraphBuilder struct {
 	builders        map[string]*Builder
 	schemas         map[string]*GraphSchema
@@ -826,7 +826,7 @@ type GraphBuilder struct {
 	mu             sync.RWMutex
 }
 
-// Builder 构建器
+// Builder 构建�?
 type Builder struct {
 	BuilderID   string                 `json:"builder_id"`
 	Type        string                 `json:"type"`
@@ -868,7 +868,7 @@ type NodeType struct {
 	IsAbstract  bool                   `json:"is_abstract"`
 }
 
-// EdgeType 边类型
+// EdgeType 边类�?
 type EdgeType struct {
 	TypeID      string                 `json:"type_id"`
 	Name        string                 `json:"name"`
@@ -879,7 +879,7 @@ type EdgeType struct {
 	IsDirected  bool                   `json:"is_directed"`
 }
 
-// Property 属性
+// Property 属�?
 type Property struct {
 	PropertyID  string                 `json:"property_id"`
 	Name        string                 `json:"name"`
@@ -890,7 +890,7 @@ type Property struct {
 	Constraints []*PropertyConstraint  `json:"constraints"`
 }
 
-// PropertyConstraint 属性约束
+// PropertyConstraint 属性约�?
 type PropertyConstraint struct {
 	ConstraintID string                 `json:"constraint_id"`
 	Type         string                 `json:"type"`
@@ -915,7 +915,7 @@ type SchemaConstraint struct {
 	ErrorMessage string                 `json:"error_message"`
 }
 
-// GraphValidator 图谱验证器
+// GraphValidator 图谱验证�?
 type GraphValidator struct {
 	ValidatorID string                 `json:"validator_id"`
 	Type        string                 `json:"type"`
@@ -935,7 +935,7 @@ type GraphValidationRule struct {
 	IsEnabled   bool                   `json:"is_enabled"`
 }
 
-// GraphMerger 图谱合并器
+// GraphMerger 图谱合并�?
 type GraphMerger struct {
 	MergerID    string                 `json:"merger_id"`
 	Type        string                 `json:"type"`
@@ -965,7 +965,7 @@ type MergeRule struct {
 	IsEnabled   bool                   `json:"is_enabled"`
 }
 
-// GraphOptimizer 图谱优化器
+// GraphOptimizer 图谱优化�?
 type GraphOptimizer struct {
 	OptimizerID string                 `json:"optimizer_id"`
 	Type        string                 `json:"type"`
@@ -1004,7 +1004,7 @@ type RelationshipEngine struct {
 	mu             sync.RWMutex
 }
 
-// RelationshipAnalyzer 关系分析器
+// RelationshipAnalyzer 关系分析�?
 type RelationshipAnalyzer struct {
 	AnalyzerID  string                 `json:"analyzer_id"`
 	Type        string                 `json:"type"`
@@ -1053,7 +1053,7 @@ type GraphInferenceRule struct {
 	IsEnabled   bool                   `json:"is_enabled"`
 }
 
-// Reasoner 推理器
+// Reasoner 推理�?
 type Reasoner struct {
 	ReasonerID  string                 `json:"reasoner_id"`
 	Type        string                 `json:"type"`
@@ -1071,7 +1071,7 @@ type ReasonerPerformance struct {
 	LastMeasured        time.Time `json:"last_measured"`
 }
 
-// SimilarityEngine 相似性引擎
+// SimilarityEngine 相似性引�?
 type SimilarityEngine struct {
 	EngineID    string                 `json:"engine_id"`
 	Type        string                 `json:"type"`
@@ -1080,7 +1080,7 @@ type SimilarityEngine struct {
 	IsActive    bool                   `json:"is_active"`
 }
 
-// SimilarityAlgorithm 相似性算法
+// SimilarityAlgorithm 相似性算�?
 type SimilarityAlgorithm struct {
 	AlgorithmID string                 `json:"algorithm_id"`
 	Name        string                 `json:"name"`
@@ -1185,7 +1185,7 @@ type RuleEngine struct {
 	IsActive    bool                   `json:"is_active"`
 }
 
-// RuleSet 规则集
+// RuleSet 规则�?
 type RuleSet struct {
 	RuleSetID   string                 `json:"rule_set_id"`
 	Name        string                 `json:"name"`
@@ -1209,7 +1209,7 @@ type Rule struct {
 	IsEnabled   bool                   `json:"is_enabled"`
 }
 
-// RuleExecutor 规则执行器
+// RuleExecutor 规则执行�?
 type RuleExecutor struct {
 	ExecutorID  string                 `json:"executor_id"`
 	Type        string                 `json:"type"`
@@ -1236,7 +1236,7 @@ type ProbabilisticEngine struct {
 	IsActive    bool                   `json:"is_active"`
 }
 
-// BayesianNetwork 贝叶斯网络
+// BayesianNetwork 贝叶斯网�?
 type BayesianNetwork struct {
 	NetworkID   string                 `json:"network_id"`
 	Name        string                 `json:"name"`
@@ -1247,7 +1247,7 @@ type BayesianNetwork struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
-// BayesianNode 贝叶斯节点
+// BayesianNode 贝叶斯节�?
 type BayesianNode struct {
 	NodeID      string                 `json:"node_id"`
 	Name        string                 `json:"name"`
@@ -1349,7 +1349,7 @@ type SearchAlgorithm struct {
 	IsActive    bool                   `json:"is_active"`
 }
 
-// QueryParser 查询解析器
+// QueryParser 查询解析�?
 type QueryParser struct {
 	ParserID    string                 `json:"parser_id"`
 	Type        string                 `json:"type"`
@@ -1368,7 +1368,7 @@ type GrammarRule struct {
 	Priority    int                    `json:"priority"`
 }
 
-// Lexer 词法分析器
+// Lexer 词法分析�?
 type Lexer struct {
 	LexerID     string                 `json:"lexer_id"`
 	Type        string                 `json:"type"`
@@ -1395,7 +1395,7 @@ type LexerRule struct {
 	Priority    int                    `json:"priority"`
 }
 
-// QueryOptimizer 查询优化器
+// QueryOptimizer 查询优化�?
 type QueryOptimizer struct {
 	OptimizerID string                 `json:"optimizer_id"`
 	Type        string                 `json:"type"`
@@ -1404,7 +1404,7 @@ type QueryOptimizer struct {
 	IsActive    bool                   `json:"is_active"`
 }
 
-// GraphOptimizationStrategy 图优化策略
+// GraphOptimizationStrategy 图优化策�?
 type GraphOptimizationStrategy struct {
 	StrategyID  string                 `json:"strategy_id"`
 	Name        string                 `json:"name"`
@@ -1441,7 +1441,7 @@ type PopularQuery struct {
 	LastUsed    time.Time              `json:"last_used"`
 }
 
-// QueryExecutor 查询执行器
+// QueryExecutor 查询执行�?
 type QueryExecutor struct {
 	ExecutorID  string                 `json:"executor_id"`
 	Type        string                 `json:"type"`
@@ -1520,7 +1520,7 @@ type StoragePerformance struct {
 	LastMeasured    time.Time `json:"last_measured"`
 }
 
-// Partitioner 分区器
+// Partitioner 分区�?
 type Partitioner struct {
 	PartitionerID string                 `json:"partitioner_id"`
 	Type          string                 `json:"type"`
@@ -1541,7 +1541,7 @@ type Partition struct {
 	IsActive    bool                   `json:"is_active"`
 }
 
-// Replicator 复制器
+// Replicator 复制�?
 type Replicator struct {
 	ReplicatorID string                 `json:"replicator_id"`
 	Type         string                 `json:"type"`
@@ -1561,7 +1561,7 @@ type Replica struct {
 	IsActive    bool                   `json:"is_active"`
 }
 
-// Compactor 压缩器
+// Compactor 压缩�?
 type Compactor struct {
 	CompactorID string                 `json:"compactor_id"`
 	Type        string                 `json:"type"`
@@ -1571,7 +1571,7 @@ type Compactor struct {
 	LastRun     *time.Time             `json:"last_run,omitempty"`
 }
 
-// IndexManager 索引管理器
+// IndexManager 索引管理�?
 type IndexManager struct {
 	indexes     map[string]*GraphIndex
 	builders    map[string]*KnowledgeGraphIndexBuilder
@@ -1602,7 +1602,7 @@ type IndexPerformance struct {
 	LastMeasured    time.Time     `json:"last_measured"`
 }
 
-// IndexOptimizer 索引优化器
+// IndexOptimizer 索引优化�?
 type IndexOptimizer struct {
 	OptimizerID string                 `json:"optimizer_id"`
 	Type        string                 `json:"type"`
@@ -1629,7 +1629,7 @@ type IndexOptimizationRule struct {
 	Benefit     float64                `json:"benefit"`
 }
 
-// VersionManager 版本管理器
+// VersionManager 版本管理�?
 type VersionManager struct {
 	versions    map[string]*GraphVersion
 	branches    map[string]*GraphBranch
@@ -1674,7 +1674,7 @@ type GraphBranch struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
-// VersionMerger 版本合并器
+// VersionMerger 版本合并�?
 type VersionMerger struct {
 	MergerID    string                 `json:"merger_id"`
 	Type        string                 `json:"type"`
@@ -1715,7 +1715,7 @@ type CachedNode struct {
 	TTL         time.Duration          `json:"ttl"`
 }
 
-// CachedEdge 缓存边
+// CachedEdge 缓存�?
 type CachedEdge struct {
 	EdgeID      string                 `json:"edge_id"`
 	Data        interface{}            `json:"data"`
@@ -1740,7 +1740,7 @@ type GraphMetrics struct {
 	mu                 sync.RWMutex
 }
 
-// NewAutomatedKnowledgeGraphServiceImpl 创建自动化知识图谱服务实现
+// NewAutomatedKnowledgeGraphServiceImpl 创建自动化知识图谱服务实�?
 func NewAutomatedKnowledgeGraphServiceImpl(config *AutomatedKnowledgeGraphServiceConfig) *AutomatedKnowledgeGraphServiceImpl {
 	return &AutomatedKnowledgeGraphServiceImpl{
 		config:              config,
@@ -1762,7 +1762,7 @@ func (akgs *AutomatedKnowledgeGraphServiceImpl) ExtractKnowledge(ctx context.Con
 	akgs.mu.Lock()
 	defer akgs.mu.Unlock()
 
-	// 预处理文本
+	// 预处理文�?
 	processedContent, err := akgs.knowledgeExtractor.preprocessText(content)
 	if err != nil {
 		return nil, fmt.Errorf("text preprocessing failed: %w", err)
@@ -1822,7 +1822,7 @@ func (akgs *AutomatedKnowledgeGraphServiceImpl) BuildKnowledgeGraph(ctx context.
 		}
 	}
 
-	// 构建边
+	// 构建�?
 	for _, result := range extractionResults {
 		if err := akgs.buildEdges(graph, result); err != nil {
 			return nil, fmt.Errorf("failed to build edges: %w", err)
@@ -1856,13 +1856,13 @@ func (akgs *AutomatedKnowledgeGraphServiceImpl) InferRelationships(ctx context.C
 		return nil, fmt.Errorf("relationship analysis failed: %w", err)
 	}
 
-	// 推理新关系
+	// 推理新关�?
 	inferredRelations, err := akgs.relationshipEngine.inferenceEngine.inferRelationships(graph, existingRelations)
 	if err != nil {
 		return nil, fmt.Errorf("relationship inference failed: %w", err)
 	}
 
-	// 计算相似性
+	// 计算相似�?
 	similarityRelations, err := akgs.relationshipEngine.similarityEngine.findSimilarEntities(graph)
 	if err != nil {
 		return nil, fmt.Errorf("similarity calculation failed: %w", err)
@@ -1880,7 +1880,7 @@ func (akgs *AutomatedKnowledgeGraphServiceImpl) InferRelationships(ctx context.C
 	allInferredRelations = append(allInferredRelations, similarityRelations...)
 	allInferredRelations = append(allInferredRelations, clusterRelations...)
 
-	// 排序和过滤
+	// 排序和过�?
 	filteredRelations := akgs.filterAndRankInferredRelations(allInferredRelations)
 
 	return filteredRelations, nil
@@ -1935,7 +1935,7 @@ func (akgs *AutomatedKnowledgeGraphServiceImpl) QueryKnowledgeGraph(ctx context.
 	akgs.mu.RLock()
 	defer akgs.mu.RUnlock()
 
-	// 检查缓存
+	// 检查缓�?
 	if cached := akgs.queryEngine.cache.getCachedResult(query); cached != nil {
 		return cached.Result.(*QueryResult), nil
 	}

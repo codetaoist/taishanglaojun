@@ -1,0 +1,263 @@
+# 性能优化配置
+performance:
+  # 缓存配置
+  cache:
+    # 缓存策略: redis, local, hybrid
+    strategy: "hybrid"
+    
+    # 默认TTL
+    default_ttl: "1h"
+    
+    # Redis配置
+    redis:
+      addr: "localhost:6379"
+      password: ""
+      db: 1
+      pool_size: 100
+      min_idle_conns: 10
+      max_retries: 3
+      dial_timeout: "5s"
+      read_timeout: "3s"
+      write_timeout: "3s"
+      idle_timeout: "5m"
+    
+    # 本地缓存配置
+    local:
+      max_size: 10000
+      ttl: "30m"
+      cleanup_time: "5m"
+      shard_count: 256
+  
+  # 连接池配置
+  connection_pool:
+    max_open_conns: 100
+    max_idle_conns: 10
+    conn_max_lifetime: "1h"
+    conn_max_idle_time: "10m"
+  
+  # 内存管理配置
+  memory:
+    # GC百分比 (默认100)
+    gc_percent: 100
+    
+    # 最大内存使用量 (MB)
+    max_memory_mb: 1024
+    
+    # 检查间隔
+    check_interval: "30s"
+    
+    # 强制GC阈值 (内存使用率)
+    force_gc_threshold: 0.8
+  
+  # 并发配置
+  concurrency:
+    # 最大工作协程数
+    max_workers: 100
+    
+    # 任务队列大小
+    queue_size: 1000
+    
+    # 工作协程超时
+    worker_timeout: "30s"
+    
+    # 关闭超时
+    shutdown_timeout: "10s"
+  
+  # 监控配置
+  monitoring:
+    # 指标收集间隔
+    metrics_interval: "10s"
+    
+    # 启用性能分析
+    enable_profiling: true
+    
+    # 性能分析端口
+    profiling_port: 6060
+
+# 数据库优化配置
+database:
+  # 连接池配置
+  max_open_conns: 100
+  max_idle_conns: 10
+  conn_max_lifetime: "1h"
+  conn_max_idle_time: "10m"
+  
+  # 查询优化
+  query_timeout: "30s"
+  slow_query_threshold: "1s"
+  
+  # 批处理配置
+  batch_size: 1000
+  batch_timeout: "5s"
+
+# HTTP服务器优化配置
+http_server:
+  # 读取超时
+  read_timeout: "30s"
+  
+  # 写入超时
+  write_timeout: "30s"
+  
+  # 空闲超时
+  idle_timeout: "60s"
+  
+  # 最大头部大小
+  max_header_bytes: 1048576
+  
+  # 启用Keep-Alive
+  keep_alive: true
+  
+  # Keep-Alive超时
+  keep_alive_timeout: "60s"
+
+# 日志优化配置
+logging:
+  # 异步日志
+  async: true
+  
+  # 缓冲区大小
+  buffer_size: 1000
+  
+  # 刷新间隔
+  flush_interval: "1s"
+  
+  # 压缩历史日志
+  compress: true
+  
+  # 日志轮转
+  rotation:
+    max_size: "100MB"
+    max_age: "7d"
+    max_backups: 10
+
+# 监控和指标配置
+metrics:
+  # 启用Prometheus指标
+  prometheus:
+    enabled: true
+    path: "/metrics"
+    port: 9090
+  
+  # 自定义指标
+  custom:
+    # 请求延迟直方图桶
+    latency_buckets: [0.1, 0.3, 1.2, 5.0]
+    
+    # 响应大小直方图桶
+    size_buckets: [200, 500, 900, 2000]
+
+# 安全性能配置
+security_performance:
+  # 威胁检测优化
+  threat_detection:
+    # 批处理大小
+    batch_size: 100
+    
+    # 处理间隔
+    process_interval: "1s"
+    
+    # 缓存规则
+    cache_rules: true
+    
+    # 规则缓存TTL
+    rule_cache_ttl: "10m"
+  
+  # 漏洞扫描优化
+  vulnerability_scan:
+    # 并发扫描数
+    concurrent_scans: 5
+    
+    # 扫描超时
+    scan_timeout: "5m"
+    
+    # 结果缓存TTL
+    result_cache_ttl: "1h"
+  
+  # 安全监控优化
+  security_monitoring:
+    # 事件缓冲区大小
+    event_buffer_size: 1000
+    
+    # 事件处理间隔
+    event_process_interval: "100ms"
+    
+    # 指标聚合间隔
+    metrics_aggregation_interval: "10s"
+
+# 资源限制配置
+resource_limits:
+  # CPU限制
+  cpu:
+    # 最大CPU使用率 (百分比)
+    max_usage: 80
+    
+    # 检查间隔
+    check_interval: "10s"
+  
+  # 内存限制
+  memory:
+    # 最大内存使用量 (MB)
+    max_usage_mb: 2048
+    
+    # 检查间隔
+    check_interval: "10s"
+  
+  # 磁盘限制
+  disk:
+    # 最大磁盘使用率 (百分比)
+    max_usage: 90
+    
+    # 检查间隔
+    check_interval: "30s"
+  
+  # 网络限制
+  network:
+    # 最大带宽 (MB/s)
+    max_bandwidth_mb: 100
+    
+    # 最大连接数
+    max_connections: 10000
+
+# 优化策略配置
+optimization_strategies:
+  # 自动优化
+  auto_optimization:
+    enabled: true
+    
+    # 优化间隔
+    interval: "5m"
+    
+    # 优化阈值
+    thresholds:
+      cpu_usage: 70
+      memory_usage: 70
+      cache_hit_rate: 0.8
+  
+  # 预热策略
+  warmup:
+    enabled: true
+    
+    # 预热数据
+    preload_data:
+      - "threat_rules"
+      - "vulnerability_signatures"
+      - "security_policies"
+    
+    # 预热超时
+    timeout: "30s"
+  
+  # 降级策略
+  degradation:
+    enabled: true
+    
+    # 降级阈值
+    thresholds:
+      cpu_usage: 90
+      memory_usage: 90
+      error_rate: 0.1
+    
+    # 降级措施
+    measures:
+      - "disable_non_critical_features"
+      - "reduce_scan_frequency"
+      - "increase_cache_ttl"

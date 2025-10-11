@@ -1,0 +1,61 @@
+Source: taishang-laojun
+Section: utils
+Priority: optional
+Maintainer: TaishangLaojun Team <team@taishanglaojun.com>
+Build-Depends: debhelper-compat (= 13),
+               cmake (>= 3.16),
+               ninja-build,
+               pkg-config,
+               libgtk-4-dev (>= 4.6),
+               libglib2.0-dev (>= 2.66),
+               libjson-c-dev (>= 0.13),
+               libssl-dev (>= 1.1),
+               libsqlite3-dev (>= 3.31),
+               libcurl4-openssl-dev (>= 7.68),
+               libnotify-dev (>= 0.7),
+               libadwaita-1-dev (>= 1.0),
+               libwebkit2gtk-4.1-dev (>= 2.36),
+               libappindicator3-dev (>= 0.4),
+               desktop-file-utils,
+               appstream-util
+Standards-Version: 4.6.0
+Homepage: https://github.com/taishanglaojun/desktop-apps
+Vcs-Git: https://github.com/taishanglaojun/desktop-apps.git
+Vcs-Browser: https://github.com/taishanglaojun/desktop-apps
+Rules-Requires-Root: no
+
+Package: taishang-laojun
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         libgtk-4-1 (>= 4.6),
+         libglib2.0-0 (>= 2.66),
+         libjson-c5 (>= 0.13),
+         libssl3 (>= 1.1),
+         libsqlite3-0 (>= 3.31),
+         libcurl4 (>= 7.68),
+         libnotify4 (>= 0.7),
+         libadwaita-1-0 (>= 1.0),
+         libwebkit2gtk-4.1-0 (>= 2.36),
+         libappindicator3-1 (>= 0.4)
+Recommends: gstreamer1.0-plugins-good,
+            gstreamer1.0-plugins-bad,
+            gstreamer1.0-libav
+Suggests: gstreamer1.0-plugins-ugly
+Description: TaishangLaojun Desktop Application
+ TaishangLaojun is a modern desktop application that provides an intuitive
+ interface for AI-powered conversations and productivity tools. Built with
+ GTK4 and modern C, it offers a native Linux experience with excellent
+ performance and integration.
+ .
+ Key features include:
+  * Modern GTK4-based user interface
+  * AI-powered conversation capabilities
+  * Cross-platform compatibility
+  * Extensible plugin system
+  * Comprehensive configuration management
+  * Multi-language support
+  * System tray integration
+  * Desktop notifications
+ .
+ This package provides the main application binary, desktop integration
+ files, and documentation for the TaishangLaojun desktop application.

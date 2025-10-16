@@ -1,0 +1,32 @@
+app:
+  name: "taishang-service"
+  version: "1.0.0"
+  environment: "development"
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 30
+  write_timeout: 30
+
+database:
+  host: "localhost"
+  port: 5432
+  username: "postgres"
+  password: "password"
+  database: "taishang"
+  ssl_mode: "disable"
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  database: 0
+
+log:
+  level: "info"
+  format: "json"
+
+jwt:
+  secret: "your-secret-key-change-in-production"
+  expire_time: 3600

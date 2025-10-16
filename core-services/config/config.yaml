@@ -1,0 +1,339 @@
+# 太上老君 - 核心服务配置文件
+# 配置文件版本
+version: "1.0.0"
+
+# 服务基础配置
+server:
+  # 服务名称
+  name: "taishang-laojun-core-services"
+  # 服务版本
+  version: "1.0.0"
+  # 监听地址
+  host: "0.0.0.0"
+  # 监听端口
+  port: 8080
+  # 运行模式: development, testing, production
+  mode: "development"
+  # 请求超时时间（秒）
+  timeout: 30
+  # 最大请求体大小（MB）
+  max_body_size: 10
+  # 启用CORS
+  enable_cors: true
+  # 允许的域名
+  allowed_origins:
+    - "http://localhost:3000"
+    - "https://taishanglaojun.com"
+  # 启用请求日志
+  enable_request_log: true
+
+# 数据库配置
+database:
+  type: "sqlite"
+  host: ""
+  port: 0
+  database: "${DB_NAME:./data/taishanglaojun.db}"
+  username: ""
+  password: ""
+  # 连接池配置
+  max_open_conns: 25
+  max_idle_conns: 10
+  max_lifetime: 3600
+  # SSL模式
+  ssl_mode: "disable"
+
+# Redis配置
+redis:
+  # 主Redis
+  primary:
+    host: "${REDIS_HOST:localhost}"
+    port: "${REDIS_PORT:6379}"
+    password: "${REDIS_PASSWORD:}"
+    database: 0
+    # 连接池配置
+    pool_size: 10
+    min_idle_conns: 5
+    # 连接超时
+    dial_timeout: "5s"
+    read_timeout: "3s"
+    write_timeout: "3s"
+    # 禁用Redis以便测试
+    enabled: false
+  
+  # 缓存Redis（可选）
+  cache:
+    enabled: false
+    host: "${REDIS_CACHE_HOST:localhost}"
+    port: "${REDIS_CACHE_PORT:6379}"
+    password: "${REDIS_CACHE_PASSWORD:}"
+    database: 1
+
+# JWT认证配置
+jwt:
+  # JWT密钥
+  secret: "${JWT_SECRET:your-super-secret-jwt-key-change-in-production}"
+  # Token过期时间
+  expires_in: "24h"
+  # 刷新Token过期时间
+  refresh_expires_in: "168h"
+  # 签发者
+  issuer: "taishang-laojun"
+  # 受众
+  audience: "taishang-laojun-users"
+
+# AI服务配置
+ai:
+  # 默认AI提供商
+  default_provider: "openai"
+  
+  # OpenAI配置
+  openai:
+    enabled: true
+    api_key: "sk-test-key-for-development"  # 请替换为真实的OpenAI API密钥
+    base_url: "${OPENAI_BASE_URL:https://api.openai.com/v1}"
+    model: "gpt-3.5-turbo"
+    max_tokens: 2000
+    temperature: 0.7
+    timeout: "30s"
+    # 请求重试配置
+    retry_attempts: 3
+    retry_delay: "1s"
+  
+  # 百度文心一言配置
+  baidu:
+    api_key: "${BAIDU_API_KEY:}"
+    secret_key: "${BAIDU_SECRET_KEY:}"
+    model: "ERNIE-Bot-turbo"
+    timeout: "30s"
+  
+  # 阿里通义千问配置
+  alibaba:
+    api_key: "${ALIBABA_API_KEY:}"
+    model: "qwen-turbo"
+    timeout: "30s"
+  
+  # 智谱AI配置
+  zhipu:
+    api_key: "${ZHIPU_API_KEY:}"
+    model: "glm-3-turbo"
+    timeout: "30s"
+
+# 搜索引擎配置
+search:
+  # Elasticsearch配置
+  elasticsearch:
+    enabled: true
+    hosts:
+      - "${ES_HOST:http://localhost:9200}"
+    username: "${ES_USERNAME:}"
+    password: "${ES_PASSWORD:}"
+    # 索引配置
+    wisdom_index: "cultural_wisdom"
+    # 搜索配置
+    max_results: 100
+    timeout: "10s"
+  
+  # 向量搜索配置
+  vector:
+    enabled: true
+    # 向量维度
+    dimension: 1536
+    # 相似度阈值
+    similarity_threshold: 0.7
+    # 最大返回结果数
+    max_results: 50
+
+# 缓存配置
+cache:
+  # 默认缓存时间
+  default_ttl: "1h"
+  # 智慧内容缓存
+  wisdom:
+    ttl: "24h"
+    prefix: "wisdom:"
+  # 搜索结果缓存
+  search:
+    ttl: "30m"
+    prefix: "search:"
+  # 用户会话缓存
+  session:
+    ttl: "24h"
+    prefix: "session:"
+  # AI对话缓存
+  conversation:
+    ttl: "168h"
+    prefix: "conv:"
+
+# 日志配置
+logging:
+  # 日志级别: debug, info, warn, error
+  level: "info"
+  # 日志格式: json, text
+  format: "json"
+  # 日志输出: stdout, file
+  output: "stdout"
+  # 日志文件配置（当output为file时）
+  file:
+    path: "./logs/app.log"
+    max_size: 100  # MB
+    max_backups: 10
+    max_age: 30    # days
+    compress: true
+  # 访问日志
+  access_log:
+    enabled: true
+    path: "./logs/access.log"
+
+# 监控配置
+monitoring:
+  # Prometheus指标
+  prometheus:
+    enabled: true
+    path: "/metrics"
+  # 健康检查
+  health:
+    enabled: true
+    path: "/health"
+  # 性能分析
+  pprof:
+    enabled: false
+    path: "/debug/pprof"
+
+# 限流配置
+rate_limit:
+  # 全局限流
+  global:
+    enabled: true
+    # 每分钟请求数
+    requests_per_minute: 1000
+  # API限流
+  api:
+    enabled: true
+    # 每个用户每分钟请求数
+    requests_per_user_per_minute: 100
+  # AI服务限流
+  ai:
+    enabled: true
+    # 每个用户每分钟AI请求数
+    requests_per_user_per_minute: 20
+
+# 安全配置
+security:
+  # 启用HTTPS
+  enable_https: false
+  # TLS证书配置
+  tls:
+    cert_file: ""
+    key_file: ""
+  # 跨域配置
+  cors:
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+    allowed_headers:
+      - "Authorization"
+      - "Content-Type"
+      - "X-Requested-With"
+    max_age: 86400
+  # 请求头安全
+  headers:
+    # 启用安全头
+    enable_security_headers: true
+    # 内容类型嗅探保护
+    x_content_type_options: "nosniff"
+    # XSS保护
+    x_xss_protection: "1; mode=block"
+    # 点击劫持保护
+    x_frame_options: "DENY"
+
+# 文件存储配置
+storage:
+  # 本地存储
+  local:
+    enabled: true
+    base_path: "./uploads"
+    max_file_size: "10MB"
+  # 对象存储（阿里云OSS）
+  oss:
+    enabled: false
+    endpoint: "${OSS_ENDPOINT:}"
+    access_key_id: "${OSS_ACCESS_KEY_ID:}"
+    access_key_secret: "${OSS_ACCESS_KEY_SECRET:}"
+    bucket: "${OSS_BUCKET:}"
+    region: "${OSS_REGION:}"
+
+# 消息队列配置
+message_queue:
+  # Redis队列
+  redis:
+    enabled: true
+    # 队列名称前缀
+    queue_prefix: "queue:"
+    # 消费者数量
+    consumer_count: 5
+  # RabbitMQ（可选）
+  rabbitmq:
+    enabled: false
+    url: "${RABBITMQ_URL:amqp://guest:guest@localhost:5672/}"
+    exchange: "taishang-laojun"
+
+# 邮件配置
+email:
+  # SMTP配置
+  smtp:
+    enabled: false
+    host: "${SMTP_HOST:}"
+    port: "${SMTP_PORT:587}"
+    username: "${SMTP_USERNAME:}"
+    password: "${SMTP_PASSWORD:}"
+    from: "${SMTP_FROM:noreply@taishanglaojun.com}"
+    # 启用TLS
+    enable_tls: true
+
+# 第三方服务配置
+third_party:
+  # 微信配置
+  wechat:
+    enabled: false
+    app_id: "${WECHAT_APP_ID:}"
+    app_secret: "${WECHAT_APP_SECRET:}"
+  # 支付宝配置
+  alipay:
+    enabled: false
+    app_id: "${ALIPAY_APP_ID:}"
+    private_key: "${ALIPAY_PRIVATE_KEY:}"
+    public_key: "${ALIPAY_PUBLIC_KEY:}"
+
+# 开发环境配置
+development:
+  # 启用调试模式
+  debug: true
+  # 启用热重载
+  hot_reload: true
+  # 启用SQL日志
+  sql_debug: true
+  # 跳过认证（仅开发环境）
+  skip_auth: false
+
+# 测试环境配置
+testing:
+  # 使用内存数据库
+  use_memory_db: true
+  # 禁用外部服务调用
+  disable_external_calls: true
+  # 测试数据初始化
+  init_test_data: true
+
+# 生产环境配置
+production:
+  # 启用性能优化
+  enable_optimization: true
+  # 启用压缩
+  enable_compression: true
+  # 禁用调试信息
+  disable_debug: true
+  # 启用访问日志
+  enable_access_log: true

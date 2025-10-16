@@ -1,0 +1,600 @@
+# 告警规则配置文件
+groups:
+  # 系统级告警规则
+  - name: system_alerts
+    interval: 30s
+    rules:
+      # CPU使用率告警
+      - alert: HighCPUUsage
+        expr: system_cpu_usage > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+          component: cpu
+        annotations:
+          summary: "High CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}% which is above the threshold of 80% for more than 5 minutes"
+          runbook_url: "https://docs.taishang.com/runbooks/high-cpu-usage"
+          dashboard_url: "https://monitoring.taishang.com/d/system-overview"
+
+      - alert: CriticalCPUUsage
+        expr: system_cpu_usage > 95
+        for: 2m
+        labels:
+          severity: critical
+          category: system
+          component: cpu
+        annotations:
+          summary: "Critical CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}% which is critically high for more than 2 minutes"
+          runbook_url: "https://docs.taishang.com/runbooks/critical-cpu-usage"
+
+      # 内存使用率告警
+      - alert: HighMemoryUsage
+        expr: system_memory_usage > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+          component: memory
+        annotations:
+          summary: "High memory usage detected on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}% which is above the threshold of 85% for more than 5 minutes"
+          runbook_url: "https://docs.taishang.com/runbooks/high-memory-usage"
+
+      - alert: CriticalMemoryUsage
+        expr: system_memory_usage > 95
+        for: 2m
+        labels:
+          severity: critical
+          category: system
+          component: memory
+        annotations:
+          summary: "Critical memory usage detected on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}% which is critically high for more than 2 minutes"
+          runbook_url: "https://docs.taishang.com/runbooks/critical-memory-usage"
+
+      # 磁盘使用率告警
+      - alert: HighDiskUsage
+        expr: system_disk_usage > 80
+        for: 10m
+        labels:
+          severity: warning
+          category: system
+          component: disk
+        annotations:
+          summary: "High disk usage detected on {{ $labels.instance }}"
+          description: "Disk usage on {{ $labels.device }} is {{ $value }}% which is above the threshold of 80%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-disk-usage"
+
+      - alert: CriticalDiskUsage
+        expr: system_disk_usage > 95
+        for: 5m
+        labels:
+          severity: critical
+          category: system
+          component: disk
+        annotations:
+          summary: "Critical disk usage detected on {{ $labels.instance }}"
+          description: "Disk usage on {{ $labels.device }} is {{ $value }}% which is critically high"
+          runbook_url: "https://docs.taishang.com/runbooks/critical-disk-usage"
+
+      # 负载平均值告警
+      - alert: HighLoadAverage
+        expr: system_load_average_5m > 2.0
+        for: 10m
+        labels:
+          severity: warning
+          category: system
+          component: load
+        annotations:
+          summary: "High load average detected on {{ $labels.instance }}"
+          description: "5-minute load average is {{ $value }} which is above the threshold of 2.0"
+          runbook_url: "https://docs.taishang.com/runbooks/high-load-average"
+
+      # 文件描述符告警
+      - alert: HighFileDescriptorUsage
+        expr: system_file_descriptors_usage > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+          component: fd
+        annotations:
+          summary: "High file descriptor usage detected on {{ $labels.instance }}"
+          description: "File descriptor usage is {{ $value }}% which is above the threshold of 80%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-fd-usage"
+
+  # 应用级告警规则
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # HTTP错误率告警
+      - alert: HighHTTPErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          category: application
+          component: http
+        annotations:
+          summary: "High HTTP error rate detected for {{ $labels.service }}"
+          description: "HTTP 5xx error rate is {{ $value | humanizePercentage }} which is above the threshold of 5%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-error-rate"
+
+      - alert: CriticalHTTPErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.20
+        for: 1m
+        labels:
+          severity: critical
+          category: application
+          component: http
+        annotations:
+          summary: "Critical HTTP error rate detected for {{ $labels.service }}"
+          description: "HTTP 5xx error rate is {{ $value | humanizePercentage }} which is critically high"
+          runbook_url: "https://docs.taishang.com/runbooks/critical-error-rate"
+
+      # HTTP响应时间告警
+      - alert: HighHTTPLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          category: application
+          component: http
+        annotations:
+          summary: "High HTTP latency detected for {{ $labels.service }}"
+          description: "95th percentile latency is {{ $value }}s which is above the threshold of 1.0s"
+          runbook_url: "https://docs.taishang.com/runbooks/high-latency"
+
+      - alert: CriticalHTTPLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5.0
+        for: 2m
+        labels:
+          severity: critical
+          category: application
+          component: http
+        annotations:
+          summary: "Critical HTTP latency detected for {{ $labels.service }}"
+          description: "95th percentile latency is {{ $value }}s which is critically high"
+          runbook_url: "https://docs.taishang.com/runbooks/critical-latency"
+
+      # 应用实例下线告警
+      - alert: ApplicationInstanceDown
+        expr: up{job=~".*-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: application
+          component: instance
+        annotations:
+          summary: "Application instance {{ $labels.instance }} is down"
+          description: "Application instance {{ $labels.instance }} of service {{ $labels.job }} has been down for more than 1 minute"
+          runbook_url: "https://docs.taishang.com/runbooks/instance-down"
+
+      # Goroutine数量告警
+      - alert: HighGoroutineCount
+        expr: go_goroutines > 1000
+        for: 10m
+        labels:
+          severity: warning
+          category: application
+          component: goroutines
+        annotations:
+          summary: "High goroutine count detected for {{ $labels.service }}"
+          description: "Goroutine count is {{ $value }} which is above the threshold of 1000"
+          runbook_url: "https://docs.taishang.com/runbooks/high-goroutine-count"
+
+      # GC时间告警
+      - alert: HighGCDuration
+        expr: rate(go_gc_duration_seconds_sum[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          category: application
+          component: gc
+        annotations:
+          summary: "High GC duration detected for {{ $labels.service }}"
+          description: "GC duration rate is {{ $value }}s/s which is above the threshold of 0.1s/s"
+          runbook_url: "https://docs.taishang.com/runbooks/high-gc-duration"
+
+  # 数据库告警规则
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # 数据库连接池告警
+      - alert: HighDatabaseConnections
+        expr: database_connections_active / database_connections_max > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+          component: connections
+        annotations:
+          summary: "High database connection usage for {{ $labels.database }}"
+          description: "Database connection usage is {{ $value | humanizePercentage }} which is above the threshold of 80%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-db-connections"
+
+      - alert: CriticalDatabaseConnections
+        expr: database_connections_active / database_connections_max > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          category: database
+          component: connections
+        annotations:
+          summary: "Critical database connection usage for {{ $labels.database }}"
+          description: "Database connection usage is {{ $value | humanizePercentage }} which is critically high"
+          runbook_url: "https://docs.taishang.com/runbooks/critical-db-connections"
+
+      # 慢查询告警
+      - alert: HighSlowQueryRate
+        expr: rate(database_slow_queries_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+          component: queries
+        annotations:
+          summary: "High slow query rate detected for {{ $labels.database }}"
+          description: "Slow query rate is {{ $value }} queries/s which is above the threshold of 10 queries/s"
+          runbook_url: "https://docs.taishang.com/runbooks/high-slow-query-rate"
+
+      # 数据库锁等待告警
+      - alert: HighDatabaseLockWait
+        expr: database_lock_wait_time > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: database
+          component: locks
+        annotations:
+          summary: "High database lock wait time for {{ $labels.database }}"
+          description: "Database lock wait time is {{ $value }}s which is above the threshold of 5s"
+          runbook_url: "https://docs.taishang.com/runbooks/high-lock-wait"
+
+      # 数据库复制延迟告警
+      - alert: HighReplicationLag
+        expr: database_replication_lag > 60
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+          component: replication
+        annotations:
+          summary: "High replication lag detected for {{ $labels.database }}"
+          description: "Replication lag is {{ $value }}s which is above the threshold of 60s"
+          runbook_url: "https://docs.taishang.com/runbooks/high-replication-lag"
+
+  # Redis告警规则
+  - name: redis_alerts
+    interval: 30s
+    rules:
+      # Redis内存使用告警
+      - alert: HighRedisMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: redis
+          component: memory
+        annotations:
+          summary: "High Redis memory usage for {{ $labels.instance }}"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} which is above the threshold of 80%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-redis-memory"
+
+      # Redis连接数告警
+      - alert: HighRedisConnections
+        expr: redis_connected_clients > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: redis
+          component: connections
+        annotations:
+          summary: "High Redis connection count for {{ $labels.instance }}"
+          description: "Redis connection count is {{ $value }} which is above the threshold of 1000"
+          runbook_url: "https://docs.taishang.com/runbooks/high-redis-connections"
+
+      # Redis命中率告警
+      - alert: LowRedisHitRate
+        expr: redis_keyspace_hits / (redis_keyspace_hits + redis_keyspace_misses) < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          category: redis
+          component: performance
+        annotations:
+          summary: "Low Redis hit rate for {{ $labels.instance }}"
+          description: "Redis hit rate is {{ $value | humanizePercentage }} which is below the threshold of 80%"
+          runbook_url: "https://docs.taishang.com/runbooks/low-redis-hit-rate"
+
+      # Redis主从同步告警
+      - alert: RedisMasterSlaveDisconnected
+        expr: redis_master_slave_connected == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: redis
+          component: replication
+        annotations:
+          summary: "Redis master-slave disconnected for {{ $labels.instance }}"
+          description: "Redis slave is disconnected from master"
+          runbook_url: "https://docs.taishang.com/runbooks/redis-replication-failure"
+
+  # 业务告警规则
+  - name: business_alerts
+    interval: 60s
+    rules:
+      # 用户活跃度告警
+      - alert: LowUserActivity
+        expr: user_active_count < 100
+        for: 15m
+        labels:
+          severity: warning
+          category: business
+          component: users
+        annotations:
+          summary: "Low user activity detected"
+          description: "Active user count is {{ $value }} which is below the threshold of 100"
+          runbook_url: "https://docs.taishang.com/runbooks/low-user-activity"
+
+      # 交易失败率告警
+      - alert: HighTransactionFailureRate
+        expr: rate(business_transactions_total{status="failed"}[10m]) / rate(business_transactions_total[10m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          category: business
+          component: transactions
+        annotations:
+          summary: "High transaction failure rate detected"
+          description: "Transaction failure rate is {{ $value | humanizePercentage }} which is above the threshold of 5%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-transaction-failure-rate"
+
+      # 收入下降告警
+      - alert: RevenueDropDetected
+        expr: (revenue_current_hour - revenue_previous_hour) / revenue_previous_hour < -0.2
+        for: 10m
+        labels:
+          severity: critical
+          category: business
+          component: revenue
+        annotations:
+          summary: "Significant revenue drop detected"
+          description: "Revenue has dropped by {{ $value | humanizePercentage }} compared to the previous hour"
+          runbook_url: "https://docs.taishang.com/runbooks/revenue-drop"
+
+      # 转化率下降告警
+      - alert: LowConversionRate
+        expr: conversion_rate < 0.02
+        for: 30m
+        labels:
+          severity: warning
+          category: business
+          component: conversion
+        annotations:
+          summary: "Low conversion rate detected"
+          description: "Conversion rate is {{ $value | humanizePercentage }} which is below the threshold of 2%"
+          runbook_url: "https://docs.taishang.com/runbooks/low-conversion-rate"
+
+  # 安全告警规则
+  - name: security_alerts
+    interval: 30s
+    rules:
+      # 异常登录告警
+      - alert: SuspiciousLoginActivity
+        expr: rate(auth_login_attempts_total{status="failed"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          component: authentication
+        annotations:
+          summary: "Suspicious login activity detected"
+          description: "Failed login attempts rate is {{ $value }} attempts/s which is above the threshold of 10 attempts/s"
+          runbook_url: "https://docs.taishang.com/runbooks/suspicious-login"
+
+      # 权限提升告警
+      - alert: PrivilegeEscalationAttempt
+        expr: rate(auth_permission_denied_total{action="admin"}[5m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+          component: authorization
+        annotations:
+          summary: "Privilege escalation attempt detected"
+          description: "Admin permission denied rate is {{ $value }} attempts/s which indicates potential privilege escalation attempts"
+          runbook_url: "https://docs.taishang.com/runbooks/privilege-escalation"
+
+      # API滥用告警
+      - alert: APIAbuseDetected
+        expr: rate(http_requests_total{status="429"}[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+          component: api
+        annotations:
+          summary: "API abuse detected"
+          description: "Rate limit exceeded (429) responses rate is {{ $value }} responses/s which indicates potential API abuse"
+          runbook_url: "https://docs.taishang.com/runbooks/api-abuse"
+
+  # 网络告警规则
+  - name: network_alerts
+    interval: 30s
+    rules:
+      # 网络延迟告警
+      - alert: HighNetworkLatency
+        expr: network_latency_ms > 100
+        for: 5m
+        labels:
+          severity: warning
+          category: network
+          component: latency
+        annotations:
+          summary: "High network latency detected between {{ $labels.source }} and {{ $labels.target }}"
+          description: "Network latency is {{ $value }}ms which is above the threshold of 100ms"
+          runbook_url: "https://docs.taishang.com/runbooks/high-network-latency"
+
+      # 网络丢包告警
+      - alert: HighPacketLoss
+        expr: network_packet_loss_rate > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          category: network
+          component: packet_loss
+        annotations:
+          summary: "High packet loss detected between {{ $labels.source }} and {{ $labels.target }}"
+          description: "Packet loss rate is {{ $value | humanizePercentage }} which is above the threshold of 1%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-packet-loss"
+
+      # 带宽使用告警
+      - alert: HighBandwidthUsage
+        expr: network_bandwidth_usage_rate > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          category: network
+          component: bandwidth
+        annotations:
+          summary: "High bandwidth usage detected on {{ $labels.interface }}"
+          description: "Bandwidth usage is {{ $value | humanizePercentage }} which is above the threshold of 80%"
+          runbook_url: "https://docs.taishang.com/runbooks/high-bandwidth-usage"
+
+# 告警抑制规则
+inhibit_rules:
+  # 当实例下线时，抑制该实例的其他告警
+  - source_match:
+      alertname: ApplicationInstanceDown
+    target_match_re:
+      instance: ".*"
+    equal: ['instance']
+
+  # 当CPU使用率达到临界值时，抑制警告级别的CPU告警
+  - source_match:
+      alertname: CriticalCPUUsage
+    target_match:
+      alertname: HighCPUUsage
+    equal: ['instance']
+
+  # 当内存使用率达到临界值时，抑制警告级别的内存告警
+  - source_match:
+      alertname: CriticalMemoryUsage
+    target_match:
+      alertname: HighMemoryUsage
+    equal: ['instance']
+
+  # 当HTTP错误率达到临界值时，抑制警告级别的错误率告警
+  - source_match:
+      alertname: CriticalHTTPErrorRate
+    target_match:
+      alertname: HighHTTPErrorRate
+    equal: ['service']
+
+# 告警路由规则
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default'
+  routes:
+    # 紧急告警立即发送
+    - match:
+        severity: emergency
+      receiver: 'emergency'
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # 严重告警快速发送
+    - match:
+        severity: critical
+      receiver: 'critical'
+      group_wait: 5s
+      repeat_interval: 15m
+
+    # 警告告警正常发送
+    - match:
+        severity: warning
+      receiver: 'warning'
+      group_wait: 10s
+      repeat_interval: 1h
+
+    # 信息告警延迟发送
+    - match:
+        severity: info
+      receiver: 'info'
+      group_wait: 30s
+      repeat_interval: 4h
+
+    # 业务告警特殊处理
+    - match:
+        category: business
+      receiver: 'business'
+      group_wait: 5s
+      repeat_interval: 30m
+
+    # 安全告警特殊处理
+    - match:
+        category: security
+      receiver: 'security'
+      group_wait: 0s
+      repeat_interval: 10m
+
+# 接收器配置
+receivers:
+  - name: 'default'
+    webhook_configs:
+      - url: 'http://monitoring-webhook:8080/alerts'
+        send_resolved: true
+
+  - name: 'emergency'
+    email_configs:
+      - to: 'emergency@taishang.com'
+        subject: '[EMERGENCY] {{ .GroupLabels.alertname }}'
+        body: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    webhook_configs:
+      - url: 'http://monitoring-webhook:8080/alerts/emergency'
+        send_resolved: true
+
+  - name: 'critical'
+    email_configs:
+      - to: 'critical@taishang.com'
+        subject: '[CRITICAL] {{ .GroupLabels.alertname }}'
+        body: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    webhook_configs:
+      - url: 'http://monitoring-webhook:8080/alerts/critical'
+        send_resolved: true
+
+  - name: 'warning'
+    email_configs:
+      - to: 'warning@taishang.com'
+        subject: '[WARNING] {{ .GroupLabels.alertname }}'
+        body: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+  - name: 'info'
+    webhook_configs:
+      - url: 'http://monitoring-webhook:8080/alerts/info'
+        send_resolved: true
+
+  - name: 'business'
+    email_configs:
+      - to: 'business@taishang.com'
+        subject: '[BUSINESS] {{ .GroupLabels.alertname }}'
+        body: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    webhook_configs:
+      - url: 'http://monitoring-webhook:8080/alerts/business'
+        send_resolved: true
+
+  - name: 'security'
+    email_configs:
+      - to: 'security@taishang.com'
+        subject: '[SECURITY] {{ .GroupLabels.alertname }}'
+        body: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    webhook_configs:
+      - url: 'http://monitoring-webhook:8080/alerts/security'
+        send_resolved: true

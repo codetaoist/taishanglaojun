@@ -1,0 +1,615 @@
+{
+  "timestamp": "2025-10-13T12:38:30.041Z",
+  "totalSize": 4135998,
+  "totalSizeFormatted": "3.94 MB",
+  "filesByType": {
+    ".css": [
+      {
+        "name": "css/index-D49A6fjd.css",
+        "size": 17518,
+        "formattedSize": "17.11 KB",
+        "type": ".css"
+      },
+      {
+        "name": "css/Profile-FassF692.css",
+        "size": 6993,
+        "formattedSize": "6.83 KB",
+        "type": ".css"
+      },
+      {
+        "name": "css/Chat-Co-WascN.css",
+        "size": 6070,
+        "formattedSize": "5.93 KB",
+        "type": ".css"
+      },
+      {
+        "name": "css/HomePage-umzWbt1v.css",
+        "size": 6014,
+        "formattedSize": "5.87 KB",
+        "type": ".css"
+      }
+    ],
+    ".html": [
+      {
+        "name": "test.html",
+        "size": 2478,
+        "formattedSize": "2.42 KB",
+        "type": ".html"
+      },
+      {
+        "name": "index.html",
+        "size": 1182,
+        "formattedSize": "1.15 KB",
+        "type": ".html"
+      }
+    ],
+    ".js": [
+      {
+        "name": "js/vendor-CuQLz3VB.js",
+        "size": 1359638,
+        "formattedSize": "1.3 MB",
+        "type": ".js"
+      },
+      {
+        "name": "js/react-core-DrvnxUQ6.js",
+        "size": 809765,
+        "formattedSize": "790.79 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/antd-core-BrpEHlBi.js",
+        "size": 707344,
+        "formattedSize": "690.77 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/antd-icons-BoWDtRiX.js",
+        "size": 155514,
+        "formattedSize": "151.87 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/index-CfM-uY0X.js",
+        "size": 119383,
+        "formattedSize": "116.58 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/date-utils-8asMwKKu.js",
+        "size": 86204,
+        "formattedSize": "84.18 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/charts-CEX5ye4x.js",
+        "size": 70284,
+        "formattedSize": "68.64 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/ThirdPartyIntegration-Dq4NSxhA.js",
+        "size": 66458,
+        "formattedSize": "64.9 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/SecurityCenter-rF9QaQdT.js",
+        "size": 62648,
+        "formattedSize": "61.18 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/i18n-CbEx4nn6.js",
+        "size": 49021,
+        "formattedSize": "47.87 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/http-client-BPTwnBaP.js",
+        "size": 35418,
+        "formattedSize": "34.59 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/IntelligentLearning-BxTZ3IOC.js",
+        "size": 19137,
+        "formattedSize": "18.69 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/SelfEvolution-Snnam56W.js",
+        "size": 17439,
+        "formattedSize": "17.03 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/Chat-DHhA6c1q.js",
+        "size": 17299,
+        "formattedSize": "16.89 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/MetaLearning-CvxmY6K9.js",
+        "size": 16931,
+        "formattedSize": "16.53 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/WisdomDetail-GDp0-X46.js",
+        "size": 16301,
+        "formattedSize": "15.92 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/HealthRecords-BXO-ImNe.js",
+        "size": 16164,
+        "formattedSize": "15.79 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/LearningProgress-CnIngqci.js",
+        "size": 15801,
+        "formattedSize": "15.43 KB",
+        "type": ".js"
+      },
+      {
+        "name": "workbox-3e8df8c8.js",
+        "size": 15030,
+        "formattedSize": "14.68 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/redux-CxrPPzsh.js",
+        "size": 13636,
+        "formattedSize": "13.32 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/Dashboard-8ADAYcey.js",
+        "size": 13512,
+        "formattedSize": "13.2 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/Wisdom-BM73FALo.js",
+        "size": 13358,
+        "formattedSize": "13.04 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/UserManagement-Gcey7Pap.js",
+        "size": 12926,
+        "formattedSize": "12.62 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AGIPlanning-C1ZmrVM8.js",
+        "size": 12741,
+        "formattedSize": "12.44 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/HealthAdvice-DAxDrewA.js",
+        "size": 12267,
+        "formattedSize": "11.98 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AbilityAssessment-C3Ihb6sC.js",
+        "size": 11757,
+        "formattedSize": "11.48 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AchievementCenter-Byeww0fb.js",
+        "size": 11753,
+        "formattedSize": "11.48 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/LearningPlan-DAWjeLXb.js",
+        "size": 11493,
+        "formattedSize": "11.22 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/HealthAnalysis-G4-_T41Q.js",
+        "size": 11310,
+        "formattedSize": "11.04 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/CourseCenter-C9dN2j1m.js",
+        "size": 11304,
+        "formattedSize": "11.04 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/Community-2VMcKhjb.js",
+        "size": 10887,
+        "formattedSize": "10.63 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/TaskManagement-BSHmvy58.js",
+        "size": 10778,
+        "formattedSize": "10.53 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/TeamCollaboration-DcbwHy3r.js",
+        "size": 10722,
+        "formattedSize": "10.47 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AGIReasoning-Bu1qHWUA.js",
+        "size": 10177,
+        "formattedSize": "9.94 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/SystemSettings-Bem25E8B.js",
+        "size": 9810,
+        "formattedSize": "9.58 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/ContentReview-R5SEFaAk.js",
+        "size": 9546,
+        "formattedSize": "9.32 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/ImageAnalysis-DM94altc.js",
+        "size": 9546,
+        "formattedSize": "9.32 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/RecommendationCenter-cNMJ01nW.js",
+        "size": 9544,
+        "formattedSize": "9.32 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/LearningAnalyticsDashboard-Csp2QzMK.js",
+        "size": 9347,
+        "formattedSize": "9.13 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/HomePage-irBg-AJS.js",
+        "size": 9287,
+        "formattedSize": "9.07 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/MenuManagement-Ce15xht4.js",
+        "size": 9108,
+        "formattedSize": "8.89 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/NotificationCenter-4DetpMxZ.js",
+        "size": 9108,
+        "formattedSize": "8.89 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/HealthMonitoring-BFYG9KHD.js",
+        "size": 8823,
+        "formattedSize": "8.62 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/Profile-DOWNDQnB.js",
+        "size": 8593,
+        "formattedSize": "8.39 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/ImageGeneration-Dgh6GW58.js",
+        "size": 8394,
+        "formattedSize": "8.2 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AIGeneration-CRPeBti3.js",
+        "size": 8343,
+        "formattedSize": "8.15 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/RoleManagement-DfLLiytv.js",
+        "size": 8086,
+        "formattedSize": "7.9 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/ProjectAnalytics-go616FoE.js",
+        "size": 7578,
+        "formattedSize": "7.4 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/DailyCheckin-Ch2LALhW.js",
+        "size": 7553,
+        "formattedSize": "7.38 KB",
+        "type": ".js"
+      },
+      {
+        "name": "sw.js",
+        "size": 7491,
+        "formattedSize": "7.32 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/DataAnalytics-CuUhagW9.js",
+        "size": 7161,
+        "formattedSize": "6.99 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/ProjectWorkspace--yYNHTuO.js",
+        "size": 7121,
+        "formattedSize": "6.95 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/TagManagement-vYvEjVLf.js",
+        "size": 7038,
+        "formattedSize": "6.87 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AIMultimodal-CY4SlLYs.js",
+        "size": 6981,
+        "formattedSize": "6.82 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/WisdomManagement-DOvfFc66.js",
+        "size": 6672,
+        "formattedSize": "6.52 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/LearningCourses-DsVL8kmZ.js",
+        "size": 6358,
+        "formattedSize": "6.21 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/Help-uA9rtvQo.js",
+        "size": 6261,
+        "formattedSize": "6.11 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/PermissionManagement-Jarx5EZS.js",
+        "size": 6249,
+        "formattedSize": "6.1 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/CategoryManagement-Tn4Kmv8C.js",
+        "size": 6191,
+        "formattedSize": "6.05 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/WisdomEditor-BhNdLuGX.js",
+        "size": 6153,
+        "formattedSize": "6.01 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/ProjectManagement-XsI3gOhf.js",
+        "size": 5466,
+        "formattedSize": "5.34 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AdminDashboard-CzW_8ADe.js",
+        "size": 5143,
+        "formattedSize": "5.02 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/UserNotes-yWflHIkg.js",
+        "size": 5115,
+        "formattedSize": "5 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/AIAnalysis-Bd7co2_J.js",
+        "size": 4396,
+        "formattedSize": "4.29 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/UserFavorites--wThqspF.js",
+        "size": 3899,
+        "formattedSize": "3.81 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/WisdomRecommendations-CF5FM7Ac.js",
+        "size": 3464,
+        "formattedSize": "3.38 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/learningApi-WipSrU-y.js",
+        "size": 3091,
+        "formattedSize": "3.02 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/HealthManagement-DxjQf6ly.js",
+        "size": 2918,
+        "formattedSize": "2.85 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/NoteModal-8fGO469G.js",
+        "size": 2917,
+        "formattedSize": "2.85 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/permissionService-D3Iqduzm.js",
+        "size": 2707,
+        "formattedSize": "2.64 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/advancedAiService-BMl5h75Z.js",
+        "size": 2616,
+        "formattedSize": "2.55 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/behaviorService-DIEspaAj.js",
+        "size": 2387,
+        "formattedSize": "2.33 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/usePermissions-BGsLYORx.js",
+        "size": 2207,
+        "formattedSize": "2.16 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/aiService-oKVkT-Pk.js",
+        "size": 2077,
+        "formattedSize": "2.03 KB",
+        "type": ".js"
+      },
+      {
+        "name": "js/performanceOptimization-B8XxsNYW.js",
+        "size": 917,
+        "formattedSize": "917 B",
+        "type": ".js"
+      },
+      {
+        "name": "js/PermissionGuard-CKwNue-Y.js",
+        "size": 518,
+        "formattedSize": "518 B",
+        "type": ".js"
+      },
+      {
+        "name": "registerSW.js",
+        "size": 134,
+        "formattedSize": "134 B",
+        "type": ".js"
+      }
+    ],
+    ".svg": [
+      {
+        "name": "laojun-avatar.svg",
+        "size": 3374,
+        "formattedSize": "3.29 KB",
+        "type": ".svg"
+      },
+      {
+        "name": "vite.svg",
+        "size": 1497,
+        "formattedSize": "1.46 KB",
+        "type": ".svg"
+      }
+    ],
+    ".webmanifest": [
+      {
+        "name": "manifest.webmanifest",
+        "size": 158,
+        "formattedSize": "158 B",
+        "type": ".webmanifest"
+      }
+    ]
+  },
+  "largestFiles": [
+    {
+      "name": "js/vendor-CuQLz3VB.js",
+      "size": 1359638,
+      "formattedSize": "1.3 MB",
+      "type": ".js"
+    },
+    {
+      "name": "js/react-core-DrvnxUQ6.js",
+      "size": 809765,
+      "formattedSize": "790.79 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/antd-core-BrpEHlBi.js",
+      "size": 707344,
+      "formattedSize": "690.77 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/antd-icons-BoWDtRiX.js",
+      "size": 155514,
+      "formattedSize": "151.87 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/index-CfM-uY0X.js",
+      "size": 119383,
+      "formattedSize": "116.58 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/date-utils-8asMwKKu.js",
+      "size": 86204,
+      "formattedSize": "84.18 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/charts-CEX5ye4x.js",
+      "size": 70284,
+      "formattedSize": "68.64 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/ThirdPartyIntegration-Dq4NSxhA.js",
+      "size": 66458,
+      "formattedSize": "64.9 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/SecurityCenter-rF9QaQdT.js",
+      "size": 62648,
+      "formattedSize": "61.18 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/i18n-CbEx4nn6.js",
+      "size": 49021,
+      "formattedSize": "47.87 KB",
+      "type": ".js"
+    }
+  ],
+  "largeFiles": [
+    {
+      "name": "js/vendor-CuQLz3VB.js",
+      "size": 1359638,
+      "formattedSize": "1.3 MB",
+      "type": ".js"
+    },
+    {
+      "name": "js/react-core-DrvnxUQ6.js",
+      "size": 809765,
+      "formattedSize": "790.79 KB",
+      "type": ".js"
+    },
+    {
+      "name": "js/antd-core-BrpEHlBi.js",
+      "size": 707344,
+      "formattedSize": "690.77 KB",
+      "type": ".js"
+    }
+  ]
+}

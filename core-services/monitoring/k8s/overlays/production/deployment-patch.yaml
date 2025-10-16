@@ -1,0 +1,158 @@
+# 太上老君监控系统 - 生产环境部署补丁
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      # 节点选择器
+      nodeSelector:
+        node-type: compute
+        
+      # 容忍度
+      tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "monitoring"
+        effect: "NoSchedule"
+        
+      # 亲和性
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - monitoring
+            topologyKey: kubernetes.io/hostname
+            
+      # 安全上下文
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        
+      containers:
+      - name: monitoring
+        image: ghcr.io/taishanglaojun/monitoring:v1.0.0
+        imagePullPolicy: IfNotPresent
+        
+        # 安全上下文
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+            
+        # 资源限制
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+            
+        # 环境变量
+        env:
+        - name: APP_ENV
+          value: "production"
+        - name: LOG_LEVEL
+          value: "warn"
+        - name: DEBUG
+          value: "false"
+        - name: PORT
+          value: "8080"
+        - name: METRICS_PORT
+          value: "9090"
+          
+        # 端口
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+          
+        # 健康检查
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+          
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 60
+          successThreshold: 1
+          
+        # 卷挂载
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: monitoring-data
+          mountPath: /var/lib/monitoring
+        - name: monitoring-logs
+          mountPath: /var/log/monitoring
+          
+      # 卷定义
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: monitoring-data
+        persistentVolumeClaim:
+          claimName: monitoring-data
+      - name: monitoring-logs
+        emptyDir: {}

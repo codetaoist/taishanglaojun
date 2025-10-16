@@ -1,0 +1,37 @@
+{
+  "productName": "太上老君AI平台",
+  "version": "1.0.0",
+  "identifier": "com.taishanglaojun.desktop",
+  "build": {
+    "beforeBuildCommand": "pnpm run build",
+    "beforeDevCommand": "",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "太上老君AI平台",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/icon.ico",
+      "icons/icon.svg"
+    ]
+  }
+}

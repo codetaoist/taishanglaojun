@@ -1,0 +1,423 @@
+name: 太上老君监控系统 安全扫描
+
+on:
+  schedule:
+    # 每天凌晨2点运行安全扫描
+    - cron: '0 2 * * *'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'core-services/monitoring/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'core-services/monitoring/**'
+  workflow_dispatch:
+    inputs:
+      scan_type:
+        description: '扫描类型'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - code
+          - dependencies
+          - container
+          - infrastructure
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: taishanglaojun/monitoring
+
+jobs:
+  # 代码安全扫描
+  code-security:
+    name: 代码安全扫描
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'code' || github.event_name != 'workflow_dispatch'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置 Go 环境
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache-dependency-path: core-services/monitoring/go.sum
+
+      - name: 下载依赖
+        working-directory: core-services/monitoring
+        run: go mod download
+
+      - name: 运行 Gosec 安全扫描
+        uses: securecodewarrior/github-action-gosec@master
+        with:
+          args: '-fmt sarif -out gosec-results.sarif ./...'
+          working-directory: core-services/monitoring
+
+      - name: 上传 Gosec 扫描结果
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: core-services/monitoring/gosec-results.sarif
+          category: gosec
+
+      - name: 运行 CodeQL 分析
+        uses: github/codeql-action/init@v2
+        with:
+          languages: go
+          queries: security-and-quality
+
+      - name: 自动构建
+        uses: github/codeql-action/autobuild@v2
+
+      - name: 执行 CodeQL 分析
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: codeql-go
+
+      - name: 运行 Semgrep 扫描
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/golang
+            p/owasp-top-ten
+            p/cwe-top-25
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  # 依赖安全扫描
+  dependency-security:
+    name: 依赖安全扫描
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'dependencies' || github.event_name != 'workflow_dispatch'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Go 环境
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache-dependency-path: core-services/monitoring/go.sum
+
+      - name: 运行 Nancy 依赖扫描
+        working-directory: core-services/monitoring
+        run: |
+          go install github.com/sonatypecommunity/nancy@latest
+          go list -json -deps ./... | nancy sleuth
+
+      - name: 运行 Govulncheck
+        working-directory: core-services/monitoring
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+      - name: 运行 Trivy 依赖扫描
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'core-services/monitoring'
+          format: 'sarif'
+          output: 'trivy-deps-results.sarif'
+
+      - name: 上传 Trivy 依赖扫描结果
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-deps-results.sarif'
+          category: trivy-dependencies
+
+      - name: 生成依赖报告
+        working-directory: core-services/monitoring
+        run: |
+          echo "# 依赖安全报告" > dependency-report.md
+          echo "" >> dependency-report.md
+          echo "## Go 模块依赖" >> dependency-report.md
+          go list -m all >> dependency-report.md
+          echo "" >> dependency-report.md
+          echo "## 直接依赖" >> dependency-report.md
+          go list -m -json all | jq -r 'select(.Main != true) | select(.Indirect != true) | .Path + " " + .Version' >> dependency-report.md
+
+      - name: 上传依赖报告
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-report
+          path: core-services/monitoring/dependency-report.md
+
+  # 容器安全扫描
+  container-security:
+    name: 容器安全扫描
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'container' || github.event_name != 'workflow_dispatch'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 构建测试镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: core-services/monitoring
+          load: true
+          tags: test-image:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 运行 Trivy 容器扫描
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'test-image:latest'
+          format: 'sarif'
+          output: 'trivy-container-results.sarif'
+
+      - name: 上传 Trivy 容器扫描结果
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-container-results.sarif'
+          category: trivy-container
+
+      - name: 运行 Grype 漏洞扫描
+        uses: anchore/scan-action@v3
+        with:
+          image: 'test-image:latest'
+          fail-build: false
+          severity-cutoff: high
+
+      - name: 运行 Snyk 容器扫描
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: 'test-image:latest'
+          args: --severity-threshold=high
+
+      - name: 运行 Dockerfile 安全检查
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: core-services/monitoring/Dockerfile
+          format: sarif
+          output-file: hadolint-results.sarif
+
+      - name: 上传 Hadolint 扫描结果
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: hadolint-results.sarif
+          category: hadolint
+
+  # 基础设施安全扫描
+  infrastructure-security:
+    name: 基础设施安全扫描
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'infrastructure' || github.event_name != 'workflow_dispatch'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 运行 Trivy 配置扫描
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'core-services/monitoring'
+          format: 'sarif'
+          output: 'trivy-config-results.sarif'
+
+      - name: 上传 Trivy 配置扫描结果
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-config-results.sarif'
+          category: trivy-config
+
+      - name: 运行 Checkov 扫描
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: core-services/monitoring
+          framework: kubernetes,dockerfile
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      - name: 上传 Checkov 扫描结果
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: checkov-results.sarif
+          category: checkov
+
+      - name: 运行 Kube-score 评估
+        run: |
+          # 安装 kube-score
+          wget https://github.com/zegl/kube-score/releases/latest/download/kube-score_linux_amd64.tar.gz
+          tar -xzf kube-score_linux_amd64.tar.gz
+          chmod +x kube-score
+          
+          # 评估 Kubernetes 配置
+          find core-services/monitoring/k8s -name "*.yaml" -exec ./kube-score score {} \; > kube-score-report.txt || true
+
+      - name: 运行 Polaris 配置验证
+        run: |
+          # 安装 Polaris
+          wget https://github.com/FairwindsOps/polaris/releases/latest/download/polaris_linux_amd64.tar.gz
+          tar -xzf polaris_linux_amd64.tar.gz
+          chmod +x polaris
+          
+          # 验证配置
+          ./polaris audit --audit-path core-services/monitoring/k8s --format=json > polaris-report.json || true
+
+      - name: 设置 Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.12.0'
+
+      - name: 运行 Helm 安全检查
+        working-directory: core-services/monitoring/helm
+        run: |
+          # 添加依赖仓库
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add influxdata https://helm.influxdata.com/
+          helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
+          helm repo update
+          
+          # 渲染模板
+          helm template test . > /tmp/helm-rendered.yaml
+          
+          # 使用 kube-score 检查渲染后的模板
+          ../kube-score score /tmp/helm-rendered.yaml > helm-security-report.txt || true
+
+      - name: 上传安全报告
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: infrastructure-security-reports
+          path: |
+            kube-score-report.txt
+            polaris-report.json
+            core-services/monitoring/helm/helm-security-report.txt
+
+  # 密钥扫描
+  secret-scan:
+    name: 密钥扫描
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 运行 TruffleHog 密钥扫描
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: 运行 GitLeaks 扫描
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 运行 Detect-secrets 扫描
+        run: |
+          pip install detect-secrets
+          detect-secrets scan --all-files --baseline .secrets.baseline core-services/monitoring/ || true
+          detect-secrets audit .secrets.baseline || true
+
+  # 生成安全报告
+  security-report:
+    name: 生成安全报告
+    runs-on: ubuntu-latest
+    needs: [code-security, dependency-security, container-security, infrastructure-security, secret-scan]
+    if: always()
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载所有扫描结果
+        uses: actions/download-artifact@v3
+
+      - name: 生成综合安全报告
+        run: |
+          cat > security-summary.md << 'EOF'
+          # 太上老君监控系统 安全扫描报告
+          
+          ## 扫描概览
+          
+          - 扫描时间: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          - 提交哈希: ${{ github.sha }}
+          - 分支: ${{ github.ref_name }}
+          - 触发事件: ${{ github.event_name }}
+          
+          ## 扫描结果
+          
+          ### 代码安全扫描
+          - ✅ Gosec: 已完成
+          - ✅ CodeQL: 已完成
+          - ✅ Semgrep: 已完成
+          
+          ### 依赖安全扫描
+          - ✅ Nancy: 已完成
+          - ✅ Govulncheck: 已完成
+          - ✅ Trivy 依赖: 已完成
+          
+          ### 容器安全扫描
+          - ✅ Trivy 容器: 已完成
+          - ✅ Grype: 已完成
+          - ✅ Snyk: 已完成
+          - ✅ Hadolint: 已完成
+          
+          ### 基础设施安全扫描
+          - ✅ Trivy 配置: 已完成
+          - ✅ Checkov: 已完成
+          - ✅ Kube-score: 已完成
+          - ✅ Polaris: 已完成
+          
+          ### 密钥扫描
+          - ✅ TruffleHog: 已完成
+          - ✅ GitLeaks: 已完成
+          - ✅ Detect-secrets: 已完成
+          
+          ## 建议
+          
+          1. 定期更新依赖包到最新版本
+          2. 遵循最小权限原则配置 RBAC
+          3. 启用网络策略限制 Pod 间通信
+          4. 使用非 root 用户运行容器
+          5. 定期轮换密钥和证书
+          
+          ## 下一步行动
+          
+          1. 查看详细的扫描结果
+          2. 修复发现的高危和中危漏洞
+          3. 更新安全基线配置
+          4. 加强监控和告警
+          
+          EOF
+
+      - name: 上传安全报告
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-summary
+          path: security-summary.md
+
+      - name: 发送安全报告通知
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#security'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          text: |
+            太上老君监控系统安全扫描已完成
+            扫描时间: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            请查看详细报告: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

@@ -1,0 +1,203 @@
+# StorageClass for dynamic provisioning
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: taishanglaojun-ssd
+  labels:
+    app.kubernetes.io/name: taishanglaojun
+    app.kubernetes.io/component: storage
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp3
+  fsType: ext4
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+
+---
+# PersistentVolumeClaim for advanced-ai-service data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: advanced-ai-data-pvc
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: taishanglaojun-ssd
+  resources:
+    requests:
+      storage: 20Gi
+  volumeMode: Filesystem
+
+---
+# PersistentVolumeClaim for PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: taishanglaojun-ssd
+  resources:
+    requests:
+      storage: 50Gi
+  volumeMode: Filesystem
+
+---
+# PersistentVolumeClaim for Redis
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: taishanglaojun
+  labels:
+    app: redis
+    component: cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: taishanglaojun-ssd
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+
+---
+# PersistentVolumeClaim for Prometheus
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-pvc
+  namespace: taishanglaojun
+  labels:
+    app: prometheus
+    component: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: taishanglaojun-ssd
+  resources:
+    requests:
+      storage: 30Gi
+  volumeMode: Filesystem
+
+---
+# PersistentVolumeClaim for Grafana
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: taishanglaojun
+  labels:
+    app: grafana
+    component: visualization
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: taishanglaojun-ssd
+  resources:
+    requests:
+      storage: 5Gi
+  volumeMode: Filesystem
+
+---
+# PersistentVolume for shared data (if using NFS or similar)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: taishanglaojun-shared-pv
+  labels:
+    app.kubernetes.io/name: taishanglaojun
+    app.kubernetes.io/component: shared-storage
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: taishanglaojun-shared
+  nfs:
+    server: nfs-server.example.com
+    path: /exports/taishanglaojun
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+    - proto=tcp
+    - timeo=600
+    - retrans=2
+
+---
+# PersistentVolumeClaim for shared data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: taishanglaojun-shared-pvc
+  namespace: taishanglaojun
+  labels:
+    app.kubernetes.io/name: taishanglaojun
+    app.kubernetes.io/component: shared-storage
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: taishanglaojun-shared
+  resources:
+    requests:
+      storage: 100Gi
+  volumeMode: Filesystem
+
+---
+# StorageClass for shared storage
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: taishanglaojun-shared
+  labels:
+    app.kubernetes.io/name: taishanglaojun
+    app.kubernetes.io/component: shared-storage
+provisioner: example.com/nfs
+parameters:
+  server: nfs-server.example.com
+  path: /exports/taishanglaojun
+  readOnly: "false"
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+
+---
+# VolumeSnapshot for backup
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: postgres-snapshot
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: backup
+spec:
+  volumeSnapshotClassName: csi-aws-vsc
+  source:
+    persistentVolumeClaimName: postgres-pvc
+
+---
+# VolumeSnapshotClass
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: csi-aws-vsc
+  labels:
+    app.kubernetes.io/name: taishanglaojun
+    app.kubernetes.io/component: backup
+driver: ebs.csi.aws.com
+deletionPolicy: Retain
+parameters:
+  encrypted: "true"

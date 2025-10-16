@@ -1,0 +1,82 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆形 -->
+  <circle cx="32" cy="32" r="32" fill="url(#bgGradient)"/>
+  
+  <!-- 牛的身体 -->
+  <ellipse cx="32" cy="45" rx="18" ry="8" fill="#8B4513"/>
+  <ellipse cx="32" cy="43" rx="16" ry="6" fill="#A0522D"/>
+  
+  <!-- 牛的腿 -->
+  <rect x="20" y="48" width="3" height="8" rx="1.5" fill="#654321"/>
+  <rect x="25" y="48" width="3" height="8" rx="1.5" fill="#654321"/>
+  <rect x="36" y="48" width="3" height="8" rx="1.5" fill="#654321"/>
+  <rect x="41" y="48" width="3" height="8" rx="1.5" fill="#654321"/>
+  
+  <!-- 牛的头部 -->
+  <ellipse cx="45" cy="38" rx="8" ry="6" fill="#A0522D"/>
+  <ellipse cx="45" cy="37" rx="6" ry="4" fill="#D2B48C"/>
+  
+  <!-- 牛的角 -->
+  <path d="M40 32 L38 28 L42 30 Z" fill="#8B4513"/>
+  <path d="M50 32 L52 28 L48 30 Z" fill="#8B4513"/>
+  
+  <!-- 牛的眼睛 -->
+  <circle cx="42" cy="36" r="1.5" fill="#000"/>
+  <circle cx="48" cy="36" r="1.5" fill="#000"/>
+  
+  <!-- 牛的鼻子 -->
+  <ellipse cx="45" cy="40" rx="2" ry="1" fill="#8B4513"/>
+  <circle cx="44" cy="40" r="0.5" fill="#000"/>
+  <circle cx="46" cy="40" r="0.5" fill="#000"/>
+  
+  <!-- 老君的身体 -->
+  <ellipse cx="28" cy="35" rx="8" ry="12" fill="url(#robeGradient)"/>
+  
+  <!-- 老君的头部 -->
+  <circle cx="28" cy="22" r="6" fill="#FDBCB4"/>
+  
+  <!-- 老君的胡须 -->
+  <path d="M22 26 Q20 30 22 32 Q24 30 26 32 Q28 30 30 32 Q32 30 34 32" stroke="#E6E6FA" stroke-width="2" fill="none"/>
+  <path d="M22 28 Q18 32 20 36 Q22 34 24 36 Q26 34 28 36 Q30 34 32 36 Q34 34 36 36" stroke="#E6E6FA" stroke-width="2" fill="none"/>
+  
+  <!-- 老君的眼睛 -->
+  <circle cx="25" cy="20" r="1" fill="#000"/>
+  <circle cx="31" cy="20" r="1" fill="#000"/>
+  
+  <!-- 老君的眉毛 -->
+  <path d="M23 18 Q25 17 27 18" stroke="#8B4513" stroke-width="1" fill="none"/>
+  <path d="M29 18 Q31 17 33 18" stroke="#8B4513" stroke-width="1" fill="none"/>
+  
+  <!-- 老君的帽子/发髻 -->
+  <circle cx="28" cy="16" r="4" fill="#4B0082"/>
+  <circle cx="28" cy="14" r="2" fill="#6A5ACD"/>
+  
+  <!-- 老君的手臂 -->
+  <ellipse cx="20" cy="30" rx="3" ry="8" fill="#FDBCB4" transform="rotate(-20 20 30)"/>
+  <ellipse cx="36" cy="30" rx="3" ry="8" fill="#FDBCB4" transform="rotate(20 36 30)"/>
+  
+  <!-- 老君的手 -->
+  <circle cx="18" cy="35" r="2" fill="#FDBCB4"/>
+  <circle cx="38" cy="35" r="2" fill="#FDBCB4"/>
+  
+  <!-- 仙气云朵 -->
+  <circle cx="12" cy="20" r="3" fill="#E6E6FA" opacity="0.7"/>
+  <circle cx="15" cy="18" r="2" fill="#E6E6FA" opacity="0.7"/>
+  <circle cx="10" cy="18" r="2" fill="#E6E6FA" opacity="0.7"/>
+  
+  <circle cx="48" cy="15" r="2.5" fill="#E6E6FA" opacity="0.7"/>
+  <circle cx="50" cy="13" r="1.5" fill="#E6E6FA" opacity="0.7"/>
+  <circle cx="46" cy="13" r="1.5" fill="#E6E6FA" opacity="0.7"/>
+  
+  <!-- 渐变定义 -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4682B4;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="robeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9370DB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4B0082;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

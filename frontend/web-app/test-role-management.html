@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色管理功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #1890ff;
+            background-color: #f0f8ff;
+        }
+        .success {
+            border-left-color: #52c41a;
+            background-color: #f6ffed;
+        }
+        .error {
+            border-left-color: #ff4d4f;
+            background-color: #fff2f0;
+        }
+        button {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #40a9ff;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 角色管理功能测试</h1>
+    
+    <div class="test-section">
+        <h2>📋 测试清单</h2>
+        <div class="test-item">
+            <strong>✅ 前端服务器启动</strong>
+            <p>前端开发服务器已在 http://localhost:5173 启动</p>
+        </div>
+        <div class="test-item">
+            <strong>✅ 后端API响应</strong>
+            <p>后端服务已启动，API端点正常响应（需要授权）</p>
+        </div>
+        <div class="test-item">
+            <strong>🔄 角色管理页面功能</strong>
+            <p>需要在浏览器中手动测试以下功能：</p>
+            <ul>
+                <li>页面加载和数据获取</li>
+                <li>角色列表显示</li>
+                <li>新增角色功能</li>
+                <li>编辑角色功能</li>
+                <li>删除角色功能</li>
+                <li>权限配置功能</li>
+                <li>表单验证</li>
+                <li>错误处理</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 快速访问</h2>
+        <button onclick="openRoleManagement()">打开角色管理页面</button>
+        <button onclick="openAdminDashboard()">打开管理后台</button>
+        <button onclick="checkBackendStatus()">检查后端状态</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试步骤</h2>
+        <ol>
+            <li><strong>访问角色管理页面</strong>：点击上方按钮或直接访问 <code>http://localhost:5173/admin/roles</code></li>
+            <li><strong>测试数据加载</strong>：检查页面是否正确加载角色列表和权限数据</li>
+            <li><strong>测试新增功能</strong>：
+                <ul>
+                    <li>点击"新增角色"按钮</li>
+                    <li>填写角色信息（测试表单验证）</li>
+                    <li>配置角色权限</li>
+                    <li>保存并验证数据库更新</li>
+                </ul>
+            </li>
+            <li><strong>测试编辑功能</strong>：
+                <ul>
+                    <li>点击角色列表中的"编辑"按钮</li>
+                    <li>修改角色信息</li>
+                    <li>更新权限配置</li>
+                    <li>保存并验证更新</li>
+                </ul>
+            </li>
+            <li><strong>测试删除功能</strong>：
+                <ul>
+                    <li>选择要删除的角色</li>
+                    <li>确认删除操作</li>
+                    <li>验证数据库中数据已删除</li>
+                </ul>
+            </li>
+            <li><strong>测试权限配置</strong>：
+                <ul>
+                    <li>点击"配置权限"按钮</li>
+                    <li>测试权限树的展开/收起</li>
+                    <li>测试全选/取消全选功能</li>
+                    <li>保存权限配置</li>
+                </ul>
+            </li>
+            <li><strong>测试错误处理</strong>：
+                <ul>
+                    <li>测试网络错误情况</li>
+                    <li>测试表单验证错误</li>
+                    <li>测试重复数据提交</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 预期结果</h2>
+        <div class="test-item success">
+            <strong>✅ 成功标准</strong>
+            <ul>
+                <li>所有CRUD操作正常工作</li>
+                <li>表单验证正确触发</li>
+                <li>数据库同步更新</li>
+                <li>错误处理友好</li>
+                <li>用户体验流畅</li>
+                <li>权限配置功能完整</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function openRoleManagement() {
+            window.open('http://localhost:5173/admin/roles', '_blank');
+        }
+
+        function openAdminDashboard() {
+            window.open('http://localhost:5173/admin', '_blank');
+        }
+
+        function checkBackendStatus() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = '正在检查后端状态...';
+            
+            fetch('http://localhost:8080/api/v1/health')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                })
+                .then(data => {
+                    resultDiv.textContent = `✅ 后端服务正常运行\n响应数据: ${JSON.stringify(data, null, 2)}`;
+                })
+                .catch(error => {
+                    resultDiv.textContent = `❌ 后端服务检查失败: ${error.message}`;
+                });
+        }
+    </script>
+</body>
+</html>

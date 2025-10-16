@@ -1,0 +1,260 @@
+{
+  "timestamp": "2025-10-13T12:12:44.571Z",
+  "totalDependencies": 38,
+  "productionDependencies": 24,
+  "devDependencies": 14,
+  "dependencySizes": [
+    {
+      "name": "antd",
+      "size": 48187803,
+      "formattedSize": "45.96 MB",
+      "type": "production"
+    },
+    {
+      "name": "typescript",
+      "size": 22867703,
+      "formattedSize": "21.81 MB",
+      "type": "development"
+    },
+    {
+      "name": "date-fns",
+      "size": 22601076,
+      "formattedSize": "21.55 MB",
+      "type": "production"
+    },
+    {
+      "name": "@ant-design/icons",
+      "size": 9672179,
+      "formattedSize": "9.22 MB",
+      "type": "production"
+    },
+    {
+      "name": "react-dom",
+      "size": 7319413,
+      "formattedSize": "6.98 MB",
+      "type": "production"
+    },
+    {
+      "name": "@reduxjs/toolkit",
+      "size": 6842520,
+      "formattedSize": "6.53 MB",
+      "type": "production"
+    },
+    {
+      "name": "@ant-design/plots",
+      "size": 6442192,
+      "formattedSize": "6.14 MB",
+      "type": "production"
+    },
+    {
+      "name": "recharts",
+      "size": 5478985,
+      "formattedSize": "5.23 MB",
+      "type": "production"
+    },
+    {
+      "name": "moment",
+      "size": 4350323,
+      "formattedSize": "4.15 MB",
+      "type": "production"
+    },
+    {
+      "name": "vite",
+      "size": 3293110,
+      "formattedSize": "3.14 MB",
+      "type": "development"
+    },
+    {
+      "name": "eslint",
+      "size": 3020521,
+      "formattedSize": "2.88 MB",
+      "type": "development"
+    },
+    {
+      "name": "@types/node",
+      "size": 2471348,
+      "formattedSize": "2.36 MB",
+      "type": "production"
+    },
+    {
+      "name": "terser",
+      "size": 2264720,
+      "formattedSize": "2.16 MB",
+      "type": "development"
+    },
+    {
+      "name": "axios",
+      "size": 2241796,
+      "formattedSize": "2.14 MB",
+      "type": "production"
+    },
+    {
+      "name": "react-redux",
+      "size": 822524,
+      "formattedSize": "803.25 KB",
+      "type": "production"
+    },
+    {
+      "name": "tailwindcss",
+      "size": 683816,
+      "formattedSize": "667.79 KB",
+      "type": "production"
+    },
+    {
+      "name": "dayjs",
+      "size": 672352,
+      "formattedSize": "656.59 KB",
+      "type": "production"
+    },
+    {
+      "name": "workbox-window",
+      "size": 576688,
+      "formattedSize": "563.17 KB",
+      "type": "development"
+    },
+    {
+      "name": "i18next",
+      "size": 567435,
+      "formattedSize": "554.14 KB",
+      "type": "production"
+    },
+    {
+      "name": "redux-persist",
+      "size": 417857,
+      "formattedSize": "408.06 KB",
+      "type": "production"
+    },
+    {
+      "name": "@types/react",
+      "size": 401016,
+      "formattedSize": "391.62 KB",
+      "type": "development"
+    },
+    {
+      "name": "react-i18next",
+      "size": 344193,
+      "formattedSize": "336.13 KB",
+      "type": "production"
+    },
+    {
+      "name": "eslint-plugin-react-hooks",
+      "size": 282596,
+      "formattedSize": "275.97 KB",
+      "type": "development"
+    },
+    {
+      "name": "vite-plugin-pwa",
+      "size": 238878,
+      "formattedSize": "233.28 KB",
+      "type": "development"
+    },
+    {
+      "name": "postcss",
+      "size": 208794,
+      "formattedSize": "203.9 KB",
+      "type": "production"
+    },
+    {
+      "name": "autoprefixer",
+      "size": 203109,
+      "formattedSize": "198.35 KB",
+      "type": "production"
+    },
+    {
+      "name": "globals",
+      "size": 196322,
+      "formattedSize": "191.72 KB",
+      "type": "development"
+    },
+    {
+      "name": "react",
+      "size": 171604,
+      "formattedSize": "167.58 KB",
+      "type": "production"
+    },
+    {
+      "name": "i18next-browser-languagedetector",
+      "size": 94117,
+      "formattedSize": "91.91 KB",
+      "type": "production"
+    },
+    {
+      "name": "@tailwindcss/postcss",
+      "size": 90354,
+      "formattedSize": "88.24 KB",
+      "type": "production"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "size": 49827,
+      "formattedSize": "48.66 KB",
+      "type": "development"
+    },
+    {
+      "name": "typescript-eslint",
+      "size": 45123,
+      "formattedSize": "44.07 KB",
+      "type": "development"
+    },
+    {
+      "name": "@types/react-dom",
+      "size": 30023,
+      "formattedSize": "29.32 KB",
+      "type": "development"
+    },
+    {
+      "name": "eslint-plugin-react-refresh",
+      "size": 24556,
+      "formattedSize": "23.98 KB",
+      "type": "development"
+    },
+    {
+      "name": "react-error-boundary",
+      "size": 21910,
+      "formattedSize": "21.4 KB",
+      "type": "production"
+    },
+    {
+      "name": "@eslint/js",
+      "size": 15515,
+      "formattedSize": "15.15 KB",
+      "type": "development"
+    },
+    {
+      "name": "@ant-design/v5-patch-for-react-19",
+      "size": 9326,
+      "formattedSize": "9.11 KB",
+      "type": "production"
+    },
+    {
+      "name": "react-router-dom",
+      "size": 5416,
+      "formattedSize": "5.29 KB",
+      "type": "production"
+    }
+  ],
+  "possiblyUnusedDependencies": [
+    "globals"
+  ],
+  "duplicateDependencies": [
+    {
+      "category": "日期处理",
+      "deps": [
+        "dayjs",
+        "moment",
+        "date-fns"
+      ],
+      "recommendation": "建议只保留一个日期处理库，推荐 dayjs (体积最小)",
+      "foundDeps": [
+        "dayjs",
+        "moment",
+        "date-fns"
+      ]
+    }
+  ],
+  "recommendations": [
+    "移除未使用的依赖以减少项目体积",
+    "合并重复功能的依赖",
+    "考虑替换大型依赖或使用按需导入"
+  ]
+}

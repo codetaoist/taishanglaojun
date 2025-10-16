@@ -1,0 +1,381 @@
+name: 太上老君监控系统 发布流水线
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '发布版本号 (例如: v1.0.0)'
+        required: true
+        type: string
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: taishanglaojun/monitoring
+  HELM_CHART_NAME: taishanglaojun-monitoring
+
+jobs:
+  # 创建发布版本
+  create-release:
+    name: 创建发布版本
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    outputs:
+      release-tag: ${{ steps.create-tag.outputs.tag }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 验证版本格式
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "错误: 版本号格式不正确。应该是 vX.Y.Z 格式"
+            exit 1
+          fi
+
+      - name: 检查版本是否已存在
+        run: |
+          if git tag -l | grep -q "^${{ github.event.inputs.version }}$"; then
+            echo "错误: 版本 ${{ github.event.inputs.version }} 已存在"
+            exit 1
+          fi
+
+      - name: 生成变更日志
+        id: changelog
+        run: |
+          # 获取上一个版本标签
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "这是第一个发布版本"
+            CHANGELOG="🎉 首次发布太上老君监控系统"
+          else
+            echo "生成从 $PREVIOUS_TAG 到当前的变更日志"
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD --no-merges)
+          fi
+          
+          # 保存到文件
+          cat > CHANGELOG.md << EOF
+          # 太上老君监控系统 ${{ github.event.inputs.version }}
+          
+          ## 🚀 新功能和改进
+          
+          $CHANGELOG
+          
+          ## 📦 部署信息
+          
+          - Docker 镜像: \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}\`
+          - Helm Chart: \`${{ env.HELM_CHART_NAME }}-${{ github.event.inputs.version }}.tgz\`
+          
+          ## 🔧 部署命令
+          
+          \`\`\`bash
+          # 使用 Helm 部署
+          helm upgrade --install taishanglaojun-monitoring \\
+            oci://${{ env.REGISTRY }}/charts/${{ env.HELM_CHART_NAME }} \\
+            --version ${{ github.event.inputs.version }} \\
+            --namespace taishanglaojun-monitoring \\
+            --create-namespace
+          \`\`\`
+          EOF
+
+      - name: 创建标签和发布
+        id: create-tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 创建标签
+          git tag -a "${{ github.event.inputs.version }}" -m "Release ${{ github.event.inputs.version }}"
+          git push origin "${{ github.event.inputs.version }}"
+          
+          echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: 创建 GitHub 发布
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: 太上老君监控系统 ${{ github.event.inputs.version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+  # 构建和发布镜像
+  build-and-publish:
+    name: 构建和发布镜像
+    runs-on: ubuntu-latest
+    needs: create-release
+    if: always() && !failure()
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-release.outputs.release-tag || github.ref }}
+
+      - name: 获取版本信息
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "发布版本: ${VERSION}"
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录容器注册表
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 提取元数据
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.version.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.version }}
+            type=semver,pattern={{major}},value=${{ steps.version.outputs.version }}
+            type=raw,value=latest
+
+      - name: 构建并推送镜像
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: core-services/monitoring
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+            COMMIT_SHA=${{ github.sha }}
+            BUILD_DATE=${{ steps.meta.outputs.created }}
+
+      - name: 生成 SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: 上传 SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+  # 打包和发布 Helm Chart
+  package-helm-chart:
+    name: 打包和发布 Helm Chart
+    runs-on: ubuntu-latest
+    needs: [create-release, build-and-publish]
+    if: always() && !failure()
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.create-release.outputs.release-tag || github.ref }}
+
+      - name: 设置 Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.12.0'
+
+      - name: 添加 Helm 仓库依赖
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add influxdata https://helm.influxdata.com/
+          helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
+          helm repo update
+
+      - name: 更新 Chart 版本
+        working-directory: core-services/monitoring/helm
+        run: |
+          VERSION="${{ needs.build-and-publish.outputs.version }}"
+          # 移除 v 前缀用于 Chart 版本
+          CHART_VERSION="${VERSION#v}"
+          
+          # 更新 Chart.yaml
+          sed -i "s/^version:.*/version: ${CHART_VERSION}/" Chart.yaml
+          sed -i "s/^appVersion:.*/appVersion: \"${VERSION}\"/" Chart.yaml
+          
+          echo "更新后的 Chart 版本信息:"
+          grep -E "^(version|appVersion):" Chart.yaml
+
+      - name: 打包 Helm Chart
+        working-directory: core-services/monitoring
+        run: |
+          mkdir -p charts
+          helm package helm/ --destination ./charts/
+          helm repo index ./charts/ --url https://charts.taishanglaojun.com
+
+      - name: 登录 OCI 注册表
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} --username ${{ github.actor }} --password-stdin
+
+      - name: 推送 Helm Chart 到 OCI
+        working-directory: core-services/monitoring
+        run: |
+          CHART_FILE=$(ls charts/*.tgz)
+          helm push "${CHART_FILE}" oci://${{ env.REGISTRY }}/charts
+
+      - name: 上传 Helm Chart 制品
+        uses: actions/upload-artifact@v3
+        with:
+          name: helm-chart
+          path: core-services/monitoring/charts/
+
+      - name: 更新发布资产
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.build-and-publish.outputs.version }}
+          files: |
+            core-services/monitoring/charts/*.tgz
+            core-services/monitoring/charts/index.yaml
+
+  # 安全扫描
+  security-scan:
+    name: 安全扫描
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    steps:
+      - name: 运行 Trivy 漏洞扫描
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-publish.outputs.version }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: 生成安全报告
+        if: always()
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-publish.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 上传安全扫描结果
+        if: always()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 部署到指定环境
+  deploy:
+    name: 部署到 ${{ github.event.inputs.environment || 'production' }}
+    runs-on: ubuntu-latest
+    needs: [build-and-publish, package-helm-chart, security-scan]
+    if: always() && !failure()
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ github.event.inputs.environment == 'staging' && 'https://monitoring-staging.taishanglaojun.com' || 'https://monitoring.taishanglaojun.com' }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: 设置 Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: '3.12.0'
+
+      - name: 配置 Kubernetes 上下文
+        run: |
+          ENV="${{ github.event.inputs.environment || 'production' }}"
+          if [ "$ENV" = "production" ]; then
+            echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > /tmp/kubeconfig
+          else
+            echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > /tmp/kubeconfig
+          fi
+          export KUBECONFIG=/tmp/kubeconfig
+          kubectl config current-context
+
+      - name: 部署应用
+        env:
+          KUBECONFIG: /tmp/kubeconfig
+        run: |
+          ENV="${{ github.event.inputs.environment || 'production' }}"
+          VERSION="${{ needs.build-and-publish.outputs.version }}"
+          NAMESPACE="taishanglaojun-monitoring"
+          
+          if [ "$ENV" = "staging" ]; then
+            NAMESPACE="taishanglaojun-monitoring-staging"
+            HOST="monitoring-staging.taishanglaojun.com"
+          else
+            HOST="monitoring.taishanglaojun.com"
+          fi
+          
+          helm upgrade --install taishanglaojun-monitoring \
+            oci://${{ env.REGISTRY }}/charts/${{ env.HELM_CHART_NAME }} \
+            --version ${VERSION#v} \
+            --namespace ${NAMESPACE} \
+            --create-namespace \
+            --set image.tag=${VERSION} \
+            --set ingress.hosts[0].host=${HOST} \
+            --set global.environment=${ENV} \
+            --set autoscaling.enabled=true \
+            --set persistence.enabled=true \
+            --wait --timeout=15m
+
+      - name: 验证部署
+        env:
+          KUBECONFIG: /tmp/kubeconfig
+        run: |
+          ENV="${{ github.event.inputs.environment || 'production' }}"
+          NAMESPACE="taishanglaojun-monitoring"
+          
+          if [ "$ENV" = "staging" ]; then
+            NAMESPACE="taishanglaojun-monitoring-staging"
+          fi
+          
+          # 检查 Pod 状态
+          kubectl get pods -n ${NAMESPACE} -l app.kubernetes.io/name=taishanglaojun-monitoring
+          
+          # 运行 Helm 测试
+          helm test taishanglaojun-monitoring -n ${NAMESPACE}
+
+      - name: 发送部署通知
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          text: |
+            太上老君监控系统 ${{ needs.build-and-publish.outputs.version }} 已部署到 ${{ github.event.inputs.environment || 'production' }} 环境
+            状态: ${{ job.status }}
+            访问地址: ${{ github.event.inputs.environment == 'staging' && 'https://monitoring-staging.taishanglaojun.com' || 'https://monitoring.taishanglaojun.com' }}

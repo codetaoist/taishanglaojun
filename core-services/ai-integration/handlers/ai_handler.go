@@ -1,0 +1,293 @@
+﻿package handlers
+
+import (
+	"net/http"
+
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/providers"
+	"github.com/codetaoist/taishanglaojun/core-services/ai-integration/services"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+)
+
+// AIHandler AI功能处理
+type AIHandler struct {
+	aiService *services.AIService
+	logger    *zap.Logger
+}
+
+// NewAIHandler 创建AI处理
+func NewAIHandler(aiService *services.AIService, logger *zap.Logger) *AIHandler {
+	return &AIHandler{
+		aiService: aiService,
+		logger:    logger,
+	}
+}
+
+// IntentRecognition 意图识别
+// @Summary 意图识别
+// @Description 识别用户输入文本的意?
+// @Tags AI功能
+// @Accept json
+// @Produce json
+// @Param request body providers.IntentRequest true "意图识别请求"
+// @Success 200 {object} providers.IntentResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/ai/intent [post]
+func (h *AIHandler) IntentRecognition(c *gin.Context) {
+	var req providers.IntentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID (如果需?
+	if userID := c.GetString("user_id"); userID != "" {
+		req.UserID = userID
+	}
+
+	response, err := h.aiService.IntentRecognition(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Intent recognition failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "INTENT_RECOGNITION_FAILED",
+			Message: "意图识别失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// SentimentAnalysis 情感分析
+// @Summary 情感分析
+// @Description 分析用户输入文本的情感倾向
+// @Tags AI功能
+// @Accept json
+// @Produce json
+// @Param request body providers.SentimentRequest true "情感分析请求"
+// @Success 200 {object} providers.SentimentResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/ai/sentiment [post]
+func (h *AIHandler) SentimentAnalysis(c *gin.Context) {
+	var req providers.SentimentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID (如果需?
+	if userID := c.GetString("user_id"); userID != "" {
+		req.UserID = userID
+	}
+
+	response, err := h.aiService.SentimentAnalysis(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Sentiment analysis failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "SENTIMENT_ANALYSIS_FAILED",
+			Message: "情感分析失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// GenerateSummary 生成摘要
+func (h *AIHandler) GenerateSummary(c *gin.Context) {
+	var req providers.ChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	response, err := h.aiService.GenerateSummary(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Generate summary failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "GENERATE_SUMMARY_FAILED",
+			Message: "生成摘要失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// GenerateExplanation 生成解释
+func (h *AIHandler) GenerateExplanation(c *gin.Context) {
+	var req providers.ChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	response, err := h.aiService.GenerateExplanation(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Generate explanation failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "GENERATE_EXPLANATION_FAILED",
+			Message: "生成解释失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// GenerateTranslation 生成翻译
+func (h *AIHandler) GenerateTranslation(c *gin.Context) {
+	var req providers.ChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	response, err := h.aiService.GenerateTranslation(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Generate translation failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "GENERATE_TRANSLATION_FAILED",
+			Message: "生成翻译失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// ExtractKeywords 提取关键?
+// @Summary 提取关键?
+// @Description 从文本中提取关键?
+// @Tags AI功能
+// @Accept json
+// @Produce json
+// @Param request body providers.AnalyzeRequest true "关键词提取请?
+// @Success 200 {object} providers.AnalyzeResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/ai/keywords [post]
+func (h *AIHandler) ExtractKeywords(c *gin.Context) {
+	var req providers.AnalyzeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID (如果需?
+	if userID := c.GetString("user_id"); userID != "" {
+		req.UserID = userID
+	}
+	response, err := h.aiService.ExtractKeywords(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Extract keywords failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "EXTRACT_KEYWORDS_FAILED",
+			Message: "提取关键词失? " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// CalculateSimilarity 计算相似?
+// @Summary 计算相似?
+// @Description 计算两个文本之间的相似度
+// @Tags AI功能
+// @Accept json
+// @Produce json
+// @Param request body providers.AnalyzeRequest true "相似度计算请?
+// @Success 200 {object} providers.AnalyzeResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/ai/similarity [post]
+func (h *AIHandler) CalculateSimilarity(c *gin.Context) {
+	var req providers.AnalyzeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID (如果需?
+	if userID := c.GetString("user_id"); userID != "" {
+		req.UserID = userID
+	}
+	response, err := h.aiService.CalculateSimilarity(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Calculate similarity failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "CALCULATE_SIMILARITY_FAILED",
+			Message: "计算相似度失? " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// GenerateEmbedding 生成嵌入向量
+// @Summary 生成嵌入向量
+// @Description 生成文本的嵌入向量表?
+// @Tags AI功能
+// @Accept json
+// @Produce json
+// @Param request body providers.AnalyzeRequest true "嵌入向量生成请求"
+// @Success 200 {object} providers.AnalyzeResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /api/v1/ai/embedding [post]
+func (h *AIHandler) GenerateEmbedding(c *gin.Context) {
+	var req providers.AnalyzeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Error("Invalid request", zap.Error(err))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "请求参数无效: " + err.Error(),
+		})
+		return
+	}
+
+	response, err := h.aiService.GenerateEmbedding(c.Request.Context(), req)
+	if err != nil {
+		h.logger.Error("Generate embedding failed", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, ErrorResponse{
+			Code:    "GENERATE_EMBEDDING_FAILED",
+			Message: "生成嵌入向量失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+

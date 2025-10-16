@@ -1,0 +1,397 @@
+# ServiceAccount for advanced-ai-service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: advanced-ai-service
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: ai-service
+  annotations:
+    description: "Service account for advanced AI service"
+automountServiceAccountToken: true
+
+---
+# ServiceAccount for Prometheus
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: taishanglaojun
+  labels:
+    app: prometheus
+    component: monitoring
+  annotations:
+    description: "Service account for Prometheus monitoring"
+automountServiceAccountToken: true
+
+---
+# ClusterRole for advanced-ai-service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: advanced-ai-service
+  labels:
+    app: advanced-ai-service
+    component: ai-service
+rules:
+# 读取节点信息用于监控
+- apiGroups: [""]
+  resources: ["nodes", "nodes/metrics"]
+  verbs: ["get", "list", "watch"]
+# 读取Pod信息用于服务发现
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+# 读取服务信息
+- apiGroups: [""]
+  resources: ["services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+# 读取配置信息
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+# 创建事件
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+
+---
+# ClusterRole for Prometheus
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+    component: monitoring
+rules:
+# 读取所有资源用于监控
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - nodes/metrics
+  - services
+  - endpoints
+  - pods
+  - ingresses
+  - configmaps
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions", "networking.k8s.io"]
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics", "/metrics/cadvisor"]
+  verbs: ["get"]
+
+---
+# Role for advanced-ai-service in namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: advanced-ai-service
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: ai-service
+rules:
+# 管理自己的配置
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+# 读取密钥
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+# 管理PVC
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+# 创建事件
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+# 读取Pod信息
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for advanced-ai-service
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: advanced-ai-service
+  labels:
+    app: advanced-ai-service
+    component: ai-service
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: advanced-ai-service
+subjects:
+- kind: ServiceAccount
+  name: advanced-ai-service
+  namespace: taishanglaojun
+
+---
+# ClusterRoleBinding for Prometheus
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+    component: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: taishanglaojun
+
+---
+# RoleBinding for advanced-ai-service in namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: advanced-ai-service
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: ai-service
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: advanced-ai-service
+subjects:
+- kind: ServiceAccount
+  name: advanced-ai-service
+  namespace: taishanglaojun
+
+---
+# PodSecurityPolicy for advanced-ai-service
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: advanced-ai-service-psp
+  labels:
+    app: advanced-ai-service
+    component: security
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  readOnlyRootFilesystem: true
+
+---
+# ClusterRole for PodSecurityPolicy
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: advanced-ai-service-psp
+  labels:
+    app: advanced-ai-service
+    component: security
+rules:
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies']
+  verbs: ['use']
+  resourceNames:
+  - advanced-ai-service-psp
+
+---
+# RoleBinding for PodSecurityPolicy
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: advanced-ai-service-psp
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: security
+roleRef:
+  kind: ClusterRole
+  name: advanced-ai-service-psp
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: advanced-ai-service
+  namespace: taishanglaojun
+
+---
+# NetworkPolicy for advanced-ai-service
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: advanced-ai-service-netpol
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: advanced-ai-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # 允许来自nginx的流量
+  - from:
+    - podSelector:
+        matchLabels:
+          app: nginx
+    ports:
+    - protocol: TCP
+      port: 8080
+  # 允许来自Prometheus的流量
+  - from:
+    - podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - protocol: TCP
+      port: 8080
+  # 允许同一命名空间内的流量
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: taishanglaojun
+  egress:
+  # 允许访问数据库
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  # 允许访问Redis
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  # 允许DNS查询
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # 允许HTTPS出站流量（用于API调用）
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # 允许HTTP出站流量
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 80
+
+---
+# NetworkPolicy for database
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-netpol
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # 只允许来自advanced-ai-service的流量
+  - from:
+    - podSelector:
+        matchLabels:
+          app: advanced-ai-service
+    ports:
+    - protocol: TCP
+      port: 5432
+  egress:
+  # 允许DNS查询
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+# NetworkPolicy for Redis
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-netpol
+  namespace: taishanglaojun
+  labels:
+    app: redis
+    component: security
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # 只允许来自advanced-ai-service的流量
+  - from:
+    - podSelector:
+        matchLabels:
+          app: advanced-ai-service
+    ports:
+    - protocol: TCP
+      port: 6379
+  egress:
+  # 允许DNS查询
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53

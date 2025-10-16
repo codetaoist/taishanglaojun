@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>太上老君</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
+	<key>WKWatchOnly</key>
+	<true/>
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>com.taishanglaojun.app</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>太上老君需要访问您的位置来提供基于位置的任务提醒和导航功能。</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>太上老君需要访问您的位置来提供基于位置的任务提醒和导航功能。</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>太上老君需要访问您的健康数据来提供个性化的任务建议和健康奖励。</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>太上老君需要更新您的健康数据来记录任务完成时的活动信息。</string>
+	<key>NSMotionUsageDescription</key>
+	<string>太上老君需要访问运动数据来跟踪您的活动并提供相关的任务建议。</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>太上老君需要发送通知来提醒您重要的任务和更新。</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>background-processing</string>
+		<string>location</string>
+		<string>background-app-refresh</string>
+	</array>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+		<string>self-care</string>
+		<string>location</string>
+	</array>
+</dict>
+</plist>

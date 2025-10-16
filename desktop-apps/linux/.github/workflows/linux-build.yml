@@ -1,0 +1,260 @@
+name: Linux Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'linux/**'
+      - '.github/workflows/linux-build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'linux/**'
+      - '.github/workflows/linux-build.yml'
+  release:
+    types: [ published ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04]
+        compiler: [gcc, clang]
+        include:
+          - os: ubuntu-20.04
+            packages: "libgtk-4-dev libadwaita-1-dev"
+          - os: ubuntu-22.04
+            packages: "libgtk-4-dev libadwaita-1-dev"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          pkg-config \
+          git \
+          ${{ matrix.packages }} \
+          libglib2.0-dev \
+          libjson-c-dev \
+          libssl-dev \
+          libasound2-dev \
+          libpulse-dev \
+          libsndfile1-dev \
+          libnotify-dev \
+          libappindicator3-dev \
+          libx11-dev \
+          libwayland-dev \
+          libgl1-mesa-dev \
+          libegl1-mesa-dev \
+          libdbus-1-dev \
+          libsqlite3-dev \
+          desktop-file-utils \
+          shared-mime-info \
+          valgrind \
+          gcov \
+          lcov
+
+    - name: Setup compiler
+      if: matrix.compiler == 'clang'
+      run: |
+        sudo apt install -y clang
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+
+    - name: Validate build environment
+      working-directory: linux
+      run: |
+        chmod +x scripts/validate_build.sh
+        ./scripts/validate_build.sh
+
+    - name: Configure CMake
+      working-directory: linux
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DBUILD_TESTS=ON \
+          -DENABLE_COVERAGE=ON \
+          -DCMAKE_INSTALL_PREFIX=/usr
+
+    - name: Build
+      working-directory: linux
+      run: cmake --build build --config ${{ env.BUILD_TYPE }}
+
+    - name: Run tests
+      working-directory: linux/build
+      run: ctest --output-on-failure --verbose
+
+    - name: Generate coverage report
+      if: matrix.compiler == 'gcc'
+      working-directory: linux/build
+      run: |
+        ninja coverage
+        
+    - name: Upload coverage to Codecov
+      if: matrix.compiler == 'gcc' && matrix.os == 'ubuntu-22.04'
+      uses: codecov/codecov-action@v3
+      with:
+        file: linux/build/coverage/coverage.info
+        directory: linux/build/coverage/
+        flags: linux
+        name: linux-coverage
+
+    - name: Run static analysis
+      if: matrix.compiler == 'gcc'
+      working-directory: linux/build
+      run: |
+        ninja cppcheck || true  # Don't fail on warnings
+
+    - name: Install
+      working-directory: linux/build
+      run: |
+        DESTDIR=${{ github.workspace }}/install ninja install
+
+    - name: Validate installation
+      run: |
+        test -f install/usr/bin/taishang-laojun
+        test -f install/usr/share/applications/taishang-laojun.desktop
+        test -f install/usr/share/icons/hicolor/scalable/apps/taishang-laojun.svg
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: taishang-laojun-${{ matrix.os }}-${{ matrix.compiler }}
+        path: |
+          linux/build/src/taishang-laojun
+          install/
+
+  package:
+    name: Create Packages
+    needs: build-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          pkg-config \
+          libgtk-4-dev \
+          libadwaita-1-dev \
+          libglib2.0-dev \
+          libjson-c-dev \
+          libssl-dev \
+          libasound2-dev \
+          libpulse-dev \
+          libsndfile1-dev \
+          libnotify-dev \
+          libappindicator3-dev \
+          libx11-dev \
+          libwayland-dev \
+          libgl1-mesa-dev \
+          libegl1-mesa-dev \
+          libdbus-1-dev \
+          libsqlite3-dev \
+          desktop-file-utils \
+          shared-mime-info \
+          dpkg-dev \
+          rpm \
+          flatpak-builder \
+          snapcraft
+
+    - name: Install AppImage tools
+      run: |
+        wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+        chmod +x linuxdeploy-x86_64.AppImage
+        sudo mv linuxdeploy-x86_64.AppImage /usr/local/bin/linuxdeploy
+
+    - name: Configure and build
+      working-directory: linux
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_PACKAGES=ON \
+          -DCMAKE_INSTALL_PREFIX=/usr
+        cmake --build build
+
+    - name: Create AppImage
+      working-directory: linux/build
+      run: ninja appimage
+
+    - name: Create DEB package
+      working-directory: linux/build
+      run: ninja package-deb
+
+    - name: Create RPM package
+      working-directory: linux/build
+      run: ninja package-rpm
+
+    - name: Verify packages
+      working-directory: linux/build
+      run: |
+        chmod +x ../packaging/scripts/verify_packages.sh
+        ../packaging/scripts/verify_packages.sh
+
+    - name: Upload packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: taishang-laojun-packages
+        path: |
+          linux/build/packaging/**/*.deb
+          linux/build/packaging/**/*.rpm
+          linux/build/packaging/**/*.AppImage
+          linux/build/packaging/**/*.tar.gz
+
+    - name: Release packages
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          linux/build/packaging/**/*.deb
+          linux/build/packaging/**/*.rpm
+          linux/build/packaging/**/*.AppImage
+          linux/build/packaging/**/*.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'linux/'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'

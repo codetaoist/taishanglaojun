@@ -1,0 +1,15 @@
+{
+  "name": "taishanglaojun-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently -n web,api -c green,blue \"pnpm --filter web-app dev\" \"pnpm --filter core-services dev\"",
+    "dev:web": "pnpm --filter web-app dev",
+    "dev:api": "pnpm --filter core-services dev",
+    "qa:health": "node scripts/health-check-backend.js",
+    "qa": "pnpm run qa:health"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1"
+  }
+}

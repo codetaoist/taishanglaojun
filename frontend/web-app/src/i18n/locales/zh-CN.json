@@ -1,0 +1,1548 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "warning": "警告",
+    "info": "信息",
+    "confirm": "确认",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "search": "搜索",
+    "filter": "筛选",
+    "refresh": "刷新",
+    "reset": "重置",
+    "submit": "提交",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "close": "关闭",
+    "open": "打开",
+    "view": "查看",
+    "download": "下载",
+    "upload": "上传",
+    "copy": "复制",
+    "paste": "粘贴",
+    "cut": "剪切",
+    "undo": "撤销",
+    "redo": "重做",
+    "select": "选择",
+    "selectAll": "全选",
+    "clear": "清空",
+    "expand": "展开",
+    "collapse": "收起",
+    "more": "更多",
+    "less": "收起",
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "apply": "应用",
+    "preview": "预览",
+    "print": "打印",
+    "export": "导出",
+    "import": "导入",
+    "settings": "设置",
+    "help": "帮助",
+    "about": "关于",
+    "version": "版本",
+    "update": "更新",
+    "upgrade": "升级",
+    "login": "登录",
+    "logout": "退出登录",
+    "register": "注册",
+    "profile": "个人资料",
+    "account": "账户",
+    "password": "密码",
+    "email": "邮箱",
+    "phone": "电话",
+    "name": "姓名",
+    "username": "用户名",
+    "nickname": "昵称",
+    "avatar": "头像",
+    "status": "状态",
+    "type": "类型",
+    "category": "分类",
+    "tag": "标签",
+    "title": "标题",
+    "description": "描述",
+    "content": "内容",
+    "date": "日期",
+    "time": "时间",
+    "created": "创建时间",
+    "updated": "更新时间",
+    "modified": "修改时间",
+    "author": "作者",
+    "owner": "所有者",
+    "size": "大小",
+    "count": "数量",
+    "total": "总计",
+    "page": "页面",
+    "pageSize": "每页条数",
+    "current": "当前",
+    "all": "全部",
+    "none": "无",
+    "empty": "空",
+    "unknown": "未知",
+    "other": "其他",
+    "custom": "自定义",
+    "default": "默认",
+    "optional": "可选",
+    "required": "必填",
+    "enabled": "启用",
+    "disabled": "禁用",
+    "active": "活跃",
+    "inactive": "非活跃",
+    "online": "在线",
+    "offline": "离线",
+    "public": "公开",
+    "private": "私有",
+    "draft": "草稿",
+    "published": "已发布",
+    "archived": "已归档",
+    "deleted": "已删除"
+  },
+  "navigation": {
+    "home": "首页",
+    "dashboard": "仪表板",
+    "wisdom": "文化智慧",
+    "chat": "AI对话",
+    "learning": "学习中心",
+    "community": "社区",
+    "profile": "个人中心",
+    "settings": "设置",
+    "help": "帮助",
+    "about": "关于我们"
+  },
+  "auth": {
+    "login": {
+      "title": "登录",
+      "subtitle": "欢迎回来",
+      "email": "邮箱地址",
+      "password": "密码",
+      "remember": "记住我",
+      "forgot": "忘记密码？",
+      "submit": "登录",
+      "noAccount": "还没有账户？",
+      "register": "立即注册",
+      "socialLogin": "社交账户登录",
+      "wechat": "微信登录",
+      "qq": "QQ登录",
+      "weibo": "微博登录"
+    },
+    "register": {
+      "title": "注册",
+      "subtitle": "创建新账户",
+      "email": "邮箱地址",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "username": "用户名",
+      "nickname": "昵称",
+      "phone": "手机号码",
+      "verificationCode": "验证码",
+      "getCode": "获取验证码",
+      "agree": "我同意",
+      "terms": "服务条款",
+      "privacy": "隐私政策",
+      "submit": "注册",
+      "hasAccount": "已有账户？",
+      "login": "立即登录"
+    },
+    "forgot": {
+      "title": "忘记密码",
+      "subtitle": "重置您的密码",
+      "email": "邮箱地址",
+      "submit": "发送重置链接",
+      "back": "返回登录",
+      "sent": "重置链接已发送",
+      "checkEmail": "请检查您的邮箱"
+    },
+    "reset": {
+      "title": "重置密码",
+      "subtitle": "设置新密码",
+      "password": "新密码",
+      "confirmPassword": "确认新密码",
+      "submit": "重置密码",
+      "success": "密码重置成功"
+    }
+  },
+  "home": {
+    "welcome": {
+      "title": "欢迎来到太上老君智慧平台",
+      "subtitle": "探索中华文化的深邃智慧，开启心灵成长之旅",
+      "getStarted": "开始探索",
+      "learnMore": "了解更多"
+    },
+    "stats": {
+      "users": "用户数量",
+      "wisdom": "智慧条目",
+      "conversations": "对话次数",
+      "learning": "学习时长"
+    },
+    "quickActions": {
+      "title": "快速操作",
+      "aiChat": {
+        "title": "AI智慧对话",
+        "description": "与AI助手探讨人生智慧"
+      },
+      "wisdomLibrary": {
+        "title": "智慧宝库",
+        "description": "浏览丰富的文化智慧内容"
+      },
+      "learningPath": {
+        "title": "学习路径",
+        "description": "个性化的学习计划和进度"
+      },
+      "community": {
+        "title": "智慧社区",
+        "description": "与同道中人交流分享"
+      }
+    },
+    "recentActivities": {
+      "title": "最近活动",
+      "noActivities": "暂无活动记录",
+      "viewAll": "查看全部"
+    },
+    "recommendations": {
+      "title": "推荐内容",
+      "wisdom": "智慧推荐",
+      "learning": "学习推荐",
+      "community": "社区推荐"
+    },
+    "progress": {
+      "title": "学习进度",
+      "dailyGoal": "今日目标",
+      "weeklyGoal": "本周目标",
+      "monthlyGoal": "本月目标",
+      "completed": "已完成",
+      "remaining": "剩余"
+    }
+  },
+  "sidebar": {
+    "status": {
+      "beta": "测试版",
+      "new": "新增",
+      "experimental": "实验",
+      "partial": "部分",
+      "development": "开发中"
+    },
+    "statusTooltip": "状态：{{text}}",
+    "logo": {
+      "title": "进入仪表盘",
+      "name": "太上老君"
+    },
+    "loading": "加载菜单中...",
+    "noData": {
+      "title": "暂无菜单",
+      "noteLogged": "正在加载用户菜单...",
+      "noteGuest": "请先登录"
+    },
+    "reload": "重新加载菜单"
+  },
+  "header": {
+    "search": {
+      "tooltip": "全局搜索 {{shortcut}}",
+      "aria": "全局搜索"
+    },
+    "notifications": {
+      "title": "通知中心"
+    },
+    "theme": {
+      "switchToDark": "切换到深色主题",
+      "switchToLight": "切换到浅色主题"
+    },
+    "help": "帮助中心",
+    "language": "切换语言",
+    "settings": "设置"
+  },
+  "mainMenu": {
+    "labels": {
+      "dashboard": "仪表板",
+      "ai-services": "AI智能服务",
+      "ai-chat": "智能对话",
+      "ai-multimodal": "多模态AI",
+      "image-generation": "图像生成",
+      "image-analysis": "图像分析",
+      "video-processing": "视频处理",
+      "audio-processing": "音频处理",
+      "ai-analysis": "AI分析",
+      "data-analysis": "数据分析",
+      "trend-prediction": "趋势预测",
+      "report-generation": "报告生成",
+      "ai-generation": "AI生成",
+      "text-generation": "文本生成",
+      "code-generation": "代码生成",
+      "creative-design": "创意设计",
+      "cultural-wisdom": "文化智慧",
+      "wisdom": "智慧库",
+      "wisdom-library": "智慧库",
+      "wisdom-search": "智慧搜索",
+      "wisdom-recommend": "智慧推荐",
+      "wisdom-category": "智慧分类",
+      "wisdom-favorites": "我的收藏",
+      "wisdom-notes": "我的笔记",
+      "community": "社区",
+      "community-posts": "社区帖子",
+      "community-chat": "社区聊天",
+      "community-groups": "兴趣小组",
+      "community-events": "社区活动",
+      "intelligent-learning": "学习中心",
+      "learning-courses": "课程中心",
+      "learning-progress": "学习进度",
+      "learning-assessment": "能力评估",
+      "learning-certificate": "学习证书",
+      "project-management": "项目管理",
+      "project-workspace": "项目工作台",
+      "project-tasks": "任务管理",
+      "project-collaboration": "团队协作",
+      "project-analytics": "项目分析",
+      "health-management": "健康管理",
+      "health-monitor": "健康监测",
+      "health-analysis": "健康分析",
+      "health-advice": "健康建议",
+      "health-records": "健康档案",
+      "security-center": "安全中心",
+      "threat-detection": "威胁检测",
+      "vulnerability-management": "漏洞管理",
+      "penetration-testing": "渗透测试",
+      "security-education": "安全教育",
+      "security-audit": "安全审计",
+      "third-party-integration": "第三方集成",
+      "api-keys": "API密钥",
+      "plugins": "插件管理",
+      "service-integration": "服务集成",
+      "webhooks": "Webhooks",
+      "oauth-apps": "OAuth应用",
+      "api-documentation": "接口文档",
+      "api-catalog": "接口目录",
+      "api-status": "接口状态",
+      "api-versions": "版本管理",
+      "api-search": "快速检索",
+      "system-management": "系统管理",
+      "system-settings": "系统设置",
+      "system-users": "用户管理",
+      "system-roles": "角色管理",
+      "system-permissions": "权限管理",
+      "system-menus": "菜单管理",
+      "system-monitoring": "系统监控",
+      "system-analytics": "系统分析",
+      "system-notifications": "系统通知",
+      "profile-overview": "个人中心",
+      "profile-settings": "个人设置",
+      "profile-security": "安全设置",
+      "profile-notifications": "通知设置",
+      "quick-chat": "快速聊天",
+      "quick-search": "快速搜索",
+      "quick-note": "快速笔记",
+      "quick-task": "快速任务"
+    }
+  },
+  "dashboard": {
+    "analysis": "分析页",
+    "monitor": "监控页",
+    "workspace": "工作台",
+    "loading": {
+      "text": "加载仪表板数据中..."
+    },
+    "error": {
+      "title": "加载失败",
+      "retry": "重试",
+      "loadFailed": "加载仪表板数据失败，请稍后重试"
+    },
+    "statistics": {
+      "totalUsers": "总用户数",
+      "activeUsers": "活跃用户",
+      "totalProjects": "项目总数",
+      "completedTasks": "已完成任务"
+    },
+    "trend": {
+      "title": "数据趋势",
+      "viewDetails": "查看详情",
+      "loading": "图表数据加载中..."
+    },
+    "quickActions": {
+      "title": "快捷操作"
+    },
+    "recentActivities": {
+      "title": "最近活动",
+      "viewAll": "查看全部"
+    },
+    "systemStatus": {
+      "title": "系统状态",
+      "cpu": "CPU使用率",
+      "memory": "内存使用率",
+      "disk": "磁盘使用率",
+      "networkLatency": "网络延迟"
+    },
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "{{count}}分钟前",
+      "hoursAgo": "{{count}}小时前",
+    "daysAgo": "{{count}}天前"
+    }
+  },
+  "wisdom": {
+    "title": "文化智慧",
+    "search": "搜索智慧内容",
+    "categories": {
+      "all": "全部",
+      "philosophy": "哲学思想",
+      "ethics": "道德修养",
+      "life": "人生智慧",
+      "nature": "自然之道",
+      "health": "养生之道",
+      "governance": "治国理政"
+    },
+    "filters": {
+      "category": "分类",
+      "source": "来源",
+      "difficulty": "难度",
+      "length": "长度"
+    },
+    "item": {
+      "source": "出处",
+      "translation": "译文",
+      "interpretation": "解读",
+      "application": "应用",
+      "related": "相关内容",
+      "share": "分享",
+      "favorite": "收藏",
+      "comment": "评论"
+    },
+    "noResults": "未找到相关内容",
+    "loadMore": "加载更多"
+  },
+  "community": {
+    "title": "修行社区",
+    "subtitle": "与志同道合的修行者交流心得，共同成长进步",
+    "tabs": {
+      "posts": "最新帖子"
+    },
+    "search": {
+      "placeholder": "搜索帖子..."
+    },
+    "categories": {
+      "placeholder": "选择分类",
+      "all": "全部分类",
+      "taoismDiscussion": "道学讨论",
+      "practiceInsights": "修行心得",
+      "confucianApplications": "儒学应用",
+      "buddhistWisdom": "佛学智慧"
+    },
+    "actions": {
+      "postNew": "发布新帖"
+    },
+    "messages": {
+      "bookmarkAdded": "已添加到收藏",
+      "postPublishSuccess": "帖子发布成功！",
+      "postPublishFailed": "发布失败，请重试",
+      "commentFeatureWip": "评论功能开发中...",
+      "linkCopied": "链接已复制到剪贴板"
+    },
+    "stats": {
+      "activeUsers": "活跃用户",
+      "posts": "讨论帖子",
+      "wisdomShares": "智慧分享"
+    },
+    "time": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "daysAgo": "{{count}}天前"
+    }
+  }
+  ,
+  "adminUser": {
+    "title": "用户管理",
+    "stats": {
+      "totalUsers": "总用户数",
+      "activeUsers": "活跃用户",
+      "admins": "管理员",
+      "newToday": "今日新增",
+      "onlineUsers": "在线用户"
+    },
+    "search": { "placeholder": "搜索用户名或邮箱" },
+    "filters": {
+      "rolePlaceholder": "角色筛选",
+      "statusPlaceholder": "状态筛选",
+      "dateRangePlaceholder": ["开始日期", "结束日期"],
+      "roleOptions": {
+        "admin": "管理员",
+        "moderator": "版主",
+        "user": "普通用户"
+      },
+      "statusOptions": {
+        "active": "正常",
+        "inactive": "禁用",
+        "banned": "封禁"
+      }
+    },
+    "actions": {
+      "addUser": "添加用户",
+      "batchDelete": "批量删除",
+      "resetSelection": "取消选择",
+      "reset": "重置",
+      "editUser": "编辑用户",
+      "close": "关闭",
+      "disableUser": "禁用用户",
+      "enableUser": "启用用户",
+      "manageRolePermissions": "管理角色权限"
+    },
+    "selection": {
+      "selectedCount": "已选择 {{count}} 项"
+    },
+    "table": {
+      "userInfo": "用户信息",
+      "username": "用户名",
+      "role": "角色",
+      "status": "状态",
+      "stats": "统计信息",
+      "lastLogin": "最后登录",
+      "registeredAt": "注册时间",
+      "actions": "操作"
+    },
+    "labels": {
+      "role": {
+        "admin": "管理员",
+        "moderator": "版主",
+        "user": "用户"
+      },
+      "status": {
+        "normal": "正常",
+        "inactive": "禁用",
+        "banned": "封禁"
+      },
+      "statItems": {
+        "login": "登录: {{count}}次",
+        "wisdom": "智慧: {{count}}篇",
+        "comment": "评论: {{count}}条"
+      }
+    },
+    "labelsExtra": {
+      "neverLogin": "从未登录"
+    },
+    "messages": {
+      "fetchUsersFailure": "获取用户列表失败",
+      "fetchStatsFailure": "获取用户统计失败",
+      "fetchRolesFailure": "获取角色列表失败",
+      "updateSuccess": "用户更新成功",
+      "createSuccess": "用户创建成功",
+      "updateFailure": "用户更新失败",
+      "createFailure": "用户创建失败",
+      "deleteSuccess": "用户删除成功",
+      "deleteFailure": "用户删除失败",
+      "batchDeleteSuccess": "批量删除成功",
+      "batchDeleteFailure": "批量删除失败",
+      "statusUpdateSuccess": "用户状态更新成功",
+      "statusUpdateFailure": "用户状态更新失败",
+      "roleUpdateSuccess": "用户角色更新成功",
+      "roleUpdateFailure": "用户角色更新失败",
+      "fetchUserRolePermFailure": "获取用户角色权限失败",
+      "userRolePermUpdateSuccess": "用户角色权限更新成功",
+      "userRolePermUpdateFailure": "用户角色权限更新失败",
+      "viewDetailsInfo": "查看用户详情功能待实现"
+    },
+    "modal": {
+      "editTitle": "编辑用户",
+      "addTitle": "添加用户",
+      "viewTitle": "用户详情"
+    },
+    "form": {
+      "usernameLabel": "用户名",
+      "usernameRequired": "请输入用户名",
+      "emailLabel": "邮箱",
+      "emailRequired": "请输入邮箱",
+      "emailInvalid": "请输入有效的邮箱地址",
+      "realNameLabel": "真实姓名",
+      "passwordLabel": "密码",
+      "passwordRequired": "请输入密码",
+      "roleLabel": "角色",
+      "roleRequired": "请选择角色",
+      "statusLabel": "状态",
+      "statusRequired": "请选择状态",
+      "update": "更新",
+      "create": "创建",
+      "cancel": "取消",
+      "save": "保存"
+    },
+    "rolePermissionModal": {
+      "title": "用户角色权限管理 - {{username}}",
+      "save": "保存",
+      "cancel": "取消",
+      "userInfoTitle": "用户信息",
+      "roleAssignTitle": "角色分配",
+      "roleSelectPlaceholder": "请选择角色",
+      "roleAssignDescription": "用户可以拥有多个角色，角色权限会自动继承",
+      "permissionAssignTitle": "权限分配",
+      "permissionSelectPlaceholder": "请选择权限",
+      "roleSwitchQuickTitle": "快速角色切换",
+      "permissionNote": "直接分配给用户的权限，优先级高于角色权限",
+      "roleOptions": {
+        "superAdmin": "超级管理员"
+      }
+    },
+    "permissions": {
+      "groups": {
+        "userManagement": "用户管理",
+        "roleManagement": "角色管理",
+        "permissionManagement": "权限管理",
+        "menuManagement": "菜单管理"
+      },
+      "resources": {
+        "user": "用户",
+        "role": "角色",
+        "permission": "权限",
+        "menu": "菜单"
+      },
+      "items": {
+        "read": "查看{{name}}",
+        "write": "编辑{{name}}",
+        "delete": "删除{{name}}"
+      }
+    },
+    "pagination": {
+      "total": "第 {{start}}-{{end}} 条/总共 {{total}} 条"
+    },
+    "confirm": {
+      "deleteTitle": "确定要删除该用户吗？",
+      "deleteContent": "删除后无法恢复，确认删除用户 {{username}}？",
+      "batchDeleteTitle": "确定要批量删除选中的用户吗？",
+      "ok": "确定",
+      "cancel": "取消"
+    }
+  },
+  "adminPermission": {
+    "title": "权限管理",
+    "actions": {
+      "tableView": "表格视图",
+      "treeView": "树形视图",
+      "addPermission": "新增权限",
+      "viewDetails": "查看详情",
+      "editPermission": "编辑权限",
+      "deletePermission": "删除权限",
+      "batchDeleteWithCount": "批量删除 ({{count}})"
+    },
+    "search": { "placeholder": "搜索权限名称或描述" },
+    "filters": {
+      "resourcePlaceholder": "资源类型",
+      "actionPlaceholder": "操作类型"
+    },
+    "table": {
+      "name": "权限名称",
+      "resource": "资源",
+      "action": "操作",
+      "description": "描述",
+      "createdAt": "创建时间",
+      "actions": "操作"
+    },
+    "messages": {
+      "fetchPermissionsFailure": "获取权限列表失败",
+      "updateSuccess": "权限更新成功",
+      "createSuccess": "权限创建成功",
+      "updateFailure": "权限更新失败",
+      "createFailure": "权限创建失败",
+      "deleteSuccess": "权限删除成功",
+      "deleteFailure": "权限删除失败",
+      "batchDeleteSuccess": "批量删除成功",
+      "batchDeleteFailure": "批量删除失败"
+    },
+    "confirm": {
+      "deleteTitle": "确定要删除这个权限吗？",
+      "batchDeleteTitle": "确定要删除选中的 {{count}} 个权限吗？",
+      "ok": "确定",
+      "cancel": "取消"
+    },
+    "pagination": {
+      "total": "第 {{start}}-{{end}} 条，共 {{total}} 条"
+    },
+    "modal": {
+      "editTitle": "编辑权限",
+      "addTitle": "新增权限"
+    },
+    "form": {
+      "resourceLabel": "资源",
+      "resourceRequired": "请输入资源名称",
+      "resourceSelectPlaceholder": "请选择或输入资源名称",
+      "actionLabel": "操作",
+      "actionRequired": "请输入操作名称",
+      "actionSelectPlaceholder": "请选择或输入操作名称",
+      "descriptionLabel": "权限描述",
+      "descriptionPlaceholder": "请输入权限描述"
+    }
+  },
+  "adminRole": {
+    "title": "角色管理",
+    "actions": {
+      "addRole": "新增角色",
+      "batchDelete": "批量删除",
+      "refresh": "刷新",
+      "clearFilters": "清空筛选"
+    },
+    "search": {
+      "placeholder": "搜索角色名称或代码"
+    },
+    "filters": {
+      "typePlaceholder": "角色类型",
+      "statusPlaceholder": "状态",
+      "typeOptions": {
+        "system": "系统",
+        "custom": "自定义",
+        "functional": "功能",
+        "data": "数据"
+      },
+      "statusOptions": {
+        "enabled": "启用",
+        "disabled": "禁用"
+      }
+    },
+    "table": {
+      "name": "角色名称",
+      "code": "角色代码",
+      "type": "类型",
+      "level": "级别",
+      "permissionsCount": "权限数量",
+      "status": "状态",
+      "description": "描述",
+      "actions": "操作",
+      "systemTag": "系统"
+    },
+    "tooltips": {
+      "view": "查看详情",
+      "edit": "编辑角色",
+      "configurePermissions": "配置权限",
+      "delete": "删除角色"
+    },
+    "confirm": {
+      "deleteTitle": "确定要删除这个角色吗？",
+      "batchDeleteTitle": "确定要删除选中的 {{count}} 个角色吗？",
+      "batchDeleteWarning": "警告",
+      "batchDeleteDescription": "您即将删除 {{count}} 个角色，此操作不可撤销。",
+      "batchDeleteRolesList": "删除的角色：",
+      "batchDeleteConfirm": "确认删除",
+      "batchDeleteSuccess": "成功删除 {{count}} 个角色",
+      "batchDeleteFailure": "批量删除失败",
+      "selectRolesWarning": "请选择要删除的角色",
+      "confirmBatchDelete": "确认批量删除",
+      "ok": "确定",
+      "cancel": "取消"
+    },
+    "modal": {
+      "editTitle": "编辑角色",
+      "addTitle": "新增角色"
+    },
+    "form": {
+      "nameLabel": "角色名称",
+      "nameRequired": "请输入角色名称",
+      "nameExists": "角色名称已存在，请使用其他名称",
+      "codeLabel": "角色代码",
+      "codeRequired": "请输入角色代码",
+      "codeExists": "角色代码已存在，请使用其他代码",
+      "codePattern": "只能包含小写字母和下划线",
+      "codeFormatError": "角色代码必须以小写字母开头",
+      "codeConsecutiveUnderscores": "角色代码不能包含连续的下划线",
+      "codeEndingUnderscore": "角色代码不能以下划线结尾",
+      "typeLabel": "角色类型",
+      "typeRequired": "请选择角色类型",
+      "levelLabel": "角色级别",
+      "levelRequired": "请输入角色级别",
+      "levelOption": "级别 {{level}}",
+      "descriptionLabel": "角色描述",
+      "descriptionRequired": "描述不能只包含空格",
+      "descriptionMinLength": "描述至少需要5个有效字符",
+      "statusLabel": "启用状态",
+      "switchEnabled": "启用",
+      "switchDisabled": "禁用",
+      "nameLength": "角色名称长度应在2-50个字符之间",
+      "namePattern": "角色名称只能包含中文、英文、数字、空格、连字符和下划线",
+      "namePlaceholder": "请输入角色名称，如：内容管理员",
+      "codeLength": "角色代码长度应在2-30个字符之间",
+      "codeExtra": "角色代码用于系统内部标识，建议使用英文，如：content_manager",
+      "codePlaceholder": "请输入角色代码，如：content_manager",
+      "typeExtra": "选择角色类型以便更好地管理和分类",
+      "typePlaceholder": "请选择角色类型",
+      "typeOptions": {
+        "custom": "自定义角色",
+        "customDesc": "用户自定义的业务角色",
+        "functional": "功能角色",
+        "functionalDesc": "基于功能模块的角色",
+        "data": "数据角色",
+        "dataDesc": "基于数据访问权限的角色"
+      },
+      "levelExtra": "级别越高，权限范围越大",
+      "levelPlaceholder": "请选择角色级别",
+      "levelOptions": {
+        "level": "级别",
+        "basic": "基础权限",
+        "normal": "一般权限",
+        "medium": "中等权限",
+        "advanced": "高级权限",
+        "highest": "最高权限"
+      },
+      "descriptionLength": "描述长度不能超过200个字符",
+      "descriptionExtra": "详细描述角色的职责和用途，有助于后续管理",
+      "descriptionPlaceholder": "请详细描述该角色的职责和权限范围，例如：负责内容的创建、编辑和发布，可以管理文章分类和标签...",
+      "statusExtra": "禁用的角色将无法分配给用户",
+      "statusEnabled": "启用",
+      "statusDisabled": "禁用"
+    },
+    "permissionModal": {
+      "title": "配置角色权限",
+      "selectPermissionsLabel": "选择权限",
+      "selectPermissionsRequired": "请选择至少一个权限",
+      "saveButton": "保存权限配置",
+      "cancelButton": "取消",
+      "configTitle": "权限配置说明",
+      "configDescription": "为角色 \"{{roleName}}\" 配置权限。选中的权限将授予该角色的所有用户。",
+      "configTip": "提示：可以按住 Ctrl/Cmd 键进行多选，或使用全选/取消全选按钮。",
+      "selectAll": "全选",
+      "deselectAll": "取消全选",
+      "selectedCount": "已选择 {{selected}} / {{total}} 项权限",
+      "noPermissions": "暂无权限数据",
+      "selectedPermissions": "已选择的权限"
+    },
+    "pagination": {
+      "total": "第 {{start}}-{{end}} 条，共 {{total}} 条"
+    },
+    "messages": {
+      "fetchRolesFailure": "获取角色列表失败",
+      "fetchPermissionsFailure": "获取权限列表失败",
+      "saveRoleSuccess": "角色保存成功",
+      "saveRoleFailure": "角色保存失败",
+      "deleteRoleSuccess": "角色删除成功",
+      "deleteRoleFailure": "角色删除失败",
+      "deleteError": "删除角色失败",
+      "batchDeleteSuccess": "批量删除成功",
+      "batchDeleteFailure": "批量删除失败",
+      "savePermissionsSuccess": "权限配置保存成功",
+      "savePermissionsFailure": "权限配置保存失败",
+      "noDataFound": "未找到匹配的数据",
+      "warning": "警告",
+      "batchDeleteWarning": "您即将删除 {{count}} 个角色，此操作不可撤销。",
+      "rolesToDelete": "删除的角色",
+      "dataLoadError": "数据加载错误"
+    },
+    "validation": {
+      "nameExists": "此角色名称已存在",
+      "codeExists": "此角色代码已存在",
+      "codeFormat": "角色代码只能包含小写字母、数字和下划线",
+      "descriptionTooLong": "描述不能超过500个字符",
+      "descriptionTooShort": "描述至少需要10个字符",
+      "codeStartWithLetter": "角色代码必须以小写字母开头",
+      "codeNoConsecutiveUnderscore": "角色代码不能包含连续的下划线",
+      "codeNoEndingUnderscore": "角色代码不能以下划线结尾",
+      "descriptionNoSpaceOnly": "描述不能只包含空格",
+      "descriptionMinLength": "描述至少需要5个有效字符"
+    }
+  },
+  "adminMenu": {
+    "title": "菜单管理",
+    "actions": {
+      "addMenu": "新增菜单",
+      "refresh": "刷新",
+      "viewDetails": "查看",
+      "editMenu": "编辑",
+      "deleteMenu": "删除",
+      "addSubmenu": "新增子菜单"
+    },
+    "search": { "placeholder": "搜索菜单名称" },
+    "filters": {
+      "statusPlaceholder": "状态筛选",
+      "typePlaceholder": "类型筛选",
+      "statusOptions": {
+        "enabled": "启用",
+        "disabled": "禁用"
+      },
+      "typeOptions": {
+        "menu": "菜单",
+        "button": "按钮",
+        "api": "API"
+      }
+    },
+    "table": {
+      "name": "菜单名称",
+      "path": "路径",
+      "type": "类型",
+      "status": "状态",
+      "sort": "排序",
+      "permissions": "权限",
+      "actions": "操作"
+    },
+    "tree": {
+      "title": "菜单树",
+      "collapse": "收缩"
+    },
+    "detail": {
+      "title": "菜单详情",
+      "name": "名称",
+      "path": "路径",
+      "icon": "图标",
+      "component": "组件",
+      "type": "类型",
+      "status": "状态",
+      "sort": "排序",
+      "permissions": "权限"
+    },
+    "confirm": {
+      "deleteTitle": "确定要删除这个菜单吗？",
+      "ok": "确定",
+      "cancel": "取消"
+    },
+    "pagination": {
+      "total": "第 {{start}}-{{end}} 条，共 {{total}} 条"
+    },
+    "modal": {
+      "editTitle": "编辑菜单",
+      "addTitle": "新增菜单"
+    },
+    "form": {
+      "nameLabel": "菜单名称",
+      "namePlaceholder": "请输入菜单名称",
+      "nameRequired": "请输入菜单名称",
+      "pathLabel": "菜单路径",
+      "pathPlaceholder": "顶级菜单可留空（作为目录）；子菜单请输入合法路径，如 /projects/list",
+      "pathRequired": "请输入菜单路径",
+      "pathPattern": "路径需以/开头，仅小写字母、数字与短横线，支持多级",
+      "iconLabel": "图标",
+      "iconSelect": "选择图标",
+      "componentLabel": "组件",
+      "componentPlaceholder": "请输入组件名称",
+      "typeLabel": "类型",
+      "statusLabel": "状态",
+      "sortLabel": "排序",
+      "parentLabel": "父菜单",
+      "parentSelectPlaceholder": "请选择父菜单",
+      "permissionsLabel": "权限",
+      "permissionsSelectPlaceholder": "请选择权限"
+    },
+    "messages": {
+      "loadMenusFailure": "加载菜单数据失败",
+      "loadPermissionsFailureFallback": "加载权限数据失败，已使用本地权限常量，获取权限列表失败: {{error}}",
+      "deleteSuccess": "删除成功",
+      "deleteFailure": "删除失败",
+      "updateSuccess": "更新成功",
+      "updateFailure": "更新失败",
+      "createSuccess": "创建成功",
+      "createFailure": "创建失败"
+    }
+  },
+  "adminDashboard": {
+    "title": "管理员仪表板",
+    "subtitle": "欢迎回来！这里是文化智慧内容管理中心",
+    "actions": {
+      "quick": "快捷操作"
+    },
+    "quickActions": {
+      "addWisdom": "添加智慧",
+      "manageCategories": "管理分类",
+      "manageTags": "管理标签",
+      "systemSettings": "系统设置"
+    },
+    "stats": {
+      "totalWisdom": "智慧总数",
+      "totalViews": "总阅读量",
+      "totalLikes": "总点赞数",
+      "totalCategories": "分类数量",
+      "totalUsers": "总用户数",
+      "activeUsers": "活跃用户",
+      "systemHealth": "系统健康度"
+    },
+    "sections": {
+      "systemOverview": "系统概览",
+      "systemMetrics": "系统指标",
+      "categoryStats": "分类统计"
+    },
+    "metrics": {
+      "cpu": "CPU 使用率",
+      "memory": "内存使用率",
+      "disk": "磁盘使用率",
+      "networkLatency": "网络延迟"
+    },
+    "health": {
+      "status": "状态"
+    },
+    "lists": {
+      "recentAdded": "最近添加",
+      "popularContent": "热门内容",
+      "viewAll": "查看全部",
+      "edit": "编辑"
+    },
+    "error": {
+      "loadFailed": "加载仪表板数据失败"
+    }
+  }
+  ,
+  "adminCategory": {
+    "title": "分类管理",
+    "subtitle": "管理智慧内容的分类体系，支持层级结构",
+    "actions": {
+      "addCategory": "添加分类",
+      "edit": "编辑",
+      "delete": "删除"
+    },
+    "confirm": {
+      "deleteTitle": "确定要删除这个分类吗？",
+      "deleteDescription": "删除后该分类下的智慧内容将移至未分类",
+      "ok": "确定",
+      "cancel": "取消"
+    },
+    "table": {
+      "createdAt": "创建时间",
+      "actions": "操作"
+    },
+    "stats": {
+      "totalCategories": "总分类数",
+      "activeCategories": "启用分类",
+      "totalWisdom": "智慧总数",
+      "totalViews": "总阅读量"
+    },
+    "treeTitle": "分类树",
+    "listTitle": "分类列表",
+    "searchPlaceholder": "搜索分类名称或描述",
+    "pagination": {
+      "total": "第 {{start}}-{{end}} 条，共 {{total}} 条"
+    },
+    "modal": {
+      "editTitle": "编辑分类",
+      "addTitle": "添加分类"
+    }
+  }
+  ,
+  "adminTag": {
+    "title": "标签管理",
+    "subtitle": "管理智慧内容的标签体系，支持批量操作",
+    "stats": {
+      "totalTags": "总标签数",
+      "activeTags": "启用标签",
+      "totalUsage": "总使用次数",
+      "totalViews": "总阅读量"
+    },
+    "cards": {
+      "hotTags": "热门标签",
+      "tagList": "标签列表"
+    },
+    "searchPlaceholder": "搜索标签名称或描述",
+    "actions": {
+      "batchDelete": "批量删除"
+    },
+    "confirm": {
+      "batchDeleteTitle": "确定要删除选中的 {{count}} 个标签吗？",
+      "ok": "确定",
+      "cancel": "取消"
+    },
+    "pagination": {
+      "total": "第 {{start}}-{{end}} 条，共 {{total}} 条"
+    },
+    "modal": {
+      "editTitle": "编辑标签",
+    "addTitle": "添加标签"
+    }
+    ,
+    "table": {
+      "name": "标签名称",
+      "description": "描述",
+      "usageCount": "使用次数",
+      "wisdomCount": "关联智慧",
+      "popularity": "热度",
+      "status": "状态",
+      "createdAt": "创建时间",
+      "actions": "操作"
+    },
+    "tooltips": {
+      "edit": "编辑",
+      "delete": "删除"
+    },
+    "status": {
+      "enabled": "启用",
+      "disabled": "禁用"
+    },
+    "form": {
+      "nameLabel": "标签名称",
+      "namePlaceholder": "请输入标签名称",
+      "nameRequired": "请输入标签名称",
+      "descriptionLabel": "标签描述",
+      "descriptionPlaceholder": "请输入标签描述",
+      "colorLabel": "标签颜色",
+      "colorPlaceholder": "选择标签颜色",
+      "statusLabel": "状态",
+      "switchEnabled": "启用",
+      "switchDisabled": "禁用"
+    },
+    "messages": {
+      "fetchFailure": "获取标签列表失败",
+      "networkError": "网络错误，请稍后重试",
+      "updateSuccess": "更新成功",
+      "createSuccess": "创建成功",
+      "updateFailure": "更新失败",
+      "createFailure": "创建失败",
+      "saveFailure": "保存标签失败",
+      "deleteSuccess": "删除成功",
+      "deleteFailure": "删除失败",
+      "batchDeleteNoneSelected": "请选择要删除的标签",
+      "batchDeleteSuccess": "批量删除成功",
+      "batchDeleteFailure": "批量删除标签失败"
+    },
+    "confirm": {
+      "deleteTitle": "确定要删除这个标签吗？",
+      "deleteDesc": "删除后相关的智慧内容将失去此标签",
+      "batchDeleteTitle": "确定要删除选中的 {{count}} 个标签吗？",
+      "ok": "确定",
+      "cancel": "取消"
+    }
+  },
+  "adminWisdom": {
+    "title": "智慧内容管理",
+    "subtitle": "管理所有文化智慧内容，包括增加、编辑、删除和查看",
+    "actions": {
+      "import": "导入",
+      "export": "导出",
+      "addWisdom": "添加智慧",
+      "advancedFilter": "高级筛选",
+      "batchDelete": "批量删除",
+      "reset": "重置",
+      "apply": "应用"
+    },
+    "search": {
+      "placeholder": "搜索标题、内容、作者..."
+    },
+    "table": {
+      "title": "标题",
+      "category": "分类",
+      "school": "学派",
+      "author": "作者",
+      "status": "状态",
+      "createdAt": "创建时间",
+      "actions": "操作",
+      "statusMap": {
+        "published": "已发布",
+        "draft": "草稿",
+        "archived": "已归档"
+      },
+      "tooltips": {
+        "view": "查看",
+        "edit": "编辑",
+        "delete": "删除"
+      },
+      "confirm": {
+        "deleteTitle": "确定要删除这条智慧吗？",
+        "ok": "确定",
+        "cancel": "取消"
+      },
+      "pagination": {
+        "total": "第 {{start}}-{{end}} 条，共 {{total}} 条"
+      }
+    },
+    "drawer": {
+      "title": "高级筛选",
+      "fields": {
+        "keyword": "关键词",
+        "category": "分类",
+        "school": "学派",
+        "author": "作者",
+        "dateRange": "创建时间",
+        "status": "状态"
+      },
+      "placeholders": {
+        "keyword": "搜索标题、内容、作者...",
+        "category": "选择分类",
+        "school": "选择学派",
+        "author": "输入作者名称",
+        "status": "选择状态"
+      },
+      "statusOptions": {
+        "published": "已发布",
+        "draft": "草稿",
+        "archived": "已归档"
+      }
+    },
+    "confirm": {
+      "batchDeleteTitle": "确定要删除选中的 {{count}} 项吗？",
+      "ok": "确定",
+      "cancel": "取消"
+    },
+    "messages": {
+      "loadListFailed": "加载智慧列表失败",
+      "loadFailed": "获取智慧列表失败",
+      "loadFiltersFailed": "加载筛选选项失败",
+      "deleteSuccess": "删除成功",
+      "deleteFailed": "删除失败",
+      "batchDeleteSuccess": "批量删除成功",
+      "batchDeleteFailed": "批量删除失败",
+      "exportSuccess": "导出成功",
+      "exportFailed": "导出失败",
+      "importWip": "导入功能开发中...",
+      "selectItemsToDelete": "请选择要删除的项目"
+    }
+  },
+  "adminSystemSettings": {
+    "title": "系统设置",
+    "subtitle": "管理网站配置、SEO设置和缓存策略",
+    "cards": {
+      "siteConfig": "网站配置",
+      "feature": "功能设置",
+      "seo": "SEO设置",
+      "openGraph": "Open Graph设置",
+      "other": "其他设置",
+      "cache": "缓存管理",
+      "cacheConfig": "缓存配置",
+      "cacheStats": "缓存统计"
+    },
+    "fields": {
+      "siteName": "网站名称",
+      "contactEmail": "联系邮箱",
+      "siteDescription": "网站描述",
+      "siteKeywords": "网站关键词",
+      "siteLogo": "网站Logo",
+      "favicon": "网站图标",
+      "icp": "ICP备案号",
+      "copyright": "版权信息",
+      "allowRegister": "允许用户注册",
+      "enableComments": "启用评论功能",
+      "enableSearch": "启用搜索功能",
+      "maxUploadMB": "最大上传大小(MB)",
+      "defaultLanguage": "默认语言",
+      "pageTitle": "页面标题",
+      "pageKeywords": "页面关键词",
+      "pageDescription": "页面描述",
+      "ogTitle": "OG标题",
+      "ogImage": "OG图片",
+      "ogDescription": "OG描述",
+      "twitterCardType": "Twitter卡片类型",
+      "enableSitemap": "启用站点地图",
+      "robots": "搜索引擎爬虫规则",
+      "analytics": "统计代码",
+      "enableCache": "启用缓存",
+      "cacheStrategy": "缓存策略",
+      "cacheTTL": "缓存时间(秒)",
+      "cacheMaxMB": "最大缓存大小(MB)"
+    },
+    "placeholders": {
+      "siteName": "请输入网站名称",
+      "contactEmail": "请输入联系邮箱",
+      "siteDescription": "请输入网站描述",
+      "siteKeywords": "请输入网站关键词",
+      "icp": "请输入ICP备案号",
+      "copyright": "请输入版权信息",
+      "defaultLanguage": "请选择默认语言",
+      "pageTitle": "请输入页面标题",
+      "pageKeywords": "请输入页面关键词",
+      "pageDescription": "请输入页面描述",
+      "ogTitle": "请输入OG标题",
+      "ogDescription": "请输入OG描述",
+      "twitterCardType": "请选择Twitter卡片类型",
+      "cacheStrategy": "请选择缓存策略",
+      "analytics": "请输入统计代码"
+    },
+    "help": {
+      "keywords": "多个关键词用逗号分隔",
+      "twitterCardType": "请选择Twitter卡片类型",
+      "analytics": "Google Analytics或其他统计代码",
+      "robots": "搜索引擎爬虫规则"
+    },
+    "buttons": {
+      "uploadLogo": "上传Logo",
+      "uploadIcon": "上传图标",
+      "uploadOgImage": "上传OG图片",
+      "save": "保存配置",
+      "saveSEO": "保存SEO配置",
+      "clearCache": "清空缓存",
+      "refreshStats": "刷新统计"
+    },
+    "twitterCardOptions": {
+      "summary": "摘要",
+      "summary_large_image": "大图摘要",
+      "app": "应用",
+      "player": "播放器"
+    },
+    "cacheStrategies": {
+      "lru": "LRU (最近最少使用)",
+      "lfu": "LFU (最少使用频率)",
+      "fifo": "FIFO (先进先出)",
+      "ttl": "TTL (生存时间)"
+    },
+    "stats": {
+      "hitRate": "缓存命中率",
+      "totalRequests": "总请求数",
+      "cacheSize": "缓存大小",
+      "memoryUsage": "内存使用"
+    },
+    "messages": {
+      "loadSiteFailed": "加载系统配置失败",
+      "loadSEOFailed": "加载SEO配置失败",
+      "loadCacheFailed": "加载缓存配置失败",
+      "loadCacheStatsFailed": "加载缓存统计失败",
+      "saveSiteSuccess": "系统配置保存成功",
+      "saveSiteFailed": "系统配置保存失败",
+      "saveSEOSuccess": "SEO配置保存成功",
+      "saveSEOFailed": "SEO配置保存失败",
+      "saveCacheSuccess": "缓存配置保存成功",
+      "saveCacheFailed": "缓存配置保存失败",
+      "clearCacheTitle": "确认清空缓存",
+      "clearCacheContent": "清空缓存后可能会暂时影响网站性能，确定要继续吗？",
+      "clearCacheSuccess": "缓存清空成功",
+      "clearCacheFailed": "缓存清空失败",
+      "uploadSuccess": "{{filename}} 文件上传成功",
+      "uploadFailed": "{{filename}} 文件上传失败"
+    }
+  },
+  "chat": {
+    "title": "AI智慧对话",
+    "placeholder": "请输入您的问题...",
+    "send": "发送",
+    "clear": "清空对话",
+    "newChat": "新对话",
+    "history": "历史对话",
+    "suggestions": {
+      "title": "建议话题",
+      "philosophy": "人生哲学",
+      "wisdom": "古代智慧",
+      "meditation": "冥想修行",
+      "ethics": "道德伦理"
+    },
+    "typing": "AI正在思考...",
+    "error": "对话出现错误，请重试",
+    "retry": "重试",
+    "copy": "复制",
+    "regenerate": "重新生成"
+  },
+  "learning": {
+    "title": "学习中心",
+    "courses": "课程",
+    "progress": "进度",
+    "achievements": "成就",
+    "certificates": "证书",
+    "path": {
+      "beginner": "入门路径",
+      "intermediate": "进阶路径",
+      "advanced": "高级路径",
+      "master": "大师路径"
+    },
+    "course": {
+      "start": "开始学习",
+      "continue": "继续学习",
+      "completed": "已完成",
+      "duration": "学习时长",
+      "difficulty": "难度",
+      "lessons": "课时",
+      "students": "学员数"
+    },
+    "lesson": {
+      "previous": "上一课",
+      "next": "下一课",
+      "complete": "完成",
+      "notes": "笔记",
+      "quiz": "测验",
+      "discussion": "讨论"
+    }
+  },
+  "community": {
+    "title": "智慧社区",
+    "posts": "帖子",
+    "discussions": "讨论",
+    "questions": "问答",
+    "sharing": "分享",
+    "create": "发布",
+    "reply": "回复",
+    "like": "点赞",
+    "follow": "关注",
+    "trending": "热门",
+    "latest": "最新",
+    "popular": "热门"
+  },
+  "profile": {
+    "title": "个人中心",
+    "info": "个人信息",
+    "avatar": "头像",
+    "nickname": "昵称",
+    "bio": "个人简介",
+    "location": "所在地",
+    "website": "个人网站",
+    "joinDate": "加入时间",
+    "stats": {
+      "posts": "发帖数",
+      "followers": "关注者",
+      "following": "关注中",
+      "likes": "获赞数"
+    },
+    "activities": "动态",
+    "favorites": "收藏",
+    "history": "历史记录",
+    "settings": "账户设置"
+  },
+  "settings": {
+    "title": "设置",
+    "general": "通用设置",
+    "account": "账户设置",
+    "privacy": "隐私设置",
+    "notifications": "通知设置",
+    "appearance": "外观设置",
+    "language": "语言设置",
+    "theme": {
+      "title": "主题",
+      "light": "浅色主题",
+      "dark": "深色主题",
+      "auto": "跟随系统"
+    },
+    "notifications": {
+      "email": "邮件通知",
+      "push": "推送通知",
+      "sms": "短信通知",
+      "system": "系统通知",
+      "marketing": "营销通知"
+    },
+    "privacy": {
+      "profile": "个人资料可见性",
+      "activities": "活动可见性",
+      "search": "搜索可见性",
+      "contact": "联系方式可见性"
+    }
+  },
+  "errors": {
+    "network": "网络连接错误",
+    "server": "服务器错误",
+    "notFound": "页面未找到",
+    "unauthorized": "未授权访问",
+    "forbidden": "访问被禁止",
+    "validation": "数据验证失败",
+    "unknown": "未知错误",
+    "retry": "重试",
+    "goHome": "返回首页",
+    "contact": "联系客服"
+  },
+  "messages": {
+    "success": {
+      "saved": "保存成功",
+      "deleted": "删除成功",
+      "updated": "更新成功",
+      "created": "创建成功",
+      "sent": "发送成功",
+      "copied": "复制成功"
+    },
+    "error": {
+      "saveFailed": "保存失败",
+      "deleteFailed": "删除失败",
+      "updateFailed": "更新失败",
+      "createFailed": "创建失败",
+      "sendFailed": "发送失败",
+      "copyFailed": "复制失败",
+      "loadFailed": "加载失败"
+    },
+    "confirm": {
+      "delete": "确定要删除吗？",
+      "logout": "确定要退出登录吗？",
+      "clear": "确定要清空吗？",
+      "reset": "确定要重置吗？"
+    }
+  },
+  "validation": {
+    "required": "此字段为必填项",
+    "email": "请输入有效的邮箱地址",
+    "password": "密码长度至少8位",
+    "confirmPassword": "两次输入的密码不一致",
+    "phone": "请输入有效的手机号码",
+    "url": "请输入有效的网址",
+    "minLength": "最少输入{{min}}个字符",
+    "maxLength": "最多输入{{max}}个字符",
+    "min": "最小值为{{min}}",
+    "max": "最大值为{{max}}",
+    "pattern": "格式不正确"
+  },
+  "time": {
+    "now": "刚刚",
+    "minutesAgo": "{{count}}分钟前",
+    "hoursAgo": "{{count}}小时前",
+    "daysAgo": "{{count}}天前",
+    "weeksAgo": "{{count}}周前",
+    "monthsAgo": "{{count}}个月前",
+    "yearsAgo": "{{count}}年前",
+    "today": "今天",
+    "yesterday": "昨天",
+    "tomorrow": "明天",
+    "thisWeek": "本周",
+    "lastWeek": "上周",
+    "nextWeek": "下周",
+    "thisMonth": "本月",
+    "lastMonth": "上月",
+    "nextMonth": "下月",
+    "thisYear": "今年",
+    "lastYear": "去年",
+    "nextYear": "明年"
+  },
+  "mainMenu": {
+    "labels": {
+      "dashboard": "仪表板",
+      "ai-services": "AI智能服务",
+      "ai-chat": "智能对话",
+      "ai-multimodal": "多模态AI",
+      "image-generation": "图像生成",
+      "image-analysis": "图像分析",
+      "video-processing": "视频处理",
+      "audio-processing": "音频处理",
+      "ai-analysis": "智能分析",
+      "data-analysis": "数据分析",
+      "trend-prediction": "趋势预测",
+      "report-generation": "报告生成",
+      "ai-generation": "内容生成",
+      "text-generation": "文本生成",
+      "code-generation": "代码生成",
+      "creative-design": "创意设计",
+      "cultural-wisdom": "文化智慧",
+      "wisdom-library": "智慧库",
+      "wisdom-search": "智慧搜索",
+      "wisdom-recommend": "智慧推荐",
+      "wisdom-category": "分类管理",
+      "wisdom-favorites": "我的收藏",
+      "wisdom-notes": "我的笔记",
+      "community": "社区交流",
+      "community-posts": "社区动态",
+      "community-chat": "实时聊天",
+      "community-groups": "兴趣小组",
+      "community-events": "活动中心",
+      "intelligent-learning": "智能学习",
+      "learning-courses": "课程中心",
+      "learning-progress": "学习进度",
+      "learning-assessment": "能力评估",
+      "learning-certificate": "认证中心",
+      "project-management": "项目管理",
+      "project-workspace": "项目工作台",
+      "project-tasks": "任务管理",
+      "project-collaboration": "团队协作",
+      "project-analytics": "项目分析",
+      "health-management": "健康管理",
+      "health-monitor": "健康监测",
+      "health-analysis": "健康分析",
+      "health-advice": "健康建议",
+      "health-records": "健康档案",
+      "security-center": "安全中心",
+      "threat-detection": "威胁检测",
+      "vulnerability-management": "漏洞管理",
+      "penetration-testing": "渗透测试",
+      "security-education": "安全教育",
+      "security-audit": "安全审计",
+      "third-party-integration": "第三方集成",
+      "api-keys": "API密钥管理",
+      "plugins": "插件管理",
+      "service-integration": "服务集成",
+      "webhooks": "Webhook管理",
+      "oauth-apps": "OAuth应用",
+      "system-management": "系统管理",
+      "system-settings": "系统设置",
+      "system-users": "用户管理",
+      "system-roles": "角色管理",
+      "system-permissions": "权限管理",
+      "system-menus": "菜单管理",
+      "system-monitoring": "系统监控",
+      "system-analytics": "数据分析",
+      "system-notifications": "通知中心",
+      "profile-overview": "个人资料",
+      "profile-settings": "账户设置",
+      "profile-security": "安全设置",
+      "profile-notifications": "通知设置",
+      "quick-chat": "快速对话",
+      "quick-search": "智慧搜索",
+      "quick-note": "快速笔记",
+      "quick-task": "创建任务",
+      "admin-dashboard": "管理员仪表板"
+    }
+  }
+}

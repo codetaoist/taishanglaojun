@@ -1,0 +1,297 @@
+version: '3.8'
+
+services:
+  # ==================== 前端服务 ====================
+  
+  # Web前端应用
+  frontend:
+    build:
+      context: ./frontend/web-app
+      dockerfile: Dockerfile.dev
+    container_name: taishanglaojun-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/web-app:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_WS_URL=ws://localhost:8080
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+
+  # ==================== 后端服务 ====================
+  
+  # API网关
+  backend:
+    build:
+      context: ./core-services
+      dockerfile: Dockerfile.dev
+    container_name: taishanglaojun-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./core-services:/app
+    environment:
+      - GIN_MODE=debug
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/taishanglaojun?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-key}
+      - LOG_LEVEL=debug
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # AI服务
+  ai-service:
+    build:
+      context: ./core-services
+      dockerfile: Dockerfile.ai-service
+    container_name: taishanglaojun-ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./core-services:/app
+    environment:
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/taishanglaojun?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - QDRANT_URL=http://qdrant:6333
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LOG_LEVEL=debug
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+
+  # ==================== 数据库服务 ====================
+  
+  # PostgreSQL主数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: taishanglaojun-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=taishanglaojun
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taishanglaojun"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: taishanglaojun-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== 搜索和向量数据库 ====================
+  
+  # Elasticsearch搜索引擎
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: taishanglaojun-elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Qdrant向量数据库
+  qdrant:
+    image: qdrant/qdrant:v1.7.0
+    container_name: taishanglaojun-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 对象存储 ====================
+  
+  # MinIO对象存储
+  minio:
+    image: minio/minio:RELEASE.2023-12-07T04-16-00Z
+    container_name: taishanglaojun-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin123}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 消息队列 ====================
+  
+  # RabbitMQ消息队列
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: taishanglaojun-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-admin123}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ==================== 监控服务 ====================
+  
+  # Prometheus监控
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: taishanglaojun-prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+
+  # Grafana可视化
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: taishanglaojun-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+
+  # ==================== 开发工具 ====================
+  
+  # Mailhog邮件测试
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: taishanglaojun-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - taishanglaojun-network
+    restart: unless-stopped
+
+# ==================== 网络配置 ====================
+networks:
+  taishanglaojun-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ==================== 数据卷 ====================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  qdrant_data:
+    driver: local
+  minio_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

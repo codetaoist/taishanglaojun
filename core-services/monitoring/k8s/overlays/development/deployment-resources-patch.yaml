@@ -1,0 +1,83 @@
+# 太上老君监控系统 - 开发环境资源限制 JSON 补丁
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources
+  value:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+- op: replace
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: APP_ENV
+      value: "development"
+    - name: LOG_LEVEL
+      value: "debug"
+    - name: DEBUG
+      value: "true"
+    - name: PORT
+      value: "8080"
+    - name: DATABASE_HOST
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: DATABASE_HOST
+    - name: DATABASE_PORT
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: DATABASE_PORT
+    - name: DATABASE_NAME
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: DATABASE_NAME
+    - name: DATABASE_USER
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: DATABASE_USER
+    - name: DATABASE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: monitoring-secrets
+          key: DATABASE_PASSWORD
+    - name: DATABASE_SSL_MODE
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: DATABASE_SSL_MODE
+    - name: REDIS_HOST
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: REDIS_HOST
+    - name: REDIS_PORT
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: REDIS_PORT
+    - name: REDIS_DB
+      valueFrom:
+        configMapKeyRef:
+          name: monitoring-config
+          key: REDIS_DB
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: monitoring-secrets
+          key: REDIS_PASSWORD
+    - name: JWT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: monitoring-secrets
+          key: JWT_SECRET
+    - name: ENCRYPTION_KEY
+      valueFrom:
+        secretKeyRef:
+          name: monitoring-secrets
+          key: ENCRYPTION_KEY

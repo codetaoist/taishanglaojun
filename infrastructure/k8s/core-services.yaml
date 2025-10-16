@@ -1,0 +1,291 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-services
+  namespace: taishanglaojun
+  labels:
+    app: core-services
+    component: backend
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: core-services
+  template:
+    metadata:
+      labels:
+        app: core-services
+        component: backend
+        version: v1.0.0
+    spec:
+      containers:
+      - name: core-services
+        image: taishanglaojun/core-services:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8081
+          name: metrics
+        env:
+        # 基础配置
+        - name: SERVER_HOST
+          value: "0.0.0.0"
+        - name: SERVER_PORT
+          value: "8080"
+        - name: SERVER_MODE
+          value: "production"
+        - name: LOG_LEVEL
+          value: "info"
+        
+        # 数据库配置
+        - name: DB_HOST
+          value: "postgres-service"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: core-services-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: core-services-config
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: postgres-password
+        
+        # Redis配置
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: redis-password
+        
+        # JWT配置
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: jwt-secret
+        - name: JWT_EXPIRATION
+          valueFrom:
+            configMapKeyRef:
+              name: core-services-config
+              key: JWT_EXPIRATION
+        
+        # AI服务配置
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: openai-api-key
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: anthropic-api-key
+        - name: BAIDU_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: baidu-api-key
+        - name: ALIBABA_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: alibaba-api-key
+        
+        # 对象存储配置
+        - name: MINIO_ENDPOINT
+          value: "minio-service:9000"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: minio-access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: taishanglaojun-secrets
+              key: minio-secret-key
+        
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+        - name: logs-volume
+          mountPath: /app/logs
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 30
+      
+      volumes:
+      - name: config-volume
+        configMap:
+          name: core-services-config
+      - name: logs-volume
+        emptyDir: {}
+      
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-services
+  namespace: taishanglaojun
+  labels:
+    app: core-services
+    component: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+    name: metrics
+  selector:
+    app: core-services
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: core-services-hpa
+  namespace: taishanglaojun
+  labels:
+    app: core-services
+    component: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: core-services
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: core-services-network-policy
+  namespace: taishanglaojun
+  labels:
+    app: core-services
+    component: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: core-services
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: taishanglaojun
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

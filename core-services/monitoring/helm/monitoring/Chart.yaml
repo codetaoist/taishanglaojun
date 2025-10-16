@@ -1,0 +1,51 @@
+apiVersion: v2
+name: monitoring
+description: 太上老君监控系统 Helm Chart
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://github.com/taishanglaojun/monitoring
+sources:
+  - https://github.com/taishanglaojun/monitoring
+maintainers:
+  - name: TaiShangLaoJun Team
+    email: team@taishanglaojun.com
+keywords:
+  - monitoring
+  - observability
+  - metrics
+  - logging
+  - tracing
+  - taishanglaojun
+annotations:
+  category: Monitoring
+  licenses: MIT
+dependencies:
+  - name: postgresql
+    version: "12.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: "17.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: prometheus
+    version: "23.x.x"
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled
+  - name: grafana
+    version: "6.x.x"
+    repository: https://grafana.github.io/helm-charts
+    condition: grafana.enabled
+  - name: jaeger
+    version: "0.x.x"
+    repository: https://jaegertracing.github.io/helm-charts
+    condition: jaeger.enabled
+  - name: elasticsearch
+    version: "8.x.x"
+    repository: https://helm.elastic.co
+    condition: elasticsearch.enabled
+  - name: kibana
+    version: "8.x.x"
+    repository: https://helm.elastic.co
+    condition: kibana.enabled

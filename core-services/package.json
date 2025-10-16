@@ -1,0 +1,9 @@
+{
+  "name": "core-services",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "go run ./main.go",
+    "start": "go run ./main.go"
+  }
+}

@@ -1,0 +1,175 @@
+name: taishang-laojun
+base: core22
+version: '1.0.0'
+summary: TaishangLaojun Desktop - Advanced Communication Platform
+description: |
+  TaishangLaojun Desktop is a comprehensive communication and collaboration 
+  platform that provides secure messaging, file sharing, and project 
+  management capabilities. Built with modern technologies and designed 
+  for both personal and professional use.
+
+  Features:
+  - Secure end-to-end encrypted messaging
+  - File sharing and collaboration tools
+  - Project management capabilities
+  - Cross-platform compatibility
+  - Modern and intuitive user interface
+  - Audio and video communication
+  - System integration and notifications
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  taishang-laojun:
+    command: usr/bin/taishang-laojun
+    desktop: usr/share/applications/taishang-laojun.desktop
+    extensions: [gnome]
+    plugs:
+      - home
+      - network
+      - network-bind
+      - audio-playback
+      - audio-record
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - hardware-observe
+      - system-observe
+      - process-control
+      - mount-observe
+      - removable-media
+      - camera
+      - screen-inhibit-control
+      - unity7
+      - gsettings
+      - browser-support
+    environment:
+      # GTK and GLib settings
+      GTK_USE_PORTAL: 1
+      GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas
+      
+      # Audio settings
+      PULSE_RUNTIME_PATH: /run/user/1000/pulse
+      
+      # XDG settings
+      XDG_DATA_DIRS: $SNAP/usr/share:$XDG_DATA_DIRS
+      XDG_CONFIG_DIRS: $SNAP/etc/xdg:$XDG_CONFIG_DIRS
+
+parts:
+  taishang-laojun:
+    plugin: cmake
+    source: ../..
+    cmake-parameters:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=/usr
+      - -DBUILD_TESTS=OFF
+      - -DBUILD_PACKAGES=OFF
+      - -DSNAP_BUILD=ON
+    build-packages:
+      - build-essential
+      - cmake
+      - ninja-build
+      - pkg-config
+      - libgtk-4-dev
+      - libadwaita-1-dev
+      - libglib2.0-dev
+      - libjson-c-dev
+      - libssl-dev
+      - libasound2-dev
+      - libpulse-dev
+      - libsndfile1-dev
+      - libnotify-dev
+      - libappindicator3-dev
+      - libx11-dev
+      - libwayland-dev
+      - libgl1-mesa-dev
+      - libegl1-mesa-dev
+      - libdbus-1-dev
+      - libsqlite3-dev
+    stage-packages:
+      - libgtk-4-1
+      - libadwaita-1-0
+      - libglib2.0-0
+      - libjson-c5
+      - libssl3
+      - libasound2
+      - libpulse0
+      - libsndfile1
+      - libnotify4
+      - libappindicator3-1
+      - libx11-6
+      - libwayland-client0
+      - libgl1-mesa-glx
+      - libegl1-mesa
+      - libdbus-1-3
+      - libsqlite3-0
+      - libgdk-pixbuf-2.0-0
+      - libpango-1.0-0
+      - libcairo2
+      - libfontconfig1
+      - libfreetype6
+      - libharfbuzz0b
+      - libfribidi0
+      - libgraphene-1.0-0
+      - shared-mime-info
+      - gsettings-desktop-schemas
+    override-build: |
+      craftctl default
+      
+      # Install desktop file with correct name
+      mkdir -p $CRAFTCTL_PART_INSTALL/usr/share/applications
+      cp resources/taishang-laojun.desktop $CRAFTCTL_PART_INSTALL/usr/share/applications/
+      
+      # Install icons
+      mkdir -p $CRAFTCTL_PART_INSTALL/usr/share/icons/hicolor/256x256/apps
+      mkdir -p $CRAFTCTL_PART_INSTALL/usr/share/icons/hicolor/scalable/apps
+      cp resources/icons/taishang-laojun.png $CRAFTCTL_PART_INSTALL/usr/share/icons/hicolor/256x256/apps/
+      cp resources/icons/taishang-laojun.svg $CRAFTCTL_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/
+      
+      # Install AppStream metadata
+      mkdir -p $CRAFTCTL_PART_INSTALL/usr/share/metainfo
+      cp resources/appstream/taishang-laojun.appdata.xml $CRAFTCTL_PART_INSTALL/usr/share/metainfo/
+    organize:
+      usr/lib/x86_64-linux-gnu: usr/lib
+    prime:
+      - usr/bin/taishang-laojun
+      - usr/share/applications/taishang-laojun.desktop
+      - usr/share/icons/hicolor/*/apps/taishang-laojun.*
+      - usr/share/metainfo/taishang-laojun.appdata.xml
+      - usr/lib/
+      - usr/share/glib-2.0/schemas/
+      - usr/share/mime/
+      - usr/share/locale/
+      - etc/
+
+  # Desktop integration
+  desktop-integration:
+    plugin: nil
+    stage-packages:
+      - desktop-file-utils
+      - shared-mime-info
+    override-prime: |
+      craftctl default
+      
+      # Update desktop database
+      if [ -d usr/share/applications ]; then
+        update-desktop-database usr/share/applications
+      fi
+      
+      # Update MIME database
+      if [ -d usr/share/mime ]; then
+        update-mime-database usr/share/mime
+      fi
+
+layout:
+  /usr/share/glib-2.0/schemas:
+    bind: $SNAP/usr/share/glib-2.0/schemas
+  /usr/share/mime:
+    bind: $SNAP/usr/share/mime

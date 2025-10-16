@@ -1,0 +1,106 @@
+{{/*
+太上老君监控系统 安装说明模板
+*/}}
+🎉 太上老君监控系统已成功部署！
+
+📊 监控系统信息:
+- Chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+- App Version: {{ .Chart.AppVersion }}
+- Release: {{ .Release.Name }}
+- Namespace: {{ .Release.Namespace }}
+
+🔗 访问方式:
+
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  🌐 外部访问: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  🔌 NodePort 访问:
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "taishanglaojun-monitoring.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+  🔗 LoadBalancer 访问:
+  注意: 可能需要几分钟时间来分配外部IP
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "taishanglaojun-monitoring.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  🔧 端口转发访问:
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "taishanglaojun-monitoring.fullname" . }} 8080:{{ .Values.service.port }}
+  然后访问: http://127.0.0.1:8080
+{{- end }}
+
+📈 监控组件状态:
+
+{{- if .Values.prometheus.enabled }}
+✅ Prometheus: 已启用
+   - 访问地址: http://{{ include "taishanglaojun-monitoring.prometheus.fullname" . }}:9090
+{{- else }}
+❌ Prometheus: 未启用
+{{- end }}
+
+{{- if .Values.grafana.enabled }}
+✅ Grafana: 已启用
+   - 访问地址: http://{{ include "taishanglaojun-monitoring.grafana.fullname" . }}:3000
+   - 默认用户名: admin
+   - 默认密码: {{ .Values.grafana.adminPassword }}
+{{- else }}
+❌ Grafana: 未启用
+{{- end }}
+
+{{- if .Values.influxdb.enabled }}
+✅ InfluxDB: 已启用
+   - 访问地址: http://{{ include "taishanglaojun-monitoring.influxdb.fullname" . }}:8086
+   - 组织: {{ .Values.influxdb.adminUser.organization }}
+   - 存储桶: {{ .Values.influxdb.adminUser.bucket }}
+{{- else }}
+❌ InfluxDB: 未启用
+{{- end }}
+
+{{- if .Values.jaeger.enabled }}
+✅ Jaeger: 已启用
+   - 访问地址: http://{{ include "taishanglaojun-monitoring.jaeger.fullname" . }}:16686
+{{- else }}
+❌ Jaeger: 未启用
+{{- end }}
+
+{{- if .Values.autoscaling.enabled }}
+🔄 自动扩缩容: 已启用
+   - 最小副本数: {{ .Values.autoscaling.minReplicas }}
+   - 最大副本数: {{ .Values.autoscaling.maxReplicas }}
+   - CPU 目标: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}%
+   - 内存目标: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}%
+{{- end }}
+
+{{- if .Values.persistence.enabled }}
+💾 持久化存储: 已启用
+   - 存储类: {{ .Values.persistence.storageClass | default "默认" }}
+   - 存储大小: {{ .Values.persistence.size }}
+{{- end }}
+
+🔍 常用命令:
+
+# 查看 Pod 状态
+kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+# 查看服务状态
+kubectl get svc -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+# 查看日志
+kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "taishanglaojun-monitoring.name" . }} -f
+
+# 运行测试
+helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+# 升级部署
+helm upgrade {{ .Release.Name }} taishanglaojun/taishanglaojun-monitoring -n {{ .Release.Namespace }}
+
+📚 更多信息:
+- 文档: https://github.com/taishanglaojun/core-services/monitoring
+- 问题反馈: https://github.com/taishanglaojun/core-services/issues
+- 社区支持: https://taishanglaojun.com/community
+
+感谢使用太上老君监控系统！🚀

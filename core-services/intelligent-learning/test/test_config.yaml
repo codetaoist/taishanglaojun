@@ -1,0 +1,202 @@
+# 智能学习服务集成测试配置
+
+# 测试数据库配置
+database:
+  host: localhost
+  port: 5432
+  name: intelligent_learning_test
+  user: test_user
+  password: test_password
+  ssl_mode: disable
+  max_connections: 10
+  connection_timeout: 30s
+
+# Redis配置
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  database: 1  # 使用不同的数据库避免与生产环境冲突
+  pool_size: 10
+  connection_timeout: 5s
+
+# Elasticsearch配置
+elasticsearch:
+  hosts:
+    - http://localhost:9200
+  username: ""
+  password: ""
+  index_prefix: "test_"
+  timeout: 30s
+
+# Neo4j配置
+neo4j:
+  uri: bolt://localhost:7687
+  username: neo4j
+  password: test_password
+  database: test
+  max_connections: 10
+
+# 测试服务配置
+server:
+  host: localhost
+  port: 8081  # 使用不同端口避免冲突
+  read_timeout: 30s
+  write_timeout: 30s
+  idle_timeout: 60s
+
+# 日志配置
+logging:
+  level: debug
+  format: json
+  output: stdout
+  file_path: "./logs/test.log"
+
+# 测试数据配置
+test_data:
+  # 测试学习者
+  learners:
+    - id: "test-learner-001"
+      name: "张三"
+      email: "zhangsan@test.com"
+      learning_style: "visual"
+      skill_level: "intermediate"
+    - id: "test-learner-002"
+      name: "李四"
+      email: "lisi@test.com"
+      learning_style: "auditory"
+      skill_level: "beginner"
+
+  # 测试内容
+  contents:
+    - id: "test-content-001"
+      title: "Go语言基础"
+      type: "video"
+      difficulty: "beginner"
+      duration: 3600
+      tags: ["golang", "programming", "basics"]
+    - id: "test-content-002"
+      title: "微服务架构设计"
+      type: "article"
+      difficulty: "advanced"
+      duration: 1800
+      tags: ["microservices", "architecture", "design"]
+
+  # 测试社区
+  communities:
+    - id: "test-community-001"
+      name: "Go学习交流群"
+      type: "study_group"
+      is_public: true
+      member_count: 50
+    - id: "test-community-002"
+      name: "微服务实战小组"
+      type: "course"
+      is_public: false
+      member_count: 20
+
+  # 测试成就
+  achievements:
+    - id: "test-achievement-001"
+      name: "初学者"
+      type: "progress"
+      level: "bronze"
+      criteria:
+        content_completed: 5
+        min_score: 70
+    - id: "test-achievement-002"
+      name: "连续学习者"
+      type: "streak"
+      level: "silver"
+      criteria:
+        consecutive_days: 7
+
+# 测试场景配置
+test_scenarios:
+  # 学习路径测试场景
+  learning_path:
+    generate_path:
+      learner_id: "test-learner-001"
+      target_skills: ["golang", "microservices", "docker"]
+      time_constraint: 30
+      difficulty: "intermediate"
+      learning_style: "visual"
+      prerequisites: ["basic_programming"]
+    
+    update_progress:
+      path_id: "test-path-001"
+      learner_id: "test-learner-001"
+      step_id: "step-1"
+      completion_rate: 0.75
+      time_spent: 1800
+      performance_score: 85.5
+
+  # 成就系统测试场景
+  achievement:
+    check_achievement:
+      learner_id: "test-learner-001"
+      event_type: "content_completed"
+      event_data:
+        content_id: "test-content-001"
+        completion_time: 1800
+        performance_score: 92.5
+
+  # 社区测试场景
+  community:
+    create_community:
+      name: "测试社区"
+      description: "用于集成测试的社区"
+      type: "study_group"
+      is_public: true
+      creator_id: "test-learner-001"
+      tags: ["test", "integration"]
+    
+    create_post:
+      community_id: "test-community-001"
+      author_id: "test-learner-001"
+      title: "测试帖子"
+      content: "这是一个测试帖子的内容"
+      type: "discussion"
+      tags: ["test"]
+
+# 性能测试配置
+performance:
+  concurrent_users: 10
+  test_duration: 60s
+  ramp_up_time: 10s
+  think_time: 1s
+  
+  # API端点性能目标
+  targets:
+    learning_path_generate:
+      max_response_time: 2000ms
+      min_throughput: 10  # requests per second
+    
+    achievement_check:
+      max_response_time: 500ms
+      min_throughput: 50
+    
+    community_posts:
+      max_response_time: 1000ms
+      min_throughput: 20
+
+# 监控和报告配置
+monitoring:
+  enable_metrics: true
+  metrics_port: 9091
+  enable_tracing: true
+  jaeger_endpoint: "http://localhost:14268/api/traces"
+  
+  # 测试报告配置
+  reports:
+    output_dir: "./test_reports"
+    formats: ["html", "json", "junit"]
+    include_coverage: true
+    coverage_threshold: 80  # 最低代码覆盖率要求
+
+# 清理配置
+cleanup:
+  auto_cleanup: true
+  cleanup_timeout: 30s
+  preserve_logs: true
+  preserve_test_data: false

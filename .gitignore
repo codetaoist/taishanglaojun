@@ -1,0 +1,242 @@
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE和编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# 日志文件
+*.log
+logs/
+log/
+
+# 临时文件
+*.tmp
+*.temp
+temp/
+tmp/
+
+# 编译输出
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+*.class
+*.pyc
+*.pyo
+__pycache__/
+*.pdb
+
+# Go相关
+vendor/
+*.test
+*.prof
+coverage.out
+go.work
+go.work.sum
+
+# Node.js相关
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.pnpm-debug.log*
+dist/
+build/
+
+# Python相关
+*.egg-info/
+.pytest_cache/
+.coverage
+.tox/
+venv/
+env/
+.env
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 配置文件（包含敏感信息）
+.env.local
+.env.production
+.env.development
+config/local.yaml
+config/production.yaml
+*.key
+*.pem
+*.crt
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# 文档生成
+docs/_build/
+site/
+
+# 测试覆盖率
+coverage/
+*.cover
+.nyc_output
+
+# 缓存目录
+.cache/
+.parcel-cache/
+
+# 运行时文件
+*.pid
+*.seed
+*.pid.lock
+
+# 依赖目录
+bower_components/
+
+# 系统文件
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# 项目特定
+# 可以根据需要添加项目特定的忽略规则
+
+# Tauri相关
+desktop-apps/tauri-app/src-tauri/target/
+desktop-apps/tauri-app/src-tauri/Cargo.lock
+
+# Rust相关
+target/
+Cargo.lock
+
+# 编译产物和可执行文件
+*.exe
+*.bin
+temp_build
+gateway.exe
+auth-system.exe
+database-layer.exe
+executionHistory.bin
+work.bin
+outputFiles.bin
+fileHashes.bin
+sha1-checksums.bin
+
+# 构建缓存
+.cache/
+build/
+dist/
+
+# Gradle缓存
+.gradle/
+*/.gradle/
+
+# Android相关
+*.apk
+*.aab
+*.dex
+local.properties
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# iOS相关
+*.ipa
+*.xcworkspace/
+*.xcuserdata/
+DerivedData/
+.build/
+
+# 更多编译产物
+*.a
+*.lib
+*.out
+*.app
+*.dmg
+*.pkg
+*.msi
+*.deb
+*.rpm
+
+# 更多临时和缓存文件
+.sass-cache/
+.eslintcache
+.stylelintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# 更多日志文件
+*.log.*
+*.out
+*.err
+crash.log
+error.log
+debug.log
+
+# 更多系统文件
+*.lnk
+.Trash/
+.Spotlight-V100/
+.DocumentRevisions-V100/
+.fseventsd/
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# 更多开发工具
+.history/
+.vscode-test/
+.nyc_output/
+coverage/
+.coverage.*
+junit.xml
+test-results/
+
+# 数据文件
+*.csv
+*.json.bak
+*.xml.bak
+*.sql.bak
+dump.rdb
+
+# 媒体文件（如果不需要版本控制）
+# *.jpg
+# *.jpeg
+# *.png
+# *.gif
+# *.mp4
+# *.mp3
+# *.wav
+
+# 文档草稿
+*.draft
+*.wip
+*~$*

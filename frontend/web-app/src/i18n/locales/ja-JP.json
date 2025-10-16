@@ -1,0 +1,1521 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "warning": "警告",
+    "info": "情報",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "add": "追加",
+    "search": "検索",
+    "filter": "フィルター",
+    "refresh": "更新",
+    "reset": "リセット",
+    "submit": "送信",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "close": "閉じる",
+    "open": "開く",
+    "view": "表示",
+    "download": "ダウンロード",
+    "upload": "アップロード",
+    "copy": "コピー",
+    "paste": "貼り付け",
+    "cut": "切り取り",
+    "undo": "元に戻す",
+    "redo": "やり直し",
+    "select": "選択",
+    "selectAll": "すべて選択",
+    "clear": "クリア",
+    "expand": "展開",
+    "collapse": "折りたたみ",
+    "more": "もっと見る",
+    "less": "閉じる",
+    "yes": "はい",
+    "no": "いいえ",
+    "ok": "OK",
+    "apply": "適用",
+    "preview": "プレビュー",
+    "print": "印刷",
+    "export": "エクスポート",
+    "import": "インポート",
+    "settings": "設定",
+    "help": "ヘルプ",
+    "about": "について",
+    "version": "バージョン",
+    "update": "更新",
+    "upgrade": "アップグレード",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "register": "登録",
+    "profile": "プロフィール",
+    "account": "アカウント",
+    "password": "パスワード",
+    "email": "メール",
+    "phone": "電話",
+    "name": "名前",
+    "username": "ユーザー名",
+    "nickname": "ニックネーム",
+    "avatar": "アバター",
+    "status": "ステータス",
+    "type": "タイプ",
+    "category": "カテゴリー",
+    "tag": "タグ",
+    "title": "タイトル",
+    "description": "説明",
+    "content": "内容",
+    "date": "日付",
+    "time": "時間",
+    "created": "作成日時",
+    "updated": "更新日時",
+    "modified": "変更日時",
+    "author": "著者",
+    "owner": "所有者",
+    "size": "サイズ",
+    "count": "数",
+    "total": "合計",
+    "page": "ページ",
+    "pageSize": "ページサイズ",
+    "current": "現在",
+    "all": "すべて",
+    "none": "なし",
+    "empty": "空",
+    "unknown": "不明",
+    "other": "その他",
+    "custom": "カスタム",
+    "default": "デフォルト",
+    "optional": "オプション",
+    "required": "必須",
+    "enabled": "有効",
+    "disabled": "無効",
+    "active": "アクティブ",
+    "inactive": "非アクティブ",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "public": "公開",
+    "private": "非公開",
+    "draft": "下書き",
+    "published": "公開済み",
+    "archived": "アーカイブ済み",
+    "deleted": "削除済み"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "wisdom": "文化の知恵",
+    "chat": "AIチャット",
+    "learning": "学習センター",
+    "community": "コミュニティ",
+    "profile": "プロフィール",
+    "settings": "設定",
+    "help": "ヘルプ",
+    "about": "私たちについて"
+  },
+  "auth": {
+    "login": {
+      "title": "ログイン",
+      "subtitle": "おかえりなさい",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "remember": "ログイン状態を保持",
+      "forgot": "パスワードを忘れましたか？",
+      "submit": "ログイン",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "register": "今すぐ登録",
+      "socialLogin": "ソーシャルログイン",
+      "wechat": "WeChatログイン",
+      "qq": "QQログイン",
+      "weibo": "Weiboログイン"
+    },
+    "register": {
+      "title": "登録",
+      "subtitle": "新しいアカウントを作成",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "confirmPassword": "パスワード確認",
+      "username": "ユーザー名",
+      "nickname": "ニックネーム",
+      "phone": "電話番号",
+      "verificationCode": "認証コード",
+      "getCode": "コードを取得",
+      "agree": "同意します",
+      "terms": "利用規約",
+      "privacy": "プライバシーポリシー",
+      "submit": "登録",
+      "hasAccount": "既にアカウントをお持ちですか？",
+      "login": "今すぐログイン"
+    },
+    "forgot": {
+      "title": "パスワードを忘れた",
+      "subtitle": "パスワードをリセット",
+      "email": "メールアドレス",
+      "submit": "リセットリンクを送信",
+      "back": "ログインに戻る",
+      "sent": "リセットリンクを送信しました",
+      "checkEmail": "メールをご確認ください"
+    },
+    "reset": {
+      "title": "パスワードリセット",
+      "subtitle": "新しいパスワードを設定",
+      "password": "新しいパスワード",
+      "confirmPassword": "新しいパスワード確認",
+      "submit": "パスワードをリセット",
+      "success": "パスワードのリセットが完了しました"
+    }
+  },
+  "home": {
+    "welcome": {
+      "title": "太上老君知恵プラットフォームへようこそ",
+      "subtitle": "中華文化の深遠な知恵を探求し、心の成長の旅を始めましょう",
+      "getStarted": "探索を始める",
+      "learnMore": "詳しく見る"
+    },
+    "stats": {
+      "users": "ユーザー数",
+      "wisdom": "知恵エントリー",
+      "conversations": "会話回数",
+      "learning": "学習時間"
+    },
+    "quickActions": {
+      "title": "クイックアクション",
+      "aiChat": {
+        "title": "AI知恵チャット",
+        "description": "AIアシスタントと人生の知恵を探求"
+      },
+      "wisdomLibrary": {
+        "title": "知恵の宝庫",
+        "description": "豊富な文化的知恵コンテンツを閲覧"
+      },
+      "learningPath": {
+        "title": "学習パス",
+        "description": "個人化された学習計画と進捗"
+      },
+      "community": {
+        "title": "知恵コミュニティ",
+        "description": "同志と交流・共有"
+      }
+    },
+    "recentActivities": {
+      "title": "最近のアクティビティ",
+      "noActivities": "アクティビティ記録がありません",
+      "viewAll": "すべて表示"
+    },
+    "recommendations": {
+      "title": "おすすめコンテンツ",
+      "wisdom": "知恵のおすすめ",
+      "learning": "学習のおすすめ",
+      "community": "コミュニティのおすすめ"
+    },
+    "progress": {
+      "title": "学習進捗",
+      "dailyGoal": "今日の目標",
+      "weeklyGoal": "今週の目標",
+      "monthlyGoal": "今月の目標",
+      "completed": "完了",
+      "remaining": "残り"
+    }
+  },
+  "sidebar": {
+    "status": {
+      "beta": "ベータ",
+      "new": "新規",
+      "experimental": "実験的",
+      "partial": "部分",
+      "development": "開発中"
+    },
+    "statusTooltip": "状態: {{text}}",
+    "logo": {
+      "title": "ダッシュボードへ",
+      "name": "太上老君"
+    },
+    "loading": "メニューを読み込み中...",
+    "noData": {
+      "title": "メニュー項目がありません",
+      "noteLogged": "ユーザーメニューを読み込み中...",
+      "noteGuest": "まずログインしてください"
+    },
+    "reload": "メニューを再読み込み"
+  },
+  "header": {
+    "search": {
+      "tooltip": "グローバル検索 {{shortcut}}",
+      "aria": "グローバル検索"
+    },
+    "notifications": {
+      "title": "通知センター"
+    },
+    "theme": {
+      "switchToDark": "ダークテーマに切り替え",
+      "switchToLight": "ライトテーマに切り替え"
+    },
+    "help": "ヘルプセンター",
+    "language": "言語を切り替え"
+  },
+  "mainMenu": {
+    "labels": {
+      "dashboard": "ダッシュボード",
+      "ai-services": "AIサービス",
+      "ai-chat": "AIチャット",
+      "ai-multimodal": "マルチモーダルAI",
+      "image-generation": "画像生成",
+      "image-analysis": "画像分析",
+      "video-processing": "動画処理",
+      "audio-processing": "音声処理",
+      "ai-analysis": "AI分析",
+      "data-analysis": "データ分析",
+      "trend-prediction": "トレンド予測",
+      "report-generation": "レポート生成",
+      "ai-generation": "AI生成",
+      "text-generation": "テキスト生成",
+      "code-generation": "コード生成",
+      "creative-design": "クリエイティブデザイン",
+      "cultural-wisdom": "文化の知恵",
+      "wisdom-library": "知恵ライブラリ",
+      "wisdom-search": "知恵検索",
+      "wisdom-recommend": "知恵おすすめ",
+      "wisdom-category": "知恵カテゴリ",
+      "wisdom-favorites": "お気に入り",
+      "wisdom-notes": "マイノート",
+      "community": "コミュニティ",
+      "community-posts": "コミュニティ投稿",
+      "community-chat": "コミュニティチャット",
+      "community-groups": "グループ",
+      "community-events": "コミュニティイベント",
+      "intelligent-learning": "学習センター",
+      "learning-courses": "コースセンター",
+      "learning-progress": "学習進捗",
+      "learning-assessment": "能力評価",
+      "learning-certificate": "学習証明",
+      "project-management": "プロジェクト管理",
+      "project-workspace": "ワークスペース",
+      "project-tasks": "タスク管理",
+      "project-collaboration": "チームコラボ",
+      "project-analytics": "プロジェクト分析",
+      "health-management": "健康管理",
+      "health-monitor": "健康モニタリング",
+      "health-analysis": "健康分析",
+      "health-advice": "健康アドバイス",
+      "health-records": "健康記録",
+      "security-center": "セキュリティセンター",
+      "threat-detection": "脅威検知",
+      "vulnerability-management": "脆弱性管理",
+      "penetration-testing": "ペネトレーションテスト",
+      "security-education": "セキュリティ教育",
+      "security-audit": "セキュリティ監査",
+      "third-party-integration": "サードパーティ連携",
+      "api-keys": "APIキー",
+      "plugins": "プラグイン",
+      "service-integration": "サービス連携",
+      "webhooks": "Webhook",
+      "oauth-apps": "OAuthアプリ",
+      "api-documentation": "API文書",
+      "api-catalog": "APIカタログ",
+      "api-status": "APIステータス",
+      "api-versions": "バージョン管理",
+      "api-search": "クイック検索",
+      "system-management": "システム管理",
+      "system-settings": "システム設定",
+      "system-users": "ユーザー管理",
+      "system-roles": "ロール管理",
+      "system-permissions": "権限管理",
+      "system-menus": "メニュー管理",
+      "system-monitoring": "システム監視",
+      "system-analytics": "システム分析",
+      "system-notifications": "システム通知",
+      "profile-overview": "プロフィール",
+      "profile-settings": "プロフィール設定",
+      "profile-security": "セキュリティ設定",
+      "profile-notifications": "通知設定",
+      "quick-chat": "クイックチャット",
+      "quick-search": "クイック検索",
+      "quick-note": "クイックノート",
+      "quick-task": "クイックタスク"
+    }
+  },
+  "dashboard": {
+    "loading": {
+      "text": "ダッシュボードデータを読み込み中..."
+    },
+    "error": {
+      "title": "読み込み失敗",
+      "retry": "再試行",
+      "loadFailed": "ダッシュボードデータの読み込みに失敗しました。後でもう一度お試しください"
+    },
+    "statistics": {
+      "totalUsers": "ユーザー総数",
+      "activeUsers": "アクティブユーザー",
+      "totalProjects": "プロジェクト総数",
+      "completedTasks": "完了したタスク"
+    },
+    "trend": {
+      "title": "データトレンド",
+      "viewDetails": "詳細を見る",
+      "loading": "チャートデータを読み込み中..."
+    },
+    "quickActions": {
+      "title": "クイックアクション"
+    },
+    "recentActivities": {
+      "title": "最近のアクティビティ",
+      "viewAll": "すべて表示"
+    },
+    "systemStatus": {
+      "title": "システム状況",
+      "cpu": "CPU使用率",
+      "memory": "メモリ使用率",
+      "disk": "ディスク使用率",
+      "networkLatency": "ネットワーク遅延"
+    },
+    "time": {
+      "justNow": "たった今",
+      "minutesAgo": "{{count}}分前",
+      "hoursAgo": "{{count}}時間前",
+    "daysAgo": "{{count}}日前"
+    }
+  },
+  "wisdom": {
+    "title": "文化の知恵",
+    "search": "知恵コンテンツを検索",
+    "categories": {
+      "all": "すべて",
+      "philosophy": "哲学思想",
+      "ethics": "道徳修養",
+      "life": "人生の知恵",
+      "nature": "自然の道",
+      "health": "養生の道",
+      "governance": "治国理政"
+    },
+    "filters": {
+      "category": "カテゴリー",
+      "source": "出典",
+      "difficulty": "難易度",
+      "length": "長さ"
+    },
+    "item": {
+      "source": "出典",
+      "translation": "翻訳",
+      "interpretation": "解釈",
+      "application": "応用",
+      "related": "関連コンテンツ",
+      "share": "共有",
+      "favorite": "お気に入り",
+      "comment": "コメント"
+    },
+    "noResults": "関連コンテンツが見つかりません",
+    "loadMore": "もっと読み込む"
+  },
+  "community": {
+    "title": "修行コミュニティ",
+    "subtitle": "志を同じくする修行者と交流し、共に成長する",
+    "tabs": {
+      "posts": "最新の投稿"
+    },
+    "search": {
+      "placeholder": "投稿を検索..."
+    },
+    "categories": {
+      "placeholder": "カテゴリーを選択",
+      "all": "すべてのカテゴリー",
+      "taoismDiscussion": "道教の議論",
+      "practiceInsights": "修行の心得",
+      "confucianApplications": "儒教の応用",
+      "buddhistWisdom": "仏教の知恵"
+    },
+    "actions": {
+      "postNew": "新規投稿"
+    },
+    "messages": {
+      "bookmarkAdded": "ブックマークに追加しました",
+      "postPublishSuccess": "投稿が正常に公開されました！",
+      "postPublishFailed": "公開に失敗しました。もう一度お試しください",
+      "commentFeatureWip": "コメント機能は開発中です...",
+      "linkCopied": "リンクをクリップボードにコピーしました"
+    },
+    "stats": {
+      "activeUsers": "アクティブユーザー",
+      "posts": "ディスカッション投稿",
+      "wisdomShares": "知恵の共有"
+    },
+    "time": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "daysAgo": "{{count}}日前"
+    }
+  }
+  ,
+  "adminUser": {
+    "title": "ユーザー管理",
+    "stats": {
+      "totalUsers": "総ユーザー数",
+      "activeUsers": "アクティブユーザー",
+      "admins": "管理者",
+      "newToday": "本日追加",
+      "onlineUsers": "オンラインユーザー"
+    },
+    "search": { "placeholder": "ユーザー名またはメールを検索" },
+    "filters": {
+      "rolePlaceholder": "ロールフィルター",
+      "statusPlaceholder": "ステータスフィルター",
+      "dateRangePlaceholder": ["開始日", "終了日"],
+      "roleOptions": {
+        "admin": "管理者",
+        "moderator": "モデレーター",
+        "user": "一般ユーザー"
+      },
+      "statusOptions": {
+        "active": "正常",
+        "inactive": "無効",
+        "banned": "禁止"
+      }
+    },
+    "actions": {
+      "addUser": "ユーザー追加",
+      "batchDelete": "一括削除",
+      "resetSelection": "選択を解除",
+      "reset": "リセット"
+    },
+    "selection": {
+      "selectedCount": "選択済み {{count}} 件"
+    },
+    "table": {
+      "userInfo": "ユーザー情報",
+      "username": "ユーザー名",
+      "role": "ロール",
+      "status": "ステータス",
+      "stats": "統計",
+      "lastLogin": "最終ログイン",
+      "registeredAt": "登録日時",
+      "actions": "操作"
+    },
+    "labels": {
+      "role": {
+        "admin": "管理者",
+        "moderator": "モデレーター",
+        "user": "ユーザー"
+      },
+      "status": {
+        "normal": "正常",
+        "inactive": "無効",
+        "banned": "禁止"
+      },
+      "statItems": {
+        "login": "ログイン: {{count}}回",
+        "wisdom": "智慧: {{count}}件",
+        "comment": "コメント: {{count}}件"
+      }
+    },
+    "messages": {
+      "fetchUsersFailure": "ユーザー取得に失敗しました",
+      "fetchStatsFailure": "ユーザー統計の取得に失敗しました",
+      "fetchRolesFailure": "ロール取得に失敗しました",
+      "updateSuccess": "ユーザーを更新しました",
+      "createSuccess": "ユーザーを作成しました",
+      "updateFailure": "ユーザーの更新に失敗しました",
+      "createFailure": "ユーザーの作成に失敗しました",
+      "deleteSuccess": "ユーザーを削除しました",
+      "deleteFailure": "ユーザーの削除に失敗しました",
+      "batchDeleteSuccess": "一括削除に成功しました",
+      "batchDeleteFailure": "一括削除に失敗しました",
+      "statusUpdateSuccess": "ユーザーステータスを更新しました",
+      "statusUpdateFailure": "ユーザーステータスの更新に失敗しました",
+      "roleUpdateSuccess": "ユーザーロールを更新しました",
+      "roleUpdateFailure": "ユーザーロールの更新に失敗しました",
+      "fetchUserRolePermFailure": "ユーザーロール権限の取得に失敗しました",
+      "userRolePermUpdateSuccess": "ユーザーロール権限を更新しました",
+      "userRolePermUpdateFailure": "ユーザーロール権限の更新に失敗しました",
+      "viewDetailsInfo": "ユーザー詳細の表示は未実装です"
+    },
+    "modal": {
+      "editTitle": "ユーザー編集",
+      "addTitle": "ユーザー追加"
+    },
+    "form": {
+      "usernameLabel": "ユーザー名",
+      "usernameRequired": "ユーザー名を入力してください",
+      "emailLabel": "メール",
+      "emailRequired": "メールを入力してください",
+      "emailInvalid": "有効なメールアドレスを入力してください",
+      "realNameLabel": "本名",
+      "passwordLabel": "パスワード",
+      "passwordRequired": "パスワードを入力してください",
+      "roleLabel": "ロール",
+      "roleRequired": "ロールを選択してください",
+      "statusLabel": "ステータス",
+      "statusRequired": "ステータスを選択してください",
+      "update": "更新",
+      "create": "作成",
+      "cancel": "キャンセル",
+      "save": "保存"
+    },
+    "rolePermissionModal": {
+      "title": "ユーザーロール権限管理 - {{username}}",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "userInfoTitle": "ユーザー情報",
+      "roleAssignTitle": "ロール割り当て",
+      "roleSelectPlaceholder": "ロールを選択",
+      "roleAssignDescription": "ユーザーは複数のロールを持てます。ロール権限は継承されます",
+      "permissionAssignTitle": "権限割り当て",
+      "permissionSelectPlaceholder": "権限を選択",
+      "roleSwitchQuickTitle": "クイックロール切り替え",
+      "permissionNote": "ユーザーに直接付与された権限はロール権限より優先されます",
+      "roleOptions": {
+        "superAdmin": "スーパー管理者"
+      }
+    },
+    "permissions": {
+      "groups": {
+        "userManagement": "ユーザー管理",
+        "roleManagement": "ロール管理",
+        "permissionManagement": "権限管理",
+        "menuManagement": "メニュー管理"
+      },
+      "resources": {
+        "user": "ユーザー",
+        "role": "ロール",
+        "permission": "権限",
+        "menu": "メニュー"
+      },
+      "items": {
+        "read": "{{name}}を表示",
+        "write": "{{name}}を編集",
+        "delete": "{{name}}を削除"
+      }
+    },
+    "pagination": {
+      "total": "{{start}}-{{end}} / 合計 {{total}} 件"
+    },
+    "confirm": {
+      "deleteTitle": "このユーザーを削除しますか？",
+      "deleteContent": "削除は元に戻せません。ユーザー {{username}} を削除しますか？",
+      "batchDeleteTitle": "選択したユーザーを一括削除しますか？",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    }
+  },
+  "adminPermission": {
+    "title": "権限管理",
+    "actions": {
+      "tableView": "テーブル表示",
+      "treeView": "ツリー表示",
+      "addPermission": "権限を追加",
+      "viewDetails": "詳細を見る",
+      "editPermission": "権限を編集",
+      "deletePermission": "権限を削除",
+      "batchDeleteWithCount": "一括削除 ({{count}})"
+    },
+    "search": { "placeholder": "権限名または説明を検索" },
+    "filters": {
+      "resourcePlaceholder": "リソース種別",
+      "actionPlaceholder": "操作種別"
+    },
+    "table": {
+      "name": "権限名",
+      "resource": "リソース",
+      "action": "操作",
+      "description": "説明",
+      "createdAt": "作成日時",
+      "actions": "操作"
+    },
+    "messages": {
+      "fetchPermissionsFailure": "権限リストの取得に失敗しました",
+      "updateSuccess": "権限を更新しました",
+      "createSuccess": "権限を作成しました",
+      "updateFailure": "権限の更新に失敗しました",
+      "createFailure": "権限の作成に失敗しました",
+      "deleteSuccess": "権限を削除しました",
+      "deleteFailure": "権限の削除に失敗しました",
+      "batchDeleteSuccess": "一括削除に成功しました",
+      "batchDeleteFailure": "一括削除に失敗しました"
+    },
+    "confirm": {
+      "deleteTitle": "この権限を削除しますか？",
+      "batchDeleteTitle": "選択した {{count}} 件の権限を削除しますか？",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    },
+    "pagination": {
+      "total": "{{start}}-{{end}} / 合計 {{total}} 件"
+    },
+    "modal": {
+      "editTitle": "権限を編集",
+      "addTitle": "権限を追加"
+    },
+    "form": {
+      "resourceLabel": "リソース",
+      "resourceRequired": "リソース名を入力してください",
+      "resourceSelectPlaceholder": "リソース名を選択または入力",
+      "actionLabel": "操作",
+      "actionRequired": "操作名を入力してください",
+      "actionSelectPlaceholder": "操作名を選択または入力",
+      "descriptionLabel": "権限の説明",
+      "descriptionPlaceholder": "権限の説明を入力してください"
+    }
+  },
+  "adminRole": {
+    "title": "ロール管理",
+    "actions": {
+      "addRole": "ロール追加",
+      "batchDelete": "一括削除",
+      "refresh": "リフレッシュ",
+      "clearFilters": "フィルタークリア"
+    },
+    "search": {
+      "placeholder": "ロール名またはコードを検索"
+    },
+    "filters": {
+      "typePlaceholder": "ロールタイプ",
+      "statusPlaceholder": "ステータス",
+      "typeOptions": {
+        "system": "システム",
+        "custom": "カスタム",
+        "functional": "機能",
+        "data": "データ"
+      },
+      "statusOptions": {
+        "enabled": "有効",
+        "disabled": "無効"
+      }
+    },
+    "table": {
+      "name": "ロール名",
+      "code": "ロールコード",
+      "type": "タイプ",
+      "level": "レベル",
+      "permissionsCount": "権限数",
+      "status": "ステータス",
+      "description": "説明",
+      "actions": "操作",
+      "systemTag": "システム"
+    },
+    "tooltips": {
+      "view": "詳細を見る",
+      "edit": "ロールを編集",
+      "configurePermissions": "権限を設定",
+      "delete": "ロールを削除"
+    },
+    "confirm": {
+      "deleteTitle": "このロールを削除しますか？",
+      "batchDeleteTitle": "選択した {{count}} 件のロールを削除しますか？",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    },
+    "modal": {
+      "editTitle": "ロール編集",
+      "addTitle": "ロール追加"
+    },
+    "form": {
+      "nameLabel": "ロール名",
+      "nameRequired": "ロール名を入力してください",
+      "codeLabel": "ロールコード",
+      "codeRequired": "ロールコードを入力してください",
+      "codePattern": "小文字とアンダースコアのみ",
+      "typeLabel": "ロールタイプ",
+      "typeRequired": "ロールタイプを選択してください",
+      "levelLabel": "ロールレベル",
+      "levelRequired": "ロールレベルを入力してください",
+      "levelOption": "レベル {{level}}",
+      "descriptionLabel": "ロール説明",
+      "statusLabel": "有効状態",
+      "switchEnabled": "有効",
+      "switchDisabled": "無効",
+      "nameLength": "ロール名の長さは2-50文字である必要があります",
+      "namePattern": "ロール名は中国語、英語、数字、スペース、ハイフン、アンダースコアのみ使用可能です",
+      "namePlaceholder": "ロール名を入力してください（例：コンテンツマネージャー）",
+      "codeLength": "ロールコードの長さは2-30文字である必要があります",
+      "codeExtra": "ロールコードはシステム内部識別に使用されます。英語を推奨します（例：content_manager）",
+      "codePlaceholder": "ロールコードを入力してください（例：content_manager）",
+      "typeExtra": "より良い管理と分類のためにロールタイプを選択してください",
+      "typePlaceholder": "ロールタイプを選択してください",
+      "typeOptions": {
+        "custom": "カスタムロール",
+        "customDesc": "ユーザー定義のビジネスロール",
+        "functional": "機能ロール",
+        "functionalDesc": "機能モジュールに基づくロール",
+        "data": "データロール",
+        "dataDesc": "データアクセス権限に基づくロール"
+      },
+      "levelExtra": "レベルが高いほど権限範囲が広くなります",
+      "levelPlaceholder": "ロールレベルを選択してください",
+      "levelOptions": {
+        "level": "レベル",
+        "basic": "基本権限",
+        "normal": "一般権限",
+        "medium": "中級権限",
+        "advanced": "上級権限",
+        "highest": "最高権限"
+      },
+      "descriptionLength": "説明は200文字を超えることはできません",
+      "descriptionExtra": "ロールの責任と目的の詳細な説明は、後の管理に役立ちます",
+      "descriptionPlaceholder": "ロールの責任と権限範囲を詳しく説明してください（例：コンテンツの作成、編集、公開を担当し、記事カテゴリとタグを管理できます...）",
+      "statusExtra": "無効なロールはユーザーに割り当てることができません",
+      "statusEnabled": "有効",
+      "statusDisabled": "無効"
+    },
+    "permissionModal": {
+      "title": "ロール権限を設定",
+      "selectPermissionsLabel": "権限を選択",
+      "selectPermissionsRequired": "少なくとも1つの権限を選択してください",
+      "saveButton": "権限設定を保存",
+      "cancelButton": "キャンセル",
+      "configTitle": "権限設定の説明",
+      "configDescription": "ロール \"{{roleName}}\" の権限を設定します。選択した権限は、このロールを持つすべてのユーザーに付与されます。",
+      "configTip": "ヒント：Ctrl/Cmdキーを押しながら複数選択するか、全選択/全選択解除ボタンを使用してください。",
+      "selectAll": "全選択",
+      "deselectAll": "全選択解除",
+      "selectedCount": "{{selected}} / {{total}} 件の権限を選択中",
+      "noPermissions": "権限データがありません",
+      "selectedPermissions": "選択された権限"
+    },
+    "pagination": {
+      "total": "{{start}}-{{end}} / 合計 {{total}} 件"
+    },
+    "messages": {
+      "fetchRolesFailure": "ロールの取得に失敗しました",
+      "fetchPermissionsFailure": "権限の取得に失敗しました",
+      "saveRoleSuccess": "ロールを保存しました",
+      "saveRoleFailure": "ロールの保存に失敗しました",
+      "deleteRoleSuccess": "ロールを削除しました",
+      "deleteRoleFailure": "ロールの削除に失敗しました",
+      "batchDeleteSuccess": "一括削除に成功しました",
+      "batchDeleteFailure": "一括削除に失敗しました",
+      "savePermissionsSuccess": "権限設定を保存しました",
+      "savePermissionsFailure": "権限設定の保存に失敗しました",
+      "refresh": "リフレッシュ",
+      "selectRolesToDelete": "削除するロールを選択してください",
+      "batchDeleteWarning": "警告",
+      "batchDeleteDescription": "{{count}} 件のロールを削除しようとしています。この操作は元に戻せません。",
+      "rolesToDelete": "削除されるロール：",
+      "confirmDelete": "削除確認",
+      "batchDeleteSuccessMessage": "{{count}} 件のロールを正常に削除しました",
+      "batchDeleteFailureMessage": "一括削除に失敗しました",
+      "noMatchingData": "一致するデータが見つかりません",
+      "warning": "警告",
+      "batchDeleteWarning": "{{count}} 件のロールを削除しようとしています。この操作は元に戻せません。",
+      "rolesToDelete": "削除されるロール",
+      "dataLoadError": "データ読み込みエラー"
+    },
+    "validation": {
+      "nameExists": "このロール名は既に存在します",
+      "codeExists": "このロールコードは既に存在します",
+      "codeFormat": "ロールコードは小文字、数字、アンダースコアのみ使用可能です",
+      "descriptionTooLong": "説明は500文字以内で入力してください",
+      "descriptionTooShort": "説明は10文字以上で入力してください"
+    }
+  },
+  "adminMenu": {
+    "title": "メニュー管理",
+    "actions": {
+      "addMenu": "メニュー追加",
+      "refresh": "リフレッシュ",
+      "viewDetails": "詳細",
+      "editMenu": "編集",
+      "deleteMenu": "削除",
+      "addSubmenu": "子メニュー追加"
+    },
+    "search": { "placeholder": "メニュー名を検索" },
+    "filters": {
+      "statusPlaceholder": "ステータスで絞り込み",
+      "typePlaceholder": "タイプで絞り込み",
+      "statusOptions": {
+        "enabled": "有効",
+        "disabled": "無効"
+      },
+      "typeOptions": {
+        "menu": "メニュー",
+        "button": "ボタン",
+        "api": "API"
+      }
+    },
+    "table": {
+      "name": "メニュー名",
+      "path": "パス",
+      "type": "タイプ",
+      "status": "ステータス",
+      "sort": "並び順",
+      "permissions": "権限",
+      "actions": "操作"
+    },
+    "tree": {
+      "title": "メニューツリー",
+      "collapse": "折りたたむ"
+    },
+    "detail": {
+      "title": "メニュー詳細",
+      "name": "名称",
+      "path": "パス",
+      "icon": "アイコン",
+      "component": "コンポーネント",
+      "type": "タイプ",
+      "status": "ステータス",
+      "sort": "並び順",
+      "permissions": "権限"
+    },
+    "confirm": {
+      "deleteTitle": "このメニューを削除しますか？",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    },
+    "pagination": {
+      "total": "{{start}}-{{end}} / 合計 {{total}} 件"
+    },
+    "modal": {
+      "editTitle": "メニューを編集",
+      "addTitle": "メニューを追加"
+    },
+    "form": {
+      "nameLabel": "メニュー名",
+      "namePlaceholder": "メニュー名を入力してください",
+      "nameRequired": "メニュー名を入力してください",
+      "pathLabel": "メニューパス",
+      "pathPlaceholder": "トップレベルは空でも可（ディレクトリ）。子メニューは /projects/list のような有効なパスを入力",
+      "pathRequired": "メニューパスを入力してください",
+      "pathPattern": "パスは / で始まり、小文字・数字・ハイフンのみ。階層対応",
+      "iconLabel": "アイコン",
+      "iconSelect": "アイコンを選択",
+      "componentLabel": "コンポーネント",
+      "componentPlaceholder": "コンポーネント名を入力",
+      "typeLabel": "タイプ",
+      "statusLabel": "ステータス",
+      "sortLabel": "並び順",
+      "parentLabel": "親メニュー",
+      "parentSelectPlaceholder": "親メニューを選択",
+      "permissionsLabel": "権限",
+      "permissionsSelectPlaceholder": "権限を選択"
+    },
+    "messages": {
+      "loadMenusFailure": "メニューデータの読み込みに失敗しました",
+      "loadPermissionsFailureFallback": "権限データの読み込みに失敗しました。ローカルの権限定数にフォールバックします。取得エラー: {{error}}",
+      "deleteSuccess": "削除しました",
+      "deleteFailure": "削除に失敗しました",
+      "updateSuccess": "更新しました",
+      "updateFailure": "更新に失敗しました",
+      "createSuccess": "作成しました",
+      "createFailure": "作成に失敗しました"
+    }
+  },
+  "adminDashboard": {
+    "title": "管理者ダッシュボード",
+    "subtitle": "お帰りなさい！ここは文化の知恵の管理センターです",
+    "actions": {
+      "quick": "クイック操作"
+    },
+    "quickActions": {
+      "addWisdom": "知恵を追加",
+      "manageCategories": "カテゴリー管理",
+      "manageTags": "タグ管理",
+      "systemSettings": "システム設定"
+    },
+    "stats": {
+      "totalWisdom": "知恵の総数",
+      "totalViews": "総閲覧数",
+      "totalLikes": "総いいね数",
+      "totalCategories": "カテゴリー数",
+      "totalUsers": "総ユーザー数",
+      "activeUsers": "アクティブユーザー",
+      "systemHealth": "システム健全性"
+    },
+    "sections": {
+      "systemOverview": "システム概要",
+      "systemMetrics": "システムメトリクス",
+      "categoryStats": "カテゴリー統計"
+    },
+    "metrics": {
+      "cpu": "CPU 使用率",
+      "memory": "メモリ使用率",
+      "disk": "ディスク使用率",
+      "networkLatency": "ネットワーク遅延"
+    },
+    "health": {
+      "status": "ステータス"
+    },
+    "lists": {
+      "recentAdded": "最近追加",
+      "popularContent": "人気コンテンツ",
+      "viewAll": "すべて表示",
+      "edit": "編集"
+    },
+    "error": {
+      "loadFailed": "ダッシュボードデータの読み込みに失敗しました"
+    }
+  }
+  ,
+  "adminCategory": {
+    "title": "カテゴリー管理",
+    "subtitle": "知恵コンテンツのカテゴリー体系を階層構造で管理",
+    "actions": {
+      "addCategory": "カテゴリーを追加",
+      "edit": "編集",
+      "delete": "削除"
+    },
+    "confirm": {
+      "deleteTitle": "このカテゴリーを削除してもよろしいですか？",
+      "deleteDescription": "削除後、このカテゴリーの知恵は未分類に移動されます",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    },
+    "table": {
+      "createdAt": "作成日時",
+      "actions": "操作"
+    },
+    "stats": {
+      "totalCategories": "カテゴリー総数",
+      "activeCategories": "有効カテゴリー",
+      "totalWisdom": "知恵の総数",
+      "totalViews": "総閲覧数"
+    },
+    "treeTitle": "カテゴリーツリー",
+    "listTitle": "カテゴリー一覧",
+    "searchPlaceholder": "カテゴリー名または説明を検索",
+    "pagination": {
+      "total": "合計 {{total}} 件中 {{start}}-{{end}} 件"
+    },
+    "modal": {
+      "editTitle": "カテゴリーを編集",
+      "addTitle": "カテゴリーを追加"
+    }
+  }
+  ,
+  "adminTag": {
+    "title": "タグ管理",
+    "subtitle": "知恵コンテンツのタグ体系を管理し、一括操作をサポート",
+    "stats": {
+      "totalTags": "タグ総数",
+      "activeTags": "有効タグ",
+      "totalUsage": "総使用回数",
+      "totalViews": "総閲覧数"
+    },
+    "cards": {
+      "hotTags": "人気タグ",
+      "tagList": "タグ一覧"
+    },
+    "searchPlaceholder": "タグ名または説明を検索",
+    "actions": {
+      "batchDelete": "一括削除"
+    },
+    "confirm": {
+      "batchDeleteTitle": "選択した {{count}} 個のタグを削除しますか？",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    },
+    "pagination": {
+      "total": "合計 {{total}} 件中 {{start}}-{{end}} 件"
+    },
+    "modal": {
+      "editTitle": "タグを編集",
+    "addTitle": "タグを追加"
+    }
+    ,
+    "table": {
+      "name": "タグ名",
+      "description": "説明",
+      "usageCount": "使用回数",
+      "wisdomCount": "関連知恵",
+      "popularity": "人気度",
+      "status": "ステータス",
+      "createdAt": "作成日時",
+      "actions": "操作"
+    },
+    "tooltips": {
+      "edit": "編集",
+      "delete": "削除"
+    },
+    "status": {
+      "enabled": "有効",
+      "disabled": "無効"
+    },
+    "form": {
+      "nameLabel": "タグ名",
+      "namePlaceholder": "タグ名を入力",
+      "nameRequired": "タグ名を入力してください",
+      "descriptionLabel": "タグ説明",
+      "descriptionPlaceholder": "タグ説明を入力",
+      "colorLabel": "タグカラー",
+      "colorPlaceholder": "タグカラーを選択",
+      "statusLabel": "ステータス",
+      "switchEnabled": "有効",
+      "switchDisabled": "無効"
+    },
+    "messages": {
+      "fetchFailure": "タグ一覧の取得に失敗しました",
+      "networkError": "ネットワークエラー、後でもう一度お試しください",
+      "updateSuccess": "更新に成功しました",
+      "createSuccess": "作成に成功しました",
+      "updateFailure": "更新に失敗しました",
+      "createFailure": "作成に失敗しました",
+      "saveFailure": "タグの保存に失敗しました",
+      "deleteSuccess": "削除に成功しました",
+      "deleteFailure": "削除に失敗しました",
+      "batchDeleteNoneSelected": "削除するタグを選択してください",
+      "batchDeleteSuccess": "一括削除に成功しました",
+      "batchDeleteFailure": "タグの一括削除に失敗しました"
+    },
+    "confirm": {
+      "deleteTitle": "このタグを削除しますか？",
+      "deleteDesc": "関連する知恵コンテンツはこのタグを失います",
+      "batchDeleteTitle": "選択した {{count}} 個のタグを削除しますか？",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    }
+  },
+  "adminWisdom": {
+    "title": "知恵コンテンツ管理",
+    "subtitle": "文化の知恵コンテンツを管理（追加・編集・削除・閲覧）",
+    "actions": {
+      "import": "インポート",
+      "export": "エクスポート",
+      "addWisdom": "知恵を追加",
+      "advancedFilter": "詳細フィルター",
+      "batchDelete": "一括削除",
+      "reset": "リセット",
+      "apply": "適用"
+    },
+    "search": {
+      "placeholder": "タイトル・内容・作者で検索..."
+    },
+    "table": {
+      "title": "タイトル",
+      "category": "カテゴリー",
+      "school": "学派",
+      "author": "作者",
+      "status": "ステータス",
+      "createdAt": "作成日時",
+      "actions": "操作",
+      "statusMap": {
+        "published": "公開済み",
+        "draft": "下書き",
+        "archived": "アーカイブ済み"
+      },
+      "tooltips": {
+        "view": "表示",
+        "edit": "編集",
+        "delete": "削除"
+      },
+      "confirm": {
+        "deleteTitle": "この知恵を削除しますか？",
+        "ok": "確認",
+        "cancel": "キャンセル"
+      },
+      "pagination": {
+        "total": "合計 {{total}} 件中 {{start}}-{{end}} 件"
+      }
+    },
+    "drawer": {
+      "title": "詳細フィルター",
+      "fields": {
+        "keyword": "キーワード",
+        "category": "カテゴリー",
+        "school": "学派",
+        "author": "作者",
+        "dateRange": "作成日時",
+        "status": "ステータス"
+      },
+      "placeholders": {
+        "keyword": "タイトル・内容・作者で検索...",
+        "category": "カテゴリーを選択",
+        "school": "学派を選択",
+        "author": "作者名を入力",
+        "status": "ステータスを選択"
+      },
+      "statusOptions": {
+        "published": "公開済み",
+        "draft": "下書き",
+        "archived": "アーカイブ済み"
+      }
+    },
+    "confirm": {
+      "batchDeleteTitle": "選択した {{count}} 件を削除しますか？",
+      "ok": "確認",
+      "cancel": "キャンセル"
+    },
+    "messages": {
+      "loadListFailed": "知恵一覧の読み込みに失敗しました",
+      "loadFailed": "知恵一覧の取得に失敗しました",
+      "loadFiltersFailed": "フィルターオプションの読み込みに失敗しました",
+      "deleteSuccess": "削除に成功しました",
+      "deleteFailed": "削除に失敗しました",
+      "batchDeleteSuccess": "一括削除に成功しました",
+      "batchDeleteFailed": "一括削除に失敗しました",
+      "exportSuccess": "エクスポートに成功しました",
+      "exportFailed": "エクスポートに失敗しました",
+      "importWip": "インポート機能は開発中です...",
+      "selectItemsToDelete": "削除する項目を選択してください"
+    }
+  },
+  "adminSystemSettings": {
+    "title": "システム設定",
+    "subtitle": "サイト設定、SEO、キャッシュ戦略を管理",
+    "cards": {
+      "siteConfig": "サイト設定",
+      "feature": "機能設定",
+      "seo": "SEO設定",
+      "openGraph": "Open Graph設定",
+      "other": "その他の設定",
+      "cache": "キャッシュ管理",
+      "cacheConfig": "キャッシュ設定",
+      "cacheStats": "キャッシュ統計"
+    },
+    "fields": {
+      "siteName": "サイト名",
+      "contactEmail": "連絡メール",
+      "siteDescription": "サイト説明",
+      "siteKeywords": "サイトキーワード",
+      "siteLogo": "サイトロゴ",
+      "favicon": "サイトアイコン",
+      "icp": "ICP登録番号",
+      "copyright": "著作権情報",
+      "allowRegister": "ユーザー登録を許可",
+      "enableComments": "コメント機能を有効化",
+      "enableSearch": "検索機能を有効化",
+      "maxUploadMB": "最大アップロードサイズ(MB)",
+      "defaultLanguage": "デフォルト言語",
+      "pageTitle": "ページタイトル",
+      "pageKeywords": "ページキーワード",
+      "pageDescription": "ページ説明",
+      "ogTitle": "OGタイトル",
+      "ogImage": "OG画像",
+      "ogDescription": "OG説明",
+      "twitterCardType": "Twitterカードタイプ",
+      "enableSitemap": "サイトマップを有効化",
+      "robots": "クローラー規則",
+      "analytics": "解析コード",
+      "enableCache": "キャッシュを有効化",
+      "cacheStrategy": "キャッシュ戦略",
+      "cacheTTL": "キャッシュ時間(秒)",
+      "cacheMaxMB": "最大キャッシュサイズ(MB)"
+    },
+    "placeholders": {
+      "siteName": "サイト名を入力",
+      "contactEmail": "連絡メールを入力",
+      "siteDescription": "サイト説明を入力",
+      "siteKeywords": "サイトキーワードを入力",
+      "defaultLanguage": "デフォルト言語を選択",
+      "icp": "ICP登録番号を入力",
+      "copyright": "著作権情報を入力",
+      "pageTitle": "ページタイトルを入力",
+      "pageKeywords": "ページキーワードを入力",
+      "pageDescription": "ページ説明を入力",
+      "ogTitle": "OGタイトルを入力",
+      "ogDescription": "OG説明を入力",
+      "twitterCardType": "Twitterカードタイプを選択",
+      "cacheStrategy": "キャッシュ戦略を選択",
+      "analytics": "解析コードを入力"
+    },
+    "help": {
+      "keywords": "複数のキーワードはカンマ区切り",
+      "twitterCardType": "Twitterカードタイプを選択",
+      "analytics": "Google Analyticsなどの解析コード",
+      "robots": "クローラー規則"
+    },
+    "buttons": {
+      "uploadLogo": "ロゴをアップロード",
+      "uploadIcon": "アイコンをアップロード",
+      "uploadOgImage": "OG画像をアップロード",
+      "save": "設定を保存",
+      "saveSEO": "SEO設定を保存",
+      "clearCache": "キャッシュをクリア",
+      "refreshStats": "統計を更新"
+    },
+    "twitterCardOptions": {
+      "summary": "概要",
+      "summary_large_image": "大きな画像の概要",
+      "app": "アプリ",
+      "player": "プレイヤー"
+    },
+    "cacheStrategies": {
+      "lru": "LRU（最近最少使用）",
+      "lfu": "LFU（使用頻度最小）",
+      "fifo": "FIFO（先入れ先出し）",
+      "ttl": "TTL（有効期間）"
+    },
+    "stats": {
+      "hitRate": "キャッシュヒット率",
+      "totalRequests": "総リクエスト数",
+      "cacheSize": "キャッシュサイズ",
+      "memoryUsage": "メモリ使用量"
+    },
+    "messages": {
+      "loadSiteFailed": "システム設定の読み込みに失敗しました",
+      "loadSEOFailed": "SEO設定の読み込みに失敗しました",
+      "loadCacheFailed": "キャッシュ設定の読み込みに失敗しました",
+      "loadCacheStatsFailed": "キャッシュ統計の読み込みに失敗しました",
+      "saveSiteSuccess": "システム設定を保存しました",
+      "saveSiteFailed": "システム設定の保存に失敗しました",
+      "saveSEOSuccess": "SEO設定を保存しました",
+      "saveSEOFailed": "SEO設定の保存に失敗しました",
+      "saveCacheSuccess": "キャッシュ設定を保存しました",
+      "saveCacheFailed": "キャッシュ設定の保存に失敗しました",
+      "clearCacheTitle": "キャッシュのクリアを確認",
+      "clearCacheContent": "キャッシュをクリアすると一時的にサイト性能に影響する可能性があります。続行しますか？",
+      "clearCacheSuccess": "キャッシュをクリアしました",
+      "clearCacheFailed": "キャッシュのクリアに失敗しました",
+      "uploadSuccess": "{{filename}} のアップロードに成功",
+      "uploadFailed": "{{filename}} のアップロードに失敗"
+    }
+  },
+  "chat": {
+    "title": "AI知恵チャット",
+    "placeholder": "質問を入力してください...",
+    "send": "送信",
+    "clear": "チャットをクリア",
+    "newChat": "新しいチャット",
+    "history": "チャット履歴",
+    "suggestions": {
+      "title": "おすすめトピック",
+      "philosophy": "人生哲学",
+      "wisdom": "古代の知恵",
+      "meditation": "瞑想修行",
+      "ethics": "道徳倫理"
+    },
+    "typing": "AIが考えています...",
+    "error": "チャットエラーが発生しました。再試行してください",
+    "retry": "再試行",
+    "copy": "コピー",
+    "regenerate": "再生成"
+  },
+  "learning": {
+    "title": "学習センター",
+    "courses": "コース",
+    "progress": "進捗",
+    "achievements": "実績",
+    "certificates": "証明書",
+    "path": {
+      "beginner": "初心者パス",
+      "intermediate": "中級パス",
+      "advanced": "上級パス",
+      "master": "マスターパス"
+    },
+    "course": {
+      "start": "学習開始",
+      "continue": "学習継続",
+      "completed": "完了",
+      "duration": "学習時間",
+      "difficulty": "難易度",
+      "lessons": "レッスン数",
+      "students": "受講者数"
+    },
+    "lesson": {
+      "previous": "前のレッスン",
+      "next": "次のレッスン",
+      "complete": "完了",
+      "notes": "ノート",
+      "quiz": "クイズ",
+      "discussion": "ディスカッション"
+    }
+  },
+  "community": {
+    "title": "知恵コミュニティ",
+    "posts": "投稿",
+    "discussions": "ディスカッション",
+    "questions": "質問・回答",
+    "sharing": "共有",
+    "create": "投稿",
+    "reply": "返信",
+    "like": "いいね",
+    "follow": "フォロー",
+    "trending": "トレンド",
+    "latest": "最新",
+    "popular": "人気"
+  },
+  "profile": {
+    "title": "プロフィール",
+    "info": "個人情報",
+    "avatar": "アバター",
+    "nickname": "ニックネーム",
+    "bio": "自己紹介",
+    "location": "所在地",
+    "website": "ウェブサイト",
+    "joinDate": "参加日",
+    "stats": {
+      "posts": "投稿数",
+      "followers": "フォロワー",
+      "following": "フォロー中",
+      "likes": "いいね数"
+    },
+    "activities": "アクティビティ",
+    "favorites": "お気に入り",
+    "history": "履歴",
+    "settings": "アカウント設定"
+  },
+  "settings": {
+    "title": "設定",
+    "general": "一般設定",
+    "account": "アカウント設定",
+    "privacy": "プライバシー設定",
+    "notifications": "通知設定",
+    "appearance": "外観設定",
+    "language": "言語設定",
+    "theme": {
+      "title": "テーマ",
+      "light": "ライトテーマ",
+      "dark": "ダークテーマ",
+      "auto": "システムに従う"
+    },
+    "notifications": {
+      "email": "メール通知",
+      "push": "プッシュ通知",
+      "sms": "SMS通知",
+      "system": "システム通知",
+      "marketing": "マーケティング通知"
+    },
+    "privacy": {
+      "profile": "プロフィール表示設定",
+      "activities": "アクティビティ表示設定",
+      "search": "検索表示設定",
+      "contact": "連絡先表示設定"
+    }
+  },
+  "errors": {
+    "network": "ネットワーク接続エラー",
+    "server": "サーバーエラー",
+    "notFound": "ページが見つかりません",
+    "unauthorized": "認証されていないアクセス",
+    "forbidden": "アクセスが禁止されています",
+    "validation": "データ検証に失敗しました",
+    "unknown": "不明なエラー",
+    "retry": "再試行",
+    "goHome": "ホームに戻る",
+    "contact": "サポートに連絡"
+  },
+  "messages": {
+    "success": {
+      "saved": "保存しました",
+      "deleted": "削除しました",
+      "updated": "更新しました",
+      "created": "作成しました",
+      "sent": "送信しました",
+      "copied": "コピーしました"
+    },
+    "error": {
+      "saveFailed": "保存に失敗しました",
+      "deleteFailed": "削除に失敗しました",
+      "updateFailed": "更新に失敗しました",
+      "createFailed": "作成に失敗しました",
+      "sendFailed": "送信に失敗しました",
+      "copyFailed": "コピーに失敗しました",
+      "loadFailed": "読み込みに失敗しました"
+    },
+    "confirm": {
+      "delete": "削除してもよろしいですか？",
+      "logout": "ログアウトしてもよろしいですか？",
+      "clear": "クリアしてもよろしいですか？",
+      "reset": "リセットしてもよろしいですか？"
+    }
+  },
+  "validation": {
+    "required": "この項目は必須です",
+    "email": "有効なメールアドレスを入力してください",
+    "password": "パスワードは8文字以上である必要があります",
+    "confirmPassword": "パスワードが一致しません",
+    "phone": "有効な電話番号を入力してください",
+    "url": "有効なURLを入力してください",
+    "minLength": "最低{{min}}文字入力してください",
+    "maxLength": "最大{{max}}文字まで入力できます",
+    "min": "最小値は{{min}}です",
+    "max": "最大値は{{max}}です",
+    "pattern": "形式が正しくありません"
+  },
+  "time": {
+    "now": "たった今",
+    "minutesAgo": "{{count}}分前",
+    "hoursAgo": "{{count}}時間前",
+    "daysAgo": "{{count}}日前",
+    "weeksAgo": "{{count}}週間前",
+    "monthsAgo": "{{count}}ヶ月前",
+    "yearsAgo": "{{count}}年前",
+    "today": "今日",
+    "yesterday": "昨日",
+    "tomorrow": "明日",
+    "thisWeek": "今週",
+    "lastWeek": "先週",
+    "nextWeek": "来週",
+    "thisMonth": "今月",
+    "lastMonth": "先月",
+    "nextMonth": "来月",
+    "thisYear": "今年",
+    "lastYear": "昨年",
+    "nextYear": "来年"
+  },
+  "mainMenu": {
+    "labels": {
+      "dashboard": "ダッシュボード",
+      "ai-services": "AIサービス",
+      "ai-chat": "AIチャット",
+      "ai-multimodal": "マルチモーダルAI",
+      "image-generation": "画像生成",
+      "image-analysis": "画像分析",
+      "video-processing": "動画処理",
+      "audio-processing": "音声処理",
+      "ai-analysis": "AI分析",
+      "data-analysis": "データ分析",
+      "trend-prediction": "トレンド予測",
+      "report-generation": "レポート生成",
+      "ai-generation": "コンテンツ生成",
+      "text-generation": "テキスト生成",
+      "code-generation": "コード生成",
+      "creative-design": "クリエイティブデザイン",
+      "cultural-wisdom": "文化の知恵",
+      "wisdom-library": "知恵ライブラリ",
+      "wisdom-search": "知恵検索",
+      "wisdom-recommend": "知恵おすすめ",
+      "wisdom-category": "カテゴリ管理",
+      "wisdom-favorites": "お気に入り",
+      "wisdom-notes": "マイノート",
+      "community": "コミュニティ",
+      "community-posts": "コミュニティ投稿",
+      "community-chat": "リアルタイムチャット",
+      "community-groups": "興味グループ",
+      "community-events": "イベントセンター",
+      "intelligent-learning": "インテリジェント学習",
+      "learning-courses": "コースセンター",
+      "learning-progress": "学習進捗",
+      "learning-assessment": "能力評価",
+      "learning-certificate": "認定センター",
+      "project-management": "プロジェクト管理",
+      "project-workspace": "プロジェクトワークスペース",
+      "project-tasks": "タスク管理",
+      "project-collaboration": "チームコラボレーション",
+      "project-analytics": "プロジェクト分析",
+      "health-management": "健康管理",
+      "health-monitor": "健康モニター",
+      "health-analysis": "健康分析",
+      "health-advice": "健康アドバイス",
+      "health-records": "健康記録",
+      "security-center": "セキュリティセンター",
+      "threat-detection": "脅威検知",
+      "vulnerability-management": "脆弱性管理",
+      "penetration-testing": "ペネトレーションテスト",
+      "security-education": "セキュリティ教育",
+      "security-audit": "セキュリティ監査",
+      "third-party-integration": "サードパーティ連携",
+      "api-keys": "APIキー",
+      "plugins": "プラグイン管理",
+      "service-integration": "サービス連携",
+      "webhooks": "Webhook管理",
+      "oauth-apps": "OAuthアプリ",
+      "system-management": "システム管理",
+      "system-settings": "システム設定",
+      "system-users": "ユーザー管理",
+      "system-roles": "ロール管理",
+      "system-permissions": "権限管理",
+      "system-menus": "メニュー管理",
+      "system-monitoring": "システム監視",
+      "system-analytics": "分析",
+      "system-notifications": "通知センター",
+      "profile-overview": "プロフィール",
+      "profile-settings": "アカウント設定",
+      "profile-security": "セキュリティ設定",
+      "profile-notifications": "通知設定",
+      "quick-chat": "クイックチャット",
+      "quick-search": "知恵検索",
+      "quick-note": "クイックノート",
+      "quick-task": "タスク作成",
+      "admin-dashboard": "管理者ダッシュボード"
+    }
+  }
+}

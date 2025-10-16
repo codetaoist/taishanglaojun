@@ -1,0 +1,457 @@
+# 太上老君AI平台多区域数据库复制配置
+
+# PostgreSQL主从复制配置
+postgresql:
+  # 主库配置 (ap-east-1)
+  primary:
+    region: "ap-east-1"
+    instance_class: "db.r5.2xlarge"
+    engine_version: "14.9"
+    allocated_storage: 1000
+    storage_type: "gp3"
+    storage_encrypted: true
+    
+    # 复制配置
+    backup_retention_period: 7
+    backup_window: "03:00-04:00"
+    maintenance_window: "sun:04:00-sun:05:00"
+    
+    # 参数组配置
+    parameter_group:
+      name: "taishanglaojun-primary-pg14"
+      parameters:
+        # 复制相关参数
+        wal_level: "replica"
+        max_wal_senders: 10
+        max_replication_slots: 10
+        wal_keep_segments: 32
+        
+        # 性能优化参数
+        shared_buffers: "2GB"
+        effective_cache_size: "6GB"
+        work_mem: "64MB"
+        maintenance_work_mem: "512MB"
+        
+        # 日志配置
+        log_statement: "all"
+        log_min_duration_statement: 1000
+        log_checkpoints: "on"
+        log_connections: "on"
+        log_disconnections: "on"
+        
+        # 同步复制配置
+        synchronous_commit: "on"
+        synchronous_standby_names: "'standby-eu-west-1,standby-us-east-1'"
+
+  # 读副本配置
+  read_replicas:
+    # 欧洲读副本
+    - name: "taishanglaojun-replica-eu-west-1"
+      region: "eu-west-1"
+      instance_class: "db.r5.xlarge"
+      publicly_accessible: false
+      auto_minor_version_upgrade: true
+      
+      # 性能洞察
+      performance_insights_enabled: true
+      performance_insights_retention_period: 7
+      
+      # 监控配置
+      monitoring_interval: 60
+      monitoring_role_arn: "arn:aws:iam::123456789012:role/rds-monitoring-role"
+      
+      # 标签
+      tags:
+        Environment: "production"
+        Region: "eu-west-1"
+        Purpose: "read-replica"
+        Compliance: "GDPR"
+    
+    # 美国读副本
+    - name: "taishanglaojun-replica-us-east-1"
+      region: "us-east-1"
+      instance_class: "db.r5.xlarge"
+      publicly_accessible: false
+      auto_minor_version_upgrade: true
+      
+      # 性能洞察
+      performance_insights_enabled: true
+      performance_insights_retention_period: 7
+      
+      # 监控配置
+      monitoring_interval: 60
+      monitoring_role_arn: "arn:aws:iam::123456789012:role/rds-monitoring-role"
+      
+      # 标签
+      tags:
+        Environment: "production"
+        Region: "us-east-1"
+        Purpose: "read-replica"
+        Compliance: "CCPA"
+
+# Redis集群配置
+redis:
+  # 全局复制组
+  global_replication_group:
+    replication_group_id: "taishanglaojun-global"
+    description: "太上老君AI平台全球Redis集群"
+    
+    # 全局数据存储配置
+    global_node_groups:
+      - global_node_group_id: "0001"
+        slots: "0-5461"
+        
+      - global_node_group_id: "0002"
+        slots: "5462-10922"
+        
+      - global_node_group_id: "0003"
+        slots: "10923-16383"
+
+  # 区域集群配置
+  regional_clusters:
+    # 亚太区域
+    - region: "ap-east-1"
+      replication_group_id: "taishanglaojun-ap-east-1"
+      description: "亚太区域Redis集群"
+      node_type: "cache.r6g.xlarge"
+      num_cache_clusters: 3
+      
+      # 参数组
+      parameter_group_name: "taishanglaojun-redis6"
+      
+      # 子网组
+      subnet_group_name: "taishanglaojun-redis-subnet-ap-east-1"
+      
+      # 安全组
+      security_group_ids:
+        - "sg-redis-ap-east-1"
+      
+      # 备份配置
+      snapshot_retention_limit: 7
+      snapshot_window: "03:00-05:00"
+      
+      # 维护窗口
+      maintenance_window: "sun:05:00-sun:07:00"
+      
+      # 通知配置
+      notification_topic_arn: "arn:aws:sns:ap-east-1:123456789012:redis-notifications"
+    
+    # 欧洲区域
+    - region: "eu-west-1"
+      replication_group_id: "taishanglaojun-eu-west-1"
+      description: "欧洲区域Redis集群"
+      node_type: "cache.r6g.xlarge"
+      num_cache_clusters: 3
+      
+      parameter_group_name: "taishanglaojun-redis6"
+      subnet_group_name: "taishanglaojun-redis-subnet-eu-west-1"
+      security_group_ids:
+        - "sg-redis-eu-west-1"
+      
+      snapshot_retention_limit: 7
+      snapshot_window: "03:00-05:00"
+      maintenance_window: "sun:05:00-sun:07:00"
+      notification_topic_arn: "arn:aws:sns:eu-west-1:123456789012:redis-notifications"
+    
+    # 北美区域
+    - region: "us-east-1"
+      replication_group_id: "taishanglaojun-us-east-1"
+      description: "北美区域Redis集群"
+      node_type: "cache.r6g.xlarge"
+      num_cache_clusters: 3
+      
+      parameter_group_name: "taishanglaojun-redis6"
+      subnet_group_name: "taishanglaojun-redis-subnet-us-east-1"
+      security_group_ids:
+        - "sg-redis-us-east-1"
+      
+      snapshot_retention_limit: 7
+      snapshot_window: "03:00-05:00"
+      maintenance_window: "sun:05:00-sun:07:00"
+      notification_topic_arn: "arn:aws:sns:us-east-1:123456789012:redis-notifications"
+
+# 数据同步策略
+data_sync:
+  # 同步作业配置
+  sync_jobs:
+    # 用户数据同步
+    - name: "user-data-sync"
+      source_region: "ap-east-1"
+      target_regions: ["eu-west-1", "us-east-1"]
+      schedule: "*/5 * * * *"  # 每5分钟
+      sync_type: "incremental"
+      
+      # 同步表
+      tables:
+        - "users"
+        - "user_profiles"
+        - "user_preferences"
+        - "user_sessions"
+      
+      # 过滤条件
+      filters:
+        - table: "users"
+          condition: "updated_at > NOW() - INTERVAL '5 minutes'"
+        - table: "user_profiles"
+          condition: "updated_at > NOW() - INTERVAL '5 minutes'"
+    
+    # 知识库数据同步
+    - name: "knowledge-base-sync"
+      source_region: "ap-east-1"
+      target_regions: ["eu-west-1", "us-east-1"]
+      schedule: "*/10 * * * *"  # 每10分钟
+      sync_type: "incremental"
+      
+      tables:
+        - "knowledge_bases"
+        - "documents"
+        - "embeddings"
+        - "document_chunks"
+      
+      filters:
+        - table: "knowledge_bases"
+          condition: "updated_at > NOW() - INTERVAL '10 minutes'"
+        - table: "documents"
+          condition: "updated_at > NOW() - INTERVAL '10 minutes'"
+    
+    # 配置数据同步
+    - name: "config-data-sync"
+      source_region: "ap-east-1"
+      target_regions: ["eu-west-1", "us-east-1"]
+      schedule: "0 */1 * * *"  # 每小时
+      sync_type: "full"
+      
+      tables:
+        - "system_configs"
+        - "feature_flags"
+        - "api_keys"
+        - "rate_limits"
+
+  # 冲突解决策略
+  conflict_resolution:
+    strategy: "last_write_wins"
+    
+    # 特殊表的冲突解决
+    table_strategies:
+      users:
+        strategy: "merge"
+        merge_fields: ["email", "name", "avatar_url"]
+        
+      user_preferences:
+        strategy: "region_priority"
+        priority_order: ["ap-east-1", "us-east-1", "eu-west-1"]
+        
+      system_configs:
+        strategy: "manual_review"
+        notification_webhook: "https://ops.taishanglaojun.com/webhooks/conflict"
+
+# 备份策略
+backup_strategy:
+  # 自动备份
+  automated_backups:
+    # 每日备份
+    daily:
+      schedule: "0 2 * * *"  # 每天凌晨2点
+      retention_days: 30
+      regions: ["ap-east-1", "eu-west-1", "us-east-1"]
+      
+      # 备份类型
+      backup_types:
+        - type: "full"
+          frequency: "daily"
+          compression: true
+          encryption: true
+        
+        - type: "incremental"
+          frequency: "hourly"
+          compression: true
+          encryption: true
+    
+    # 每周备份
+    weekly:
+      schedule: "0 1 * * 0"  # 每周日凌晨1点
+      retention_weeks: 12
+      regions: ["ap-east-1", "eu-west-1", "us-east-1"]
+      
+      backup_types:
+        - type: "full"
+          frequency: "weekly"
+          compression: true
+          encryption: true
+    
+    # 每月备份
+    monthly:
+      schedule: "0 0 1 * *"  # 每月1号凌晨
+      retention_months: 12
+      regions: ["ap-east-1"]
+      
+      backup_types:
+        - type: "full"
+          frequency: "monthly"
+          compression: true
+          encryption: true
+
+  # 跨区域备份
+  cross_region_backup:
+    enabled: true
+    
+    # 备份复制规则
+    replication_rules:
+      - source_region: "ap-east-1"
+        target_regions: ["us-east-1", "eu-west-1"]
+        replication_time: "15 minutes"
+        
+      - source_region: "eu-west-1"
+        target_regions: ["ap-east-1"]
+        replication_time: "15 minutes"
+        
+      - source_region: "us-east-1"
+        target_regions: ["ap-east-1"]
+        replication_time: "15 minutes"
+
+# 灾难恢复
+disaster_recovery:
+  # RTO/RPO目标
+  objectives:
+    rto: "15 minutes"  # 恢复时间目标
+    rpo: "5 minutes"   # 恢复点目标
+  
+  # 故障转移策略
+  failover_strategy:
+    # 自动故障转移
+    automatic:
+      enabled: true
+      health_check_interval: "30 seconds"
+      failure_threshold: 3
+      
+      # 故障转移顺序
+      failover_order:
+        primary: "ap-east-1"
+        secondary: "us-east-1"
+        tertiary: "eu-west-1"
+    
+    # 手动故障转移
+    manual:
+      enabled: true
+      approval_required: true
+      notification_channels:
+        - "email:ops@taishanglaojun.com"
+        - "slack:#ops-alerts"
+        - "pagerduty:database-team"
+
+  # 恢复程序
+  recovery_procedures:
+    - name: "database_failover"
+      steps:
+        - "停止应用程序写入"
+        - "等待复制延迟追赶"
+        - "提升读副本为主库"
+        - "更新DNS记录"
+        - "重启应用程序"
+        - "验证数据一致性"
+      
+      estimated_time: "10 minutes"
+      
+    - name: "full_region_recovery"
+      steps:
+        - "评估故障范围"
+        - "启动备用区域"
+        - "恢复数据库"
+        - "重新部署应用程序"
+        - "更新负载均衡器"
+        - "验证服务可用性"
+      
+      estimated_time: "30 minutes"
+
+# 监控和告警
+monitoring:
+  # 复制监控
+  replication_monitoring:
+    metrics:
+      - name: "replication_lag"
+        threshold: 60  # 秒
+        alert_severity: "warning"
+        
+      - name: "replication_lag_critical"
+        threshold: 300  # 秒
+        alert_severity: "critical"
+        
+      - name: "replica_connection_count"
+        threshold: 0
+        alert_severity: "critical"
+    
+    # 告警规则
+    alerts:
+      - name: "high_replication_lag"
+        condition: "replication_lag > 60"
+        actions:
+          - "email:dba@taishanglaojun.com"
+          - "slack:#database-alerts"
+      
+      - name: "replication_broken"
+        condition: "replica_connection_count == 0"
+        actions:
+          - "email:ops@taishanglaojun.com"
+          - "pagerduty:database-emergency"
+          - "slack:#ops-critical"
+
+  # 性能监控
+  performance_monitoring:
+    metrics:
+      - name: "database_cpu_utilization"
+        threshold: 80
+        alert_severity: "warning"
+        
+      - name: "database_memory_utilization"
+        threshold: 85
+        alert_severity: "warning"
+        
+      - name: "database_connections"
+        threshold: 80  # 百分比
+        alert_severity: "warning"
+        
+      - name: "slow_query_count"
+        threshold: 10
+        alert_severity: "warning"
+
+# 合规性配置
+compliance:
+  # 数据驻留要求
+  data_residency:
+    # GDPR要求
+    gdpr:
+      regions: ["eu-west-1"]
+      data_types: ["personal_data", "user_profiles"]
+      retention_period: "2 years"
+      
+    # CCPA要求
+    ccpa:
+      regions: ["us-east-1"]
+      data_types: ["california_users"]
+      retention_period: "1 year"
+      
+    # 中国数据本地化
+    china_cybersecurity_law:
+      regions: ["ap-east-1"]
+      data_types: ["chinese_users", "critical_data"]
+      retention_period: "3 years"
+
+  # 加密要求
+  encryption:
+    # 传输加密
+    in_transit:
+      enabled: true
+      protocol: "TLS 1.3"
+      cipher_suites: ["TLS_AES_256_GCM_SHA384"]
+      
+    # 静态加密
+    at_rest:
+      enabled: true
+      algorithm: "AES-256"
+      key_management: "AWS KMS"
+      
+      # 区域密钥配置
+      regional_keys:
+        ap-east-1: "arn:aws:kms:ap-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+        eu-west-1: "arn:aws:kms:eu-west-1:123456789012:key/12345678-1234-1234-1234-123456789012"
+        us-east-1: "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012"

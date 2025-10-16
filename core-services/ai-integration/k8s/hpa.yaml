@@ -1,0 +1,358 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: advanced-ai-service-hpa
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: advanced-ai-service
+  
+  minReplicas: 3
+  maxReplicas: 20
+  
+  metrics:
+  # CPU使用率
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  
+  # 内存使用率
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  
+  # 自定义指标 - 请求队列长度
+  - type: Pods
+    pods:
+      metric:
+        name: request_queue_length
+      target:
+        type: AverageValue
+        averageValue: "10"
+  
+  # 自定义指标 - 响应时间
+  - type: Pods
+    pods:
+      metric:
+        name: response_time_p95
+      target:
+        type: AverageValue
+        averageValue: "500m"  # 500ms
+  
+  # 外部指标 - Redis连接数
+  - type: External
+    external:
+      metric:
+        name: redis_connected_clients
+        selector:
+          matchLabels:
+            service: redis
+      target:
+        type: AverageValue
+        averageValue: "50"
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5分钟稳定窗口
+      policies:
+      - type: Percent
+        value: 10  # 每次最多缩减10%
+        periodSeconds: 60
+      - type: Pods
+        value: 2   # 每次最多缩减2个Pod
+        periodSeconds: 60
+      selectPolicy: Min  # 选择最保守的策略
+    
+    scaleUp:
+      stabilizationWindowSeconds: 60   # 1分钟稳定窗口
+      policies:
+      - type: Percent
+        value: 50  # 每次最多扩展50%
+        periodSeconds: 60
+      - type: Pods
+        value: 4   # 每次最多增加4个Pod
+        periodSeconds: 60
+      selectPolicy: Max  # 选择最激进的策略
+
+---
+# Nginx HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-hpa
+  namespace: taishanglaojun
+  labels:
+    app: nginx
+    component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx
+  
+  minReplicas: 2
+  maxReplicas: 10
+  
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
+  
+  # 自定义指标 - 活跃连接数
+  - type: Pods
+    pods:
+      metric:
+        name: nginx_active_connections
+      target:
+        type: AverageValue
+        averageValue: "100"
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 180
+      policies:
+      - type: Percent
+        value: 20
+        periodSeconds: 60
+    
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+
+---
+# 垂直Pod自动扩缩 (VPA)
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: advanced-ai-service-vpa
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: advanced-ai-service
+  
+  updatePolicy:
+    updateMode: "Auto"  # 自动更新Pod资源
+    # updateMode: "Off"     # 仅提供建议
+    # updateMode: "Initial" # 仅在Pod创建时设置资源
+  
+  resourcePolicy:
+    containerPolicies:
+    - containerName: advanced-ai-service
+      minAllowed:
+        cpu: 100m
+        memory: 128Mi
+      maxAllowed:
+        cpu: 4
+        memory: 8Gi
+      controlledResources: ["cpu", "memory"]
+      controlledValues: RequestsAndLimits
+
+---
+# 集群自动扩缩 (Cluster Autoscaler)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-autoscaler-status
+  namespace: taishanglaojun
+  labels:
+    app: cluster-autoscaler
+data:
+  nodes.max: "50"
+  nodes.min: "3"
+  scale-down-enabled: "true"
+  scale-down-delay-after-add: "10m"
+  scale-down-unneeded-time: "10m"
+  scale-down-utilization-threshold: "0.5"
+  skip-nodes-with-local-storage: "false"
+  skip-nodes-with-system-pods: "false"
+
+---
+# Pod中断预算 (Pod Disruption Budget)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: advanced-ai-service-pdb
+  namespace: taishanglaojun
+  labels:
+    app: advanced-ai-service
+    component: pdb
+spec:
+  minAvailable: 2  # 至少保持2个Pod运行
+  # maxUnavailable: 1  # 最多1个Pod不可用
+  selector:
+    matchLabels:
+      app: advanced-ai-service
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nginx-pdb
+  namespace: taishanglaojun
+  labels:
+    app: nginx
+    component: pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: nginx
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgres-pdb
+  namespace: taishanglaojun
+  labels:
+    app: postgres
+    component: pdb
+spec:
+  maxUnavailable: 0  # 数据库不允许中断
+  selector:
+    matchLabels:
+      app: postgres
+
+---
+# 自定义资源定义 - AI工作负载扩缩
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: aiworkloads.ai.taishanglaojun.com
+spec:
+  group: ai.taishanglaojun.com
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              workloadType:
+                type: string
+                enum: ["agi", "meta-learning", "self-evolution"]
+              targetMetrics:
+                type: object
+                properties:
+                  inferenceLatency:
+                    type: string
+                  throughput:
+                    type: string
+                  accuracy:
+                    type: string
+              scalingPolicy:
+                type: object
+                properties:
+                  minReplicas:
+                    type: integer
+                    minimum: 1
+                  maxReplicas:
+                    type: integer
+                    minimum: 1
+                  scaleUpThreshold:
+                    type: number
+                  scaleDownThreshold:
+                    type: number
+          status:
+            type: object
+            properties:
+              currentReplicas:
+                type: integer
+              desiredReplicas:
+                type: integer
+              lastScaleTime:
+                type: string
+                format: date-time
+  scope: Namespaced
+  names:
+    plural: aiworkloads
+    singular: aiworkload
+    kind: AIWorkload
+
+---
+# AI工作负载实例
+apiVersion: ai.taishanglaojun.com/v1
+kind: AIWorkload
+metadata:
+  name: agi-workload
+  namespace: taishanglaojun
+spec:
+  workloadType: "agi"
+  targetMetrics:
+    inferenceLatency: "200ms"
+    throughput: "100rps"
+    accuracy: "95%"
+  scalingPolicy:
+    minReplicas: 2
+    maxReplicas: 15
+    scaleUpThreshold: 0.8
+    scaleDownThreshold: 0.3
+
+---
+apiVersion: ai.taishanglaojun.com/v1
+kind: AIWorkload
+metadata:
+  name: meta-learning-workload
+  namespace: taishanglaojun
+spec:
+  workloadType: "meta-learning"
+  targetMetrics:
+    inferenceLatency: "500ms"
+    throughput: "50rps"
+    accuracy: "90%"
+  scalingPolicy:
+    minReplicas: 1
+    maxReplicas: 8
+    scaleUpThreshold: 0.7
+    scaleDownThreshold: 0.2
+
+---
+apiVersion: ai.taishanglaojun.com/v1
+kind: AIWorkload
+metadata:
+  name: self-evolution-workload
+  namespace: taishanglaojun
+spec:
+  workloadType: "self-evolution"
+  targetMetrics:
+    inferenceLatency: "1s"
+    throughput: "20rps"
+    accuracy: "85%"
+  scalingPolicy:
+    minReplicas: 1
+    maxReplicas: 5
+    scaleUpThreshold: 0.6
+    scaleDownThreshold: 0.1

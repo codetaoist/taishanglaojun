@@ -1,0 +1,24 @@
+# 太上老君监控系统 Deployment 资源补丁配置 (JSON 6902)
+
+- op: replace
+  path: /spec/template/spec/containers/0/resources/requests/cpu
+  value: "200m"
+- op: replace
+  path: /spec/template/spec/containers/0/resources/requests/memory
+  value: "256Mi"
+- op: replace
+  path: /spec/template/spec/containers/0/resources/limits/cpu
+  value: "1000m"
+- op: replace
+  path: /spec/template/spec/containers/0/resources/limits/memory
+  value: "1Gi"
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: MONITORING_PERFORMANCE_ENABLED
+    value: "true"
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: MONITORING_AUTOMATION_ENABLED
+    value: "true"

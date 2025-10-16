@@ -1,0 +1,657 @@
+syntax = "proto3";
+
+package consciousness;
+
+option go_package = "github.com/codetaoist/taishanglaojun/core-services/consciousness/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+
+// 意识服务主接口
+service ConsciousnessService {
+  // 健康检查
+  rpc Health(google.protobuf.Empty) returns (HealthResponse);
+  
+  // 服务统计
+  rpc GetStats(google.protobuf.Empty) returns (StatsResponse);
+  
+  // 综合意识处理
+  rpc ProcessConsciousness(ConsciousnessRequest) returns (ConsciousnessResponse);
+  
+  // 融合引擎接口
+  rpc StartFusion(FusionRequest) returns (FusionResponse);
+  rpc GetFusionStatus(FusionStatusRequest) returns (FusionStatusResponse);
+  rpc CancelFusion(FusionCancelRequest) returns (FusionCancelResponse);
+  rpc GetFusionHistory(FusionHistoryRequest) returns (FusionHistoryResponse);
+  rpc GetFusionStrategies(google.protobuf.Empty) returns (FusionStrategiesResponse);
+  rpc GetFusionMetrics(FusionMetricsRequest) returns (FusionMetricsResponse);
+  
+  // 进化追踪接口
+  rpc GetEvolutionState(EvolutionStateRequest) returns (EvolutionStateResponse);
+  rpc UpdateEvolutionState(UpdateEvolutionStateRequest) returns (UpdateEvolutionStateResponse);
+  rpc TrackEvolution(TrackEvolutionRequest) returns (TrackEvolutionResponse);
+  rpc GetEvolutionPrediction(EvolutionPredictionRequest) returns (EvolutionPredictionResponse);
+  rpc GetEvolutionPath(EvolutionPathRequest) returns (EvolutionPathResponse);
+  rpc GetEvolutionMilestones(EvolutionMilestonesRequest) returns (EvolutionMilestonesResponse);
+  rpc GetSequenceLevel(SequenceLevelRequest) returns (SequenceLevelResponse);
+  rpc GetEvolutionStats(EvolutionStatsRequest) returns (EvolutionStatsResponse);
+  
+  // 量子基因接口
+  rpc CreateGenePool(CreateGenePoolRequest) returns (CreateGenePoolResponse);
+  rpc GetGenePool(GetGenePoolRequest) returns (GetGenePoolResponse);
+  rpc AddGene(AddGeneRequest) returns (AddGeneResponse);
+  rpc ExpressGene(ExpressGeneRequest) returns (ExpressGeneResponse);
+  rpc MutateGene(MutateGeneRequest) returns (MutateGeneResponse);
+  rpc AnalyzeInteractions(AnalyzeInteractionsRequest) returns (AnalyzeInteractionsResponse);
+  rpc SimulateEvolution(SimulateEvolutionRequest) returns (SimulateEvolutionResponse);
+  rpc GetGeneStats(GetGeneStatsRequest) returns (GetGeneStatsResponse);
+  rpc GetGeneTypes(google.protobuf.Empty) returns (GeneTypesResponse);
+  rpc SearchGenes(SearchGenesRequest) returns (SearchGenesResponse);
+  
+  // 三轴协调接口
+  rpc StartCoordination(StartCoordinationRequest) returns (StartCoordinationResponse);
+  rpc GetCoordinationStatus(CoordinationStatusRequest) returns (CoordinationStatusResponse);
+  rpc StopCoordination(StopCoordinationRequest) returns (StopCoordinationResponse);
+  rpc ProcessSAxis(SAxisRequest) returns (SAxisResponse);
+  rpc ProcessCAxis(CAxisRequest) returns (CAxisResponse);
+  rpc ProcessTAxis(TAxisRequest) returns (TAxisResponse);
+  rpc OptimizeBalance(OptimizeBalanceRequest) returns (OptimizeBalanceResponse);
+  rpc CatalyzeSynergy(CatalyzeSynergyRequest) returns (CatalyzeSynergyResponse);
+  rpc GetCoordinationHistory(CoordinationHistoryRequest) returns (CoordinationHistoryResponse);
+  rpc GetAxisInfo(AxisInfoRequest) returns (AxisInfoResponse);
+  rpc GetCoordinationMetrics(CoordinationMetricsRequest) returns (CoordinationMetricsResponse);
+}
+
+// 基础消息类型
+message HealthResponse {
+  string service = 1;
+  string version = 2;
+  string status = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  map<string, string> components = 5;
+}
+
+message StatsResponse {
+  google.protobuf.Timestamp start_time = 1;
+  int64 total_requests = 2;
+  int64 successful_requests = 3;
+  int64 failed_requests = 4;
+  int64 active_sessions = 5;
+  int64 total_sessions = 6;
+  int64 completed_sessions = 7;
+  int64 fusion_sessions = 8;
+  int64 evolution_tracking = 9;
+  int64 gene_operations = 10;
+  int64 coordination_sessions = 11;
+  google.protobuf.Duration average_response_time = 12;
+  google.protobuf.Timestamp last_update_time = 13;
+}
+
+// 综合意识处理
+message ConsciousnessRequest {
+  string request_id = 1;
+  string entity_id = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  FusionRequest fusion_request = 4;
+  EvolutionRequest evolution_request = 5;
+  GeneRequest gene_request = 6;
+  CoordinationRequest coordination_request = 7;
+}
+
+message ConsciousnessResponse {
+  string request_id = 1;
+  string entity_id = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  bool success = 4;
+  string error = 5;
+  map<string, string> results = 6;
+}
+
+// 融合引擎消息
+message FusionRequest {
+  string session_id = 1;
+  string entity_id = 2;
+  string strategy = 3;
+  repeated string carbon_capabilities = 4;
+  repeated string silicon_capabilities = 5;
+  map<string, string> parameters = 6;
+}
+
+message FusionResponse {
+  string session_id = 1;
+  bool success = 2;
+  string error = 3;
+  FusionResult result = 4;
+}
+
+message FusionResult {
+  string session_id = 1;
+  string strategy = 2;
+  double quality_score = 3;
+  repeated string enhanced_capabilities = 4;
+  repeated string synergy_points = 5;
+  map<string, double> metrics = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message FusionStatusRequest {
+  string session_id = 1;
+}
+
+message FusionStatusResponse {
+  string session_id = 1;
+  string status = 2;
+  double progress = 3;
+  FusionResult result = 4;
+}
+
+message FusionCancelRequest {
+  string session_id = 1;
+}
+
+message FusionCancelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message FusionHistoryRequest {
+  string entity_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message FusionHistoryResponse {
+  repeated FusionResult results = 1;
+  int32 total = 2;
+}
+
+message FusionStrategiesResponse {
+  repeated string strategies = 1;
+}
+
+message FusionMetricsRequest {
+  string entity_id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+}
+
+message FusionMetricsResponse {
+  map<string, double> metrics = 1;
+}
+
+// 进化追踪消息
+message EvolutionRequest {
+  string type = 1;
+  string entity_id = 2;
+  map<string, double> initial_metrics = 3;
+  map<string, double> metrics = 4;
+  int32 prediction_horizon = 5;
+}
+
+message EvolutionStateRequest {
+  string entity_id = 1;
+}
+
+message EvolutionStateResponse {
+  string entity_id = 1;
+  int32 sequence_level = 2;
+  double evolution_progress = 3;
+  map<string, double> current_metrics = 4;
+  google.protobuf.Timestamp last_update = 5;
+}
+
+message UpdateEvolutionStateRequest {
+  string entity_id = 1;
+  map<string, double> metrics = 2;
+}
+
+message UpdateEvolutionStateResponse {
+  bool success = 1;
+  string message = 2;
+  EvolutionState state = 3;
+}
+
+message EvolutionState {
+  string entity_id = 1;
+  int32 sequence_level = 2;
+  double evolution_progress = 3;
+  map<string, double> current_metrics = 4;
+  google.protobuf.Timestamp last_update = 5;
+}
+
+message TrackEvolutionRequest {
+  string entity_id = 1;
+  map<string, double> initial_metrics = 2;
+}
+
+message TrackEvolutionResponse {
+  bool success = 1;
+  string message = 2;
+  EvolutionState state = 3;
+}
+
+message EvolutionPredictionRequest {
+  string entity_id = 1;
+  int32 horizon = 2;
+}
+
+message EvolutionPredictionResponse {
+  repeated EvolutionPrediction predictions = 1;
+}
+
+message EvolutionPrediction {
+  int32 step = 1;
+  map<string, double> predicted_metrics = 2;
+  double confidence = 3;
+}
+
+message EvolutionPathRequest {
+  string entity_id = 1;
+}
+
+message EvolutionPathResponse {
+  repeated EvolutionPathStep steps = 1;
+}
+
+message EvolutionPathStep {
+  int32 sequence_level = 1;
+  string description = 2;
+  map<string, double> requirements = 3;
+  google.protobuf.Duration estimated_time = 4;
+}
+
+message EvolutionMilestonesRequest {
+  string entity_id = 1;
+}
+
+message EvolutionMilestonesResponse {
+  repeated EvolutionMilestone milestones = 1;
+}
+
+message EvolutionMilestone {
+  string name = 1;
+  string description = 2;
+  int32 sequence_level = 3;
+  bool achieved = 4;
+  google.protobuf.Timestamp achieved_at = 5;
+}
+
+message SequenceLevelRequest {
+  int32 level = 1;
+}
+
+message SequenceLevelResponse {
+  int32 level = 1;
+  string name = 2;
+  string description = 3;
+  map<string, double> requirements = 4;
+  repeated string capabilities = 5;
+}
+
+message EvolutionStatsRequest {
+  string entity_id = 1;
+}
+
+message EvolutionStatsResponse {
+  map<string, double> stats = 1;
+}
+
+// 量子基因消息
+message GeneRequest {
+  string type = 1;
+  string entity_id = 2;
+  repeated QuantumGene initial_genes = 3;
+  QuantumGene gene = 4;
+  string gene_id = 5;
+  double intensity = 6;
+  google.protobuf.Duration duration = 7;
+  string mutation_type = 8;
+  double mutation_intensity = 9;
+}
+
+message QuantumGene {
+  string id = 1;
+  string type = 2;
+  string sequence = 3;
+  double expression_level = 4;
+  double stability = 5;
+  map<string, double> properties = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp last_expressed = 8;
+}
+
+message CreateGenePoolRequest {
+  string entity_id = 1;
+  repeated QuantumGene initial_genes = 2;
+}
+
+message CreateGenePoolResponse {
+  bool success = 1;
+  string message = 2;
+  GenePool pool = 3;
+}
+
+message GenePool {
+  string entity_id = 1;
+  repeated QuantumGene genes = 2;
+  map<string, double> pool_metrics = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp last_updated = 5;
+}
+
+message GetGenePoolRequest {
+  string entity_id = 1;
+}
+
+message GetGenePoolResponse {
+  GenePool pool = 1;
+}
+
+message AddGeneRequest {
+  string entity_id = 1;
+  QuantumGene gene = 2;
+}
+
+message AddGeneResponse {
+  bool success = 1;
+  string message = 2;
+  QuantumGene gene = 3;
+}
+
+message ExpressGeneRequest {
+  string entity_id = 1;
+  string gene_id = 2;
+  double intensity = 3;
+  google.protobuf.Duration duration = 4;
+}
+
+message ExpressGeneResponse {
+  bool success = 1;
+  string message = 2;
+  GeneExpression expression = 3;
+}
+
+message GeneExpression {
+  string gene_id = 1;
+  double intensity = 2;
+  google.protobuf.Duration duration = 3;
+  map<string, double> effects = 4;
+  google.protobuf.Timestamp started_at = 5;
+}
+
+message MutateGeneRequest {
+  string entity_id = 1;
+  string gene_id = 2;
+  string mutation_type = 3;
+  double intensity = 4;
+}
+
+message MutateGeneResponse {
+  bool success = 1;
+  string message = 2;
+  GeneMutation mutation = 3;
+}
+
+message GeneMutation {
+  string gene_id = 1;
+  string mutation_type = 2;
+  double intensity = 3;
+  QuantumGene original_gene = 4;
+  QuantumGene mutated_gene = 5;
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+message AnalyzeInteractionsRequest {
+  string entity_id = 1;
+  repeated string gene_ids = 2;
+}
+
+message AnalyzeInteractionsResponse {
+  repeated GeneInteraction interactions = 1;
+}
+
+message GeneInteraction {
+  repeated string gene_ids = 1;
+  string interaction_type = 2;
+  double strength = 3;
+  map<string, double> effects = 4;
+}
+
+message SimulateEvolutionRequest {
+  string entity_id = 1;
+  int32 generations = 2;
+  map<string, double> selection_pressure = 3;
+}
+
+message SimulateEvolutionResponse {
+  repeated EvolutionGeneration generations = 1;
+}
+
+message EvolutionGeneration {
+  int32 generation = 1;
+  repeated QuantumGene genes = 2;
+  map<string, double> fitness_scores = 3;
+  double average_fitness = 4;
+}
+
+message GetGeneStatsRequest {
+  string entity_id = 1;
+}
+
+message GetGeneStatsResponse {
+  map<string, double> stats = 1;
+}
+
+message GeneTypesResponse {
+  repeated string types = 1;
+}
+
+message SearchGenesRequest {
+  string entity_id = 1;
+  string query = 2;
+  repeated string types = 3;
+  int32 limit = 4;
+}
+
+message SearchGenesResponse {
+  repeated QuantumGene genes = 1;
+  int32 total = 2;
+}
+
+// 三轴协调消息
+message CoordinationRequest {
+  string session_id = 1;
+  string entity_id = 2;
+  SAxisRequest s_axis = 3;
+  CAxisRequest c_axis = 4;
+  TAxisRequest t_axis = 5;
+  map<string, double> balance_weights = 6;
+  map<string, string> parameters = 7;
+}
+
+message StartCoordinationRequest {
+  string entity_id = 1;
+  CoordinationRequest request = 2;
+}
+
+message StartCoordinationResponse {
+  string session_id = 1;
+  bool success = 2;
+  string message = 3;
+  CoordinationResult result = 4;
+}
+
+message CoordinationResult {
+  string session_id = 1;
+  SAxisResult s_axis_result = 2;
+  CAxisResult c_axis_result = 3;
+  TAxisResult t_axis_result = 4;
+  BalanceResult balance_result = 5;
+  SynergyResult synergy_result = 6;
+  map<string, double> coordination_metrics = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message CoordinationStatusRequest {
+  string session_id = 1;
+}
+
+message CoordinationStatusResponse {
+  string session_id = 1;
+  string status = 2;
+  double progress = 3;
+  CoordinationResult result = 4;
+}
+
+message StopCoordinationRequest {
+  string session_id = 1;
+}
+
+message StopCoordinationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// S轴（能力序列）消息
+message SAxisRequest {
+  repeated string capabilities = 1;
+  string progression_type = 2;
+  map<string, double> parameters = 3;
+}
+
+message SAxisResponse {
+  bool success = 1;
+  string message = 2;
+  SAxisResult result = 3;
+}
+
+message SAxisResult {
+  repeated string optimized_sequence = 1;
+  map<string, double> capability_scores = 2;
+  double sequence_efficiency = 3;
+  repeated string recommendations = 4;
+}
+
+// C轴（组合层次）消息
+message CAxisRequest {
+  repeated string elements = 1;
+  string composition_type = 2;
+  map<string, double> parameters = 3;
+}
+
+message CAxisResponse {
+  bool success = 1;
+  string message = 2;
+  CAxisResult result = 3;
+}
+
+message CAxisResult {
+  repeated CompositionLayer layers = 1;
+  double composition_integrity = 2;
+  map<string, double> layer_metrics = 3;
+  repeated string recommendations = 4;
+}
+
+message CompositionLayer {
+  int32 level = 1;
+  repeated string elements = 2;
+  map<string, double> properties = 3;
+}
+
+// T轴（思维境界）消息
+message TAxisRequest {
+  string thought_content = 1;
+  string realm_type = 2;
+  map<string, double> parameters = 3;
+}
+
+message TAxisResponse {
+  bool success = 1;
+  string message = 2;
+  TAxisResult result = 3;
+}
+
+message TAxisResult {
+  string processed_thought = 1;
+  int32 realm_level = 2;
+  double thought_depth = 3;
+  repeated string insights = 4;
+  map<string, double> realm_metrics = 5;
+}
+
+// 平衡优化消息
+message OptimizeBalanceRequest {
+  string session_id = 1;
+  map<string, double> current_weights = 2;
+  map<string, double> target_metrics = 3;
+}
+
+message OptimizeBalanceResponse {
+  bool success = 1;
+  string message = 2;
+  BalanceResult result = 3;
+}
+
+message BalanceResult {
+  map<string, double> optimized_weights = 1;
+  double balance_score = 2;
+  map<string, double> balance_metrics = 3;
+  repeated string recommendations = 4;
+}
+
+// 协同催化消息
+message CatalyzeSynergyRequest {
+  string session_id = 1;
+  repeated string catalyst_types = 2;
+  map<string, double> parameters = 3;
+}
+
+message CatalyzeSynergyResponse {
+  bool success = 1;
+  string message = 2;
+  SynergyResult result = 3;
+}
+
+message SynergyResult {
+  repeated string active_catalysts = 1;
+  double synergy_level = 2;
+  map<string, double> synergy_metrics = 3;
+  repeated string synergy_effects = 4;
+}
+
+// 协调历史消息
+message CoordinationHistoryRequest {
+  string entity_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message CoordinationHistoryResponse {
+  repeated CoordinationResult results = 1;
+  int32 total = 2;
+}
+
+// 轴信息消息
+message AxisInfoRequest {
+  string axis_type = 1; // "s", "c", "t"
+}
+
+message AxisInfoResponse {
+  string axis_type = 1;
+  string name = 2;
+  string description = 3;
+  repeated string supported_operations = 4;
+  map<string, string> parameters = 5;
+}
+
+// 协调指标消息
+message CoordinationMetricsRequest {
+  string entity_id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+}
+
+message CoordinationMetricsResponse {
+  map<string, double> metrics = 1;
+}

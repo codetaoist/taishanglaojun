@@ -1,0 +1,85 @@
+# 太上老君监控系统 - 开发环境 Kustomize 配置
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 基础资源
+resources:
+  - ../../base
+
+# 命名空间
+namespace: taishanglaojun-monitoring-dev
+
+# 名称前缀
+namePrefix: dev-
+
+# 通用标签
+commonLabels:
+  environment: development
+  app.kubernetes.io/instance: monitoring-dev
+  app.kubernetes.io/version: latest
+
+# 通用注解
+commonAnnotations:
+  deployment.kubernetes.io/revision: "1"
+  environment: development
+
+# 镜像替换
+images:
+  - name: ghcr.io/taishanglaojun/monitoring
+    newTag: latest
+
+# 副本数量
+replicas:
+  - name: monitoring
+    count: 1
+
+# 配置补丁
+patchesStrategicMerge:
+  - deployment-patch.yaml
+  - service-patch.yaml
+  - ingress-patch.yaml
+
+# JSON 补丁
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: monitoring
+    path: deployment-resources-patch.yaml
+
+# 配置生成器
+configMapGenerator:
+  - name: monitoring-config
+    literals:
+      - APP_ENV=development
+      - LOG_LEVEL=debug
+      - DEBUG=true
+      - DATABASE_HOST=postgres-dev.default.svc.cluster.local
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=taishanglaojun_monitoring_dev
+      - DATABASE_USER=monitoring_user
+      - DATABASE_SSL_MODE=disable
+      - REDIS_HOST=redis-dev.default.svc.cluster.local
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - METRICS_ENABLED=true
+      - TRACING_ENABLED=false
+      - CORS_ENABLED=true
+      - CORS_ALLOWED_ORIGINS=*
+
+# 密钥生成器
+secretGenerator:
+  - name: monitoring-secrets
+    literals:
+      - DATABASE_PASSWORD=dev_password_123
+      - REDIS_PASSWORD=dev_redis_123
+      - JWT_SECRET=dev_jwt_secret_key_for_development_only
+      - ENCRYPTION_KEY=dev_encryption_key_32_chars_long
+
+# 生成器选项
+generatorOptions:
+  disableNameSuffixHash: false
+  labels:
+    environment: development

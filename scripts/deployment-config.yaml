@@ -1,0 +1,471 @@
+# 太上老君AI平台全球化部署配置
+# Global Deployment Configuration for Taishang Laojun AI Platform
+
+# 区域配置
+regions:
+  ap-east-1:
+    name: "Asia Pacific (Hong Kong)"
+    timezone: "Asia/Hong_Kong"
+    compliance: ["PIPL", "PDPA"]
+    languages: ["zh-CN", "zh-HK", "en-US"]
+    currency: "HKD"
+    
+  ap-southeast-1:
+    name: "Asia Pacific (Singapore)"
+    timezone: "Asia/Singapore"
+    compliance: ["PDPA", "PIPL"]
+    languages: ["en-US", "zh-CN", "ms-MY", "ta-SG"]
+    currency: "SGD"
+    
+  eu-west-1:
+    name: "Europe (Ireland)"
+    timezone: "Europe/Dublin"
+    compliance: ["GDPR"]
+    languages: ["en-US", "de-DE", "fr-FR", "es-ES", "it-IT"]
+    currency: "EUR"
+    
+  eu-central-1:
+    name: "Europe (Frankfurt)"
+    timezone: "Europe/Berlin"
+    compliance: ["GDPR"]
+    languages: ["de-DE", "en-US", "fr-FR", "pl-PL"]
+    currency: "EUR"
+    
+  us-east-1:
+    name: "US East (N. Virginia)"
+    timezone: "America/New_York"
+    compliance: ["CCPA", "COPPA"]
+    languages: ["en-US", "es-US"]
+    currency: "USD"
+    
+  us-west-2:
+    name: "US West (Oregon)"
+    timezone: "America/Los_Angeles"
+    compliance: ["CCPA", "COPPA"]
+    languages: ["en-US", "es-US"]
+    currency: "USD"
+
+# 服务配置
+services:
+  core-services:
+    image: "taishang-laojun/core-services"
+    replicas: 3
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+    ports:
+      - name: http
+        port: 8080
+        targetPort: 8080
+    env:
+      - name: LOG_LEVEL
+        value: "info"
+      - name: METRICS_ENABLED
+        value: "true"
+        
+  localization-service:
+    image: "taishang-laojun/localization-service"
+    replicas: 2
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+    ports:
+      - name: http
+        port: 8081
+        targetPort: 8081
+        
+  compliance-service:
+    image: "taishang-laojun/compliance-service"
+    replicas: 2
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+    ports:
+      - name: http
+        port: 8082
+        targetPort: 8082
+
+# 数据库配置
+database:
+  postgresql:
+    primary:
+      image: "postgres:15"
+      storage: "100Gi"
+      storageClass: "gp3"
+      resources:
+        requests:
+          cpu: "1000m"
+          memory: "2Gi"
+        limits:
+          cpu: "4000m"
+          memory: "8Gi"
+    replicas:
+      - region: "ap-southeast-1"
+        storage: "100Gi"
+      - region: "eu-central-1"
+        storage: "100Gi"
+      - region: "us-west-2"
+        storage: "100Gi"
+        
+  redis:
+    cluster:
+      nodes: 6
+      image: "redis:7"
+      storage: "20Gi"
+      resources:
+        requests:
+          cpu: "250m"
+          memory: "512Mi"
+        limits:
+          cpu: "1000m"
+          memory: "2Gi"
+
+# 前端配置
+frontend:
+  s3Bucket: "taishang-laojun-frontend-${environment}-${region}"
+  cloudfrontId: "E1234567890ABC"
+  apiBaseUrl: "https://api-${region}.taishanglaojun.ai"
+  cdnDomain: "cdn-${region}.taishanglaojun.ai"
+
+# API配置
+api:
+  baseUrl: "https://api-${region}.taishanglaojun.ai"
+  gateway:
+    image: "nginx:1.24"
+    replicas: 2
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "256Mi"
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+
+# 本地化配置
+localization:
+  supportedLanguages:
+    - code: "zh-CN"
+      name: "简体中文"
+      direction: "ltr"
+    - code: "zh-HK"
+      name: "繁體中文"
+      direction: "ltr"
+    - code: "en-US"
+      name: "English (US)"
+      direction: "ltr"
+    - code: "de-DE"
+      name: "Deutsch"
+      direction: "ltr"
+    - code: "fr-FR"
+      name: "Français"
+      direction: "ltr"
+    - code: "es-ES"
+      name: "Español"
+      direction: "ltr"
+    - code: "ja-JP"
+      name: "日本語"
+      direction: "ltr"
+    - code: "ko-KR"
+      name: "한국어"
+      direction: "ltr"
+      
+  defaultLanguage: "en-US"
+  
+  timezones:
+    - "UTC"
+    - "Asia/Shanghai"
+    - "Asia/Hong_Kong"
+    - "Asia/Singapore"
+    - "Asia/Tokyo"
+    - "Asia/Seoul"
+    - "Europe/London"
+    - "Europe/Berlin"
+    - "Europe/Paris"
+    - "America/New_York"
+    - "America/Los_Angeles"
+    - "America/Chicago"
+    
+  currencies:
+    - code: "USD"
+      symbol: "$"
+      name: "US Dollar"
+    - code: "EUR"
+      symbol: "€"
+      name: "Euro"
+    - code: "CNY"
+      symbol: "¥"
+      name: "Chinese Yuan"
+    - code: "HKD"
+      symbol: "HK$"
+      name: "Hong Kong Dollar"
+    - code: "SGD"
+      symbol: "S$"
+      name: "Singapore Dollar"
+    - code: "JPY"
+      symbol: "¥"
+      name: "Japanese Yen"
+    - code: "KRW"
+      symbol: "₩"
+      name: "Korean Won"
+      
+  culturalSettings:
+    dateFormats:
+      "zh-CN": "YYYY年MM月DD日"
+      "zh-HK": "YYYY年MM月DD日"
+      "en-US": "MM/DD/YYYY"
+      "de-DE": "DD.MM.YYYY"
+      "fr-FR": "DD/MM/YYYY"
+      "ja-JP": "YYYY年MM月DD日"
+      "ko-KR": "YYYY년 MM월 DD일"
+    numberFormats:
+      "zh-CN": "1,234.56"
+      "zh-HK": "1,234.56"
+      "en-US": "1,234.56"
+      "de-DE": "1.234,56"
+      "fr-FR": "1 234,56"
+      "ja-JP": "1,234.56"
+      "ko-KR": "1,234.56"
+
+# 合规性配置
+compliance:
+  gdpr:
+    enabled: true
+    dataRetentionDays: 2555  # 7 years
+    consentRequired: true
+    rightToErasure: true
+    dataPortability: true
+    privacyOfficerEmail: "privacy@taishanglaojun.ai"
+    
+  ccpa:
+    enabled: true
+    dataRetentionDays: 1095  # 3 years
+    rightToKnow: true
+    rightToDelete: true
+    rightToOptOut: true
+    businessPurposes:
+      - "Service provision"
+      - "Customer support"
+      - "Analytics"
+      - "Security"
+      
+  pipl:
+    enabled: true
+    dataRetentionDays: 1825  # 5 years
+    consentRequired: true
+    dataLocalization: true
+    crossBorderTransferApproval: true
+    
+  pdpa:
+    enabled: true
+    dataRetentionDays: 1095  # 3 years
+    consentRequired: true
+    dataBreachNotification: true
+    
+  default:
+    enabled: true
+    dataRetentionDays: 1095  # 3 years
+    consentRequired: true
+    
+  dataRetention:
+    policies:
+      - category: "user_data"
+        retentionDays: 2555
+        autoDelete: true
+      - category: "audit_logs"
+        retentionDays: 2555
+        autoDelete: false
+      - category: "analytics_data"
+        retentionDays: 730
+        autoDelete: true
+      - category: "session_data"
+        retentionDays: 30
+        autoDelete: true
+        
+  auditSettings:
+    enabled: true
+    logLevel: "detailed"
+    retentionDays: 2555
+    encryptionEnabled: true
+
+# 监控配置
+monitoring:
+  prometheus:
+    retention: "30d"
+    scrapeInterval: "15s"
+    evaluationInterval: "15s"
+    
+  grafana:
+    adminPassword: "admin123"  # 应该从环境变量或密钥管理系统获取
+    
+  alertmanager:
+    enabled: true
+    
+  smtp:
+    host: "smtp.gmail.com"
+    port: 587
+    from: "alerts@taishanglaojun.ai"
+    
+  alerts:
+    - name: "HighCPUUsage"
+      condition: "cpu_usage > 80"
+      duration: "5m"
+      severity: "warning"
+      
+    - name: "HighMemoryUsage"
+      condition: "memory_usage > 85"
+      duration: "5m"
+      severity: "warning"
+      
+    - name: "ServiceDown"
+      condition: "up == 0"
+      duration: "1m"
+      severity: "critical"
+      
+    - name: "DatabaseConnectionFailed"
+      condition: "database_connections_failed > 0"
+      duration: "1m"
+      severity: "critical"
+      
+    - name: "ComplianceViolation"
+      condition: "compliance_violations > 0"
+      duration: "0s"
+      severity: "critical"
+
+# 安全配置
+security:
+  tls:
+    enabled: true
+    certManager: true
+    issuer: "letsencrypt-prod"
+    
+  networkPolicies:
+    enabled: true
+    defaultDeny: true
+    
+  podSecurityStandards:
+    enforce: "restricted"
+    audit: "restricted"
+    warn: "restricted"
+    
+  rbac:
+    enabled: true
+    
+  secrets:
+    encryption: true
+    rotationDays: 90
+
+# 备份配置
+backup:
+  database:
+    enabled: true
+    schedule: "0 2 * * *"  # 每天凌晨2点
+    retention: "30d"
+    encryption: true
+    
+  volumes:
+    enabled: true
+    schedule: "0 3 * * *"  # 每天凌晨3点
+    retention: "7d"
+    
+  crossRegion:
+    enabled: true
+    targetRegions:
+      - "us-west-2"
+      - "eu-central-1"
+
+# 扩展配置
+scaling:
+  horizontal:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilization: 70
+    targetMemoryUtilization: 80
+    
+  vertical:
+    enabled: true
+    updateMode: "Auto"
+    
+  cluster:
+    enabled: true
+    minNodes: 3
+    maxNodes: 20
+    nodeInstanceTypes:
+      - "t3.medium"
+      - "t3.large"
+      - "t3.xlarge"
+
+# 日志配置
+logging:
+  level: "info"
+  format: "json"
+  
+  aggregation:
+    enabled: true
+    retention: "30d"
+    
+  shipping:
+    enabled: true
+    destination: "elasticsearch"
+    
+  audit:
+    enabled: true
+    retention: "2555d"  # 7 years
+
+# 环境特定配置
+environments:
+  dev:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+    monitoring:
+      enabled: false
+    backup:
+      enabled: false
+      
+  staging:
+    replicas: 2
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+    monitoring:
+      enabled: true
+    backup:
+      enabled: true
+      retention: "7d"
+      
+  prod:
+    replicas: 3
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+    monitoring:
+      enabled: true
+    backup:
+      enabled: true
+      retention: "30d"

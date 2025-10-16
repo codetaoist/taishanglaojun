@@ -1,0 +1,116 @@
+{{- if .Values.configMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "monitoring.fullname" . }}
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+data:
+  # 应用配置
+  app.yaml: |
+    app:
+      name: {{ include "monitoring.name" . }}
+      version: {{ .Chart.AppVersion | quote }}
+      environment: {{ .Values.env | default "production" }}
+      debug: {{ .Values.monitoring.debug | default false }}
+      
+    server:
+      port: {{ .Values.service.targetPort | default 8080 }}
+      host: "0.0.0.0"
+      read_timeout: 30s
+      write_timeout: 30s
+      idle_timeout: 120s
+      
+    database:
+      type: {{ .Values.database.type | default "postgresql" }}
+      host: {{ include "monitoring.databaseHost" . }}
+      port: {{ .Values.database.port | default 5432 }}
+      name: {{ .Values.database.name | quote }}
+      user: {{ .Values.database.user | quote }}
+      ssl_mode: {{ .Values.database.sslMode | default "disable" }}
+      max_open_conns: {{ .Values.database.maxOpenConns | default 25 }}
+      max_idle_conns: {{ .Values.database.maxIdleConns | default 5 }}
+      conn_max_lifetime: {{ .Values.database.connMaxLifetime | default "300s" }}
+      
+    {{- if .Values.redis.enabled }}
+    redis:
+      host: {{ include "monitoring.redisHost" . }}
+      port: {{ .Values.redis.port | default 6379 }}
+      db: {{ .Values.redis.db | default 0 }}
+      max_retries: {{ .Values.redis.maxRetries | default 3 }}
+      pool_size: {{ .Values.redis.poolSize | default 10 }}
+      min_idle_conns: {{ .Values.redis.minIdleConns | default 5 }}
+    {{- end }}
+    
+    logging:
+      level: {{ .Values.monitoring.logLevel | default "info" }}
+      format: "json"
+      output: "stdout"
+      
+    monitoring:
+      metrics:
+        enabled: {{ .Values.monitoring.metricsEnabled | default true }}
+        path: {{ .Values.monitoring.metricsPath | default "/metrics" }}
+        port: 9090
+      tracing:
+        enabled: {{ .Values.monitoring.tracingEnabled | default true }}
+        {{- if .Values.monitoring.tracingEndpoint }}
+        endpoint: {{ .Values.monitoring.tracingEndpoint | quote }}
+        {{- end }}
+        service_name: {{ include "monitoring.fullname" . }}
+      health:
+        path: {{ .Values.monitoring.healthCheckPath | default "/health" }}
+        readiness_path: {{ .Values.monitoring.readinessCheckPath | default "/ready" }}
+        
+    security:
+      jwt:
+        expiration: {{ .Values.security.jwt.expiration | default "24h" }}
+      cors:
+        enabled: {{ .Values.security.cors.enabled | default true }}
+        allowed_origins: 
+          {{- range .Values.security.cors.allowedOrigins }}
+          - {{ . | quote }}
+          {{- end }}
+        allowed_methods:
+          {{- range .Values.security.cors.allowedMethods }}
+          - {{ . | quote }}
+          {{- end }}
+        allowed_headers:
+          {{- range .Values.security.cors.allowedHeaders }}
+          - {{ . | quote }}
+          {{- end }}
+          
+    {{- if .Values.alerting.enabled }}
+    alerting:
+      enabled: true
+      {{- if .Values.alerting.webhookUrl }}
+      webhook_url: {{ .Values.alerting.webhookUrl | quote }}
+      {{- end }}
+      {{- if .Values.alerting.slackChannel }}
+      slack_channel: {{ .Values.alerting.slackChannel | quote }}
+      {{- end }}
+      {{- if .Values.alerting.emailRecipients }}
+      email_recipients:
+        {{- range .Values.alerting.emailRecipients }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    
+    {{- if .Values.backup.enabled }}
+    backup:
+      enabled: true
+      schedule: {{ .Values.backup.schedule | default "0 2 * * *" | quote }}
+      retention: {{ .Values.backup.retention | default 7 }}
+      storage:
+        type: {{ .Values.backup.storage.type | default "s3" }}
+        bucket: {{ .Values.backup.storage.bucket | quote }}
+        region: {{ .Values.backup.storage.region | quote }}
+    {{- end }}
+
+  {{- if .Values.configMap.data }}
+  {{- range $key, $value := .Values.configMap.data }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}

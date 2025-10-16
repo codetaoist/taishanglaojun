@@ -1,0 +1,103 @@
+{{- if .Values.frontend.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "taishang-laojun.frontend.fullname" . }}
+  labels:
+    {{- include "taishang-laojun.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+    {{- if .Values.monitoring.enabled }}
+    {{- include "taishang-laojun.monitoring.labels" . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "taishang-laojun.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+{{- end }}
+
+{{- if .Values.backend.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "taishang-laojun.backend.fullname" . }}
+  labels:
+    {{- include "taishang-laojun.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+    {{- if .Values.monitoring.enabled }}
+    {{- include "taishang-laojun.monitoring.labels" . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+      protocol: TCP
+      name: http
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "taishang-laojun.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+{{- end }}
+
+{{- if .Values.apiGateway.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "taishang-laojun.apiGateway.fullname" . }}
+  labels:
+    {{- include "taishang-laojun.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+    {{- if .Values.monitoring.enabled }}
+    {{- include "taishang-laojun.monitoring.labels" . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.apiGateway.service.type }}
+  ports:
+    - port: {{ .Values.apiGateway.service.port }}
+      targetPort: {{ .Values.apiGateway.service.targetPort }}
+      protocol: TCP
+      name: http
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "taishang-laojun.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+{{- end }}
+
+{{- if .Values.monitoring.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "taishang-laojun.fullname" . }}-metrics
+  labels:
+    {{- include "taishang-laojun.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: metrics
+  selector:
+    {{- include "taishang-laojun.selectorLabels" . | nindent 4 }}
+{{- end }}

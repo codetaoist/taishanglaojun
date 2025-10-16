@@ -1,0 +1,255 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "monitoring.fullname" . }}
+  labels:
+    {{- include "monitoring.labels" . | nindent 4 }}
+    {{- with .Values.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.extraAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "monitoring.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "monitoring.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "monitoring.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+            {{- if .Values.monitoring.metricsEnabled }}
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+            {{- end }}
+          env:
+            {{- toYaml .Values.env | nindent 12 }}
+            # 数据库配置
+            - name: DB_HOST
+              value: {{ .Values.database.host | quote }}
+            - name: DB_PORT
+              value: {{ .Values.database.port | quote }}
+            - name: DB_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DB_USER
+              value: {{ .Values.database.user | quote }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "monitoring.fullname" . }}-db
+                  key: password
+            - name: DB_SSL_MODE
+              value: {{ .Values.database.sslMode | quote }}
+            - name: DB_MAX_OPEN_CONNS
+              value: {{ .Values.database.maxOpenConns | quote }}
+            - name: DB_MAX_IDLE_CONNS
+              value: {{ .Values.database.maxIdleConns | quote }}
+            - name: DB_CONN_MAX_LIFETIME
+              value: {{ .Values.database.connMaxLifetime | quote }}
+            # Redis 配置
+            {{- if .Values.redis.enabled }}
+            - name: REDIS_HOST
+              value: {{ .Values.redis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.port | quote }}
+            - name: REDIS_DB
+              value: {{ .Values.redis.db | quote }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "monitoring.fullname" . }}-redis
+                  key: password
+            - name: REDIS_MAX_RETRIES
+              value: {{ .Values.redis.maxRetries | quote }}
+            - name: REDIS_POOL_SIZE
+              value: {{ .Values.redis.poolSize | quote }}
+            - name: REDIS_MIN_IDLE_CONNS
+              value: {{ .Values.redis.minIdleConns | quote }}
+            {{- end }}
+            # 监控配置
+            - name: LOG_LEVEL
+              value: {{ .Values.monitoring.logLevel | quote }}
+            - name: DEBUG
+              value: {{ .Values.monitoring.debug | quote }}
+            - name: METRICS_ENABLED
+              value: {{ .Values.monitoring.metricsEnabled | quote }}
+            - name: METRICS_PATH
+              value: {{ .Values.monitoring.metricsPath | quote }}
+            - name: TRACING_ENABLED
+              value: {{ .Values.monitoring.tracingEnabled | quote }}
+            {{- if .Values.monitoring.tracingEndpoint }}
+            - name: TRACING_ENDPOINT
+              value: {{ .Values.monitoring.tracingEndpoint | quote }}
+            {{- end }}
+            # 安全配置
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "monitoring.fullname" . }}-jwt
+                  key: secret
+            - name: JWT_EXPIRATION
+              value: {{ .Values.security.jwt.expiration | quote }}
+            {{- if .Values.security.encryption.key }}
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "monitoring.fullname" . }}-encryption
+                  key: key
+            {{- end }}
+            # CORS 配置
+            - name: CORS_ENABLED
+              value: {{ .Values.security.cors.enabled | quote }}
+            - name: CORS_ALLOWED_ORIGINS
+              value: {{ join "," .Values.security.cors.allowedOrigins | quote }}
+            - name: CORS_ALLOWED_METHODS
+              value: {{ join "," .Values.security.cors.allowedMethods | quote }}
+            - name: CORS_ALLOWED_HEADERS
+              value: {{ join "," .Values.security.cors.allowedHeaders | quote }}
+            # 告警配置
+            {{- if .Values.alerting.enabled }}
+            - name: ALERTING_ENABLED
+              value: "true"
+            {{- if .Values.alerting.webhookUrl }}
+            - name: ALERTING_WEBHOOK_URL
+              value: {{ .Values.alerting.webhookUrl | quote }}
+            {{- end }}
+            {{- if .Values.alerting.slackChannel }}
+            - name: ALERTING_SLACK_CHANNEL
+              value: {{ .Values.alerting.slackChannel | quote }}
+            {{- end }}
+            {{- if .Values.alerting.emailRecipients }}
+            - name: ALERTING_EMAIL_RECIPIENTS
+              value: {{ join "," .Values.alerting.emailRecipients | quote }}
+            {{- end }}
+            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          {{- end }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.startupProbe.httpGet.path }}
+              port: {{ .Values.startupProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: /app/data
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- with .Values.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "monitoring.fullname" . }}-data
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.tolerations .Values.podAntiAffinity.enabled }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.podAntiAffinity.enabled }}
+      affinity:
+        podAntiAffinity:
+          {{- if eq .Values.podAntiAffinity.type "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          {{- else }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          {{- end }}
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - {{ include "monitoring.name" . }}
+                topologyKey: kubernetes.io/hostname
+      {{- end }}

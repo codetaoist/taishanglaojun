@@ -1,0 +1,27 @@
+taishang-laojun (1.0.0-1) unstable; urgency=medium
+
+  * Initial release of TaishangLaojun Desktop Application
+  * Modern GTK4-based user interface implementation
+  * Core application framework with GObject-based architecture
+  * Configuration management system with JSON backend
+  * Comprehensive utility functions for system integration
+  * Desktop integration with .desktop file and AppStream metadata
+  * System tray integration and desktop notifications
+  * Multi-language support infrastructure
+  * Plugin system foundation
+  * Comprehensive test suite
+  * Complete build and packaging system for multiple formats
+  * Documentation and user manual
+  * CI/CD pipeline configuration
+
+ -- TaishangLaojun Team <team@taishanglaojun.com>  Mon, 06 Jan 2025 12:00:00 +0000
+
+taishang-laojun (0.9.0-1) experimental; urgency=low
+
+  * Pre-release version for testing
+  * Basic application structure
+  * Initial GTK4 integration
+  * Core configuration system
+  * Basic utility functions
+
+ -- TaishangLaojun Team <team@taishanglaojun.com>  Mon, 30 Dec 2024 12:00:00 +0000

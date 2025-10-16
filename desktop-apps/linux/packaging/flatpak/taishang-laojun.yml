@@ -1,0 +1,103 @@
+app-id: com.taishanglaojun.Desktop
+runtime: org.gnome.Platform
+runtime-version: '45'
+sdk: org.gnome.Sdk
+command: taishang-laojun
+separate-locales: false
+
+finish-args:
+  # X11 + XShm access
+  - --share=ipc
+  - --socket=x11
+  
+  # Wayland access
+  - --socket=wayland
+  
+  # Audio access
+  - --socket=pulseaudio
+  
+  # Network access
+  - --share=network
+  
+  # Home directory access (for user files)
+  - --filesystem=home
+  
+  # Access to Downloads folder
+  - --filesystem=xdg-download
+  
+  # Access to Documents folder
+  - --filesystem=xdg-documents
+  
+  # Access to Pictures folder (for screenshots)
+  - --filesystem=xdg-pictures
+  
+  # D-Bus access for desktop integration
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.FileManager1
+  - --talk-name=org.freedesktop.portal.Desktop
+  - --talk-name=org.freedesktop.portal.FileChooser
+  - --talk-name=org.freedesktop.portal.Notification
+  - --talk-name=org.freedesktop.portal.Screenshot
+  
+  # System tray access
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=org.freedesktop.StatusNotifierWatcher
+  
+  # Session management
+  - --talk-name=org.gnome.SessionManager
+  - --talk-name=org.freedesktop.login1
+  
+  # Hardware access for system information
+  - --device=dri
+  - --device=all
+  
+  # Environment variables
+  - --env=PULSE_RUNTIME_PATH=/run/user/1000/pulse
+
+modules:
+  - name: taishang-laojun
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTS=OFF
+      - -DBUILD_PACKAGES=OFF
+      - -DFLATPAK_BUILD=ON
+    sources:
+      - type: dir
+        path: ../..
+    post-install:
+      - install -Dm644 resources/taishang-laojun.desktop /app/share/applications/com.taishanglaojun.Desktop.desktop
+      - install -Dm644 resources/icons/taishang-laojun.png /app/share/icons/hicolor/256x256/apps/com.taishanglaojun.Desktop.png
+      - install -Dm644 resources/icons/taishang-laojun.svg /app/share/icons/hicolor/scalable/apps/com.taishanglaojun.Desktop.svg
+      - install -Dm644 resources/appstream/taishang-laojun.appdata.xml /app/share/metainfo/com.taishanglaojun.Desktop.appdata.xml
+
+  # Additional dependencies that might not be in the runtime
+  - name: libsndfile
+    sources:
+      - type: archive
+        url: https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz
+        sha256: 3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e
+    cleanup:
+      - /share/doc
+
+  - name: json-c
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTING=OFF
+    sources:
+      - type: archive
+        url: https://github.com/json-c/json-c/archive/json-c-0.17-20230812.tar.gz
+        sha256: 024d302a3aadcbf9f78735320a6d5aedf8b77876c8ac8bbb95081ca55054c7eb
+    cleanup:
+      - /lib/cmake
+      - /lib/pkgconfig
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /lib/cmake
+  - /share/man
+  - /share/doc
+  - '*.la'
+  - '*.a'

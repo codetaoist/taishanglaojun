@@ -1,0 +1,23 @@
+{{/*
+太上老君监控系统 PersistentVolumeClaim 模板
+*/}}
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "taishanglaojun-monitoring.fullname" . }}-data
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "taishanglaojun-monitoring.labels" . | nindent 4 }}
+  {{- with .Values.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+  {{- include "taishanglaojun-monitoring.storageClass" . | nindent 2 }}
+{{- end }}

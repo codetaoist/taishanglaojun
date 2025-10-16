@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜单管理测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .button {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #40a9ff;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #a8071a;
+        }
+        .success {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #389e0d;
+        }
+    </style>
+</head>
+<body>
+    <h1>菜单管理功能测试</h1>
+    
+    <div class="section">
+        <h2>1. 登录获取Token</h2>
+        <button class="button" onclick="login()">登录</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. 测试菜单API</h2>
+        <button class="button" onclick="testMenuAPI()">获取菜单列表</button>
+        <button class="button" onclick="testMenuTree()">获取菜单树</button>
+        <div id="menuResult" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. 测试数据转换</h2>
+        <button class="button" onclick="testDataTransform()">测试数据转换</button>
+        <div id="transformResult" class="result"></div>
+    </div>
+
+    <script>
+        let authToken = '';
+        
+        async function login() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.textContent = '正在登录...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.token) {
+                    authToken = data.data.token;
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `登录成功！\nToken: ${authToken.substring(0, 50)}...`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `登录失败: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `登录错误: ${error.message}`;
+            }
+        }
+        
+        async function testMenuAPI() {
+            const resultDiv = document.getElementById('menuResult');
+            
+            if (!authToken) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '请先登录获取Token';
+                return;
+            }
+            
+            resultDiv.textContent = '正在获取菜单数据...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/menus?page=1&pageSize=10', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `菜单API调用成功！\n返回数据:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `菜单API调用失败: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `菜单API错误: ${error.message}`;
+            }
+        }
+        
+        async function testMenuTree() {
+            const resultDiv = document.getElementById('menuResult');
+            
+            if (!authToken) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '请先登录获取Token';
+                return;
+            }
+            
+            resultDiv.textContent = '正在获取菜单树...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/menus/tree', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `菜单树API调用成功！\n返回数据:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `菜单树API调用失败: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `菜单树API错误: ${error.message}`;
+            }
+        }
+        
+        function testDataTransform() {
+            const resultDiv = document.getElementById('transformResult');
+            
+            // 模拟后端返回的数据
+            const backendData = {
+                "id": "123",
+                "name": "测试菜单",
+                "path": "/test",
+                "icon": "TestOutlined",
+                "parent_id": null,
+                "sort": 1,
+                "is_enabled": true,
+                "is_visible": true,
+                "required_role": "USER",
+                "component": "TestComponent",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z"
+            };
+            
+            // 数据转换函数
+            function transformBackendMenuItem(backendItem) {
+                return {
+                    id: backendItem.id,
+                    name: backendItem.name,
+                    path: backendItem.path,
+                    icon: backendItem.icon,
+                    component: backendItem.component,
+                    parentId: backendItem.parent_id,
+                    sort: backendItem.sort,
+                    status: backendItem.is_enabled ? 'active' : 'inactive',
+                    type: mapBackendTypeToFrontend(backendItem),
+                    permissions: [],
+                    children: backendItem.children ? backendItem.children.map(child => transformBackendMenuItem(child)) : undefined,
+                    createdAt: backendItem.created_at,
+                    updatedAt: backendItem.updated_at
+                };
+            }
+            
+            function mapBackendTypeToFrontend(backendItem) {
+                if (backendItem.path && backendItem.path.startsWith('/')) {
+                    return 'menu';
+                } else if (backendItem.component) {
+                    return 'button';
+                } else {
+                    return 'api';
+                }
+            }
+            
+            const transformedData = transformBackendMenuItem(backendData);
+            
+            resultDiv.className = 'result success';
+            resultDiv.textContent = `数据转换测试成功！\n\n原始后端数据:\n${JSON.stringify(backendData, null, 2)}\n\n转换后的前端数据:\n${JSON.stringify(transformedData, null, 2)}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+name: 文档自动化生成和同步
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'core-services/**'
+      - 'frontend/**'
+      - 'mobile-apps/**'
+      - 'docs/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'core-services/**'
+      - 'frontend/**'
+      - 'mobile-apps/**'
+      - 'docs/**'
+  schedule:
+    # 每天凌晨2点执行文档同步检查
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: '强制更新所有文档'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  DOCS_DIR: docs
+  TEMPLATES_DIR: docs/templates
+
+jobs:
+  # 文档结构检查和验证
+  docs-validation:
+    runs-on: ubuntu-latest
+    name: 文档结构验证
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置Node.js环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 安装文档检查工具
+        run: |
+          npm install -g markdownlint-cli
+          npm install -g markdown-link-check
+          npm install -g textlint
+          npm install -g alex
+
+      - name: 检查文档格式规范
+        run: |
+          echo "🔍 检查Markdown格式规范..."
+          markdownlint docs/ --config .markdownlint.json || true
+
+      - name: 检查链接有效性
+        run: |
+          echo "🔗 检查文档链接有效性..."
+          find docs -name "*.md" -exec markdown-link-check {} \; || true
+
+      - name: 检查文档完整性
+        run: |
+          echo "📋 检查文档完整性..."
+          
+          # 检查核心服务模块是否都有README
+          echo "检查核心服务README文件..."
+          missing_readmes=()
+          for dir in core-services/*/; do
+            if [ -d "$dir" ] && [ ! -f "${dir}README.md" ]; then
+              module_name=$(basename "$dir")
+              missing_readmes+=("$module_name")
+              echo "❌ 缺少README: $module_name"
+            fi
+          done
+          
+          # 检查前端应用是否都有README
+          echo "检查前端应用README文件..."
+          for dir in frontend/*/; do
+            if [ -d "$dir" ] && [ ! -f "${dir}README.md" ]; then
+              app_name=$(basename "$dir")
+              missing_readmes+=("frontend/$app_name")
+              echo "❌ 缺少README: frontend/$app_name"
+            fi
+          done
+          
+          # 检查移动应用是否都有README
+          echo "检查移动应用README文件..."
+          for dir in mobile-apps/*/; do
+            if [ -d "$dir" ] && [ ! -f "${dir}README.md" ]; then
+              app_name=$(basename "$dir")
+              missing_readmes+=("mobile-apps/$app_name")
+              echo "❌ 缺少README: mobile-apps/$app_name"
+            fi
+          done
+          
+          if [ ${#missing_readmes[@]} -gt 0 ]; then
+            echo "::warning::发现 ${#missing_readmes[@]} 个模块缺少README文件"
+          else
+            echo "✅ 所有模块都有README文件"
+          fi
+
+      - name: 生成文档覆盖率报告
+        run: |
+          echo "📊 生成文档覆盖率报告..."
+          
+          # 统计核心服务模块
+          total_core_modules=$(find core-services -maxdepth 1 -type d | grep -v "^core-services$" | wc -l)
+          documented_core_modules=$(find core-services -name "README.md" | wc -l)
+          
+          # 统计前端应用
+          total_frontend_apps=$(find frontend -maxdepth 1 -type d | grep -v "^frontend$" | wc -l)
+          documented_frontend_apps=$(find frontend -name "README.md" | wc -l)
+          
+          # 统计移动应用
+          total_mobile_apps=$(find mobile-apps -maxdepth 1 -type d | grep -v "^mobile-apps$" | wc -l)
+          documented_mobile_apps=$(find mobile-apps -name "README.md" | wc -l)
+          
+          # 计算覆盖率
+          if [ $total_core_modules -gt 0 ]; then
+            core_coverage=$((documented_core_modules * 100 / total_core_modules))
+          else
+            core_coverage=100
+          fi
+          
+          if [ $total_frontend_apps -gt 0 ]; then
+            frontend_coverage=$((documented_frontend_apps * 100 / total_frontend_apps))
+          else
+            frontend_coverage=100
+          fi
+          
+          if [ $total_mobile_apps -gt 0 ]; then
+            mobile_coverage=$((documented_mobile_apps * 100 / total_mobile_apps))
+          else
+            mobile_coverage=100
+          fi
+          
+          echo "📈 文档覆盖率统计:"
+          echo "  核心服务: $documented_core_modules/$total_core_modules ($core_coverage%)"
+          echo "  前端应用: $documented_frontend_apps/$total_frontend_apps ($frontend_coverage%)"
+          echo "  移动应用: $documented_mobile_apps/$total_mobile_apps ($mobile_coverage%)"
+          
+          # 设置输出变量
+          echo "CORE_COVERAGE=$core_coverage" >> $GITHUB_ENV
+          echo "FRONTEND_COVERAGE=$frontend_coverage" >> $GITHUB_ENV
+          echo "MOBILE_COVERAGE=$mobile_coverage" >> $GITHUB_ENV
+
+  # API文档自动生成
+  api-docs-generation:
+    runs-on: ubuntu-latest
+    name: API文档生成
+    needs: docs-validation
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Go环境
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: 安装Swagger工具
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: 生成Go API文档
+        run: |
+          echo "🔧 生成Go服务API文档..."
+          
+          # 为每个核心服务生成API文档
+          for service_dir in core-services/*/; do
+            if [ -d "$service_dir" ]; then
+              service_name=$(basename "$service_dir")
+              echo "生成 $service_name 服务API文档..."
+              
+              # 检查是否有main.go或api相关文件
+              if [ -f "${service_dir}main.go" ] || [ -d "${service_dir}api" ]; then
+                cd "$service_dir"
+                
+                # 生成swagger文档
+                if command -v swag &> /dev/null; then
+                  swag init --output ./docs --parseInternal || echo "Swagger生成失败: $service_name"
+                fi
+                
+                cd - > /dev/null
+                
+                # 创建API文档目录
+                api_doc_dir="docs/06-API文档/核心服务API"
+                mkdir -p "$api_doc_dir"
+                
+                # 生成API文档Markdown
+                api_doc_file="$api_doc_dir/${service_name}.md"
+                cat > "$api_doc_file" << EOF
+# ${service_name} 服务 API 文档
+
+> ${service_name} 服务的API接口文档
+
+[![服务状态](https://img.shields.io/badge/状态-运行中-green.svg)](#)
+[![API版本](https://img.shields.io/badge/API版本-v1.0-blue.svg)](#)
+[![更新时间](https://img.shields.io/badge/更新时间-$(date +%Y.%m.%d)-orange.svg)](#)
+
+## 📋 API概述
+
+### 服务信息
+- **服务名称**: ${service_name}
+- **基础路径**: \`/api/v1/${service_name}\`
+- **协议**: HTTP/HTTPS
+- **数据格式**: JSON
+
+### 认证方式
+- **认证类型**: Bearer Token
+- **Token获取**: 通过认证服务获取
+- **Token有效期**: 24小时
+
+## 🔌 API接口列表
+
+### 核心接口
+
+#### 1. 获取服务状态
+\`\`\`http
+GET /api/v1/${service_name}/health
+\`\`\`
+
+**响应示例**:
+\`\`\`json
+{
+  "status": "healthy",
+  "timestamp": "2024-12-19T10:00:00Z",
+  "version": "v1.0.0"
+}
+\`\`\`
+
+#### 2. 获取服务信息
+\`\`\`http
+GET /api/v1/${service_name}/info
+\`\`\`
+
+**响应示例**:
+\`\`\`json
+{
+  "name": "${service_name}",
+  "version": "v1.0.0",
+  "description": "${service_name} 服务",
+  "endpoints": []
+}
+\`\`\`
+
+## 📊 错误码定义
+
+| 错误码 | 说明 | 解决方案 |
+|--------|------|----------|
+| 200 | 请求成功 | - |
+| 400 | 请求参数错误 | 检查请求参数格式 |
+| 401 | 认证失败 | 检查Token是否有效 |
+| 403 | 权限不足 | 联系管理员分配权限 |
+| 404 | 资源不存在 | 检查请求路径 |
+| 500 | 服务器内部错误 | 联系技术支持 |
+
+## 🔗 相关文档
+
+- [${service_name} 服务README](../../03-核心服务/${service_name}/README.md)
+- [API认证指南](../API认证指南.md)
+- [错误处理指南](../错误处理指南.md)
+
+---
+
+**最后更新**: $(date +%Y年%m月%d日)  
+**文档版本**: v1.0  
+**维护状态**: 自动生成 🤖
+EOF
+                
+                echo "✅ 生成API文档: $api_doc_file"
+              fi
+            fi
+          done
+
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 生成Python API文档
+        run: |
+          echo "🐍 检查Python API文档..."
+          
+          # 查找Python API文件
+          python_apis=$(find . -name "*.py" -path "*/api/*" -o -name "*api*.py" | head -10)
+          
+          if [ ! -z "$python_apis" ]; then
+            echo "发现Python API文件，生成文档..."
+            pip install pydoc-markdown
+            
+            # 这里可以添加具体的Python API文档生成逻辑
+          fi
+
+      - name: 提交API文档更新
+        if: github.event_name == 'push'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [ -n "$(git status --porcelain docs/06-API文档/)" ]; then
+            git add docs/06-API文档/
+            git commit -m "docs: 自动更新API文档 [skip ci]"
+            echo "API_DOCS_UPDATED=true" >> $GITHUB_ENV
+          else
+            echo "API文档无变更"
+            echo "API_DOCS_UPDATED=false" >> $GITHUB_ENV
+          fi
+
+  # README文档自动生成和更新
+  readme-generation:
+    runs-on: ubuntu-latest
+    name: README文档生成
+    needs: docs-validation
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 生成缺失的README文件
+        run: |
+          echo "📝 生成缺失的README文件..."
+          
+          template_file="docs/templates/README模板.md"
+          
+          # 检查模板文件是否存在
+          if [ ! -f "$template_file" ]; then
+            echo "❌ README模板文件不存在: $template_file"
+            exit 1
+          fi
+          
+          # 为核心服务生成README
+          for service_dir in core-services/*/; do
+            if [ -d "$service_dir" ]; then
+              service_name=$(basename "$service_dir")
+              readme_file="${service_dir}README.md"
+              
+              if [ ! -f "$readme_file" ]; then
+                echo "生成README: $service_name"
+                
+                # 复制模板并替换占位符
+                cp "$template_file" "$readme_file"
+                
+                # 替换模板中的占位符
+                sed -i "s/\[模块名称\]/${service_name}/g" "$readme_file"
+                sed -i "s/\[模块描述\]/${service_name} 核心服务模块/g" "$readme_file"
+                sed -i "s/\[技术栈\]/Go, Gin, GORM/g" "$readme_file"
+                sed -i "s/\[端口号\]/8080/g" "$readme_file"
+                sed -i "s|\[相对路径\]|../../docs/03-核心服务/${service_name}|g" "$readme_file"
+                
+                echo "✅ 生成README: $readme_file"
+              fi
+            fi
+          done
+          
+          # 为前端应用生成README
+          for app_dir in frontend/*/; do
+            if [ -d "$app_dir" ]; then
+              app_name=$(basename "$app_dir")
+              readme_file="${app_dir}README.md"
+              
+              if [ ! -f "$readme_file" ]; then
+                echo "生成README: frontend/$app_name"
+                
+                cp "$template_file" "$readme_file"
+                
+                # 根据应用类型设置不同的技术栈
+                if [ "$app_name" = "web-app" ]; then
+                  tech_stack="React, TypeScript, Vite"
+                  port="3000"
+                else
+                  tech_stack="待定"
+                  port="待定"
+                fi
+                
+                sed -i "s/\[模块名称\]/${app_name}/g" "$readme_file"
+                sed -i "s/\[模块描述\]/${app_name} 前端应用/g" "$readme_file"
+                sed -i "s/\[技术栈\]/${tech_stack}/g" "$readme_file"
+                sed -i "s/\[端口号\]/${port}/g" "$readme_file"
+                sed -i "s|\[相对路径\]|../../docs/04-前端应用/${app_name}|g" "$readme_file"
+                
+                echo "✅ 生成README: $readme_file"
+              fi
+            fi
+          done
+          
+          # 为移动应用生成README
+          for app_dir in mobile-apps/*/; do
+            if [ -d "$app_dir" ]; then
+              app_name=$(basename "$app_dir")
+              readme_file="${app_dir}README.md"
+              
+              if [ ! -f "$readme_file" ]; then
+                echo "生成README: mobile-apps/$app_name"
+                
+                cp "$template_file" "$readme_file"
+                
+                # 根据平台设置不同的技术栈
+                case "$app_name" in
+                  "android")
+                    tech_stack="Kotlin, Android SDK"
+                    ;;
+                  "ios")
+                    tech_stack="Swift, iOS SDK"
+                    ;;
+                  "harmony")
+                    tech_stack="ArkTS, HarmonyOS SDK"
+                    ;;
+                  *)
+                    tech_stack="待定"
+                    ;;
+                esac
+                
+                sed -i "s/\[模块名称\]/${app_name}/g" "$readme_file"
+                sed -i "s/\[模块描述\]/${app_name} 移动应用/g" "$readme_file"
+                sed -i "s/\[技术栈\]/${tech_stack}/g" "$readme_file"
+                sed -i "s/\[端口号\]/N\/A/g" "$readme_file"
+                sed -i "s|\[相对路径\]|../../docs/04-前端应用/mobile-apps/${app_name}|g" "$readme_file"
+                
+                echo "✅ 生成README: $readme_file"
+              fi
+            fi
+          done
+
+      - name: 更新主README文档
+        run: |
+          echo "📋 更新主README文档..."
+          
+          # 统计项目信息
+          total_core_services=$(find core-services -maxdepth 1 -type d | grep -v "^core-services$" | wc -l)
+          total_frontend_apps=$(find frontend -maxdepth 1 -type d | grep -v "^frontend$" | wc -l)
+          total_mobile_apps=$(find mobile-apps -maxdepth 1 -type d | grep -v "^mobile-apps$" | wc -l)
+          
+          # 更新README中的统计信息
+          main_readme="README.md"
+          if [ -f "$main_readme" ]; then
+            # 更新统计数据（这里可以添加更复杂的逻辑）
+            echo "更新主README统计信息..."
+          fi
+
+      - name: 提交README更新
+        if: github.event_name == 'push'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # 检查是否有README文件变更
+          if [ -n "$(git status --porcelain | grep README)" ]; then
+            git add . -A
+            git commit -m "docs: 自动生成和更新README文档 [skip ci]"
+            echo "README_UPDATED=true" >> $GITHUB_ENV
+          else
+            echo "README文档无变更"
+            echo "README_UPDATED=false" >> $GITHUB_ENV
+          fi
+
+  # 开发进度文档更新
+  progress-tracking:
+    runs-on: ubuntu-latest
+    name: 开发进度跟踪
+    needs: [docs-validation, api-docs-generation, readme-generation]
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 分析代码变更
+        run: |
+          echo "📊 分析代码变更..."
+          
+          # 获取最近的提交信息
+          recent_commits=$(git log --since="24 hours ago" --pretty=format:"%h|%s|%an|%ad" --date=short)
+          
+          if [ ! -z "$recent_commits" ]; then
+            echo "最近24小时的提交:"
+            echo "$recent_commits" | while IFS='|' read -r hash subject author date; do
+              echo "  - [$date] $subject (by $author)"
+            done
+          else
+            echo "最近24小时无提交"
+          fi
+
+      - name: 更新开发进度文档
+        run: |
+          echo "📈 更新开发进度文档..."
+          
+          progress_dir="docs/10-开发进度"
+          mkdir -p "$progress_dir"
+          
+          # 生成开发进度报告
+          progress_file="$progress_dir/开发进度报告.md"
+          
+          cat > "$progress_file" << EOF
+# 太上老君AI平台 - 开发进度报告
+
+> 自动生成的开发进度报告
+
+[![更新时间](https://img.shields.io/badge/更新时间-$(date +%Y.%m.%d)-green.svg)](#)
+[![总体进度](https://img.shields.io/badge/总体进度-进行中-orange.svg)](#)
+
+## 📊 项目概览
+
+### 模块统计
+| 模块类型 | 总数 | 已实现 | 进度 |
+|----------|------|--------|------|
+| **核心服务** | $(find core-services -maxdepth 1 -type d | grep -v "^core-services$" | wc -l) | $(find core-services -name "*.go" | wc -l > 0 && echo "$(find core-services -maxdepth 1 -type d | grep -v "^core-services$" | wc -l)" || echo "0") | 🟡 进行中 |
+| **前端应用** | $(find frontend -maxdepth 1 -type d | grep -v "^frontend$" | wc -l) | $(find frontend -name "package.json" | wc -l) | 🟡 进行中 |
+| **移动应用** | $(find mobile-apps -maxdepth 1 -type d | grep -v "^mobile-apps$" | wc -l) | $(find mobile-apps -name "README.md" | wc -l) | 🟡 进行中 |
+
+### 文档覆盖率
+| 文档类型 | 覆盖率 | 状态 |
+|----------|--------|------|
+| **README文档** | $(find . -name "README.md" | wc -l) 个 | ✅ 良好 |
+| **API文档** | $(find docs/06-API文档 -name "*.md" | wc -l) 个 | 🟡 进行中 |
+| **设计文档** | $(find docs -name "*设计*.md" | wc -l) 个 | ✅ 良好 |
+
+## 🚀 最新进展
+
+### 最近更新 (24小时内)
+$(git log --since="24 hours ago" --pretty=format:"- **%ad** %s (by %an)" --date=short | head -10)
+
+### 本周重点
+- 完善文档自动化生成机制
+- 优化API文档结构
+- 提升文档覆盖率
+
+## 📋 待办事项
+
+### 高优先级
+- [ ] 完善安全模块实现
+- [ ] 优化API接口设计
+- [ ] 完善测试覆盖
+
+### 中优先级
+- [ ] 前端界面优化
+- [ ] 移动端适配
+- [ ] 性能优化
+
+### 低优先级
+- [ ] 文档完善
+- [ ] 代码重构
+- [ ] 工具升级
+
+## 📈 趋势分析
+
+### 代码提交趋势
+- **本周提交**: $(git log --since="1 week ago" --oneline | wc -l) 次
+- **本月提交**: $(git log --since="1 month ago" --oneline | wc -l) 次
+- **活跃开发者**: $(git log --since="1 week ago" --pretty=format:"%an" | sort | uniq | wc -l) 人
+
+### 文档更新趋势
+- **文档总数**: $(find docs -name "*.md" | wc -l) 个
+- **最近更新**: $(find docs -name "*.md" -mtime -7 | wc -l) 个文档在7天内更新
+
+---
+
+**报告生成时间**: $(date '+%Y年%m月%d日 %H:%M:%S')  
+**生成方式**: 自动化脚本 🤖  
+**下次更新**: 24小时后
+EOF
+          
+          echo "✅ 开发进度报告已更新: $progress_file"
+
+      - name: 生成变更记录
+        run: |
+          echo "📝 更新变更记录..."
+          
+          changelog_file="docs/10-开发进度/变更记录.md"
+          
+          # 如果变更记录文件不存在，从模板创建
+          if [ ! -f "$changelog_file" ]; then
+            cp "docs/templates/变更记录模板.md" "$changelog_file"
+            
+            # 替换模板占位符
+            sed -i "s/\[项目\/模块名称\]/太上老君AI平台/g" "$changelog_file"
+            sed -i "s/\[版本号\]/v1.0.0/g" "$changelog_file"
+            sed -i "s/\[日期\]/$(date +%Y-%m-%d)/g" "$changelog_file"
+            sed -i "s/\[状态\]/开发中/g" "$changelog_file"
+          fi
+          
+          # 获取最新的提交并添加到变更记录
+          recent_commit=$(git log -1 --pretty=format:"%h|%s|%an|%ad" --date=short)
+          
+          if [ ! -z "$recent_commit" ]; then
+            IFS='|' read -r hash subject author date <<< "$recent_commit"
+            
+            # 在变更记录中插入最新变更
+            temp_file=$(mktemp)
+            head -n 50 "$changelog_file" > "$temp_file"
+            echo "" >> "$temp_file"
+            echo "### 最新变更 - $date" >> "$temp_file"
+            echo "- **[$hash]** $subject (by $author)" >> "$temp_file"
+            echo "" >> "$temp_file"
+            tail -n +51 "$changelog_file" >> "$temp_file"
+            mv "$temp_file" "$changelog_file"
+          fi
+
+      - name: 提交进度文档更新
+        if: github.event_name == 'push'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if [ -n "$(git status --porcelain docs/10-开发进度/)" ]; then
+            git add docs/10-开发进度/
+            git commit -m "docs: 自动更新开发进度文档 [skip ci]"
+            echo "PROGRESS_UPDATED=true" >> $GITHUB_ENV
+          else
+            echo "开发进度文档无变更"
+            echo "PROGRESS_UPDATED=false" >> $GITHUB_ENV
+          fi
+
+  # 推送所有文档更新
+  push-updates:
+    runs-on: ubuntu-latest
+    name: 推送文档更新
+    needs: [api-docs-generation, readme-generation, progress-tracking]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: 拉取最新更改
+        run: |
+          git pull origin main
+
+      - name: 推送文档更新
+        run: |
+          echo "🚀 推送所有文档更新..."
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            
+            git add .
+            git commit -m "docs: 自动化文档更新 [skip ci]
+
+            - 更新API文档
+            - 生成缺失的README文件  
+            - 更新开发进度报告
+            - 同步变更记录
+            
+            Generated by GitHub Actions at $(date)"
+            
+            git push
+            echo "✅ 文档更新已推送"
+          else
+            echo "📝 无文档变更需要推送"
+          fi
+
+  # 通知和报告
+  notification:
+    runs-on: ubuntu-latest
+    name: 通知和报告
+    needs: [docs-validation, api-docs-generation, readme-generation, progress-tracking]
+    if: always()
+    steps:
+      - name: 生成执行报告
+        run: |
+          echo "📋 文档自动化执行报告"
+          echo "========================"
+          echo "执行时间: $(date)"
+          echo "触发事件: ${{ github.event_name }}"
+          echo "分支: ${{ github.ref }}"
+          echo ""
+          echo "执行结果:"
+          echo "- 文档验证: ${{ needs.docs-validation.result }}"
+          echo "- API文档生成: ${{ needs.api-docs-generation.result }}"
+          echo "- README生成: ${{ needs.readme-generation.result }}"
+          echo "- 进度跟踪: ${{ needs.progress-tracking.result }}"
+          echo ""
+          
+          if [ "${{ needs.docs-validation.result }}" = "success" ] && 
+             [ "${{ needs.api-docs-generation.result }}" = "success" ] && 
+             [ "${{ needs.readme-generation.result }}" = "success" ] && 
+             [ "${{ needs.progress-tracking.result }}" = "success" ]; then
+            echo "✅ 所有文档自动化任务执行成功"
+          else
+            echo "❌ 部分文档自动化任务执行失败"
+          fi
+
+      - name: 创建Issue报告 (如果失败)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '文档自动化执行失败 - ' + new Date().toISOString().split('T')[0],
+              body: `## 文档自动化执行失败报告
+
+              **执行时间**: ${new Date().toISOString()}
+              **触发事件**: ${{ github.event_name }}
+              **分支**: ${{ github.ref }}
+              **工作流**: ${{ github.workflow }}
+
+              ### 执行结果
+              - 文档验证: ${{ needs.docs-validation.result }}
+              - API文档生成: ${{ needs.api-docs-generation.result }}
+              - README生成: ${{ needs.readme-generation.result }}
+              - 进度跟踪: ${{ needs.progress-tracking.result }}
+
+              ### 建议操作
+              1. 检查工作流日志
+              2. 验证文档模板和配置
+              3. 手动执行失败的步骤
+              4. 修复问题后重新运行工作流
+
+              **自动生成于**: GitHub Actions`,
+              labels: ['documentation', 'automation', 'bug']
+            })

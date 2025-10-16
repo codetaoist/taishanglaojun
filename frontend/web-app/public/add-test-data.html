@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色管理测试数据添加工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .header h1 {
+            color: #1890ff;
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn {
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background-color: #40a9ff;
+            transform: translateY(-1px);
+        }
+        .btn:disabled {
+            background-color: #d9d9d9;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn.danger {
+            background-color: #ff4d4f;
+        }
+        .btn.danger:hover {
+            background-color: #ff7875;
+        }
+        .btn.success {
+            background-color: #52c41a;
+        }
+        .btn.success:hover {
+            background-color: #73d13d;
+        }
+        .log {
+            background-color: #001529;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .progress {
+            width: 100%;
+            height: 6px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #1890ff;
+            transition: width 0.3s;
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .alert.info {
+            background-color: #e6f7ff;
+            border: 1px solid #91d5ff;
+            color: #0050b3;
+        }
+        .alert.success {
+            background-color: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #389e0d;
+        }
+        .alert.warning {
+            background-color: #fffbe6;
+            border: 1px solid #ffe58f;
+            color: #d48806;
+        }
+        .alert.error {
+            background-color: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #cf1322;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 角色管理测试数据工具</h1>
+            <p>为角色管理系统添加丰富的测试数据，包含多种类型的角色和权限</p>
+        </div>
+
+        <div class="section">
+            <h3>🔧 操作面板</h3>
+            <button class="btn" onclick="checkConnection()">🔍 检查API连接</button>
+            <button class="btn" onclick="addPermissions()">🔐 添加权限数据</button>
+            <button class="btn" onclick="addRoles()">👥 添加角色数据</button>
+            <button class="btn success" onclick="addAllTestData()">🚀 一键添加所有数据</button>
+            <button class="btn" onclick="getStats()">📊 获取统计信息</button>
+            <button class="btn danger" onclick="clearLog()">🗑️ 清空日志</button>
+        </div>
+
+        <div class="section">
+            <h3>📊 数据统计</h3>
+            <div class="stats" id="statsContainer">
+                <div class="stat-card">
+                    <div class="stat-number" id="roleCount">-</div>
+                    <div class="stat-label">角色总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="permissionCount">-</div>
+                    <div class="stat-label">权限总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeRoleCount">-</div>
+                    <div class="stat-label">启用角色</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="roleTypeCount">-</div>
+                    <div class="stat-label">角色类型</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📝 操作日志</h3>
+            <div class="progress" id="progressContainer" style="display: none;">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="log" id="logContainer">等待操作...</div>
+        </div>
+
+        <div class="section">
+            <h3>💡 使用说明</h3>
+            <div class="alert info">
+                <strong>测试数据包含：</strong><br>
+                • 10个不同类型的角色（系统、自定义、功能、数据）<br>
+                • 24个权限项目，覆盖各种资源和操作<br>
+                • 不同级别和状态的角色配置<br>
+                • 真实的业务场景描述
+            </div>
+            <div class="alert warning">
+                <strong>注意事项：</strong><br>
+                • 确保后端服务正在运行 (http://localhost:8080)<br>
+                • 重复添加相同数据会被自动跳过<br>
+                • 建议先检查API连接再添加数据
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api/v1';
+        
+        // 测试权限数据
+        const testPermissions = [
+            { name: 'content_read', description: '查看内容', resource: 'content', action: 'read' },
+            { name: 'content_write', description: '编辑内容', resource: 'content', action: 'write' },
+            { name: 'content_publish', description: '发布内容', resource: 'content', action: 'publish' },
+            { name: 'user_read', description: '查看用户信息', resource: 'user', action: 'read' },
+            { name: 'user_write', description: '编辑用户信息', resource: 'user', action: 'write' },
+            { name: 'analytics_read', description: '查看分析数据', resource: 'analytics', action: 'read' },
+            { name: 'analytics_write', description: '编辑分析配置', resource: 'analytics', action: 'write' },
+            { name: 'report_generate', description: '生成报告', resource: 'report', action: 'generate' },
+            { name: 'ticket_read', description: '查看工单', resource: 'ticket', action: 'read' },
+            { name: 'ticket_write', description: '处理工单', resource: 'ticket', action: 'write' },
+            { name: 'finance_read', description: '查看财务数据', resource: 'finance', action: 'read' },
+            { name: 'audit_read', description: '查看审计日志', resource: 'audit', action: 'read' },
+            { name: 'audit_write', description: '编辑审计配置', resource: 'audit', action: 'write' },
+            { name: 'product_read', description: '查看产品信息', resource: 'product', action: 'read' },
+            { name: 'product_write', description: '编辑产品信息', resource: 'product', action: 'write' },
+            { name: 'test_read', description: '查看测试结果', resource: 'test', action: 'read' },
+            { name: 'test_write', description: '执行测试', resource: 'test', action: 'write' },
+            { name: 'bug_report', description: '报告缺陷', resource: 'bug', action: 'report' },
+            { name: 'marketing_read', description: '查看营销数据', resource: 'marketing', action: 'read' },
+            { name: 'marketing_write', description: '编辑营销活动', resource: 'marketing', action: 'write' },
+            { name: 'security_read', description: '查看安全日志', resource: 'security', action: 'read' },
+            { name: 'security_write', description: '配置安全策略', resource: 'security', action: 'write' },
+            { name: 'system_monitor', description: '系统监控', resource: 'system', action: 'monitor' },
+            { name: 'basic_read', description: '基础查看权限', resource: 'basic', action: 'read' }
+        ];
+
+        // 测试角色数据
+        const testRoles = [
+            {
+                name: '内容管理员',
+                code: 'content_manager',
+                description: '负责网站内容的创建、编辑和发布，管理文章分类和标签，审核用户提交的内容',
+                type: 'functional',
+                level: 3,
+                is_active: true,
+                permissions: ['content_read', 'content_write', 'content_publish']
+            },
+            {
+                name: '用户运营',
+                code: 'user_operator',
+                description: '负责用户管理、用户行为分析、用户反馈处理，维护良好的用户体验',
+                type: 'functional',
+                level: 2,
+                is_active: true,
+                permissions: ['user_read', 'user_write', 'analytics_read']
+            },
+            {
+                name: '数据分析师',
+                code: 'data_analyst',
+                description: '负责数据收集、分析和报告生成，为业务决策提供数据支持',
+                type: 'data',
+                level: 4,
+                is_active: true,
+                permissions: ['analytics_read', 'analytics_write', 'report_generate']
+            },
+            {
+                name: '客服专员',
+                code: 'customer_service',
+                description: '处理用户咨询、投诉和建议，提供技术支持和问题解决方案',
+                type: 'functional',
+                level: 1,
+                is_active: true,
+                permissions: ['user_read', 'ticket_read', 'ticket_write']
+            },
+            {
+                name: '财务审计',
+                code: 'financial_auditor',
+                description: '负责财务数据审核、合规检查和风险控制，确保财务安全',
+                type: 'data',
+                level: 5,
+                is_active: true,
+                permissions: ['finance_read', 'audit_read', 'audit_write']
+            },
+            {
+                name: '产品经理',
+                code: 'product_manager',
+                description: '负责产品规划、需求分析和功能设计，协调开发团队实现产品目标',
+                type: 'custom',
+                level: 4,
+                is_active: true,
+                permissions: ['product_read', 'product_write', 'analytics_read', 'user_read']
+            },
+            {
+                name: '测试工程师',
+                code: 'qa_engineer',
+                description: '负责软件测试、质量保证和缺陷跟踪，确保产品质量',
+                type: 'functional',
+                level: 3,
+                is_active: true,
+                permissions: ['test_read', 'test_write', 'bug_report']
+            },
+            {
+                name: '市场推广',
+                code: 'marketing_specialist',
+                description: '负责市场活动策划、品牌推广和用户增长，提升产品知名度',
+                type: 'custom',
+                level: 2,
+                is_active: true,
+                permissions: ['marketing_read', 'marketing_write', 'analytics_read']
+            },
+            {
+                name: '安全专员',
+                code: 'security_officer',
+                description: '负责系统安全监控、漏洞修复和安全策略制定，保障系统安全',
+                type: 'system',
+                level: 5,
+                is_active: true,
+                permissions: ['security_read', 'security_write', 'audit_read', 'system_monitor']
+            },
+            {
+                name: '临时访客',
+                code: 'temp_visitor',
+                description: '临时访问权限，用于短期合作伙伴或外部顾问的有限访问',
+                type: 'custom',
+                level: 1,
+                is_active: false,
+                permissions: ['basic_read']
+            }
+        ];
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'warning': '⚠️',
+                'error': '❌'
+            }[type] || 'ℹ️';
+            
+            logContainer.textContent += `[${timestamp}] ${icon} ${message}\n`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').textContent = '日志已清空...\n';
+        }
+
+        function showProgress(show = true) {
+            const progressContainer = document.getElementById('progressContainer');
+            progressContainer.style.display = show ? 'block' : 'none';
+        }
+
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${percent}%`;
+        }
+
+        async function makeRequest(url, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(url, options);
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${result.message || response.statusText}`);
+            }
+            
+            return result;
+        }
+
+        async function checkConnection() {
+            log('检查API连接...');
+            try {
+                await makeRequest(`${API_BASE_URL}/health`);
+                log('API连接正常', 'success');
+            } catch (error) {
+                log(`API连接失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function addPermissions() {
+            log('开始添加权限数据...');
+            showProgress(true);
+            
+            let successCount = 0;
+            let skipCount = 0;
+            let errorCount = 0;
+            
+            for (let i = 0; i < testPermissions.length; i++) {
+                const permission = testPermissions[i];
+                updateProgress((i / testPermissions.length) * 100);
+                
+                try {
+                    await makeRequest(`${API_BASE_URL}/permissions`, 'POST', permission);
+                    log(`权限添加成功: ${permission.name}`, 'success');
+                    successCount++;
+                } catch (error) {
+                    if (error.message.includes('already exists') || error.message.includes('重复')) {
+                        log(`权限已存在: ${permission.name}`, 'warning');
+                        skipCount++;
+                    } else {
+                        log(`权限添加失败: ${permission.name} - ${error.message}`, 'error');
+                        errorCount++;
+                    }
+                }
+            }
+            
+            updateProgress(100);
+            setTimeout(() => showProgress(false), 1000);
+            
+            log(`权限数据添加完成 - 成功: ${successCount}, 跳过: ${skipCount}, 失败: ${errorCount}`, 'info');
+        }
+
+        async function addRoles() {
+            log('开始添加角色数据...');
+            showProgress(true);
+            
+            let successCount = 0;
+            let skipCount = 0;
+            let errorCount = 0;
+            
+            for (let i = 0; i < testRoles.length; i++) {
+                const role = testRoles[i];
+                updateProgress((i / testRoles.length) * 100);
+                
+                try {
+                    await makeRequest(`${API_BASE_URL}/roles`, 'POST', role);
+                    log(`角色添加成功: ${role.name} (${role.code})`, 'success');
+                    successCount++;
+                } catch (error) {
+                    if (error.message.includes('already exists') || error.message.includes('重复')) {
+                        log(`角色已存在: ${role.name} (${role.code})`, 'warning');
+                        skipCount++;
+                    } else {
+                        log(`角色添加失败: ${role.name} - ${error.message}`, 'error');
+                        errorCount++;
+                    }
+                }
+            }
+            
+            updateProgress(100);
+            setTimeout(() => showProgress(false), 1000);
+            
+            log(`角色数据添加完成 - 成功: ${successCount}, 跳过: ${skipCount}, 失败: ${errorCount}`, 'info');
+        }
+
+        async function addAllTestData() {
+            log('开始一键添加所有测试数据...', 'info');
+            
+            try {
+                await checkConnection();
+                await addPermissions();
+                await addRoles();
+                await getStats();
+                log('所有测试数据添加完成！', 'success');
+            } catch (error) {
+                log(`添加测试数据失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function getStats() {
+            log('获取数据统计...');
+            
+            try {
+                const rolesResponse = await makeRequest(`${API_BASE_URL}/roles`);
+                const permissionsResponse = await makeRequest(`${API_BASE_URL}/permissions`);
+                
+                const roles = rolesResponse.data || [];
+                const permissions = permissionsResponse.data || [];
+                
+                // 更新统计卡片
+                document.getElementById('roleCount').textContent = roles.length;
+                document.getElementById('permissionCount').textContent = permissions.length;
+                
+                const activeRoles = roles.filter(role => role.is_active).length;
+                document.getElementById('activeRoleCount').textContent = activeRoles;
+                
+                const roleTypes = [...new Set(roles.map(role => role.type))].length;
+                document.getElementById('roleTypeCount').textContent = roleTypes;
+                
+                // 详细统计
+                const rolesByType = roles.reduce((acc, role) => {
+                    acc[role.type] = (acc[role.type] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                log(`数据统计 - 角色: ${roles.length}, 权限: ${permissions.length}`, 'info');
+                log(`角色状态 - 启用: ${activeRoles}, 禁用: ${roles.length - activeRoles}`, 'info');
+                log(`角色类型分布: ${Object.entries(rolesByType).map(([type, count]) => `${type}(${count})`).join(', ')}`, 'info');
+                
+            } catch (error) {
+                log(`获取统计信息失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 页面加载时自动获取统计信息
+        window.addEventListener('load', () => {
+            log('页面加载完成，可以开始操作');
+            getStats();
+        });
+    </script>
+</body>
+</html>

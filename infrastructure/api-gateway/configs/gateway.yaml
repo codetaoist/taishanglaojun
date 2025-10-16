@@ -1,0 +1,555 @@
+﻿# API Gateway Configuration
+
+# 鏈嶅姟鍣ㄩ厤缃?
+server:
+  host: "0.0.0.0"
+  port: 8081
+  debug: false
+  read_timeout: 30s
+  write_timeout: 30s
+  idle_timeout: 60s
+  max_header_bytes: 1048576
+
+# 鏃ュ織閰嶇疆
+logging:
+  level: "debug"
+  format: "json"
+  output: "stdout"
+  file:
+    enabled: false
+    path: "/var/log/api-gateway/gateway.log"
+    max_size: 100
+    max_backups: 3
+    max_age: 7
+    compress: true
+
+# 鐩戞帶閰嶇疆
+monitoring:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+  namespace: "api_gateway"
+
+# 鏈嶅姟娉ㄥ唽涓庡彂鐜?
+registry:
+  type: "static"  # static, consul, etcd
+  consul:
+    address: "localhost:8500"
+    scheme: "http"
+    datacenter: "dc1"
+    wait_time: 30s
+    token: ""
+  etcd:
+    endpoints:
+      - "localhost:2379"
+    dial_timeout: 5s
+    username: ""
+    password: ""
+
+# 浠ｇ悊閰嶇疆
+proxy:
+  timeout: 30s
+  idle_conn_timeout: 90s
+  max_idle_conns: 100
+  max_idle_conns_per_host: 10
+  disable_keep_alives: false
+  health_check:
+    enabled: true
+    interval: 30s
+    timeout: 5s
+    path: "/health"
+
+# 瀹夊叏閰嶇疆
+security:
+  # 璁よ瘉閰嶇疆
+  auth:
+    jwt_secret: "your-super-secret-jwt-key-change-in-production-laojun-2024"
+    token_expiry: 24h
+    refresh_expiry: 168h  # 7 days
+    redis_addr: "localhost:6379"
+    redis_password: ""
+    redis_db: 0
+    skip_paths:
+      - "/health"
+      - "/ready"
+      - "/metrics"
+      - "/auth/login"
+      - "/auth/register"
+      - "/auth/refresh"
+      - "/ai/providers"
+      - "/ai/models"
+      - "/ai/health"
+    optional_paths:
+      - "/public/*filepath"
+      - "/docs/*filepath"
+
+  # 闄愭祦閰嶇疆
+  rate_limit:
+    global_rps: 1000
+    global_burst: 2000
+    ip_rps: 100
+    ip_burst: 200
+    user_rps: 50
+    user_burst: 100
+    redis_addr: "localhost:6379"
+    redis_password: ""
+    redis_db: 1
+    window_size: 1m
+    skip_paths:
+      - "/health"
+      - "/ready"
+    path_limits:
+      "/auth/*filepath":
+        rps: 10
+        burst: 20
+      "/admin/*filepath":
+        rps: 20
+        burst: 40
+
+  # CORS閰嶇疆
+  cors:
+    allow_origins:
+      - "http://localhost:3000"
+      - "http://localhost:5173"
+      - "http://localhost:5174"
+      - "http://localhost:8080"
+      - "https://yourdomain.com"
+    allow_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "OPTIONS"
+      - "PATCH"
+    allow_headers:
+      - "Origin"
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+      - "Accept"
+      - "Cache-Control"
+    expose_headers:
+      - "Content-Length"
+      - "X-RateLimit-Limit"
+      - "X-RateLimit-Remaining"
+      - "X-RateLimit-Reset"
+    allow_credentials: true
+    max_age: 86400
+    allow_all_origins: false
+    allow_private_network: false
+
+# 鏈嶅姟閰嶇疆
+services:
+  # 璁よ瘉鏈嶅姟
+  - name: "auth-service"
+    url: "http://localhost:8082"
+    load_balancer: "round_robin"
+    health_check: "/api/v1/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/auth/register"
+        method: "POST"
+        rewrite: "/api/v1/auth/register"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/auth/login"
+        method: "POST"
+        rewrite: "/api/v1/auth/login"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/auth/refresh"
+        method: "POST"
+        rewrite: "/api/v1/auth/refresh"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/auth/logout"
+        method: "POST"
+        rewrite: "/api/v1/user/logout"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/me"
+        method: "GET"
+        rewrite: "/api/v1/user/me"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/profile"
+        method: "GET"
+        rewrite: "/api/v1/user/profile"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/profile"
+        method: "PUT"
+        rewrite: "/api/v1/user/profile"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/change-password"
+        method: "POST"
+        rewrite: "/api/v1/user/change-password"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/validate-token"
+        method: "POST"
+        rewrite: "/api/v1/auth/validate-token"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/user/me"
+        method: "GET"
+        rewrite: "/api/v1/user/me"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/sessions"
+        method: "GET"
+        rewrite: "/api/v1/sessions"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/sessions/:sessionId"
+        method: "DELETE"
+        rewrite: "/api/v1/sessions/:sessionId"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/auth/sessions"
+        method: "DELETE"
+        rewrite: "/api/v1/sessions"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+
+  # 浠诲姟绠＄悊鏈嶅姟
+  - name: "task-management-service"
+    url: "http://localhost:8084"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/tasks/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/tasks/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/projects/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/projects/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/teams/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/teams/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+
+  # 绀惧尯鏈嶅姟
+  - name: "community-service"
+    url: "http://localhost:8085"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/posts/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/posts/*filepath"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/post/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/post/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/comments/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/comments/*filepath"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/comment/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/comment/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/users/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/users/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/chat/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/chat/*filepath"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+
+  # AI闆嗘垚鏈嶅姟
+  - name: "ai-integration-service"
+    url: "http://localhost:8083"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes: []
+
+  # 鍋ュ悍绠＄悊鏈嶅姟
+  - name: "health-management-service"
+    url: "http://localhost:8086"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/health-management/*filepath"
+        method: "ANY"
+        rewrite: "/api/v1/*filepath"
+        strip_prefix: true
+        middleware: ["auth", "rate_limit"]
+
+  # 鏂囧寲鏅烘収鏈嶅姟
+  - name: "cultural-wisdom-service"
+    url: "http://localhost:8087"
+    load_balancer: "round_robin"
+    health_check: "/health"
+    timeout: 30
+    circuit_breaker:
+      enabled: true
+      request_threshold: 20
+      error_threshold: 0.5
+      timeout: 60s
+      max_concurrent: 100
+      sleep_window: 5s
+    retry:
+      enabled: true
+      max_attempts: 3
+      delay: 1s
+      backoff_rate: 2.0
+    routes:
+      - path: "/cultural-wisdom/list"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/list"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/categories"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/categories"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/categories/:category/wisdoms"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/categories/:category/wisdoms"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/search"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/search"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/search/semantic"
+        method: "POST"
+        rewrite: "/api/v1/cultural-wisdom/search/semantic"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/stats"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/stats"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom/:id"
+        method: "GET"
+        rewrite: "/api/v1/cultural-wisdom/:id"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/cultural-wisdom"
+        method: "POST"
+        rewrite: "/api/v1/cultural-wisdom/"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/cultural-wisdom/:id"
+        method: "PUT"
+        rewrite: "/api/v1/cultural-wisdom/:id"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/cultural-wisdom/:id"
+        method: "DELETE"
+        rewrite: "/api/v1/cultural-wisdom/:id"
+        strip_prefix: false
+        middleware: ["auth", "rate_limit"]
+      - path: "/ai/providers"
+        method: "GET"
+        rewrite: "/api/v1/ai/providers"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/chat"
+        method: "POST"
+        rewrite: "/api/v1/ai/chat"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/sessions"
+        method: "GET"
+        rewrite: "/api/v1/ai/sessions"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/sessions/:id"
+        method: "GET"
+        rewrite: "/api/v1/ai/sessions/:id"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/models"
+        method: "GET"
+        rewrite: "/api/v1/ai/models"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+      - path: "/ai/health"
+        method: "GET"
+        rewrite: "/api/v1/ai/health"
+        strip_prefix: false
+        middleware: ["rate_limit"]
+
+# 闈欐€佽矾鐢遍厤缃紙鐢ㄤ簬鏈嶅姟鍙戠幇涓嶅彲鐢ㄦ椂鐨勫鐢ㄦ柟妗堬級
+static_services:
+  auth-service:
+    - id: "auth-service-1"
+      address: "localhost"
+      port: 8082
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/api/v1/health"
+  task-management-service:
+    - id: "task-management-1"
+      address: "localhost"
+      port: 8084
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+  community-service:
+    - id: "community-1"
+      address: "localhost"
+      port: 8085
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+  ai-integration-service:
+    - id: "ai-integration-1"
+      address: "localhost"
+      port: 8083
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+  health-management-service:
+    - id: "health-management-1"
+      address: "localhost"
+      port: 8086
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+  cultural-wisdom-service:
+    - id: "cultural-wisdom-1"
+      address: "localhost"
+      port: 8087
+      weight: 1
+      tags: ["primary"]
+      meta:
+        version: "1.0.0"
+        region: "local"
+        health_check_path: "/health"
+
+# 鍋ュ悍妫€鏌ラ厤缃?
+health_check:
+  enabled: true
+  interval: 30s
+  timeout: 5s
+  unhealthy_threshold: 3
+  healthy_threshold: 2
+
+# 鎬ц兘閰嶇疆
+performance:
+  # 杩炴帴姹犻厤缃?
+  connection_pool:
+    max_idle_conns: 100
+    max_idle_conns_per_host: 10
+    idle_conn_timeout: 90s
+    disable_keep_alives: false
+  
+  # 缂撳瓨閰嶇疆
+  cache:
+    enabled: true
+    ttl: 300s
+    max_size: 1000
+  
+  # 鍘嬬缉閰嶇疆
+  compression:
+    enabled: true
+    level: 6
+    min_length: 1024
+
+# 寮€鍙戦厤缃?
+development:
+  hot_reload: true
+  debug_headers: true
+  mock_services: false
+  profiling: true

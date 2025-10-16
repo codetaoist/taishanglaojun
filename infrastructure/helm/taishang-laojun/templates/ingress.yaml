@@ -1,0 +1,143 @@
+{{- if .Values.frontend.enabled }}
+{{- if .Values.frontend.ingress.enabled -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "taishang-laojun.frontend.fullname" . }}
+  labels:
+    {{- include "taishang-laojun.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+  annotations:
+    {{- with .Values.frontend.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.frontend.ingress.className }}
+  ingressClassName: {{ .Values.frontend.ingress.className }}
+  {{- end }}
+  {{- if .Values.frontend.ingress.tls }}
+  tls:
+    {{- range .Values.frontend.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.frontend.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ include "taishang-laojun.frontend.fullname" $ }}
+                port:
+                  number: {{ $.Values.frontend.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.backend.enabled }}
+{{- if .Values.backend.ingress.enabled -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "taishang-laojun.backend.fullname" . }}
+  labels:
+    {{- include "taishang-laojun.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+  annotations:
+    {{- with .Values.backend.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.backend.ingress.className }}
+  ingressClassName: {{ .Values.backend.ingress.className }}
+  {{- end }}
+  {{- if .Values.backend.ingress.tls }}
+  tls:
+    {{- range .Values.backend.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.backend.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ include "taishang-laojun.backend.fullname" $ }}
+                port:
+                  number: {{ $.Values.backend.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.apiGateway.enabled }}
+{{- if .Values.apiGateway.ingress.enabled -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "taishang-laojun.apiGateway.fullname" . }}
+  labels:
+    {{- include "taishang-laojun.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+  annotations:
+    {{- with .Values.apiGateway.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.apiGateway.ingress.className }}
+  ingressClassName: {{ .Values.apiGateway.ingress.className }}
+  {{- end }}
+  {{- if .Values.apiGateway.ingress.tls }}
+  tls:
+    {{- range .Values.apiGateway.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.apiGateway.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ include "taishang-laojun.apiGateway.fullname" $ }}
+                port:
+                  number: {{ $.Values.apiGateway.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}

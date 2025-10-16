@@ -1,0 +1,41 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=TaishangLaojun Desktop
+Name[zh_CN]=太上老君桌面版
+Name[zh_TW]=太上老君桌面版
+GenericName=Communication Platform
+GenericName[zh_CN]=通信平台
+GenericName[zh_TW]=通信平台
+Comment=Advanced communication and collaboration platform
+Comment[zh_CN]=先进的通信和协作平台
+Comment[zh_TW]=先進的通信和協作平台
+Exec=taishang-laojun %U
+Icon=taishang-laojun
+Terminal=false
+StartupNotify=true
+StartupWMClass=TaishangLaojun
+Categories=Network;InstantMessaging;Chat;Office;ProjectManagement;
+Keywords=chat;messaging;communication;collaboration;project;management;secure;
+Keywords[zh_CN]=聊天;消息;通信;协作;项目;管理;安全;
+Keywords[zh_TW]=聊天;消息;通信;協作;項目;管理;安全;
+MimeType=application/x-taishang-project;x-scheme-handler/taishang;
+Actions=NewChat;NewProject;Settings;
+
+[Desktop Action NewChat]
+Name=New Chat
+Name[zh_CN]=新建聊天
+Name[zh_TW]=新建聊天
+Exec=taishang-laojun --new-chat
+
+[Desktop Action NewProject]
+Name=New Project
+Name[zh_CN]=新建项目
+Name[zh_TW]=新建項目
+Exec=taishang-laojun --new-project
+
+[Desktop Action Settings]
+Name=Settings
+Name[zh_CN]=设置
+Name[zh_TW]=設置
+Exec=taishang-laojun --settings

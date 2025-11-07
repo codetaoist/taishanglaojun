@@ -1,0 +1,618 @@
+openapi: 3.0.3
+info:
+  title: CodeTaoist Taishang API
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+components:
+  schemas:
+    ErrorCode:
+      type: string
+      enum: [OK, INVALID_ARGUMENT, UNAUTHENTICATED, PERMISSION_DENIED, NOT_FOUND, CONFLICT, FAILED_PRECONDITION, INTERNAL, UNAVAILABLE]
+    ErrorResponse:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }
+        traceId: { type: string }
+      required: [code]
+    ModelStatus:
+      type: string
+      enum: [enabled, disabled]
+    Model:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        version: { type: string }
+        status: { $ref: '#/components/schemas/ModelStatus' }
+        params:
+          type: object
+          additionalProperties: { type: string }
+      required: [id, name, version, status]
+    ModelListData:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Model' }
+    RegisterModelRequest:
+      type: object
+      properties:
+        name: { type: string }
+        version: { type: string }
+        family: { type: string }
+        quantization: { type: string }
+        params:
+          type: object
+          additionalProperties: { type: string }
+      required: [name, version]
+    Response_Model:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data: { $ref: '#/components/schemas/Model' }
+    Response_ModelList:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data: { $ref: '#/components/schemas/ModelListData' }
+    IndexType:
+      type: string
+      enum: [HNSW, IVF, FLAT]
+    MetricType:
+      type: string
+      enum: [cosine, l2, dot]
+    VectorCollection:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        dim: { type: integer }
+        indexType: { $ref: '#/components/schemas/IndexType' }
+        metric: { $ref: '#/components/schemas/MetricType' }
+      required: [id, name, dim, indexType, metric]
+    VectorCollectionList:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/VectorCollection' }
+    CreateVectorCollectionRequest:
+      type: object
+      properties:
+        name: { type: string }
+        dim: { type: integer }
+        indexType: { $ref: '#/components/schemas/IndexType' }
+        metric: { $ref: '#/components/schemas/MetricType' }
+        replication: { type: integer }
+      required: [name, dim, indexType, metric]
+    UpsertVector:
+      type: object
+      properties:
+        id: { type: string }
+        values:
+          type: array
+          items: { type: number }
+        metadata:
+          type: object
+          additionalProperties: true
+    UpsertVectorsRequest:
+      type: object
+      properties:
+        vectors:
+          type: array
+          items: { $ref: '#/components/schemas/UpsertVector' }
+        namespace: { type: string }
+      required: [vectors]
+    QueryRequest:
+      type: object
+      properties:
+        topK: { type: integer }
+        query:
+          oneOf:
+            - type: object
+              properties:
+                values:
+                  type: array
+                  items: { type: number }
+            - type: object
+              properties:
+                text: { type: string }
+        filter:
+          type: object
+          additionalProperties: true
+        namespace: { type: string }
+      required: [topK, query]
+    DeleteRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items: { type: string }
+        filter:
+          type: object
+          additionalProperties: true
+        namespace: { type: string }
+    Response_CollectionCreate:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data: { $ref: '#/components/schemas/VectorCollection' }
+    Response_CollectionsList:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data: { $ref: '#/components/schemas/VectorCollectionList' }
+    Response_Upsert:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data:
+          type: object
+          properties:
+            upserted: { type: integer }
+            namespace: { type: string }
+    Match:
+      type: object
+      properties:
+        id: { type: string }
+        score: { type: number }
+        metadata:
+          type: object
+          additionalProperties: true
+    Response_Query:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data:
+          type: object
+          properties:
+            matches:
+              type: array
+              items: { $ref: '#/components/schemas/Match' }
+            count: { type: integer }
+    Response_Delete:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data:
+          type: object
+          properties:
+            deleted: { type: integer }
+    TaskStatus:
+      type: string
+      enum: [PENDING, RUNNING, SUCCEEDED, FAILED, CANCELED]
+    Priority:
+      type: string
+      enum: [low, normal, high]
+    Task:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string }
+        status: { $ref: '#/components/schemas/TaskStatus' }
+        progress: { type: number }
+        result:
+          type: object
+          additionalProperties: true
+      required: [id, type, status]
+    TaskList:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Task' }
+    SubmitTaskRequest:
+      type: object
+      properties:
+        type: { type: string }
+        payload:
+          type: object
+          additionalProperties: true
+        priority: { $ref: '#/components/schemas/Priority' }
+        ttl: { type: integer }
+      required: [type, payload]
+    Response_Task:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data: { $ref: '#/components/schemas/Task' }
+    Response_TaskList:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        data: { $ref: '#/components/schemas/TaskList' }
+paths:
+  /api/taishang/models:
+    post:
+      summary: Register a model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterModelRequest' }
+            example:
+              name: qwen
+              version: '2.5'
+              family: transformer
+              quantization: int8
+              params:
+                max_tokens: '4096'
+      responses:
+        '200':
+          description: Model registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Model' }
+              example:
+                code: OK
+                data:
+                  id: m-123
+                  name: qwen
+                  version: '2.5'
+                  status: enabled
+    get:
+      summary: List models
+      parameters:
+        - in: query
+          name: status
+          schema: { $ref: '#/components/schemas/ModelStatus' }
+        - in: query
+          name: name
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Model list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_ModelList' }
+              example:
+                code: OK
+                data:
+                  total: 1
+                  page: 1
+                  pageSize: 20
+                  items:
+                    - id: m-123
+                      name: qwen
+                      version: '2.5'
+                      status: enabled
+  /api/taishang/models/{id}:
+    get:
+      summary: Get model detail
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Model detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Model' }
+              example:
+                code: OK
+                data:
+                  id: m-123
+                  name: qwen
+                  versions: ['2.5']
+                  status: enabled
+                  params:
+                    max_tokens: '4096'
+  /api/taishang/models/{id}/disable:
+    post:
+      summary: Disable a model
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Model disabled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Model' }
+              example:
+                code: OK
+                data:
+                  id: m-123
+                  status: disabled
+  /api/taishang/models/{id}/enable:
+    post:
+      summary: Enable a model
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Model enabled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Model' }
+              example:
+                code: OK
+                data:
+                  id: m-123
+                  status: enabled
+  /api/taishang/vectors/collections:
+    post:
+      summary: Create a vector collection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateVectorCollectionRequest' }
+            example:
+              name: docs
+              dim: 1536
+              indexType: HNSW
+              metric: cosine
+      responses:
+        '200':
+          description: Collection created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_CollectionCreate' }
+              example:
+                code: OK
+                data:
+                  id: vc-1
+                  name: docs
+                  dim: 1536
+                  indexType: HNSW
+                  metric: cosine
+    get:
+      summary: List vector collections
+      parameters:
+        - in: query
+          name: name
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Collection list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_CollectionsList' }
+              example:
+                code: OK
+                data:
+                  total: 1
+                  page: 1
+                  pageSize: 20
+                  items:
+                    - id: vc-1
+                      name: docs
+                      dim: 1536
+                      indexType: HNSW
+                      metric: cosine
+  /api/taishang/vectors/collections/{id}/upsert:
+    post:
+      summary: Upsert vectors
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpsertVectorsRequest' }
+            example:
+              namespace: default
+              vectors:
+                - id: v1
+                  values: [0.1, 0.2, 0.3]
+                  metadata:
+                    doc: '...'
+      responses:
+        '200':
+          description: Upserted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Upsert' }
+              example:
+                code: OK
+                data:
+                  upserted: 1
+                  namespace: default
+  /api/taishang/vectors/collections/{id}/query:
+    post:
+      summary: Query vectors
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QueryRequest' }
+            example:
+              topK: 3
+              query:
+                text: 'how to backup'
+              namespace: default
+      responses:
+        '200':
+          description: Query result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Query' }
+              example:
+                code: OK
+                data:
+                  matches:
+                    - id: v1
+                      score: 0.93
+                      metadata:
+                        doc: '...'
+                  count: 1
+  /api/taishang/vectors/collections/{id}/delete:
+    post:
+      summary: Delete vectors
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DeleteRequest' }
+            example:
+              ids: ['v1','v2']
+              namespace: default
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Delete' }
+              example:
+                code: OK
+                data:
+                  deleted: 2
+  /api/taishang/tasks:
+    post:
+      summary: Submit a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SubmitTaskRequest' }
+            example:
+              type: infer
+              payload:
+                text: 'hello'
+              priority: high
+              ttl: 600
+      responses:
+        '200':
+          description: Task submitted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Task' }
+              example:
+                code: OK
+                data:
+                  id: t-1
+                  type: infer
+                  status: PENDING
+    get:
+      summary: List tasks
+      parameters:
+        - in: query
+          name: status
+          schema: { $ref: '#/components/schemas/TaskStatus' }
+        - in: query
+          name: type
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_TaskList' }
+              example:
+                code: OK
+                data:
+                  total: 2
+                  page: 1
+                  pageSize: 20
+                  items:
+                    - id: t-1
+                      type: infer
+                      status: PENDING
+  /api/taishang/tasks/{id}:
+    get:
+      summary: Get task detail
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Task detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Task' }
+              example:
+                code: OK
+                data:
+                  id: t-1
+                  status: RUNNING
+                  progress: 0.4
+  /api/taishang/tasks/{id}/cancel:
+    post:
+      summary: Cancel a task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Task canceled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Task' }
+              example:
+                code: OK
+                data:
+                  id: t-1
+                  status: CANCELED
+  /api/taishang/tasks/{id}/retry:
+    post:
+      summary: Retry a task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Task retried
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Response_Task' }
+              example:
+                code: OK
+                data:
+                  id: t-1
+                  status: PENDING

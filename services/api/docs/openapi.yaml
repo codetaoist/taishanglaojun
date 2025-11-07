@@ -1,0 +1,1440 @@
+openapi: 3.0.3
+info:
+  title: Taoist API
+  description: |
+    This is the API documentation for the Taoist platform, which provides services for both Laojun and Taishang domains.
+    
+    The Laojun domain focuses on plugin management, configuration management, and audit logging.
+    The Taishang domain focuses on AI model management, vector collections, and task management.
+  version: 1.0.0
+  contact:
+    name: Taoist API Support
+    email: support@taoist.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.taoist.com
+    description: Production server
+
+tags:
+  - name: Laojun
+    description: Laojun domain operations
+  - name: Config
+    description: Configuration management operations
+  - name: Plugin
+    description: Plugin management operations
+  - name: AuditLog
+    description: Audit log operations
+  - name: Taishang
+    description: Taishang domain operations
+  - name: Model
+    description: AI model management operations
+  - name: Collection
+    description: Vector collection operations
+  - name: Task
+    description: Task management operations
+
+paths:
+  # Health checks
+  /api/laojun/health:
+    get:
+      tags:
+        - Laojun
+      summary: Check Laojun domain health
+      description: Returns the health status of the Laojun domain
+      operationId: laojunHealth
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                code: 200
+                message: "success"
+                traceId: "abc123"
+                data:
+                  status: "ok"
+                  domain: "laojun"
+
+  /api/taishang/health:
+    get:
+      tags:
+        - Taishang
+      summary: Check Taishang domain health
+      description: Returns the health status of the Taishang domain
+      operationId: taishangHealth
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                code: 200
+                message: "success"
+                traceId: "abc123"
+                data:
+                  status: "ok"
+                  domain: "taishang"
+
+  # Config management
+  /api/laojun/config:
+    get:
+      tags:
+        - Config
+      summary: Get configuration
+      description: Retrieves the current configuration for the tenant
+      operationId: getConfig
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Config
+      summary: Update configuration
+      description: Updates the configuration for the tenant
+      operationId: updateConfig
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigUpdateRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Plugin management
+  /api/laojun/plugins:
+    get:
+      tags:
+        - Plugin
+      summary: List plugins
+      description: Retrieves a list of all plugins for the tenant
+      operationId: listPlugins
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Plugin
+      summary: Install plugin
+      description: Installs a new plugin
+      operationId: installPlugin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PluginInstallRequest'
+      responses:
+        '201':
+          description: Plugin installed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/laojun/plugins/{id}/start:
+    post:
+      tags:
+        - Plugin
+      summary: Start plugin
+      description: Starts a specific plugin
+      operationId: startPlugin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plugin started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/laojun/plugins/{id}/stop:
+    post:
+      tags:
+        - Plugin
+      summary: Stop plugin
+      description: Stops a specific plugin
+      operationId: stopPlugin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plugin stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/laojun/plugins/{id}/upgrade:
+    post:
+      tags:
+        - Plugin
+      summary: Upgrade plugin
+      description: Upgrades a specific plugin to a new version
+      operationId: upgradePlugin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PluginUpgradeRequest'
+      responses:
+        '200':
+          description: Plugin upgraded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/laojun/plugins/{id}:
+    delete:
+      tags:
+        - Plugin
+      summary: Uninstall plugin
+      description: Uninstalls a specific plugin
+      operationId: uninstallPlugin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plugin uninstalled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Audit log
+  /api/laojun/audit-logs:
+    get:
+      tags:
+        - AuditLog
+      summary: List audit logs
+      description: Retrieves a paginated list of audit logs for the tenant
+      operationId: listAuditLogs
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: start_time
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: end_time
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: action
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Model management
+  /api/taishang/models:
+    get:
+      tags:
+        - Model
+      summary: List models
+      description: Retrieves a list of all models for the tenant
+      operationId: listModels
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Model
+      summary: Register model
+      description: Registers a new AI model
+      operationId: registerModel
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelCreateRequest'
+      responses:
+        '201':
+          description: Model registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/taishang/models/{id}:
+    get:
+      tags:
+        - Model
+      summary: Get model
+      description: Retrieves details of a specific model
+      operationId: getModel
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Model
+      summary: Update model
+      description: Updates a specific model
+      operationId: updateModel
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelUpdateRequest'
+      responses:
+        '200':
+          description: Model updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Model
+      summary: Delete model
+      description: Deletes a specific model
+      operationId: deleteModel
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Model deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Vector collection management
+  /api/taishang/collections:
+    get:
+      tags:
+        - Collection
+      summary: List collections
+      description: Retrieves a list of all vector collections for the tenant
+      operationId: listCollections
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Collection
+      summary: Create collection
+      description: Creates a new vector collection
+      operationId: createCollection
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionCreateRequest'
+      responses:
+        '201':
+          description: Collection created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/taishang/collections/{id}:
+    get:
+      tags:
+        - Collection
+      summary: Get collection
+      description: Retrieves details of a specific collection
+      operationId: getCollection
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Collection
+      summary: Delete collection
+      description: Deletes a specific collection
+      operationId: deleteCollection
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Collection deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/taishang/collections/{id}/rebuild-index:
+    post:
+      tags:
+        - Collection
+      summary: Rebuild collection index
+      description: Rebuilds the index for a specific collection
+      operationId: rebuildCollectionIndex
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Index rebuilt successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Task management
+  /api/taishang/tasks:
+    get:
+      tags:
+        - Task
+      summary: List tasks
+      description: Retrieves a paginated list of tasks for the tenant
+      operationId: listTasks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Task
+      summary: Create task
+      description: Creates a new task
+      operationId: createTask
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/taishang/tasks/{id}:
+    get:
+      tags:
+        - Task
+      summary: Get task
+      description: Retrieves details of a specific task
+      operationId: getTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - Task
+      summary: Update task
+      description: Updates a specific task
+      operationId: updateTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdateRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Task
+      summary: Delete task
+      description: Deletes a specific task
+      operationId: deleteTask
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Base response schemas
+    BaseResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "success"
+        traceId:
+          type: string
+          example: "abc123"
+      required:
+        - code
+        - message
+        - traceId
+
+    HealthResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "ok"
+                domain:
+                  type: string
+                  example: "laojun"
+              required:
+                - status
+                - domain
+          required:
+            - data
+
+    MessageResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Operation completed successfully"
+              required:
+                - message
+          required:
+            - data
+
+    # Config schemas
+    Config:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenant_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        key:
+          type: string
+          example: "theme"
+        value:
+          type: string
+          example: "dark"
+        description:
+          type: string
+          example: "UI theme setting"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tenant_id
+        - key
+        - value
+
+    ConfigResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Config'
+          required:
+            - data
+
+    ConfigUpdateRequest:
+      type: object
+      properties:
+        key:
+          type: string
+          example: "theme"
+        value:
+          type: string
+          example: "dark"
+        description:
+          type: string
+          example: "UI theme setting"
+      required:
+        - key
+        - value
+
+    # Plugin schemas
+    Plugin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenant_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        name:
+          type: string
+          example: "weather-plugin"
+        version:
+          type: string
+          example: "1.0.0"
+        description:
+          type: string
+          example: "A plugin for weather information"
+        status:
+          type: string
+          enum: ["installed", "running", "stopped"]
+          example: "running"
+        config:
+          type: object
+          example: {"api_key": "secret123"}
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tenant_id
+        - name
+        - version
+        - status
+
+    PluginResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Plugin'
+          required:
+            - data
+
+    PluginListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Plugin'
+          required:
+            - data
+
+    PluginInstallRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "weather-plugin"
+        version:
+          type: string
+          example: "1.0.0"
+        description:
+          type: string
+          example: "A plugin for weather information"
+        config:
+          type: object
+          example: {"api_key": "secret123"}
+      required:
+        - name
+        - version
+
+    PluginUpgradeRequest:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "1.1.0"
+      required:
+        - version
+
+    # Audit log schemas
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenant_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        user_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        action:
+          type: string
+          example: "plugin.install"
+        resource_type:
+          type: string
+          example: "plugin"
+        resource_id:
+          type: string
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        details:
+          type: object
+          example: {"plugin_name": "weather-plugin", "version": "1.0.0"}
+        ip_address:
+          type: string
+          example: "192.168.1.1"
+        user_agent:
+          type: string
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tenant_id
+        - user_id
+        - action
+        - resource_type
+
+    AuditLogListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                logs:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AuditLog'
+                total:
+                  type: integer
+                  example: 100
+                page:
+                  type: integer
+                  example: 1
+                page_size:
+                  type: integer
+                  example: 20
+              required:
+                - logs
+                - total
+                - page
+                - page_size
+          required:
+            - data
+
+    # Model schemas
+    Model:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenant_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        name:
+          type: string
+          example: "gpt-3.5-turbo"
+        type:
+          type: string
+          example: "llm"
+        description:
+          type: string
+          example: "OpenAI's GPT-3.5 Turbo model"
+        status:
+          type: string
+          enum: ["active", "inactive"]
+          example: "active"
+        config:
+          type: object
+          example: {"api_key": "secret123", "temperature": 0.7}
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tenant_id
+        - name
+        - type
+        - status
+
+    ModelResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Model'
+          required:
+            - data
+
+    ModelListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Model'
+          required:
+            - data
+
+    ModelCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "gpt-3.5-turbo"
+        type:
+          type: string
+          example: "llm"
+        description:
+          type: string
+          example: "OpenAI's GPT-3.5 Turbo model"
+        config:
+          type: object
+          example: {"api_key": "secret123", "temperature": 0.7}
+      required:
+        - name
+        - type
+
+    ModelUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "gpt-3.5-turbo"
+        type:
+          type: string
+          example: "llm"
+        description:
+          type: string
+          example: "OpenAI's GPT-3.5 Turbo model"
+        status:
+          type: string
+          enum: ["active", "inactive"]
+          example: "active"
+        config:
+          type: object
+          example: {"api_key": "secret123", "temperature": 0.7}
+
+    # Vector collection schemas
+    VectorCollection:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenant_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        name:
+          type: string
+          example: "document-embeddings"
+        description:
+          type: string
+          example: "Collection for document embeddings"
+        config:
+          type: object
+          example: {"dimension": 1536, "metric": "cosine"}
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tenant_id
+        - name
+
+    CollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/VectorCollection'
+          required:
+            - data
+
+    CollectionListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/VectorCollection'
+          required:
+            - data
+
+    CollectionCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "document-embeddings"
+        description:
+          type: string
+          example: "Collection for document embeddings"
+        config:
+          type: object
+          example: {"dimension": 1536, "metric": "cosine"}
+      required:
+        - name
+
+    # Task schemas
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        tenant_id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        name:
+          type: string
+          example: "document-indexing"
+        type:
+          type: string
+          example: "indexing"
+        description:
+          type: string
+          example: "Index documents for search"
+        status:
+          type: string
+          enum: ["pending", "running", "completed", "failed"]
+          example: "completed"
+        config:
+          type: object
+          example: {"batch_size": 100, "source": "s3://bucket/docs"}
+        result:
+          type: object
+          example: {"processed": 1000, "errors": 0}
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tenant_id
+        - name
+        - type
+        - status
+
+    TaskResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Task'
+          required:
+            - data
+
+    TaskListResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                tasks:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Task'
+                total:
+                  type: integer
+                  example: 100
+                page:
+                  type: integer
+                  example: 1
+                page_size:
+                  type: integer
+                  example: 20
+              required:
+                - tasks
+                - total
+                - page
+                - page_size
+          required:
+            - data
+
+    TaskCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "document-indexing"
+        type:
+          type: string
+          example: "indexing"
+        description:
+          type: string
+          example: "Index documents for search"
+        config:
+          type: object
+          example: {"batch_size": 100, "source": "s3://bucket/docs"}
+      required:
+        - name
+        - type
+
+    TaskUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "document-indexing"
+        type:
+          type: string
+          example: "indexing"
+        description:
+          type: string
+          example: "Index documents for search"
+        status:
+          type: string
+          enum: ["pending", "running", "completed", "failed"]
+          example: "completed"
+        config:
+          type: object
+          example: {"batch_size": 100, "source": "s3://bucket/docs"}
+        result:
+          type: object
+          example: {"processed": 1000, "errors": 0}
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid request parameters"
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid or expired token"
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Access denied"
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Resource not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/BaseResponse'
+              - type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"

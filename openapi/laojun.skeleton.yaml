@@ -1,0 +1,189 @@
+openapi: 3.0.3
+info:
+  title: Laojun API (Skeleton)
+  version: 0.1.0
+  description: 基础域（插件生态）OpenAPI 骨架示例，遵循 docs/interfaces/standard.md
+servers:
+  - url: https://api.example.com
+    description: production
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    XRequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+    XWorkspaceId:
+      name: X-Workspace-Id
+      in: header
+      required: false
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+  schemas:
+    StandardResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          description: 载荷（任意类型）
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+    PluginManifest:
+      type: object
+      required: [name, version, entry, permissions]
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        entry:
+          type: string
+          description: 插件入口（命令或URL）
+        permissions:
+          type: array
+          items:
+            type: string
+        resources:
+          type: object
+          additionalProperties: true
+        signature:
+          type: string
+          description: 可选，签名值
+    InstallRequest:
+      type: object
+      required: [manifest]
+      properties:
+        manifest:
+          $ref: '#/components/schemas/PluginManifest'
+    InstallResponse:
+      allOf:
+        - $ref: '#/components/schemas/StandardResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                taskId:
+                  type: string
+paths:
+  /api/laojun/plugins:
+    get:
+      summary: 插件列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /api/laojun/plugins/install:
+    post:
+      summary: 安装插件（幂等）
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstallResponse'
+  /api/laojun/plugins/{pluginId}/start:
+    post:
+      summary: 启动插件
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: pluginId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /api/laojun/plugins/{pluginId}/stop:
+    post:
+      summary: 停止插件
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: pluginId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /api/laojun/audits:
+    get:
+      summary: 审计事件列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+security:
+  - bearerAuth: []

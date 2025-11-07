@@ -1,0 +1,344 @@
+openapi: 3.0.3
+info:
+  title: CodeTaoist Laojun API
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+components:
+  schemas:
+    ErrorCode:
+      type: string
+      description: Standardized platform error codes
+      enum:
+        - OK
+        - INVALID_ARGUMENT
+        - UNAUTHENTICATED
+        - PERMISSION_DENIED
+        - NOT_FOUND
+        - CONFLICT
+        - FAILED_PRECONDITION
+        - INTERNAL
+        - UNAVAILABLE
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+        traceId:
+          type: string
+      required: [code]
+    PluginStatus:
+      type: string
+      enum: [installed, running, stopped, disabled]
+    Plugin:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        version: { type: string }
+        status: { $ref: '#/components/schemas/PluginStatus' }
+        checksum: { type: string }
+      required: [id, name, version, status]
+    PluginListData:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plugin'
+      required: [total, page, pageSize, items]
+    InstallRequest:
+      type: object
+      properties:
+        pluginId: { type: string }
+        version: { type: string }
+        sourceUrl: { type: string }
+      required: [pluginId, version]
+    StartStopRequest:
+      type: object
+      properties:
+        pluginId: { type: string }
+      required: [pluginId]
+    UpgradeRequest:
+      type: object
+      properties:
+        pluginId: { type: string }
+        version: { type: string }
+      required: [pluginId, version]
+    UninstallRequest:
+      type: object
+      properties:
+        pluginId: { type: string }
+      required: [pluginId]
+    Response_PluginList:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }
+        traceId: { type: string }
+        data:
+          $ref: '#/components/schemas/PluginListData'
+      required: [code, data]
+    Response_Install:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }
+        traceId: { type: string }
+        data:
+          type: object
+          properties:
+            installed: { type: boolean }
+            pluginId: { type: string }
+            version: { type: string }
+          required: [installed, pluginId, version]
+      required: [code, data]
+    Response_Start:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }
+        traceId: { type: string }
+        data:
+          type: object
+          properties:
+            running: { type: boolean, enum: [true] }
+            pluginId: { type: string }
+          required: [running, pluginId]
+      required: [code, data]
+    Response_Stop:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }
+        traceId: { type: string }
+        data:
+          type: object
+          properties:
+            running: { type: boolean, enum: [false] }
+            pluginId: { type: string }
+          required: [running, pluginId]
+      required: [code, data]
+    Response_Upgrade:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }
+        traceId: { type: string }
+        data:
+          type: object
+          properties:
+            upgraded: { type: boolean }
+            pluginId: { type: string }
+            version: { type: string }
+          required: [upgraded, pluginId, version]
+      required: [code, data]
+    Response_Uninstall:
+      type: object
+      properties:
+        code: { $ref: '#/components/schemas/ErrorCode' }
+        message: { type: string }
+        traceId: { type: string }
+        data:
+          type: object
+          properties:
+            uninstalled: { type: boolean }
+            pluginId: { type: string }
+          required: [uninstalled, pluginId]
+      required: [code, data]
+  responses:
+    Error:
+      description: Standard error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        default:
+          $ref: '#/components/responses/Error'
+  /api/laojun/plugins/install:
+    post:
+      summary: Install a plugin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallRequest'
+            example:
+              pluginId: speech_tool
+              version: 1.0.0
+              sourceUrl: https://repo.example/plugins/speech_tool-1.0.0.tar.gz
+      responses:
+        '200':
+          description: Installation triggered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Install'
+              example:
+                code: OK
+                data:
+                  installed: true
+                  pluginId: speech_tool
+                  version: 1.0.0
+        default:
+          $ref: '#/components/responses/Error'
+  /api/laojun/plugins/list:
+    get:
+      summary: List plugins
+      parameters:
+        - in: query
+          name: status
+          schema: { $ref: '#/components/schemas/PluginStatus' }
+        - in: query
+          name: name
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Plugins list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_PluginList'
+              example:
+                code: OK
+                data:
+                  total: 1
+                  page: 1
+                  pageSize: 20
+                  items:
+                    - id: speech_tool
+                      name: 语音工具
+                      version: 1.0.0
+                      status: stopped
+                      checksum: 'sha256:...'
+        default:
+          $ref: '#/components/responses/Error'
+  /api/laojun/plugins/start:
+    post:
+      summary: Start a plugin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartStopRequest'
+            example:
+              pluginId: speech_tool
+      responses:
+        '200':
+          description: Started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Start'
+              example:
+                code: OK
+                data:
+                  running: true
+                  pluginId: speech_tool
+        default:
+          $ref: '#/components/responses/Error'
+  /api/laojun/plugins/stop:
+    post:
+      summary: Stop a plugin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartStopRequest'
+            example:
+              pluginId: speech_tool
+      responses:
+        '200':
+          description: Stopped
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Stop'
+              example:
+                code: OK
+                data:
+                  running: false
+                  pluginId: speech_tool
+        default:
+          $ref: '#/components/responses/Error'
+  /api/laojun/plugins/upgrade:
+    post:
+      summary: Upgrade a plugin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpgradeRequest'
+            example:
+              pluginId: speech_tool
+              version: 1.1.0
+      responses:
+        '200':
+          description: Upgraded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Upgrade'
+              example:
+                code: OK
+                data:
+                  upgraded: true
+                  pluginId: speech_tool
+                  version: 1.1.0
+        default:
+          $ref: '#/components/responses/Error'
+  /api/laojun/plugins/uninstall:
+    delete:
+      summary: Uninstall a plugin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UninstallRequest'
+            example:
+              pluginId: speech_tool
+      responses:
+        '200':
+          description: Uninstalled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response_Uninstall'
+              example:
+                code: OK
+                data:
+                  uninstalled: true
+                  pluginId: speech_tool
+        default:
+          $ref: '#/components/responses/Error'

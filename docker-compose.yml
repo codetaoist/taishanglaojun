@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: taishanglaojun-postgres
+    environment:
+      POSTGRES_DB: taishanglaojun
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    networks:
+      - taishanglaojun-network
+
+  auth-service:
+    build:
+      context: ./services/auth
+      dockerfile: Dockerfile
+    container_name: taishanglaojun-auth
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/taishanglaojun?sslmode=disable
+      JWT_SECRET: your-secret-key-change-in-production
+      AUTH_SERVICE_URL: http://auth-service:8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    networks:
+      - taishanglaojun-network
+
+  api-service:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    container_name: taishanglaojun-api
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/taishanglaojun?sslmode=disable
+      JWT_SECRET: your-secret-key-change-in-production
+      AUTH_SERVICE_URL: http://auth-service:8081
+      LAOJUN_API_PORT: 8082
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - auth-service
+    networks:
+      - taishanglaojun-network
+
+  gateway:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    container_name: taishanglaojun-gateway
+    environment:
+      JWT_SECRET: your-secret-key-change-in-production
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - api-service
+    networks:
+      - taishanglaojun-network
+
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+    container_name: taishanglaojun-frontend
+    environment:
+      REACT_APP_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - gateway
+    networks:
+      - taishanglaojun-network
+
+volumes:
+  postgres_data:
+
+networks:
+  taishanglaojun-network:
+    driver: bridge

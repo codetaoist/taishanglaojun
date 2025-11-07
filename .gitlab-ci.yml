@@ -1,0 +1,48 @@
+stages: [contracts]
+
+variables:
+  PY_IMAGE: "python:3.11-slim"
+
+.default_python:
+  image: ${PY_IMAGE}
+  before_script:
+    - python --version
+    - pip install --upgrade pip
+    - pip install -r scripts/requirements.txt
+
+contracts:validate_openapi:
+  stage: contracts
+  extends: .default_python
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push"
+  script:
+    - mkdir -p reports/openapi
+    - python scripts/openapi_validate.py openapi/laojun.yaml | tee reports/openapi/validate_laojun.log
+    - python scripts/openapi_validate.py openapi/taishang.yaml | tee reports/openapi/validate_taishang.log
+  artifacts:
+    when: always
+    paths:
+      - reports/openapi/
+
+contracts:diff_openapi:
+  stage: contracts
+  extends: .default_python
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - mkdir -p reports/openapi
+    - |
+      if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
+        git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" || true
+        git show "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME:openapi/laojun.yaml" > /tmp/laojun_base.yaml || true
+        git show "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME:openapi/taishang.yaml" > /tmp/taishang_base.yaml || true
+      fi
+    - BASE_LA=/tmp/laojun_base.yaml; [ -s "$BASE_LA" ] || BASE_LA=openapi/laojun.skeleton.yaml
+    - BASE_TA=/tmp/taishang_base.yaml; [ -s "$BASE_TA" ] || BASE_TA=openapi/taishang.skeleton.yaml
+    - python scripts/openapi_contract_diff.py "$BASE_LA" openapi/laojun.yaml | tee reports/openapi/diff_laojun.txt || true
+    - python scripts/openapi_contract_diff.py "$BASE_TA" openapi/taishang.yaml | tee reports/openapi/diff_taishang.txt || true
+  artifacts:
+    when: always
+    paths:
+      - reports/openapi/

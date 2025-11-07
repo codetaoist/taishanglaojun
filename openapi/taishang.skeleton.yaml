@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: Taishang API (Skeleton)
+  version: 0.1.0
+  description: 高级域（模型/向量/任务）OpenAPI 骨架示例，遵循 docs/interfaces/standard.md
+servers:
+  - url: https://api.example.com
+    description: production
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    XRequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+    XWorkspaceId:
+      name: X-Workspace-Id
+      in: header
+      required: false
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+  schemas:
+    StandardResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          description: 载荷（任意类型）
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+    Model:
+      type: object
+      required: [name, provider, version]
+      properties:
+        name:
+          type: string
+        provider:
+          type: string
+          example: openai|ollama|huggingface
+        version:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+    VectorCollection:
+      type: object
+      required: [name, dimension]
+      properties:
+        name:
+          type: string
+        dimension:
+          type: integer
+        metric:
+          type: string
+          example: cosine|l2
+    Task:
+      type: object
+      required: [type, status]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          example: embedding|index|inference
+        status:
+          type: string
+          example: pending|running|succeeded|failed
+        progress:
+          type: number
+          format: float
+        cost:
+          type: number
+          format: float
+paths:
+  /api/taishang/models:
+    get:
+      summary: 模型列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+    post:
+      summary: 注册模型（幂等）
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Model'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /api/taishang/vectors:
+    get:
+      summary: 向量集合列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+    post:
+      summary: 创建向量集合（幂等）
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VectorCollection'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+  /api/taishang/tasks:
+    get:
+      summary: 任务列表
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+    post:
+      summary: 创建任务（幂等）
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XRequestId'
+        - $ref: '#/components/parameters/XWorkspaceId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardResponse'
+security:
+  - bearerAuth: []

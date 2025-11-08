@@ -51,7 +51,7 @@ const AuditLogs: React.FC = () => {
     setLoading(true);
     try {
       const response = await auditLogApi.getAll(page, pageSize);
-      if (response.success) {
+      if (response.code === 200) {
         setLogs(response.data?.logs || []);
         setPagination({
           current: page,

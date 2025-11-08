@@ -258,3 +258,49 @@ func (h *AuthHandler) GetUser(c *gin.Context) {
 		"data":    user,
 	})
 }
+
+// RevokeToken handles token revocation requests
+func (h *AuthHandler) RevokeToken(c *gin.Context) {
+	// Get token from Authorization header
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    "MISSING_TOKEN",
+			"message": "Authorization header is missing",
+		})
+		return
+	}
+
+	// Extract token from "Bearer <token>"
+	token := authHeader[7:] // Remove "Bearer " prefix
+	if len(token) < 10 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    "INVALID_TOKEN",
+			"message": "Invalid token format",
+		})
+		return
+	}
+
+	// Get reason from request body
+	var req struct {
+		Reason string `json:"reason"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// If no body is provided, use default reason
+		req.Reason = "revoked"
+	}
+
+	if err := h.authService.RevokeToken(token, req.Reason); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    "TOKEN_REVOCATION_FAILED",
+			"message": "Token revocation failed",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "SUCCESS",
+		"message": "Token revoked successfully",
+	})
+}

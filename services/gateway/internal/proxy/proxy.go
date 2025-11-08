@@ -2,13 +2,11 @@ package proxy
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/codetaoist/taishanglaojun/gateway/internal/discovery"
@@ -262,16 +260,10 @@ func (pm *ProxyManager) ProxyHandler(serviceName string) gin.HandlerFunc {
 
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 
-		// Update the request path to remove the service prefix
-		// For example, /api/users/users/123 becomes /users/123
-		path := c.Request.URL.Path
-		prefix := "/" + serviceName
-		if strings.HasPrefix(path, prefix) {
-			c.Request.URL.Path = strings.TrimPrefix(path, prefix)
-			if !strings.HasPrefix(c.Request.URL.Path, "/") {
-				c.Request.URL.Path = "/" + c.Request.URL.Path
-			}
-		}
+		// Update the request path to remove the service path prefix
+		// This will be handled by the router, which will pass the correct service name
+		// and the proxy will forward the request as-is
+		// The service itself should handle the full path
 
 		// Proxy the request
 		proxy.ServeHTTP(c.Writer, c.Request)

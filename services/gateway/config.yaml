@@ -12,7 +12,7 @@ jwt:
 
 # Service Discovery Configuration
 discovery:
-  type: "consul"           # consul, etcd, mock
+  type: "mock"           # consul, etcd, mock
   address: "localhost:8500"
   datacenter: "dc1"
   token: ""
@@ -47,7 +47,7 @@ metrics:
 # Services Configuration
 services:
   api:
-    path_prefix: "/api"
+    path_prefix: "/api/v1"
     auth_required: false
     rate_limit_enabled: false
     timeout: "30s"
@@ -55,7 +55,7 @@ services:
     load_balancer: "round_robin"
     
   auth:
-    path_prefix: "/auth"
+    path_prefix: "/api/v1/auth"
     auth_required: false
     rate_limit_enabled: true
     rate_limit:

@@ -1,6 +1,36 @@
-# scripts 使用说明（manifest 校验/签名、OpenAPI 校验与合同 diff）
+# scripts 使用说明（manifest 校验/签名、OpenAPI 校验与合同 diff、数据库管理）
 
-## 安装依赖
+## 数据库管理
+
+### 数据库初始化
+```bash
+# 执行基础域初始化脚本（V1和V2）
+./scripts/db/init.sh
+```
+- 该脚本会执行db/migrations/中的V1__init_lao.sql和V2__init_tai.sql
+- 创建基础域表结构和初始数据
+
+### 数据库迁移
+```bash
+# 应用所有待执行的迁移
+./scripts/db/migrate.sh up
+
+# 回滚最后一次迁移
+./scripts/db/migrate.sh down
+
+# 查看迁移状态
+./scripts/db/migrate.sh status
+
+# 创建新的迁移文件
+./scripts/db/migrate.sh create migration_name
+```
+- 迁移文件位于services/api/migrations/目录
+- 使用时间戳命名约定
+- 支持up和down迁移
+
+## 清单校验（laojun 基础域）
+
+### 安装依赖
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate

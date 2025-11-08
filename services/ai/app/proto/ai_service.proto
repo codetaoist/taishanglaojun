@@ -1,0 +1,354 @@
+syntax = "proto3";
+
+package ai;
+
+// 向量数据库服务
+service VectorService {
+  // 健康检查
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // 集合管理
+  rpc CreateCollection(CreateCollectionRequest) returns (CreateCollectionResponse);
+  rpc DropCollection(DropCollectionRequest) returns (DropCollectionResponse);
+  rpc HasCollection(HasCollectionRequest) returns (HasCollectionResponse);
+  rpc ListCollections(ListCollectionsRequest) returns (ListCollectionsResponse);
+  rpc GetCollectionInfo(GetCollectionInfoRequest) returns (GetCollectionInfoResponse);
+  rpc GetCollectionStats(GetCollectionStatsRequest) returns (GetCollectionStatsResponse);
+  
+  // 索引管理
+  rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse);
+  rpc DropIndex(DropIndexRequest) returns (DropIndexResponse);
+  rpc HasIndex(HasIndexRequest) returns (HasIndexResponse);
+  
+  // 向量操作
+  rpc Insert(InsertRequest) returns (InsertResponse);
+  rpc Upsert(UpsertRequest) returns (UpsertResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc GetById(GetByIdRequest) returns (GetByIdResponse);
+  
+  // 数据库管理
+  rpc Compact(CompactRequest) returns (CompactResponse);
+}
+
+// 模型服务
+service ModelService {
+  // 健康检查
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // 模型管理
+  rpc RegisterModel(RegisterModelRequest) returns (RegisterModelResponse);
+  rpc UpdateModel(UpdateModelRequest) returns (UpdateModelResponse);
+  rpc UnregisterModel(UnregisterModelRequest) returns (UnregisterModelResponse);
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+  rpc GetModel(GetModelRequest) returns (GetModelResponse);
+  
+  // 模型加载
+  rpc LoadModel(LoadModelRequest) returns (LoadModelResponse);
+  rpc UnloadModel(UnloadModelRequest) returns (UnloadModelResponse);
+  rpc IsModelLoaded(IsModelLoadedRequest) returns (IsModelLoadedResponse);
+  
+  // 模型推理
+  rpc GenerateText(GenerateTextRequest) returns (GenerateTextResponse);
+  rpc GenerateEmbedding(GenerateEmbeddingRequest) returns (GenerateEmbeddingResponse);
+}
+
+// 通用请求和响应
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string message = 2;
+}
+
+// 向量数据库相关消息
+message IndexParams {
+  string index_type = 1;  // "FLAT", "IVF_FLAT", "IVF_SQ8", "IVF_PQ", "HNSW", "NSG", "ANNOY", "RHNSW_FLAT", "RHNSW_SQ", "RHNSW_PQ"
+  string metric_type = 2;  // "L2", "IP", "HAMMING", "TANIMOTO", "SUBSTRUCTURE", "SUPERSTRUCTURE"
+  map<string, string> params = 3;
+}
+
+message CreateCollectionRequest {
+  string name = 1;
+  string description = 2;
+  int32 vector_dim = 3;
+  IndexParams index_params = 4;
+}
+
+message CreateCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DropCollectionRequest {
+  string name = 1;
+}
+
+message DropCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message HasCollectionRequest {
+  string name = 1;
+}
+
+message HasCollectionResponse {
+  bool exists = 1;
+}
+
+message ListCollectionsRequest {}
+
+message ListCollectionsResponse {
+  repeated string collections = 1;
+}
+
+message GetCollectionInfoRequest {
+  string name = 1;
+}
+
+message GetCollectionInfoResponse {
+  string name = 1;
+  string description = 2;
+  int32 vector_dim = 3;
+  IndexParams index_params = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message GetCollectionStatsRequest {
+  string name = 1;
+}
+
+message GetCollectionStatsResponse {
+  string name = 1;
+  int64 vector_count = 2;
+  int64 size_in_bytes = 3;
+}
+
+message CreateIndexRequest {
+  string collection_name = 1;
+  IndexParams index_params = 2;
+}
+
+message CreateIndexResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DropIndexRequest {
+  string collection_name = 1;
+}
+
+message DropIndexResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message HasIndexRequest {
+  string collection_name = 1;
+}
+
+message HasIndexResponse {
+  bool has_index = 1;
+}
+
+message Vector {
+  string id = 1;
+  repeated float vector = 2;
+  map<string, string> metadata = 3;
+}
+
+message InsertRequest {
+  string collection_name = 1;
+  repeated Vector vectors = 2;
+}
+
+message InsertResponse {
+  bool success = 1;
+  string message = 2;
+  repeated string ids = 3;
+}
+
+message UpsertRequest {
+  string collection_name = 1;
+  repeated Vector vectors = 2;
+}
+
+message UpsertResponse {
+  bool success = 1;
+  string message = 2;
+  repeated string ids = 3;
+}
+
+message DeleteRequest {
+  string collection_name = 1;
+  repeated string ids = 2;
+}
+
+message DeleteResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message SearchRequest {
+  string collection_name = 1;
+  repeated float query_vector = 2;
+  int32 topk = 3;
+  bool include_vector = 4;
+}
+
+message SearchResult {
+  string id = 1;
+  float score = 2;
+  repeated float vector = 3;
+  map<string, string> metadata = 4;
+}
+
+message SearchResponse {
+  bool success = 1;
+  string message = 2;
+  repeated SearchResult results = 3;
+}
+
+message GetByIdRequest {
+  string collection_name = 1;
+  string id = 2;
+}
+
+message GetByIdResponse {
+  string id = 1;
+  repeated float vector = 2;
+  map<string, string> metadata = 3;
+}
+
+message CompactRequest {
+  string collection_name = 1;
+}
+
+message CompactResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 模型服务相关消息
+enum ModelProvider {
+  HUGGINGFACE = 0;
+  OPENAI = 1;
+  SENTENCE_TRANSFORMERS = 2;
+}
+
+message RegisterModelRequest {
+  string name = 1;
+  ModelProvider provider = 2;
+  string model_path = 3;
+  string model_type = 4;  // "embedding", "generation"
+  string description = 5;
+  bool is_default = 6;
+  map<string, string> config = 7;
+}
+
+message RegisterModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdateModelRequest {
+  string name = 1;
+  ModelProvider provider = 2;
+  string model_path = 3;
+  string model_type = 4;
+  string description = 5;
+  bool is_default = 6;
+  map<string, string> config = 7;
+}
+
+message UpdateModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UnregisterModelRequest {
+  string name = 1;
+}
+
+message UnregisterModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListModelsRequest {}
+
+message ModelInfo {
+  string name = 1;
+  ModelProvider provider = 2;
+  string model_path = 3;
+  string model_type = 4;
+  string description = 5;
+  bool is_default = 6;
+  map<string, string> config = 7;
+}
+
+message ListModelsResponse {
+  repeated ModelInfo models = 1;
+}
+
+message GetModelRequest {
+  string name = 1;
+}
+
+message GetModelResponse {
+  ModelInfo model = 1;
+}
+
+message LoadModelRequest {
+  string name = 1;
+}
+
+message LoadModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UnloadModelRequest {
+  string name = 1;
+}
+
+message UnloadModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message IsModelLoadedRequest {
+  string name = 1;
+}
+
+message IsModelLoadedResponse {
+  bool is_loaded = 1;
+}
+
+message GenerateTextRequest {
+  string prompt = 1;
+  string model_name = 2;
+  int32 max_tokens = 3;
+  float temperature = 4;
+  float top_p = 5;
+}
+
+message GenerateTextResponse {
+  string text = 1;
+  string model_name = 2;
+  int32 tokens_used = 3;
+  string finish_reason = 4;
+}
+
+message GenerateEmbeddingRequest {
+  string text = 1;
+  string model_name = 2;
+}
+
+message GenerateEmbeddingResponse {
+  repeated float embedding = 1;
+  string model_name = 2;
+  int32 dimension = 3;
+}

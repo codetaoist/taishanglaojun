@@ -48,8 +48,10 @@ const CollectionManagement: React.FC = () => {
     setLoading(true);
     try {
       const response = await collectionApi.getAll();
-      if (response.success) {
-        setCollections(response.data || []);
+      if (response.success && response.data) {
+        // 后端返回的是分页格式，需要提取items数组
+        const items = response.data.items || [];
+        setCollections(items);
       } else {
         message.error('获取集合列表失败');
       }
@@ -73,17 +75,18 @@ const CollectionManagement: React.FC = () => {
     setModalVisible(true);
   };
 
-  // 打开编辑集合模态框
-  const handleOpenEditModal = (collection: Collection) => {
+  // 打开编辑模态框
+  const handleEditCollection = (collection: Collection) => {
     setEditingCollection(collection);
     form.setFieldsValue({
       name: collection.name,
       description: collection.description,
-      dimension: collection.dimension,
-      metric: collection.metric,
+      dims: collection.dims,
       indexType: collection.indexType,
-      indexParams: collection.indexParams ? JSON.stringify(collection.indexParams, null, 2) : '',
-      metadata: collection.metadata ? JSON.stringify(collection.metadata, null, 2) : ''
+      metricType: collection.metricType,
+      // 注意：后端可能没有indexParams和metadata字段，需要处理
+      indexParams: collection.extraIndexArgs ? JSON.stringify(collection.extraIndexArgs, null, 2) : '',
+      metadata: ''
     });
     setModalVisible(true);
   };
@@ -91,31 +94,23 @@ const CollectionManagement: React.FC = () => {
   // 提交表单（新增或更新集合）
   const handleSubmit = async (values: any) => {
     try {
-      let indexParams;
-      let metadata;
+      let extraIndexArgs;
       
       try {
-        indexParams = values.indexParams ? JSON.parse(values.indexParams) : {};
+        extraIndexArgs = values.indexParams ? JSON.parse(values.indexParams) : {};
       } catch (e) {
         message.error('索引参数格式不正确，请输入有效的JSON');
         return;
       }
-      
-      try {
-        metadata = values.metadata ? JSON.parse(values.metadata) : {};
-      } catch (e) {
-        message.error('元数据格式不正确，请输入有效的JSON');
-        return;
-      }
 
+      // 后端API期望的字段格式
       const collectionData = {
         name: values.name,
         description: values.description,
-        dimension: values.dimension,
-        metric: values.metric,
+        dims: values.dims,
         indexType: values.indexType,
-        indexParams,
-        metadata
+        metricType: values.metricType,
+        extraIndexArgs
       };
 
       if (editingCollection) {
@@ -126,7 +121,7 @@ const CollectionManagement: React.FC = () => {
           setModalVisible(false);
           fetchCollections();
         } else {
-          message.error(response.message || '集合更新失败');
+          message.error(response.error?.message || '集合更新失败');
         }
       } else {
         // 新增集合
@@ -137,7 +132,7 @@ const CollectionManagement: React.FC = () => {
           form.resetFields();
           fetchCollections();
         } else {
-          message.error(response.message || '集合创建失败');
+          message.error(response.error?.message || '集合创建失败');
         }
       }
     } catch (error) {
@@ -154,7 +149,7 @@ const CollectionManagement: React.FC = () => {
         message.success('集合删除成功');
         fetchCollections();
       } else {
-        message.error(response.message || '集合删除失败');
+        message.error(response.error?.message || '集合删除失败');
       }
     } catch (error) {
       message.error('集合删除失败');
@@ -170,7 +165,7 @@ const CollectionManagement: React.FC = () => {
         message.success('索引重建成功');
         fetchCollections();
       } else {
-        message.error(response.message || '索引重建失败');
+        message.error(response.error?.message || '索引重建失败');
       }
     } catch (error) {
       message.error('索引重建失败');
@@ -182,7 +177,7 @@ const CollectionManagement: React.FC = () => {
   const handleViewCollectionDetail = async (collection: Collection) => {
     try {
       const response = await collectionApi.get(collection.id);
-      if (response.success) {
+      if (response.success && response.data) {
         setSelectedCollection(response.data);
         setDetailModalVisible(true);
       } else {
@@ -210,14 +205,14 @@ const CollectionManagement: React.FC = () => {
     },
     {
       title: '维度',
-      dataIndex: 'dimension',
-      key: 'dimension',
+      dataIndex: 'dims',
+      key: 'dims',
       width: 100,
     },
     {
       title: '距离度量',
-      dataIndex: 'metric',
-      key: 'metric',
+      dataIndex: 'metricType',
+      key: 'metricType',
       width: 120,
       render: (metric: string) => (
         <Tag color="blue">{metric}</Tag>
@@ -344,6 +339,11 @@ const CollectionManagement: React.FC = () => {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          initialValues={{
+            indexType: 'hnsw',
+            metricType: 'cosine',
+            dims: 1536
+          }}
         >
           <Row gutter={16}>
             <Col span={12}>
@@ -357,7 +357,7 @@ const CollectionManagement: React.FC = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                name="dimension"
+                name="dims"
                 label="向量维度"
                 rules={[{ required: true, message: '请输入向量维度' }]}
               >
@@ -374,7 +374,7 @@ const CollectionManagement: React.FC = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="metric"
+                name="metricType"
                 label="距离度量"
                 rules={[{ required: true, message: '请选择距离度量' }]}
               >
@@ -461,75 +461,42 @@ const CollectionManagement: React.FC = () => {
 
       {/* 集合详情模态框 */}
       <Modal
-        title="集合详情"
-        open={detailModalVisible}
-        onCancel={() => setDetailModalVisible(false)}
-        footer={[
-          <Button key="close" onClick={() => setDetailModalVisible(false)}>
-            关闭
-          </Button>
-        ]}
-        width={800}
-      >
-        {selectedCollection && (
-          <div>
-            <Descriptions bordered column={2}>
-              <Descriptions.Item label="ID">{selectedCollection.id}</Descriptions.Item>
-              <Descriptions.Item label="名称">{selectedCollection.name}</Descriptions.Item>
-              <Descriptions.Item label="维度">{selectedCollection.dimension}</Descriptions.Item>
-              <Descriptions.Item label="距离度量">{selectedCollection.metric}</Descriptions.Item>
-              <Descriptions.Item label="索引类型">{selectedCollection.indexType || '-'}</Descriptions.Item>
-              <Descriptions.Item label="创建时间">
-                {new Date(selectedCollection.createdAt).toLocaleString()}
-              </Descriptions.Item>
-              <Descriptions.Item label="更新时间">
-                {new Date(selectedCollection.updatedAt).toLocaleString()}
-              </Descriptions.Item>
-              <Descriptions.Item label="描述" span={2}>
-                {selectedCollection.description || '-'}
-              </Descriptions.Item>
-            </Descriptions>
-            
-            {selectedCollection.indexParams && (
-              <>
-                <Divider>索引参数</Divider>
-                <Row>
-                  <Col span={24}>
-                    <pre style={{ 
-                      background: '#f5f5f5', 
-                      padding: '10px', 
-                      borderRadius: '4px',
-                      overflow: 'auto',
-                      maxHeight: '200px'
-                    }}>
-                      {JSON.stringify(selectedCollection.indexParams, null, 2)}
-                    </pre>
-                  </Col>
-                </Row>
-              </>
-            )}
-            
-            {selectedCollection.metadata && (
-              <>
-                <Divider>元数据</Divider>
-                <Row>
-                  <Col span={24}>
-                    <pre style={{ 
-                      background: '#f5f5f5', 
-                      padding: '10px', 
-                      borderRadius: '4px',
-                      overflow: 'auto',
-                      maxHeight: '200px'
-                    }}>
-                      {JSON.stringify(selectedCollection.metadata, null, 2)}
-                    </pre>
-                  </Col>
-                </Row>
-              </>
-            )}
-          </div>
-        )}
-      </Modal>
+          title="集合详情"
+          open={detailModalVisible}
+          onCancel={() => setDetailModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setDetailModalVisible(false)}>
+              关闭
+            </Button>
+          ]}
+          width={800}
+        >
+          {selectedCollection && (
+            <div>
+              <Descriptions bordered column={2}>
+                <Descriptions.Item label="ID">{selectedCollection.id}</Descriptions.Item>
+                <Descriptions.Item label="租户ID">{selectedCollection.tenantId}</Descriptions.Item>
+                <Descriptions.Item label="名称">{selectedCollection.name}</Descriptions.Item>
+                <Descriptions.Item label="描述">{selectedCollection.description || '-'}</Descriptions.Item>
+                <Descriptions.Item label="向量维度">{selectedCollection.dims}</Descriptions.Item>
+                <Descriptions.Item label="索引类型">{selectedCollection.indexType}</Descriptions.Item>
+                <Descriptions.Item label="距离度量">{selectedCollection.metricType}</Descriptions.Item>
+                <Descriptions.Item label="模型ID">{selectedCollection.modelId || '-'}</Descriptions.Item>
+                <Descriptions.Item label="创建时间" span={2}>
+                  {new Date(selectedCollection.createdAt).toLocaleString()}
+                </Descriptions.Item>
+                <Descriptions.Item label="更新时间" span={2}>
+                  {new Date(selectedCollection.updatedAt).toLocaleString()}
+                </Descriptions.Item>
+                {selectedCollection.extraIndexArgs && (
+                  <Descriptions.Item label="索引参数" span={2}>
+                    <pre>{JSON.stringify(selectedCollection.extraIndexArgs, null, 2)}</pre>
+                  </Descriptions.Item>
+                )}
+              </Descriptions>
+            </div>
+          )}
+        </Modal>
     </div>
   );
 };

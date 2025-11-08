@@ -1,4 +1,6 @@
-# 接口标准（统一包装与安全契约）
+# 接口规范（统一契约与跨域通信）
+
+本文档定义了混合架构（Go + Python）下的统一接口规范，包括响应包装、分页、安全契约、幂等性、观测审计以及跨语言通信协议。所有域（laojun/taishang/taishang-ai）均需遵循此规范，确保前后端一致性和跨域协作。
 
 ## 统一响应包装
 - 结构：`{ code: number, data: any, message: string }`。
@@ -112,3 +114,50 @@ func WriteUnified(w http.ResponseWriter, r *http.Request, err error, data any) {
 - 统一性要求：
   - 所有端点（含错误）均返回统一包装；`/health` 亦返回包装并包含版本与时间戳。
   - 批量接口对部分失败以 `code != 0` 表示，并在 `data.failures[]` 列出失败项。
+
+## 跨语言通信（gRPC协议）
+
+### 服务间通信架构
+- **Laojun域 (Go)**: 提供插件管理、审计、配置等核心功能
+- **Taishang-core (Go)**: 提供模型、向量、任务管理功能
+- **Taishang-AI (Python)**: 提供AI推理、对话、嵌入等AI功能
+- **通信方式**: taishang-ai与taishang-core之间通过gRPC协议通信
+
+### gRPC接口定义
+- **协议定义**: 使用Protocol Buffers定义服务接口和数据结构
+- **服务发现**: 通过服务注册中心发现和连接服务
+- **负载均衡**: 支持多种负载均衡策略（轮询、一致性哈希等）
+- **错误处理**: 统一的错误码映射和传播机制
+
+### 关键gRPC服务接口
+```protobuf
+// 模型服务
+service ModelService {
+  rpc GetModel(GetModelRequest) returns (ModelResponse);
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+}
+
+// 向量服务
+service VectorService {
+  rpc QueryVector(QueryRequest) returns (QueryResponse);
+  rpc UpsertVector(UpsertRequest) returns (UpsertResponse);
+}
+
+// AI推理服务
+service InferenceService {
+  rpc TextGeneration(TextGenerationRequest) returns (TextGenerationResponse);
+  rpc EmbeddingGeneration(EmbeddingRequest) returns (EmbeddingResponse);
+}
+```
+
+### 跨语言通信最佳实践
+- **超时控制**: 设置合理的请求超时和重试策略
+- **流式处理**: 对长时间运行的AI推理任务使用流式响应
+- **认证传递**: 通过metadata传递认证信息和上下文
+- **监控与追踪**: 实现分布式追踪，监控跨服务调用链路
+
+### 错误处理与降级策略
+- **服务降级**: 当AI服务不可用时，提供基础功能降级方案
+- **熔断机制**: 实现熔断器模式，防止级联故障
+- **重试策略**: 对临时性错误实现指数退避重试
+- **错误映射**: 将gRPC错误码映射到统一的HTTP错误码

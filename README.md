@@ -98,12 +98,22 @@ codetaoist/
 ```
 codetaoist/
   docs/                  # 全量文档（索引见 docs/README.md）
+    data/                 # 数据模型与迁移文档
+      migrations-explanation.md
+    architecture/         # 架构设计文档
+      root-structure-optimization.md
   openapi/               # 契约事实源与骨架示例
     laojun.yaml
     taishang.yaml
     laojun.skeleton.yaml
     taishang.skeleton.yaml
-  scripts/               # 清单校验/签名、OpenAPI 校验、合同 diff
+  scripts/               # 开发、部署、工具脚本
+    db/                   # 数据库管理脚本
+      init.sh             # 初始化脚本（执行V1/V2）
+      migrate.sh          # 迁移脚本（执行时间戳迁移）
+    tools/                # 开发工具脚本
+      temp_hash.go        # 密码哈希工具
+      test_vector_api.sh  # API测试脚本
     README.md
     requirements.txt
     manifest_validate.py
@@ -112,6 +122,17 @@ codetaoist/
     openapi_contract_diff.py
   services/
     api/                 # Go 后端入口（Gin）
+      tests/             # API服务测试目录
+        integration/     # 集成测试
+        unit/            # 单元测试
+    auth/                # 认证服务
+      tests/             # 认证服务测试目录
+        integration/     # 集成测试
+        unit/            # 单元测试
+    gateway/             # 网关服务
+      tests/             # 网关服务测试目录
+        integration/     # 集成测试
+        unit/            # 单元测试
   db/
     migrations/
       V1__init_lao.sql
@@ -144,6 +165,7 @@ codetaoist/
 - CI/CD 与测试：`docs/ops/ci-cd-pipeline.md`、`docs/testing/strategy.md`
 
 ## 下一步（落地建议）
+- 整合migrations目录：将根目录migrations/合并到services/api/migrations/，保留db/migrations/作为参考文档
 - 纠正目录文案：将规划中的 `infra/ci` 统一为现有 `ops/`（运维与 CI/CD）。
 - 细化 `docs/interfaces/laojun-api-spec.md` 与 `docs/interfaces/taishang-api-spec.md` 字段级契约，生成客户端并用于联调。
 - 集成脚本到 CI：新增合同校验与插件门禁作业（使用 `scripts/*`）。

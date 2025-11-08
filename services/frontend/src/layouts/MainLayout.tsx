@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, theme } from 'antd';
+import { Layout, Menu, theme, Dropdown, Avatar, Space, message } from 'antd';
 import { 
   DashboardOutlined, 
   SettingOutlined, 
@@ -7,9 +7,14 @@ import {
   FileTextOutlined,
   DatabaseOutlined,
   ExperimentOutlined,
-  HistoryOutlined
+  HistoryOutlined,
+  UserOutlined,
+  LogoutOutlined,
+  LockOutlined,
+  SafetyOutlined
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Header, Sider, Content } = Layout;
 
@@ -21,6 +26,7 @@ const MainLayout: React.FC = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   // 菜单项配置
   const menuItems = [
@@ -28,6 +34,11 @@ const MainLayout: React.FC = () => {
       key: '/',
       icon: <DashboardOutlined />,
       label: '仪表盘',
+    },
+    {
+      key: '/token-manager',
+      icon: <SafetyOutlined />,
+      label: '令牌管理',
     },
     {
       key: '/laojun',
@@ -67,6 +78,16 @@ const MainLayout: React.FC = () => {
           label: '向量集合',
         },
         {
+          key: '/taishang/vector-data',
+          icon: <DatabaseOutlined />,
+          label: '向量数据',
+        },
+        {
+          key: '/taishang/vector-monitor',
+          icon: <DatabaseOutlined />,
+          label: '向量监控',
+        },
+        {
           key: '/taishang/tasks',
           icon: <FileTextOutlined />,
           label: '任务管理',
@@ -84,6 +105,42 @@ const MainLayout: React.FC = () => {
   const getSelectedKeys = () => {
     return [location.pathname];
   };
+
+  // 用户下拉菜单
+  const userMenuItems = [
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: '个人资料',
+      onClick: () => navigate('/profile'),
+    },
+    {
+      key: 'change-password',
+      icon: <LockOutlined />,
+      label: '修改密码',
+      onClick: () => navigate('/change-password'),
+    },
+    {
+      type: 'divider' as const,
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+      onClick: handleLogout,
+    },
+  ];
+
+  // 处理登出
+  async function handleLogout() {
+    try {
+      await logout();
+      message.success('已成功退出登录');
+      navigate('/login');
+    } catch (error) {
+      message.error('退出登录失败');
+    }
+  }
 
   // 获取当前展开的菜单项
   const getOpenKeys = () => {
@@ -134,7 +191,16 @@ const MainLayout: React.FC = () => {
             {/* 这里可以添加面包屑导航 */}
           </div>
           <div style={{ padding: '0 24px' }}>
-            {/* 这里可以添加用户信息、通知等 */}
+            <Dropdown
+              menu={{ items: userMenuItems }}
+              placement="bottomRight"
+              arrow
+            >
+              <Space style={{ cursor: 'pointer' }}>
+                <Avatar size="small" icon={<UserOutlined />} />
+                <span>{user?.username || '用户'}</span>
+              </Space>
+            </Dropdown>
           </div>
         </Header>
         <Content

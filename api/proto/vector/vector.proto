@@ -1,0 +1,268 @@
+syntax = "proto3";
+
+package vector;
+
+option go_package = "github.com/codetaoist/api/proto/vector";
+
+// Vector service definition
+service VectorService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Collection operations
+  rpc CreateCollection(CreateCollectionRequest) returns (CreateCollectionResponse);
+  rpc DropCollection(DropCollectionRequest) returns (DropCollectionResponse);
+  rpc HasCollection(HasCollectionRequest) returns (HasCollectionResponse);
+  rpc ListCollections(ListCollectionsRequest) returns (ListCollectionsResponse);
+  rpc GetCollectionInfo(GetCollectionInfoRequest) returns (GetCollectionInfoResponse);
+  rpc GetCollectionStats(GetCollectionStatsRequest) returns (GetCollectionStatsResponse);
+  
+  // Index operations
+  rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse);
+  rpc DropIndex(DropIndexRequest) returns (DropIndexResponse);
+  rpc HasIndex(HasIndexRequest) returns (HasIndexResponse);
+  rpc DescribeIndex(DescribeIndexRequest) returns (DescribeIndexResponse);
+  
+  // Data operations
+  rpc Insert(InsertRequest) returns (InsertResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Upsert(UpsertRequest) returns (UpsertResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc Query(QueryRequest) returns (QueryResponse);
+}
+
+// Health check
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string message = 2;
+}
+
+// Collection operations
+message CreateCollectionRequest {
+  string collection_name = 1;
+  int64 dimension = 2;
+  string metric_type = 3; // L2, IP, HAMMING, etc.
+  map<string, string> params = 4;
+}
+
+message CreateCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DropCollectionRequest {
+  string collection_name = 1;
+}
+
+message DropCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message HasCollectionRequest {
+  string collection_name = 1;
+}
+
+message HasCollectionResponse {
+  bool has_collection = 1;
+}
+
+message ListCollectionsRequest {
+  // No parameters needed
+}
+
+message ListCollectionsResponse {
+  repeated string collection_names = 1;
+}
+
+message GetCollectionInfoRequest {
+  string collection_name = 1;
+}
+
+message GetCollectionInfoResponse {
+  string collection_name = 1;
+  int64 dimension = 2;
+  string metric_type = 3;
+  map<string, string> params = 4;
+}
+
+message GetCollectionStatsRequest {
+  string collection_name = 1;
+}
+
+message GetCollectionStatsResponse {
+  int64 row_count = 1;
+  int64 data_size = 2;
+  int64 index_size = 3;
+}
+
+// Index operations
+message CreateIndexRequest {
+  string collection_name = 1;
+  string field_name = 2;
+  string index_type = 3; // FLAT, IVF_FLAT, IVF_SQ8, etc.
+  map<string, string> params = 4;
+}
+
+message CreateIndexResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DropIndexRequest {
+  string collection_name = 1;
+  string field_name = 2;
+}
+
+message DropIndexResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message HasIndexRequest {
+  string collection_name = 1;
+  string field_name = 2;
+}
+
+message HasIndexResponse {
+  bool has_index = 1;
+}
+
+message DescribeIndexRequest {
+  string collection_name = 1;
+  string field_name = 2;
+}
+
+message DescribeIndexResponse {
+  string index_type = 1;
+  map<string, string> params = 2;
+}
+
+// Data operations
+message InsertRequest {
+  string collection_name = 1;
+  repeated FieldData fields_data = 2;
+}
+
+message InsertResponse {
+  repeated int64 ids = 1;
+  int64 insert_count = 2;
+}
+
+message DeleteRequest {
+  string collection_name = 1;
+  string expr = 1; // Expression to filter entities
+}
+
+message DeleteResponse {
+  int64 delete_count = 1;
+}
+
+message UpsertRequest {
+  string collection_name = 1;
+  repeated FieldData fields_data = 2;
+}
+
+message UpsertResponse {
+  repeated int64 ids = 1;
+  int64 upsert_count = 2;
+}
+
+message SearchRequest {
+  string collection_name = 1;
+  repeated string partition_names = 2;
+  string expr = 3; // Expression to filter entities
+  repeated VectorData vectors = 4;
+  int64 top_k = 5;
+  map<string, string> params = 6;
+  repeated string output_fields = 7;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+message QueryRequest {
+  string collection_name = 1;
+  repeated string partition_names = 2;
+  string expr = 3; // Expression to filter entities
+  repeated string output_fields = 4;
+  int64 limit = 5;
+}
+
+message QueryResponse {
+  repeated QueryResult results = 1;
+}
+
+// Common data structures
+message FieldData {
+  string field_name = 1;
+  oneof data {
+    BoolArray bool_array = 2;
+    IntArray int_array = 3;
+    LongArray long_array = 4;
+    FloatArray float_array = 5;
+    DoubleArray double_array = 6;
+    StringArray string_array = 7;
+    VectorArray vector_array = 8;
+  }
+}
+
+message BoolArray {
+  repeated bool data = 1;
+}
+
+message IntArray {
+  repeated int32 data = 1;
+}
+
+message LongArray {
+  repeated int64 data = 1;
+}
+
+message FloatArray {
+  repeated float data = 1;
+}
+
+message DoubleArray {
+  repeated double data = 1;
+}
+
+message StringArray {
+  repeated string data = 1;
+}
+
+message VectorArray {
+  repeated float data = 1;
+}
+
+message VectorData {
+  repeated float data = 1;
+}
+
+message SearchResult {
+  int64 id = 1;
+  float distance = 2;
+  map<string, Value> fields = 3;
+}
+
+message QueryResult {
+  int64 id = 1;
+  map<string, Value> fields = 2;
+}
+
+message Value {
+  oneof data {
+    bool bool_value = 1;
+    int32 int_value = 2;
+    int64 long_value = 3;
+    float float_value = 4;
+    double double_value = 5;
+    string string_value = 6;
+    repeated float vector_value = 7;
+  }
+}

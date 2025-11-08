@@ -44,7 +44,7 @@ const PluginManagement: React.FC = () => {
     setLoading(true);
     try {
       const response = await pluginApi.getAll();
-      if (response.success) {
+      if (response.code === 200) {
         setPlugins(response.data || []);
       } else {
         message.error('获取插件列表失败');
@@ -66,7 +66,7 @@ const PluginManagement: React.FC = () => {
   const handleInstallPlugin = async (values: any) => {
     try {
       const response = await pluginApi.install(values.id, values.source, values.version);
-      if (response.success) {
+      if (response.code === 200) {
         message.success('插件安装成功');
         setInstallModalVisible(false);
         form.resetFields();
@@ -84,7 +84,7 @@ const PluginManagement: React.FC = () => {
   const handleStartPlugin = async (id: string) => {
     try {
       const response = await pluginApi.start(id);
-      if (response.success) {
+      if (response.code === 200) {
         message.success('插件启动成功');
         fetchPlugins();
       } else {
@@ -100,7 +100,7 @@ const PluginManagement: React.FC = () => {
   const handleStopPlugin = async (id: string) => {
     try {
       const response = await pluginApi.stop(id);
-      if (response.success) {
+      if (response.code === 200) {
         message.success('插件停止成功');
         fetchPlugins();
       } else {
@@ -116,7 +116,7 @@ const PluginManagement: React.FC = () => {
   const handleUpgradePlugin = async (id: string, version?: string) => {
     try {
       const response = await pluginApi.upgrade(id, version);
-      if (response.success) {
+      if (response.code === 200) {
         message.success('插件升级成功');
         fetchPlugins();
       } else {
@@ -132,7 +132,7 @@ const PluginManagement: React.FC = () => {
   const handleUninstallPlugin = async (id: string) => {
     try {
       const response = await pluginApi.uninstall(id);
-      if (response.success) {
+      if (response.code === 200) {
         message.success('插件卸载成功');
         fetchPlugins();
       } else {
@@ -148,7 +148,7 @@ const PluginManagement: React.FC = () => {
   const handleViewPluginDetail = async (plugin: Plugin) => {
     try {
       const response = await pluginApi.get(plugin.id);
-      if (response.success) {
+      if (response.code === 200) {
         setSelectedPlugin(response.data);
         setDetailModalVisible(true);
       } else {

@@ -1,0 +1,488 @@
+syntax = "proto3";
+
+package ai;
+
+option go_package = "github.com/codetaoist/taishang/pkg/grpc/ai";
+
+// IndexType specifies the type of index for vector collection
+enum IndexType {
+  INDEX_TYPE_UNSPECIFIED = 0;
+  INDEX_TYPE_FLAT = 1;
+  INDEX_TYPE_IVF_FLAT = 2;
+  INDEX_TYPE_IVF_SQ8 = 3;
+  INDEX_TYPE_IVF_PQ = 4;
+  INDEX_TYPE_HNSW = 5;
+  INDEX_TYPE_ANNOY = 6;
+  INDEX_TYPE_RHNSW_FLAT = 7;
+  INDEX_TYPE_RHNSW_SQ = 8;
+  INDEX_TYPE_RHNSW_PQ = 9;
+  INDEX_TYPE_IVF_HNSW = 10;
+  INDEX_TYPE_DISKANN = 11;
+  INDEX_TYPE_AUTOINDEX = 12;
+  INDEX_TYPE_SCANN = 13;
+}
+
+// MetricType specifies the distance metric for vector search
+enum MetricType {
+  METRIC_TYPE_UNSPECIFIED = 0;
+  METRIC_TYPE_L2 = 1;
+  METRIC_TYPE_IP = 2;
+  METRIC_TYPE_COSINE = 3;
+  METRIC_TYPE_HAMMING = 4;
+  METRIC_TYPE_JACCARD = 5;
+  METRIC_TYPE_TANIMOTO = 6;
+  METRIC_TYPE_SUBSTRUCTURE = 7;
+  METRIC_TYPE_SUPERSTRUCTURE = 8;
+}
+
+// ModelProvider specifies the provider of the model
+enum ModelProvider {
+  MODEL_PROVIDER_UNSPECIFIED = 0;
+  MODEL_PROVIDER_HUGGINGFACE = 1;
+  MODEL_PROVIDER_OPENAI = 2;
+  MODEL_PROVIDER_SENTENCE_TRANSFORMERS = 3;
+}
+
+// Health check response
+message HealthCheckResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Vector database collection
+message Collection {
+  string name = 1;
+  int64 id = 2;
+  int64 shard_num = 3;
+  bool auto_id = 4;
+  int64 vector_field_id = 5;
+  string vector_field_name = 6;
+  int64 primary_field_id = 7;
+  string primary_field_name = 8;
+  int64 dimension = 9;
+  string consistency_level = 10;
+  int64 created_timestamp = 11;
+  int64 created_utc_timestamp = 12;
+  int64 modified_timestamp = 13;
+  int64 modified_utc_timestamp = 14;
+  map<string, string> properties = 15;
+}
+
+// Vector field schema
+message FieldSchema {
+  string name = 1;
+  int64 id = 2;
+  bool is_primary_key = 3;
+  string description = 4;
+  string data_type = 5;
+  bool auto_id = 6;
+  map<string, string> type_params = 7;
+}
+
+// Collection schema
+message CollectionSchema {
+  string name = 1;
+  string description = 2;
+  bool auto_id = 3;
+  repeated FieldSchema fields = 4;
+}
+
+// Index parameters
+message IndexParams {
+  string index_name = 1;
+  string field_name = 2;
+  IndexType index_type = 3;
+  map<string, string> metric_type = 4;
+  map<string, string> params = 5;
+}
+
+// Vector data
+message VectorData {
+  string id = 1;
+  repeated float vector = 2;
+  map<string, string> metadata = 3;
+}
+
+// Search request
+message SearchRequest {
+  string collection_name = 1;
+  repeated float vector = 2;
+  int64 top_k = 3;
+  string expr = 4;
+  map<string, string> params = 5;
+  repeated string output_fields = 6;
+}
+
+// Search result
+message SearchResult {
+  string id = 1;
+  float score = 2;
+  map<string, string> metadata = 3;
+}
+
+// Create collection request
+message CreateCollectionRequest {
+  string collection_name = 1;
+  CollectionSchema schema = 2;
+  int64 consistency_level = 3;
+}
+
+// Drop collection request
+message DropCollectionRequest {
+  string collection_name = 1;
+}
+
+// Has collection request
+message HasCollectionRequest {
+  string collection_name = 1;
+}
+
+// Has collection response
+message HasCollectionResponse {
+  bool has = 1;
+}
+
+// Describe collection request
+message DescribeCollectionRequest {
+  string collection_name = 1;
+}
+
+// Load collection request
+message LoadCollectionRequest {
+  string collection_name = 1;
+  int64 replica_number = 2;
+}
+
+// Release collection request
+message ReleaseCollectionRequest {
+  string collection_name = 1;
+}
+
+// Get collection statistics request
+message GetCollectionStatisticsRequest {
+  string collection_name = 1;
+}
+
+// Get collection statistics response
+message GetCollectionStatisticsResponse {
+  string stats = 1;
+}
+
+// List collections request
+message ListCollectionsRequest {}
+
+// List collections response
+message ListCollectionsResponse {
+  repeated Collection collections = 1;
+}
+
+// Create index request
+message CreateIndexRequest {
+  string collection_name = 1;
+  IndexParams index_params = 2;
+}
+
+// Drop index request
+message DropIndexRequest {
+  string collection_name = 1;
+  string index_name = 2;
+}
+
+// Describe index request
+message DescribeIndexRequest {
+  string collection_name = 1;
+  string index_name = 2;
+}
+
+// Describe index response
+message DescribeIndexResponse {
+  repeated IndexParams indexes = 1;
+}
+
+// Insert request
+message InsertRequest {
+  string collection_name = 1;
+  repeated VectorData data = 2;
+}
+
+// Insert response
+message InsertResponse {
+  repeated string ids = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// Delete request
+message DeleteRequest {
+  string collection_name = 1;
+  string expr = 2;
+}
+
+// Delete response
+message DeleteResponse {
+  int64 delete_count = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// Search response
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+// Get by IDs request
+message GetByIdRequest {
+  string collection_name = 1;
+  repeated string ids = 2;
+  repeated string output_fields = 3;
+}
+
+// Get by IDs response
+message GetByIdResponse {
+  repeated VectorData data = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// Compact request
+message CompactRequest {
+  string collection_name = 1;
+}
+
+// Compact response
+message CompactResponse {
+  int64 compact_time = 1;
+}
+
+// Model configuration
+message ModelConfig {
+  string name = 1;
+  ModelProvider provider = 2;
+  string model_path = 3;
+  map<string, string> config = 4;
+  bool is_loaded = 5;
+  int64 load_time = 6;
+  string description = 7;
+}
+
+// Register model request
+message RegisterModelRequest {
+  string name = 1;
+  ModelProvider provider = 2;
+  string model_path = 3;
+  map<string, string> config = 4;
+  string description = 5;
+}
+
+// Register model response
+message RegisterModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Update model request
+message UpdateModelRequest {
+  string name = 1;
+  ModelProvider provider = 2;
+  string model_path = 3;
+  map<string, string> config = 4;
+  string description = 5;
+}
+
+// Update model response
+message UpdateModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Unregister model request
+message UnregisterModelRequest {
+  string name = 1;
+}
+
+// Unregister model response
+message UnregisterModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// List models request
+message ListModelsRequest {
+  // Empty request, can add pagination parameters later
+}
+
+// List models response
+message ListModelsResponse {
+  repeated ModelConfig models = 1;
+}
+
+// Get model request
+message GetModelRequest {
+  string name = 1;
+}
+
+// Get model response
+message GetModelResponse {
+  ModelConfig model = 1;
+}
+
+// Load model request
+message LoadModelRequest {
+  string name = 1;
+}
+
+// Load model response
+message LoadModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Unload model request
+message UnloadModelRequest {
+  string name = 1;
+}
+
+// Unload model response
+message UnloadModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Get model status request
+message GetModelStatusRequest {
+  string name = 1;
+}
+
+// Get model status response
+message GetModelStatusResponse {
+  bool is_loaded = 1;
+  int64 load_time = 2;
+  string message = 3;
+}
+
+// Text generation request
+message TextGenerationRequest {
+  string model_name = 1;
+  string prompt = 2;
+  int64 max_length = 3;
+  float temperature = 4;
+  float top_p = 5;
+  int64 num_return_sequences = 6;
+  bool do_sample = 7;
+  map<string, string> additional_params = 8;
+}
+
+// Text generation response
+message TextGenerationResponse {
+  repeated string texts = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// Embedding generation request
+message EmbeddingRequest {
+  string model_name = 1;
+  repeated string texts = 2;
+  map<string, string> additional_params = 3;
+}
+
+// Embedding response
+message EmbeddingResponse {
+  repeated float embeddings = 1;  // This should be a 2D array, but proto3 doesn't support nested repeated directly
+  bool success = 2;
+  string message = 3;
+}
+
+// Vector database service
+service VectorService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Collection operations
+  rpc CreateCollection(CreateCollectionRequest) returns (CreateCollectionResponse);
+  rpc DropCollection(DropCollectionRequest) returns (DropCollectionResponse);
+  rpc HasCollection(HasCollectionRequest) returns (HasCollectionResponse);
+  rpc DescribeCollection(DescribeCollectionRequest) returns (DescribeCollectionResponse);
+  rpc LoadCollection(LoadCollectionRequest) returns (LoadCollectionResponse);
+  rpc ReleaseCollection(ReleaseCollectionRequest) returns (ReleaseCollectionResponse);
+  rpc GetCollectionStatistics(GetCollectionStatisticsRequest) returns (GetCollectionStatisticsResponse);
+  rpc ListCollections(ListCollectionsRequest) returns (ListCollectionsResponse);
+  
+  // Index operations
+  rpc CreateIndex(CreateIndexRequest) returns (CreateIndexResponse);
+  rpc DropIndex(DropIndexRequest) returns (DropIndexResponse);
+  rpc DescribeIndex(DescribeIndexRequest) returns (DescribeIndexResponse);
+  
+  // Data operations
+  rpc Insert(InsertRequest) returns (InsertResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc GetById(GetByIdRequest) returns (GetByIdResponse);
+  
+  // Collection operations
+  rpc Compact(CompactRequest) returns (CompactResponse);
+}
+
+// Model service
+service ModelService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Model management
+  rpc RegisterModel(RegisterModelRequest) returns (RegisterModelResponse);
+  rpc UpdateModel(UpdateModelRequest) returns (UpdateModelResponse);
+  rpc UnregisterModel(UnregisterModelRequest) returns (UnregisterModelResponse);
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+  rpc GetModel(GetModelRequest) returns (GetModelResponse);
+  
+  // Model operations
+  rpc LoadModel(LoadModelRequest) returns (LoadModelResponse);
+  rpc UnloadModel(UnloadModelRequest) returns (UnloadModelResponse);
+  rpc GetModelStatus(GetModelStatusRequest) returns (GetModelStatusResponse);
+  
+  // Inference operations
+  rpc GenerateText(TextGenerationRequest) returns (TextGenerationResponse);
+  rpc GenerateEmbedding(EmbeddingRequest) returns (EmbeddingResponse);
+}
+
+// Missing message types
+message HealthCheckRequest {
+  // Empty request for health check
+}
+
+// Collection response messages
+message CreateCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DropCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DescribeCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message LoadCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReleaseCollectionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Index response messages
+message CreateIndexResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DropIndexResponse {
+  bool success = 1;
+  string message = 2;
+}

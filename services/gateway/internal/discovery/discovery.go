@@ -1,7 +1,6 @@
 package discovery
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"time"
@@ -35,24 +34,32 @@ type ConsulDiscovery struct {
 
 // Config holds configuration for service discovery
 type Config struct {
+	Type       string `mapstructure:"type"`
 	Address    string `mapstructure:"address"`
 	Datacenter string `mapstructure:"datacenter"`
 	Token      string `mapstructure:"token"`
 }
 
-// NewClient creates a new Consul client
+// NewClient creates a new service discovery client based on the configuration type
 func NewClient(cfg Config) (ServiceDiscovery, error) {
-	config := api.DefaultConfig()
-	config.Address = cfg.Address
-	config.Datacenter = cfg.Datacenter
-	config.Token = cfg.Token
+	switch cfg.Type {
+	case "mock":
+		return NewMockDiscovery(), nil
+	case "consul":
+		config := api.DefaultConfig()
+		config.Address = cfg.Address
+		config.Datacenter = cfg.Datacenter
+		config.Token = cfg.Token
 
-	client, err := api.NewClient(config)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create consul client: %w", err)
+		client, err := api.NewClient(config)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create consul client: %w", err)
+		}
+
+		return &ConsulDiscovery{client: client}, nil
+	default:
+		return nil, fmt.Errorf("unsupported discovery type: %s", cfg.Type)
 	}
-
-	return &ConsulDiscovery{client: client}, nil
 }
 
 // Register registers a service with Consul
@@ -161,10 +168,43 @@ type MockDiscovery struct {
 
 // NewMockDiscovery creates a new mock service discovery
 func NewMockDiscovery() ServiceDiscovery {
-	return &MockDiscovery{
+	md := &MockDiscovery{
 		services: make(map[string][]*Service),
 		watchers: make(map[string]chan []*Service),
 	}
+	
+	// Add default services
+	md.services["api"] = []*Service{
+		{
+			ID:      "api-1",
+			Name:    "api",
+			Address: "localhost",
+			Port:    8082,
+			Tags:    []string{"api"},
+		},
+	}
+	
+	md.services["auth"] = []*Service{
+		{
+			ID:      "auth-1",
+			Name:    "auth",
+			Address: "localhost",
+			Port:    8081,
+			Tags:    []string{"auth"},
+		},
+	}
+	
+	md.services["notification"] = []*Service{
+		{
+			ID:      "notification-1",
+			Name:    "notification",
+			Address: "localhost",
+			Port:    8083,
+			Tags:    []string{"notification"},
+		},
+	}
+	
+	return md
 }
 
 // Register registers a service in the mock discovery
@@ -220,6 +260,8 @@ func (m *MockDiscovery) WatchService(serviceName string) (<-chan []*Service, err
 		}()
 	}
 
+	// In a real implementation, we would watch for changes
+	// For the mock, we'll just keep the channel open
 	return ch, nil
 }
 

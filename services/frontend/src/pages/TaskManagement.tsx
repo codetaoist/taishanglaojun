@@ -54,7 +54,7 @@ const TaskManagement: React.FC = () => {
     setLoading(true);
     try {
       const response = await taskApi.getAll(statusFilter, typeFilter);
-      if (response.success) {
+      if (response.code === 200) {
         setTasks(response.data || []);
       } else {
         message.error('获取任务列表失败');
@@ -124,7 +124,7 @@ const TaskManagement: React.FC = () => {
       if (editingTask) {
         // 更新任务
         const response = await taskApi.update(editingTask.id, taskData);
-        if (response.success) {
+        if (response.code === 200) {
           message.success('任务更新成功');
           setModalVisible(false);
           fetchTasks();
@@ -134,7 +134,7 @@ const TaskManagement: React.FC = () => {
       } else {
         // 新增任务
         const response = await taskApi.create(taskData);
-        if (response.success) {
+        if (response.code === 200) {
           message.success('任务创建成功');
           setModalVisible(false);
           form.resetFields();
@@ -153,7 +153,7 @@ const TaskManagement: React.FC = () => {
   const handleDeleteTask = async (id: string) => {
     try {
       const response = await taskApi.delete(id);
-      if (response.success) {
+      if (response.code === 200) {
         message.success('任务删除成功');
         fetchTasks();
       } else {
@@ -169,7 +169,7 @@ const TaskManagement: React.FC = () => {
   const handleViewTaskDetail = async (task: Task) => {
     try {
       const response = await taskApi.get(task.id);
-      if (response.success) {
+      if (response.code === 200) {
         setSelectedTask(response.data);
         setDetailModalVisible(true);
       } else {

@@ -17,9 +17,10 @@ func Setup(cfg config.Config, r *gin.Engine, db *sql.DB) {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	sessionRepo := repository.NewSessionRepository(db)
+	blacklistRepo := repository.NewBlacklistRepository(db)
 
 	// Initialize services
-	authService := service.NewAuthService(userRepo, sessionRepo, cfg.JWTSecret, cfg.JWTExpiration)
+	authService := service.NewAuthService(userRepo, sessionRepo, blacklistRepo, cfg.JWTSecret, cfg.JWTExpiration)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
@@ -50,7 +51,7 @@ func Setup(cfg config.Config, r *gin.Engine, db *sql.DB) {
 			// User profile routes
 			protected.GET("/profile", authHandler.GetProfile)
 			protected.POST("/change-password", authHandler.ChangePassword)
-			protected.POST("/logout", authHandler.Logout)
+			protected.POST("/revoke-token", authHandler.RevokeToken)
 
 			// Admin routes (admin role required)
 			admin := protected.Group("/admin")
@@ -58,6 +59,13 @@ func Setup(cfg config.Config, r *gin.Engine, db *sql.DB) {
 			{
 				admin.GET("/users/:id", authHandler.GetUser)
 			}
+		}
+
+		// Protected auth routes (authentication required)
+		protectedAuth := v1.Group("/auth")
+		protectedAuth.Use(middleware.AuthMiddleware(authService))
+		{
+			protectedAuth.POST("/logout", authHandler.Logout)
 		}
 	}
 }

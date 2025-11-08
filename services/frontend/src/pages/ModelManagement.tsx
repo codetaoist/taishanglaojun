@@ -46,7 +46,7 @@ const ModelManagement: React.FC = () => {
     setLoading(true);
     try {
       const response = await modelApi.getAll();
-      if (response.success) {
+      if (response.code === 200) {
         setModels(response.data || []);
       } else {
         message.error('获取模型列表失败');
@@ -110,7 +110,7 @@ const ModelManagement: React.FC = () => {
       if (editingModel) {
         // 更新模型
         const response = await modelApi.update(editingModel.id, modelData);
-        if (response.success) {
+        if (response.code === 200) {
           message.success('模型更新成功');
           setModalVisible(false);
           fetchModels();
@@ -120,7 +120,7 @@ const ModelManagement: React.FC = () => {
       } else {
         // 新增模型
         const response = await modelApi.register(modelData);
-        if (response.success) {
+        if (response.code === 200) {
           message.success('模型注册成功');
           setModalVisible(false);
           form.resetFields();
@@ -139,7 +139,7 @@ const ModelManagement: React.FC = () => {
   const handleDeleteModel = async (id: string) => {
     try {
       const response = await modelApi.delete(id);
-      if (response.success) {
+      if (response.code === 200) {
         message.success('模型删除成功');
         fetchModels();
       } else {
@@ -155,7 +155,7 @@ const ModelManagement: React.FC = () => {
   const handleViewModelDetail = async (model: Model) => {
     try {
       const response = await modelApi.get(model.id);
-      if (response.success) {
+      if (response.code === 200) {
         setSelectedModel(response.data);
         setDetailModalVisible(true);
       } else {

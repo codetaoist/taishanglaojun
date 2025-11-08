@@ -1,4 +1,4 @@
-import { get, post, put, del } from './api';
+import { api } from './api';
 import type { ApiResponse } from './api';
 
 // 配置项接口
@@ -48,22 +48,22 @@ export interface AuditLog {
 export const configApi = {
   // 获取所有配置
   getAll: (): Promise<ApiResponse<Config[]>> => {
-    return get<Config[]>('/laojun/config');
+    return api.get<Config[]>('/api/laojun/configs');
   },
   
   // 获取单个配置
   get: (key: string): Promise<ApiResponse<Config>> => {
-    return get<Config>(`/laojun/config/${key}`);
+    return api.get<Config>(`/api/laojun/configs/${key}`);
   },
   
   // 创建或更新配置
   set: (key: string, value: string, description?: string): Promise<ApiResponse<Config>> => {
-    return post<Config>(`/laojun/config/${key}`, { value, description });
+    return api.post<Config>(`/api/laojun/configs/${key}`, { value, description });
   },
   
   // 删除配置
   delete: (key: string): Promise<ApiResponse<void>> => {
-    return del<void>(`/laojun/config/${key}`);
+    return api.delete<void>(`/api/laojun/configs/${key}`);
   }
 };
 
@@ -71,37 +71,37 @@ export const configApi = {
 export const pluginApi = {
   // 获取所有插件
   getAll: (): Promise<ApiResponse<Plugin[]>> => {
-    return get<Plugin[]>('/laojun/plugins');
+    return api.get<Plugin[]>('/api/laojun/plugins/list');
   },
   
   // 获取单个插件
   get: (id: string): Promise<ApiResponse<Plugin>> => {
-    return get<Plugin>(`/laojun/plugins/${id}`);
+    return api.get<Plugin>(`/api/laojun/plugins/${id}`);
   },
   
   // 安装插件
   install: (id: string, source: string, version?: string): Promise<ApiResponse<Plugin>> => {
-    return post<Plugin>(`/laojun/plugins/${id}/install`, { source, version });
+    return api.post<Plugin>(`/api/laojun/plugins/install`, { pluginId: id, source, version });
   },
   
   // 启动插件
   start: (id: string): Promise<ApiResponse<Plugin>> => {
-    return post<Plugin>(`/laojun/plugins/${id}/start`);
+    return api.post<Plugin>(`/api/laojun/plugins/start`, { pluginId: id });
   },
   
   // 停止插件
   stop: (id: string): Promise<ApiResponse<Plugin>> => {
-    return post<Plugin>(`/laojun/plugins/${id}/stop`);
+    return api.post<Plugin>(`/api/laojun/plugins/stop`, { pluginId: id });
   },
   
   // 升级插件
   upgrade: (id: string, version?: string): Promise<ApiResponse<Plugin>> => {
-    return post<Plugin>(`/laojun/plugins/${id}/upgrade`, { version });
+    return api.post<Plugin>(`/api/laojun/plugins/upgrade`, { pluginId: id, version });
   },
   
   // 卸载插件
   uninstall: (id: string): Promise<ApiResponse<void>> => {
-    return del<void>(`/laojun/plugins/${id}`);
+    return api.delete<void>(`/api/laojun/plugins/uninstall`, { data: { pluginId: id } });
   }
 };
 
@@ -114,13 +114,13 @@ export const auditLogApi = {
     if (pageSize) params.append('pageSize', pageSize.toString());
     
     const queryString = params.toString();
-    const url = queryString ? `/laojun/audit-logs?${queryString}` : '/laojun/audit-logs';
+    const url = queryString ? `/api/laojun/audits?${queryString}` : '/api/laojun/audits';
     
-    return get<{ logs: AuditLog[], total: number }>(url);
+    return api.get<{ logs: AuditLog[], total: number }>(url);
   },
   
   // 获取单个审计日志
   get: (id: string): Promise<ApiResponse<AuditLog>> => {
-    return get<AuditLog>(`/laojun/audit-logs/${id}`);
+    return api.get<AuditLog>(`/api/laojun/audits/${id}`);
   }
 };

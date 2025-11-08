@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # API service
+  api:
+    build: .
+    ports:
+      - "8082:8082"
+    environment:
+      - ENV=dev
+      - LOG_LEVEL=info
+      - LAOJUN_API_PORT=8082
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/taishanglaojun?sslmode=disable
+      - AUTH_SERVICE_URL=http://auth:8081
+      - VECTOR_DB_TYPE=milvus
+      - VECTOR_DB_HOST=milvus
+      - VECTOR_DB_PORT=19530
+      - AI_VECTOR_SERVICE_ADDR=ai-vector:50051
+      - AI_MODEL_SERVICE_ADDR=ai-model:50052
+    depends_on:
+      - postgres
+      - milvus
+      - ai-vector
+      - ai-model
+    networks:
+      - taishanglaojun
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=taishanglaojun
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - taishanglaojun
+
+  # Milvus vector database
+  etcd:
+    container_name: milvus-etcd
+    image: quay.io/coreos/etcd:v3.5.5
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    volumes:
+      - etcd_data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - taishanglaojun
+
+  minio:
+    container_name: milvus-minio
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    volumes:
+      - minio_data:/minio_data
+    command: minio server /minio_data --console-address ":9001"
+    networks:
+      - taishanglaojun
+
+  milvus:
+    container_name: milvus-standalone
+    image: milvusdb/milvus:v2.3.0
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    volumes:
+      - milvus_data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    depends_on:
+      - "etcd"
+      - "minio"
+    networks:
+      - taishanglaojun
+
+  # AI Vector service
+  ai-vector:
+    build: ../services/ai
+    ports:
+      - "50051:50051"
+    environment:
+      - ENV=dev
+      - LOG_LEVEL=info
+      - VECTOR_SERVICE_PORT=50051
+      - VECTOR_DB_TYPE=milvus
+      - VECTOR_DB_HOST=milvus
+      - VECTOR_DB_PORT=19530
+    depends_on:
+      - milvus
+    networks:
+      - taishanglaojun
+
+  # AI Model service
+  ai-model:
+    build: ../services/ai
+    ports:
+      - "50052:50052"
+    environment:
+      - ENV=dev
+      - LOG_LEVEL=info
+      - MODEL_SERVICE_PORT=50052
+    networks:
+      - taishanglaojun
+
+volumes:
+  postgres_data:
+  etcd_data:
+  minio_data:
+  milvus_data:
+
+networks:
+  taishanglaojun:
+    driver: bridge

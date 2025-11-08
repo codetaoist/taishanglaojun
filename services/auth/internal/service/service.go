@@ -22,28 +22,32 @@ type AuthService interface {
 	ChangePassword(userID int, req *model.ChangePasswordRequest) error
 	GetUser(userID int) (*model.User, error)
 	ValidateToken(token string) (*model.User, error)
+	RevokeToken(token string, reason string) error
 }
 
 // authService implements AuthService
 type authService struct {
-	userRepo    repository.UserRepository
-	sessionRepo repository.SessionRepository
-	jwtSecret   string
-	jwtExp      int
+	userRepo     repository.UserRepository
+	sessionRepo  repository.SessionRepository
+	blacklistRepo repository.BlacklistRepository
+	jwtSecret    string
+	jwtExp       int
 }
 
 // NewAuthService creates a new authentication service
 func NewAuthService(
 	userRepo repository.UserRepository,
 	sessionRepo repository.SessionRepository,
+	blacklistRepo repository.BlacklistRepository,
 	jwtSecret string,
 	jwtExp int,
 ) AuthService {
 	return &authService{
-		userRepo:    userRepo,
-		sessionRepo: sessionRepo,
-		jwtSecret:   jwtSecret,
-		jwtExp:      jwtExp,
+		userRepo:     userRepo,
+		sessionRepo:  sessionRepo,
+		blacklistRepo: blacklistRepo,
+		jwtSecret:    jwtSecret,
+		jwtExp:       jwtExp,
 	}
 }
 
@@ -55,10 +59,10 @@ func (s *authService) Login(req *model.LoginRequest) (*model.LoginResponse, erro
 		return nil, fmt.Errorf("invalid username or password")
 	}
 
-	// Check if user is active
-	if user.Status != "active" {
-		return nil, fmt.Errorf("account is not active")
-	}
+	// Check if user is active (since lao_users doesn't have status field, we assume all users are active)
+	// if user.Status != "active" {
+	// 	return nil, fmt.Errorf("account is not active")
+	// }
 
 	// Verify password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
@@ -72,11 +76,10 @@ func (s *authService) Login(req *model.LoginRequest) (*model.LoginResponse, erro
 	}
 
 	// Create session
-	tokenHash := hashToken(token)
 	session := &model.Session{
-		UserID:    user.ID,
-		TokenHash: tokenHash,
-		ExpiresAt: expiresAt,
+		UserID:       user.ID,
+		RefreshToken: token, // Use token as refresh token since table has refresh_token column
+		ExpiresAt:    expiresAt,
 	}
 	if err := s.sessionRepo.Create(session); err != nil {
 		return nil, fmt.Errorf("failed to create session: %w", err)
@@ -116,7 +119,7 @@ func (s *authService) Register(req *model.RegisterRequest) error {
 		Email:    req.Email,
 		Password: string(hashedPassword),
 		Role:     req.Role,
-		Status:   "active",
+		Status:   req.Role, // Use role as status since lao_users doesn't have status field
 	}
 
 	if err := s.userRepo.Create(user); err != nil {
@@ -141,13 +144,12 @@ func (s *authService) RefreshToken(req *model.RefreshTokenRequest) (*model.Refre
 	}
 
 	// Update session
-	tokenHash := hashToken(token)
-	session, err := s.sessionRepo.GetByTokenHash(hashToken(req.Token))
+	session, err := s.sessionRepo.GetByRefreshToken(req.Token)
 	if err != nil {
 		return nil, fmt.Errorf("session not found: %w", err)
 	}
 
-	session.TokenHash = tokenHash
+	session.RefreshToken = token
 	session.ExpiresAt = expiresAt
 	if err := s.sessionRepo.Update(session); err != nil {
 		return nil, fmt.Errorf("failed to update session: %w", err)
@@ -161,18 +163,14 @@ func (s *authService) RefreshToken(req *model.RefreshTokenRequest) (*model.Refre
 
 // Logout invalidates a JWT token
 func (s *authService) Logout(token string) error {
-	// Delete session
-	tokenHash := hashToken(token)
-	session, err := s.sessionRepo.GetByTokenHash(tokenHash)
+	// Validate token first
+	_, err := s.ValidateToken(token)
 	if err != nil {
-		return fmt.Errorf("session not found: %w", err)
+		return fmt.Errorf("invalid token: %w", err)
 	}
 
-	if err := s.sessionRepo.Delete(session.ID); err != nil {
-		return fmt.Errorf("failed to delete session: %w", err)
-	}
-
-	return nil
+	// Revoke the token
+	return s.RevokeToken(token, "logout")
 }
 
 // ChangePassword changes a user's password
@@ -232,9 +230,15 @@ func (s *authService) ValidateToken(token string) (*model.User, error) {
 		return nil, fmt.Errorf("invalid token")
 	}
 
-	// Check if session exists
+	// Check if token is blacklisted
 	tokenHash := hashToken(token)
-	session, err := s.sessionRepo.GetByTokenHash(tokenHash)
+	_, err = s.blacklistRepo.GetByTokenHash(tokenHash)
+	if err == nil {
+		return nil, fmt.Errorf("token is blacklisted")
+	}
+
+	// Check if session exists
+	session, err := s.sessionRepo.GetByRefreshToken(token)
 	if err != nil {
 		return nil, fmt.Errorf("session not found: %w", err)
 	}
@@ -246,8 +250,12 @@ func (s *authService) ValidateToken(token string) (*model.User, error) {
 
 	// Get user
 	userID := 0
-	if sub, ok := claims.GetSubject(); ok {
-		fmt.Sscanf(sub, "%d", &userID)
+	sub := claims.Subject
+	if sub != "" {
+		_, err := fmt.Sscanf(sub, "%d", &userID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid user ID in token: %w", err)
+		}
 	}
 
 	user, err := s.userRepo.GetByID(userID)
@@ -281,9 +289,66 @@ func (s *authService) generateToken(user *model.User) (string, time.Time, error)
 
 // hashToken hashes a token for storage
 func hashToken(token string) string {
-	// In a real implementation, you would use a proper hash function
-	// For simplicity, we'll just use base64 encoding
+	// In a real implementation, you would use a proper hash function like SHA-256
+	// For simplicity, we'll use base64 encoding
 	return base64.StdEncoding.EncodeToString([]byte(token))
+}
+
+// RevokeToken revokes a JWT token by adding it to the blacklist
+func (s *authService) RevokeToken(token string, reason string) error {
+	// Get user from token
+	user, err := s.ValidateToken(token)
+	if err != nil {
+		return fmt.Errorf("invalid token: %w", err)
+	}
+
+	// Parse token to get expiration time
+	tokenObj, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(s.jwtSecret), nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to parse token: %w", err)
+	}
+
+	// Get claims
+	claims, ok := tokenObj.Claims.(jwt.MapClaims)
+	if !ok {
+		return fmt.Errorf("invalid token claims")
+	}
+
+	// Get expiration time from claims
+	expiresAtFloat, ok := claims["exp"].(float64)
+	if !ok {
+		return fmt.Errorf("invalid expiration time in token")
+	}
+
+	expiresAt := time.Unix(int64(expiresAtFloat), 0)
+
+	// Create blacklist entry
+	blacklist := &model.TokenBlacklist{
+		TokenHash: hashToken(token),
+		UserID:    user.ID,
+		Reason:    reason,
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+	}
+
+	// Add to blacklist
+	if err := s.blacklistRepo.Create(blacklist); err != nil {
+		return fmt.Errorf("failed to add token to blacklist: %w", err)
+	}
+
+	// Also delete the session if it exists
+	session, err := s.sessionRepo.GetByRefreshToken(token)
+	if err == nil {
+		s.sessionRepo.Delete(session.ID)
+	}
+
+	return nil
 }
 
 // generateRandomString generates a random string of the specified length

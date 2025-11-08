@@ -9,21 +9,21 @@ type User struct {
 	ID        int       `json:"id" db:"id"`
 	Username  string    `json:"username" db:"username"`
 	Email     string    `json:"email" db:"email"`
-	Password  string    `json:"-" db:"password"` // Password is omitted from JSON
+	Password  string    `json:"-" db:"password_hash"` // Password is omitted from JSON
 	Role      string    `json:"role" db:"role"`
-	Status    string    `json:"status" db:"status"`
+	Status    string    `json:"status" db:"role"` // Map status to role since lao_users doesn't have status field
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // Session represents a user session
 type Session struct {
-	ID         int       `json:"id" db:"id"`
-	UserID     int       `json:"user_id" db:"user_id"`
-	TokenHash  string    `json:"-" db:"token_hash"` // Token hash is omitted from JSON
-	ExpiresAt  time.Time `json:"expires_at" db:"expires_at"`
-	CreatedAt  time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`
+	ID            int       `json:"id" db:"id"`
+	UserID        int       `json:"user_id" db:"user_id"`
+	RefreshToken  string    `json:"refresh_token" db:"refresh_token"` // Changed from TokenHash to RefreshToken
+	ExpiresAt     time.Time `json:"expires_at" db:"expires_at"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // LoginRequest represents a login request
@@ -62,4 +62,14 @@ type RefreshTokenRequest struct {
 type RefreshTokenResponse struct {
 	Token     string    `json:"token"`
 	ExpiresAt time.Time `json:"expires_at"`
+}
+
+// TokenBlacklist represents a blacklisted token
+type TokenBlacklist struct {
+	ID        int       `json:"id" db:"id"`
+	TokenHash string    `json:"-" db:"token_hash"` // Token hash is omitted from JSON
+	UserID    int       `json:"user_id" db:"user_id"`
+	Reason    string    `json:"reason" db:"reason"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ExpiresAt time.Time `json:"expires_at" db:"expires_at"`
 }

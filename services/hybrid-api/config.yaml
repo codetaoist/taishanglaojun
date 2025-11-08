@@ -1,0 +1,154 @@
+# Taoist API 混合架构配置
+
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: "30s"
+  write_timeout: "30s"
+  idle_timeout: "60s"
+
+# 数据库配置
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  dbname: "taoist"
+  sslmode: "disable"
+
+# Redis配置
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+# AI服务配置
+ai:
+  vector_service:
+    name: "vector-service"
+    version: "1.0.0"
+    address: "localhost"
+    port: 50051
+    protocol: "grpc"
+    tags: ["ai", "vector", "database"]
+    metadata:
+      description: "Vector database service"
+  
+  model_service:
+    name: "model-service"
+    version: "1.0.0"
+    address: "localhost"
+    port: 50051
+    protocol: "grpc"
+    tags: ["ai", "model", "inference"]
+    metadata:
+      description: "Model inference service"
+
+# 混合架构配置
+hybrid:
+  # 服务注册中心配置
+  service_registry:
+    type: "in-memory"  # 可选: "in-memory", "consul", "etcd"
+    host: "localhost"
+    port: 8500
+  
+  # 健康检查配置
+  health_check:
+    interval: "30s"
+    timeout: "5s"
+  
+  # 熔断器配置
+  circuit_breaker:
+    max_requests: 5
+    interval: "60s"
+    timeout: "30s"
+    ready_to_trip: 0.5
+    on_state_change: true
+  
+  # 限流配置
+  rate_limit:
+    requests_per_minute: 60
+    burst_size: 10
+  
+  # 链路追踪配置
+  tracing:
+    enabled: false
+    service_name: "taoist-api"
+    jaeger:
+      endpoint: "http://localhost:14268/api/traces"
+  
+  # 指标监控配置
+  metrics:
+    enabled: false
+    port: 9090
+    path: "/metrics"
+  
+  # 日志配置
+  logging:
+    level: "info"
+    format: "json"
+
+# 安全配置
+security:
+  jwt_secret: "your-secret-key-change-in-production"
+  expires_in: 24  # 小时
+  refresh_expires_in: 168  # 小时 (7天)
+
+# 环境配置
+environment: "development"
+debug: true
+
+# 插件配置
+plugin:
+  # 插件目录
+  directory: "./plugins"
+  # 插件仓库
+  repository:
+    url: "https://github.com/codetaoist/plugins"
+    branch: "main"
+  # 自动构建插件
+  auto_build: true
+  # 插件版本管理
+  versioning: true
+  # 插件更新间隔
+  update_interval: "24h"
+  # 插件超时时间
+  timeout: "10m"
+  # 插件资源限制
+  resource_limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# CI/CD配置
+ci:
+  # 是否启用CI/CD
+  enabled: true
+  # 构建超时时间
+  timeout: "30m"
+  # 制品保留时间
+  artifact_retention: "7d"
+  # 注册表URL
+  registry_url: "docker.io/codetaoist"
+  # 默认流水线模板
+  default_pipeline_template: "default"
+  # 构建环境
+  build_environment:
+    docker_image: "golang:1.19-alpine"
+    workdir: "/workspace"
+  # 部署配置
+  deploy_environment: "development"
+  deploy_namespace: "default"
+  deploy_wait: true
+  deploy_timeout: "10m"
+  # Kubernetes配置
+  kube_config: "~/.kube/config"
+  # Helm配置
+  helm_chart: "./helm"
+  helm_values: "./helm/values.yaml"
+  helm_release: "taoist-api"
+  # 部署变量
+  deploy_variables:
+    ENV: "development"
+    LOG_LEVEL: "info"

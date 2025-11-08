@@ -1,0 +1,222 @@
+syntax = "proto3";
+
+package model;
+
+option go_package = "github.com/codetaoist/api/proto/model";
+
+// Model service definition
+service ModelService {
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Model management
+  rpc RegisterModel(RegisterModelRequest) returns (RegisterModelResponse);
+  rpc UpdateModel(UpdateModelRequest) returns (UpdateModelResponse);
+  rpc UnregisterModel(UnregisterModelRequest) returns (UnregisterModelResponse);
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+  rpc GetModel(GetModelRequest) returns (GetModelResponse);
+  
+  // Model operations
+  rpc LoadModel(LoadModelRequest) returns (LoadModelResponse);
+  rpc UnloadModel(UnloadModelRequest) returns (UnloadModelResponse);
+  rpc IsModelLoaded(IsModelLoadedRequest) returns (IsModelLoadedResponse);
+  
+  // AI capabilities
+  rpc GenerateText(GenerateTextRequest) returns (GenerateTextResponse);
+  rpc GenerateEmbedding(GenerateEmbeddingRequest) returns (GenerateEmbeddingResponse);
+  rpc ClassifyText(ClassifyTextRequest) returns (ClassifyTextResponse);
+  rpc SummarizeText(SummarizeTextRequest) returns (SummarizeTextResponse);
+  rpc TranslateText(TranslateTextRequest) returns (TranslateTextResponse);
+}
+
+// Health check
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string message = 2;
+}
+
+// Model management
+message RegisterModelRequest {
+  string name = 1;
+  string provider = 2; // huggingface, openai, sentence_transformers, etc.
+  string model_path = 3;
+  ModelType model_type = 4;
+  map<string, string> config = 5;
+  map<string, string> metadata = 6;
+}
+
+message RegisterModelResponse {
+  bool success = 1;
+  string message = 2;
+  string model_id = 3;
+}
+
+message UpdateModelRequest {
+  string model_id = 1;
+  map<string, string> config = 2;
+  map<string, string> metadata = 3;
+}
+
+message UpdateModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UnregisterModelRequest {
+  string model_id = 1;
+}
+
+message UnregisterModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListModelsRequest {
+  string provider = 1; // Optional filter
+  ModelType model_type = 2; // Optional filter
+}
+
+message ListModelsResponse {
+  repeated ModelInfo models = 1;
+}
+
+message GetModelRequest {
+  string model_id = 1;
+}
+
+message GetModelResponse {
+  ModelInfo model = 1;
+}
+
+// Model operations
+message LoadModelRequest {
+  string model_id = 1;
+  map<string, string> load_config = 2;
+}
+
+message LoadModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UnloadModelRequest {
+  string model_id = 1;
+}
+
+message UnloadModelResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message IsModelLoadedRequest {
+  string model_id = 1;
+}
+
+message IsModelLoadedResponse {
+  bool loaded = 1;
+}
+
+// AI capabilities
+message GenerateTextRequest {
+  string model_id = 1;
+  string prompt = 1;
+  map<string, string> parameters = 2; // temperature, max_length, etc.
+}
+
+message GenerateTextResponse {
+  bool success = 1;
+  string text = 2;
+  map<string, float> scores = 3;
+  string message = 4;
+}
+
+message GenerateEmbeddingRequest {
+  string model_id = 1;
+  repeated string texts = 1;
+  map<string, string> parameters = 2;
+}
+
+message GenerateEmbeddingResponse {
+  bool success = 1;
+  repeated Embedding embeddings = 2;
+  string message = 3;
+}
+
+message ClassifyTextRequest {
+  string model_id = 1;
+  string text = 1;
+  repeated string labels = 2;
+  map<string, string> parameters = 3;
+}
+
+message ClassifyTextResponse {
+  bool success = 1;
+  repeated ClassificationResult results = 2;
+  string message = 3;
+}
+
+message SummarizeTextRequest {
+  string model_id = 1;
+  string text = 1;
+  map<string, string> parameters = 2; // max_length, min_length, etc.
+}
+
+message SummarizeTextResponse {
+  bool success = 1;
+  string summary = 2;
+  string message = 3;
+}
+
+message TranslateTextRequest {
+  string model_id = 1;
+  string text = 1;
+  string source_language = 2;
+  string target_language = 3;
+  map<string, string> parameters = 4;
+}
+
+message TranslateTextResponse {
+  bool success = 1;
+  string translated_text = 2;
+  string message = 3;
+}
+
+// Common data structures
+enum ModelType {
+  MODEL_TYPE_UNSPECIFIED = 0;
+  MODEL_TYPE_TEXT_GENERATION = 1;
+  MODEL_TYPE_TEXT_EMBEDDING = 2;
+  MODEL_TYPE_TEXT_CLASSIFICATION = 3;
+  MODEL_TYPE_TEXT_SUMMARIZATION = 4;
+  MODEL_TYPE_TRANSLATION = 5;
+  MODEL_TYPE_IMAGE_GENERATION = 6;
+  MODEL_TYPE_IMAGE_CLASSIFICATION = 7;
+  MODEL_TYPE_AUDIO_TRANSCRIPTION = 8;
+  MODEL_TYPE_AUDIO_GENERATION = 9;
+}
+
+message ModelInfo {
+  string id = 1;
+  string name = 2;
+  string provider = 3;
+  string model_path = 4;
+  ModelType model_type = 5;
+  map<string, string> config = 6;
+  map<string, string> metadata = 7;
+  bool loaded = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message Embedding {
+  repeated float values = 1;
+}
+
+message ClassificationResult {
+  string label = 1;
+  float score = 2;
+}

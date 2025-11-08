@@ -19,6 +19,10 @@ build/
 .env.local
 .env.*.local
 
+# 运行时生成的数据文件
+volumes/
+*.tmp
+
 # IDE
 .vscode/
 .idea/
